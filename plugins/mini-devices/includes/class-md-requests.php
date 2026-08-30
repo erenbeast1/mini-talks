@@ -113,6 +113,44 @@ class MD_Requests {
         return is_array($d) ? $d : null;
     }
 
+    /**
+     * Every Mini-Design this member has asked for, across all their requests for
+     * the kit, newest request first. A scene asked for twice keeps the newer
+     * request's status, which is the one that still means something.
+     */
+    public static function kit_designs($uid, $kit_slug) {
+        $posts = get_posts(array(
+            'post_type'   => self::CPT,
+            'author'      => $uid,
+            'numberposts' => -1,
+            'orderby'     => 'date',
+            'order'       => 'DESC',
+            'post_status' => 'any',
+            'meta_query'  => array(array('key' => '_md_kit', 'value' => $kit_slug)),
+        ));
+
+        $all  = self::statuses();
+        $seen = array();
+        foreach ($posts as $post) {
+            $ids = get_post_meta($post->ID, '_md_designs', true);
+            if (!is_array($ids) || !$ids) continue;
+            $st  = self::normalise(get_post_meta($post->ID, '_md_status', true) ?: 'draft');
+            $sub = (int) get_post_meta($post->ID, '_md_submitted_at', true);
+            foreach ($ids as $id) {
+                $id = (int) $id;
+                if (isset($seen[$id])) continue;
+                $seen[$id] = array(
+                    'id'           => $id,
+                    'request'      => $post->ID,
+                    'status'       => $st,
+                    'status_label' => isset($all[$st]) ? $all[$st] : $st,
+                    'submitted'    => $sub,
+                );
+            }
+        }
+        return array_values($seen);
+    }
+
     public static function latest_request($uid, $kit_slug) {
         $q = get_posts(array(
             'post_type'   => self::CPT,
@@ -156,6 +194,11 @@ class MD_Requests {
                 'request'  => $req,
                 'editable' => !$req || $req['status'] === 'draft',
             );
+            // "My Designs" is everything the member ever asked for, not just the
+            // latest request — a second request must not hide the first.
+            if ($kit['pre_request'] === 'catalogue') {
+                $kits[$slug]['designs'] = self::kit_designs($uid, $slug);
+            }
         }
         return array(
             'kits'      => $kits,

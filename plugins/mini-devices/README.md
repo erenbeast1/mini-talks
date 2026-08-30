@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.1.2)
+# Mini Devices — Mini-Kits (v3.2.0)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -15,7 +15,7 @@ Request | Connect | Manage, and everything a connected kit can do lives under Ma
 |---|---|---|
 | **Mini-Designs** | Explore \| Request \| My Designs | Explore → Select → Request → My Designs |
 | **Design-Talks** | Request \| Connect \| Manage | Request → Connect → Scenes / Recordings / Device Details |
-| **Brick-Talks** | Request \| Connect \| Manage | Request → Connect → Figs / Slots / Recordings / Device Details |
+| **Brick-Talks** | Request \| Connect \| Manage | Request → Connect → Figs & Slots / Device Details |
 | **Fig-Talks** | Request \| Connect \| Manage | Request → Personalize → Review → Connect → My Fig / Recordings / Device Details |
 
 **Where personalization sits** differs by kit, and that is the point: a Fig-Talks
@@ -98,18 +98,28 @@ out of their own hardware.
 | Kit | Sections |
 |---|---|
 | Design-Talks | Scenes (scene → level → mini) · Recordings · Device Details |
-| Brick-Talks | Figs · Slots · Recordings · Device Details |
+| Brick-Talks | Figs & Slots · Device Details |
 | Fig-Talks | My Fig · Recordings · Device Details |
 
-**Figs** are Brick-Talks' digital characters. A Fig lives in one of the kit's slots —
-that is how the kit itself is built — so the list is the slots that carry one:
-create, rename, edit, delete, and send to the kit. A slot's Fig also sits beside its
-recording under **Slots**, because the two are halves of the same object. Designing a
-Fig opens the same avatar editor the site already uses; nothing about that screen
-changes here.
+**Figs & Slots** is one list, not three. A Brick-Talks slot holds one Fig and one
+recording, so separate Figs, Slots and Recordings tabs were the same five objects
+shown three times over, and you had to match slot numbers by eye to see what belonged
+with what. One card per slot carries the Fig, the recording, and everything you can
+do to either: Assign or Change Fig, Delete Fig, Send Fig, Download audio.
+
+Designing a Fig opens the same avatar editor the site already uses; nothing about
+that screen changes here.
 
 **Device Details** carries device id, connection state, connected date, firmware,
 last sync and the device name.
+
+## Asking for more Mini-Designs
+
+An earlier request is never edited. Picking new scenes in Explore and sending them
+creates a **second** request, and the screen says so before you send. Scenes already
+asked for are marked in Explore with the status they carry, so nothing is requested
+twice by accident, and **My Designs** rolls up every request the member has made —
+a second request cannot hide the first.
 
 ## Where requests go
 

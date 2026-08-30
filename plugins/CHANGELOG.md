@@ -33,6 +33,31 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.2.0
+
+**Brick-Talks' Manage is one list, not three.** Figs, Slots and Recordings were the
+same five objects shown three times over — a slot holds one Fig and one recording,
+so you had to match slot numbers by eye to see what belonged with what. Manage is
+now **Figs & Slots** and **Device Details**, and each slot card carries the Fig, the
+recording and every action on either: Assign/Change Fig, Delete Fig, Send Fig,
+Download audio. The separate Figs tab and its per-Fig naming are gone with it.
+
+**Fixed: picking a design threw you back to the top of the catalogue.** Choosing a
+scene re-renders the popup, and rebuilding the body reset its scroll — so ticking the
+ninth scene sent you back to the first. The scroll position is carried across the
+rebuild, while moving to another section still starts at its top.
+
+**Fixed: sending a request left the same scenes ticked.** With the selection still
+live, Explore looked as though nothing had been sent and Continue to Request led back
+to a screen showing the old request. Now the picker clears on send, scenes already
+requested are marked in Explore with the status they carry and cannot be re-picked,
+and choosing new ones opens an explicit **Another request** screen: your earlier
+request is not changed, this adds a second one.
+
+**My Designs rolls up every request.** `MD_Requests::kit_designs()` gathers the
+scenes across all of a member's requests for the kit, newest first, so a second
+request cannot hide the first. Each card carries its own status and date.
+
 ## mini-devices 3.1.2
 
 **Connect is the cable, and only the cable.** The docs floated a pairing code or QR

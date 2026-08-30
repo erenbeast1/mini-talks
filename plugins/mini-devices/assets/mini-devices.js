@@ -912,10 +912,14 @@
                     : ['explore', 'request', 'my-designs'];
   }
 
-  /* What Manage holds differs per kit. */
+  /* What Manage holds differs per kit.
+     Brick-Talks keeps one list, not three: a slot holds one Fig and one
+     recording, so Figs, Slots and Recordings were the same five objects shown
+     three times over — you had to match slot numbers by eye to see what
+     belonged with what. One card per slot carries both. */
   function manageSections(kit) {
     if (kit.code === 'D') return ['scenes', 'recordings', 'device'];
-    if (kit.code === 'B') return ['figs', 'slots', 'recordings', 'device'];
+    if (kit.code === 'B') return ['slots', 'device'];
     if (kit.code === 'F') return ['my-fig', 'recordings', 'device'];
     return [];
   }
@@ -923,8 +927,8 @@
   function sectionLabel(sec) {
     return { explore: 'Explore', request: 'Request', 'my-designs': 'My Designs',
              connect: 'Connect', manage: 'Manage',
-             scenes: 'Scenes', recordings: 'Recordings', slots: 'Slots',
-             figs: 'Figs', device: 'Device Details',
+             scenes: 'Scenes', recordings: 'Recordings', slots: 'Figs & Slots',
+             device: 'Device Details',
              'my-fig': 'My Fig' }[sec] || sec;
   }
 
@@ -974,6 +978,13 @@
   function gotoSection(sec) { openSection = sec; renderPopup(); }
 
   function renderPopup() {
+    // Picking a design re-renders the popup, and rebuilding the body reset the
+    // scroll to the top — so choosing the ninth scene threw you back to the
+    // first. Carry the scroll position across the rebuild.
+    var wasOpen = modalRoot.querySelector('.md-pop-body');
+    var keepTop = wasOpen ? wasOpen.scrollTop : 0;
+    var keepSec = openSection, keepSub = openManage;
+
     modalRoot.innerHTML = '';
     if (!openSlug) return;
 
@@ -1084,6 +1095,10 @@
     wrap.appendChild(modal);
     overlay.appendChild(wrap);
     modalRoot.appendChild(overlay);
+
+    // Only when the member is still on the same screen: moving to another
+    // section should start at its top.
+    if (keepTop && keepSec === openSection && keepSub === openManage) bodyEl.scrollTop = keepTop;
   }
 
   function statGrid(stats) {
@@ -1254,6 +1269,9 @@
         done(false, res && res.message); return;
       }
       kits = res;
+      // The scenes are with the team now; leaving them ticked in Explore made
+      // it look as though nothing had been sent.
+      if (payload && payload.designs) designPick = {};
       done(true);
       render();
       setStatus('Request sent — the Mini-Talks team will be in touch.', 'ok');
@@ -1266,15 +1284,34 @@
 
   var designPick = {};
 
+  /* Everything already requested, keyed by design id. A scene that is already
+     with the team must not read as a fresh choice. */
+  function requested(slug) {
+    var k = (kitsState().kits || {})[slug || 'mini-designs'];
+    var out = {};
+    if (!k) return out;
+    var list = k.designs;
+    if (!list && k.request && k.request.designs) {
+      list = k.request.designs.map(function (id) {
+        return { id: id, status: k.request.status, status_label: k.request.status_label,
+                 submitted: k.request.submitted };
+      });
+    }
+    (list || []).forEach(function (d) { out[d.id] = d; });
+    return out;
+  }
+
   function designGrid(kit) {
     var cat  = kitsState().catalogue || [];
     var grid = el('div', 'md-designs');
     if (!cat.length) {
       return emptyNote('The catalogue is empty', 'Mini-Designs will appear here once the team adds them.');
     }
+    var mine = requested(kit.slug);
     cat.forEach(function (d) {
-      var card = el('article', 'md-design' + (d.selectable ? '' : ' is-unavailable') +
-                               (designPick[d.id] ? ' is-picked' : ''));
+      var got  = mine[d.id];
+      var card = el('article', 'md-design' + (d.selectable && !got ? '' : ' is-unavailable') +
+                               (designPick[d.id] ? ' is-picked' : '') + (got ? ' is-requested' : ''));
       var thumb = el('div', 'md-design-thumb');
       if (d.image) {
         var img = el('img'); img.src = d.image; img.alt = ''; img.loading = 'lazy';
@@ -1284,7 +1321,10 @@
       }
       card.appendChild(thumb);
       card.appendChild(el('h5', 'md-design-name', d.name));
-      if (!d.selectable) {
+      if (got) {
+        card.appendChild(el('span', 'md-design-flag md-design-status',
+                            got.status_label || got.status));
+      } else if (!d.selectable) {
         card.appendChild(el('span', 'md-design-flag', d.label));
       } else {
         var pick = el('button', 'md-btn md-btn-ghost md-btn-sm md-design-pick',
@@ -1352,12 +1392,15 @@
     host.appendChild(bar);
   }
 
-  /* ── My Designs ── what the member asked for, and where it stands. */
+  /* ── My Designs ── everything the member asked for, and where each stands.
+     Read from the roll-up across all their requests, so a second request never
+     hides the first. */
   function renderMyDesigns(host, kit) {
-    var req = reqFor(kit.slug);
-    var mine = req ? designsById(req.designs) : [];
+    var mine = requested(kit.slug);
+    var ids  = Object.keys(mine).map(Number);
+    var items = designsById(ids);
 
-    if (!mine.length) {
+    if (!items.length) {
       host.appendChild(emptyNote('No Mini-Designs yet',
         'The scenes you request appear here with their status.'));
       var go = el('button', 'md-btn md-btn-primary md-fig-cta', 'Explore Mini-Designs');
@@ -1368,12 +1411,15 @@
     }
 
     host.appendChild(el('h3', 'md-fig-title', 'My Mini-Designs'));
-    var when = req.submitted ? ' \u00b7 ' + fmtDay(req.submitted) : '';
     host.appendChild(el('p', 'md-section-note',
-      (req.status_note || '') + (req.submitted ? ' Requested on ' + fmtDay(req.submitted) + '.' : '')));
-    host.appendChild(designPreviews(mine, function () {
-      var b = el('span', 'md-design-flag md-design-status', (req.status_label || req.status));
-      return b;
+      items.length + (items.length === 1 ? ' scene is' : ' scenes are') + ' with the Mini-Talks team.'));
+
+    host.appendChild(designPreviews(items, function (d) {
+      var m = mine[d.id] || {};
+      var wrap = el('div', 'md-design-meta');
+      wrap.appendChild(el('span', 'md-design-flag md-design-status', m.status_label || m.status || ''));
+      if (m.submitted) wrap.appendChild(el('span', 'md-design-when', fmtDay(m.submitted)));
+      return wrap;
     }));
 
     var open = el('button', 'md-btn md-btn-ghost md-fig-cta', 'View My Request');
@@ -1388,12 +1434,14 @@
     var req = reqFor(kit.slug);
     var st  = kitsState();
 
+    // A selection waiting to be sent is the whole point of this screen, so it
+    // comes before any earlier request's status.
+    if (kit.pre === 'catalogue' && pickedIds().length) { renderDesignReview(host, kit, req); return; }
+
     /* nothing asked for yet */
     if (!req) {
-      host.appendChild(el('h3', 'md-fig-title',
-        kit.pre === 'personalize' ? 'Create Your Fig-Talks'
-      : kit.pre === 'catalogue'   ? 'Review your selection'
-                                  : 'Request ' + kit.name));
+      host.appendChild(el('h3', 'md-fig-title', kit.pre === 'personalize'
+        ? 'Create Your Fig-Talks' : 'Request ' + kit.name));
       host.appendChild(el('p', 'md-section-note', requestIntro(kit)));
 
       if (kit.pre === 'personalize') {
@@ -1406,31 +1454,12 @@
       }
 
       if (kit.pre === 'catalogue') {
-        var picked = pickedIds();
-        if (!picked.length) {
-          host.appendChild(emptyNote('Nothing selected yet',
-            'Pick your scenes in Explore, then come back here to send the request.'));
-          var back = el('button', 'md-btn md-btn-primary md-fig-cta', 'Explore Mini-Designs');
-          back.type = 'button';
-          back.addEventListener('click', function () { gotoSection('explore'); });
-          host.appendChild(back);
-          return;
-        }
-        host.appendChild(el('p', 'md-designs-count',
-          picked.length + (picked.length === 1 ? ' design selected' : ' designs selected')));
-        host.appendChild(designPreviews(designsById(picked)));
-        var change = el('button', 'md-btn md-btn-ghost md-btn-sm md-change-sel', 'Change selection');
-        change.type = 'button';
-        change.addEventListener('click', function () { gotoSection('explore'); });
-        host.appendChild(change);
-
-        var note1 = noteField('');
-        host.appendChild(note1);
-        var send1 = sendButton('Send Request', function (done) {
-          submitRequest(kit.slug, { designs: pickedIds(), note: note1.input.value }, done);
-        });
-        send1.classList.add('md-fig-cta');
-        host.appendChild(send1);
+        host.appendChild(emptyNote('Nothing selected yet',
+          'Pick your scenes in Explore, then come back here to send the request.'));
+        var back = el('button', 'md-btn md-btn-primary md-fig-cta', 'Explore Mini-Designs');
+        back.type = 'button';
+        back.addEventListener('click', function () { gotoSection('explore'); });
+        host.appendChild(back);
         return;
       }
 
@@ -1536,6 +1565,36 @@
       host.appendChild(el('p', 'md-fig-foot',
         'Your sent request stays exactly as it was. Designing again starts a new request rather than changing this one.'));
     }
+  }
+
+  /* Review what was picked in Explore, and send it. An earlier request is not
+     edited by this — it stays as it was sent, and this becomes a second one. */
+  function renderDesignReview(host, kit, req) {
+    var picked = pickedIds();
+    var live   = req && req.status !== 'draft';
+
+    host.appendChild(el('h3', 'md-fig-title', live ? 'Another request' : 'Review your selection'));
+    host.appendChild(el('p', 'md-section-note', live
+      ? 'Your earlier request is still with the team and is not changed by this. ' +
+        'Sending these adds a second request.'
+      : requestIntro(kit)));
+
+    host.appendChild(el('p', 'md-designs-count',
+      picked.length + (picked.length === 1 ? ' design selected' : ' designs selected')));
+    host.appendChild(designPreviews(designsById(picked)));
+
+    var change = el('button', 'md-btn md-btn-ghost md-btn-sm md-change-sel', 'Change selection');
+    change.type = 'button';
+    change.addEventListener('click', function () { gotoSection('explore'); });
+    host.appendChild(change);
+
+    var note = noteField('');
+    host.appendChild(note);
+    var send = sendButton('Send Request', function (done) {
+      submitRequest(kit.slug, { designs: pickedIds(), note: note.input.value }, done);
+    });
+    send.classList.add('md-fig-cta');
+    host.appendChild(send);
   }
 
   function requestIntro(kit) {
@@ -1649,117 +1708,8 @@
     else if (openManage === 'recordings') renderRecordings(body, key, dev, live);
     else if (openManage === 'slots')      renderSlots(body, key, dev, live);
     else if (openManage === 'scenes')     renderScenes(body, key, dev, live);
-    else if (openManage === 'figs')       renderFigs(body, kit, key, dev, live);
     else if (openManage === 'my-fig')     renderMyFig(body, kit);
     host.appendChild(body);
-  }
-
-  /* ── Figs ── Brick-Talks' digital characters.
-     A Fig lives in one of the kit's slots \u2014 that is how the kit itself is
-     built, so the list here is the slots that carry one. Naming, editing and
-     deleting happen here; a slot's Fig sits beside its recording under Slots,
-     because the two are halves of the same thing. */
-  function renderFigs(host, kit, key, dev, live) {
-    var hasEditor = window.MDFaces && window.MFAvatarEditor;
-    host.appendChild(el('p', 'md-section-note', hasEditor
-      ? 'Figs are the characters on your Brick-Talks. They are kept on your profile, so you can ' +
-        'keep working on them while the kit is unplugged, and send them over when you plug it in.'
-      : 'The avatar editor did not load on this page, so Figs cannot be designed here \u2014 reload, ' +
-        'and check that Mini-Forum is active.'));
-
-    var slots = dev.slots || [];
-    if (!slots.length) {
-      host.appendChild(emptyNote('No slots reported yet',
-        'Connect the kit once so it can tell the site how many Figs it holds.'));
-      return;
-    }
-
-    var mine = slots.filter(function (sl) { return faces[key] && faces[key][sl.i]; });
-    var free = slots.filter(function (sl) { return !(faces[key] && faces[key][sl.i]); });
-
-    if (!mine.length) {
-      host.appendChild(emptyNote('No Figs yet', 'Create your first Fig and it will appear here.'));
-    } else {
-      var grid = el('div', 'md-figs');
-      mine.forEach(function (sl) {
-        var f = faces[key][sl.i];
-        var card = el('article', 'md-figcard');
-
-        var thumb = el('div', 'md-face-thumb has-face');
-        if (f.url) { var img = el('img'); img.src = f.url; img.alt = ''; thumb.appendChild(img); }
-        else thumb.appendChild(el('span', 'md-face-placeholder', '?'));
-        card.appendChild(thumb);
-
-        var main = el('div', 'md-figcard-main');
-        var nameIn = el('input', 'md-slot-name');
-        nameIn.type = 'text';
-        nameIn.value = f.name || '';
-        nameIn.placeholder = 'Fig in slot ' + sl.i;
-        nameIn.addEventListener('change', function () {
-          api('faces', { dev: key, slot: sl.i, name: nameIn.value }).then(function (res) {
-            faces = res.faces || faces;
-            nameIn.classList.add('md-saved');
-            setTimeout(function () { nameIn.classList.remove('md-saved'); }, 900);
-          });
-        });
-        main.appendChild(nameIn);
-        main.appendChild(el('span', 'md-fig-slotno', 'Slot ' + sl.i));
-
-        var acts = el('div', 'md-figcard-acts');
-        acts.appendChild(figEditButton('Edit Fig', kit, key, sl.i, f, hasEditor));
-
-        var send = el('button', 'md-btn md-btn-primary md-btn-sm', 'Send to kit');
-        send.type = 'button';
-        send.disabled = !live;
-        send.title = live ? '' : 'Connect the kit to send it.';
-        send.addEventListener('click', function () { transferFace(key, sl.i, f.config, send); });
-        acts.appendChild(send);
-
-        var del = el('button', 'md-btn md-btn-danger md-btn-sm', 'Delete Fig');
-        del.type = 'button';
-        del.addEventListener('click', function () {
-          if (!window.confirm('Delete this Fig? The recording in slot ' + sl.i + ' is not touched.')) return;
-          api('faces', { dev: key, slot: sl.i, remove: true }).then(function (res) {
-            faces = res.faces || faces;
-            render();
-            setStatus('The Fig was deleted.', 'ok');
-          });
-        });
-        acts.appendChild(del);
-
-        main.appendChild(acts);
-        card.appendChild(main);
-        grid.appendChild(card);
-      });
-      host.appendChild(grid);
-    }
-
-    var create = figEditButton('Create Fig', kit, key, free.length ? free[0].i : 0, null, hasEditor && !!free.length);
-    create.classList.add('md-btn-primary');
-    create.classList.remove('md-btn-ghost', 'md-btn-sm');
-    create.classList.add('md-fig-cta');
-    if (!free.length) create.title = 'Every slot already holds a Fig. Delete one to make room.';
-    host.appendChild(create);
-  }
-
-  function figEditButton(label, kit, key, slot, f, enabled) {
-    var b = el('button', 'md-btn md-btn-ghost md-btn-sm', label);
-    b.type = 'button';
-    b.disabled = !enabled;
-    b.addEventListener('click', function () {
-      window.MDFaces.designFace(f && f.config, function (cfg, img) {
-        api('faces', { dev: key, slot: slot, config: cfg, image: img }).then(function (res) {
-          faces = res.faces || faces;
-          render();
-          setStatus(f ? 'The Fig was saved.' : 'Your new Fig was saved to slot ' + slot + '.', 'ok');
-        });
-      }, {
-        title: f ? 'Edit Fig' : 'Create a Fig',
-        subtitle: kit.name + ' \u00b7 Slot ' + slot,
-        color: kit.colour
-      });
-    });
-    return b;
   }
 
   /* ── My Fig ── the physical figure the member designed before requesting. */
@@ -1940,20 +1890,20 @@
     host.appendChild(list);
   }
 
-  /* Brick-Talks: one card per slot, carrying that slot's face and its
-     recording together. They are two halves of the same object — splitting them
-     across tabs made you line up slot numbers by eye. */
+  /* Brick-Talks: one card per slot, carrying that slot's Fig and its recording
+     together. They are two halves of the same object — splitting them across
+     tabs made you line up slot numbers by eye. */
   function renderSlots(host, key, dev, live) {
     var hasEditor = window.MDFaces && window.MFAvatarEditor;
 
     host.appendChild(el('p', 'md-section-note', hasEditor
-      ? 'Each slot holds one recording and one Fig. Figs are kept on your profile, so you can keep working on them while the kit is unplugged.'
-      : 'Each slot holds one recording and one Fig. The avatar editor did not load on this page, so Figs cannot be designed here \u2014 reload, and check that Mini-Forum is active.'));
+      ? 'Each slot holds one Fig and one recording. Figs are kept on your profile, so you can keep working on them while the kit is unplugged, and send them over when you plug it in.'
+      : 'Each slot holds one Fig and one recording. The avatar editor did not load on this page, so Figs cannot be designed here \u2014 reload, and check that Mini-Forum is active.'));
 
     var slots = dev.slots || [];
     if (!slots.length) {
       host.appendChild(emptyNote('No slots reported yet',
-        'Connect the kit once so it can tell the site how many slots it has.'));
+        'Connect the kit once so it can tell the site how many Figs it holds.'));
       return;
     }
 
@@ -2010,6 +1960,21 @@
         });
       });
       acts.appendChild(design);
+
+      if (f) {
+        var del = el('button', 'md-btn md-btn-danger md-btn-sm', 'Delete Fig');
+        del.type = 'button';
+        del.addEventListener('click', function () {
+          if (!window.confirm('Delete the Fig in slot ' + slot.i +
+                              '? The recording in that slot is not touched.')) return;
+          api('faces', { dev: key, slot: slot.i, remove: true }).then(function (res) {
+            faces = res.faces || faces;
+            render();
+            setStatus('The Fig in slot ' + slot.i + ' was deleted.', 'ok');
+          });
+        });
+        acts.appendChild(del);
+      }
 
       var send = el('button', 'md-btn md-btn-primary md-btn-sm', 'Send Fig');
       send.type = 'button';
