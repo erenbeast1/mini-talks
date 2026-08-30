@@ -315,6 +315,9 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-fig-acts .md-btn-primary:hover:not(:disabled),.md-fig-acts .md-btn-primary:active:not(:disabled){transform:none!important;box-shadow:none!important;filter:brightness(1.04)!important}
 .md-fig-foot{margin:16px 0 0!important;font-size:12px!important;font-weight:600!important;color:#999!important;line-height:1.55!important}
 
+/* Request status in the profile header, beside the Kits counter. */
+.md-stat-figtalks{border-color:var(--mf-green,#237841)!important;border-bottom-color:#17512C!important;color:#17512C!important}
+
 .md-kit-line{margin:0 0 8px!important;font-size:13px!important;font-weight:700!important;color:var(--md-soft,#555)!important}
 .md-kit-facts-row{display:flex!important;gap:22px!important;flex-wrap:wrap!important;margin-top:10px!important}
 

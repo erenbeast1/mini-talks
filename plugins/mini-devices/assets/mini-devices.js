@@ -794,7 +794,8 @@
         facts.appendChild(el('p', 'md-kit-line', 'Your design is ready to send.'));
       } else {
         facts.appendChild(el('p', 'md-kit-hint',
-          'Personalize a figure that represents you, then send the design to the Mini-Talks team.'));
+          'Every Fig-Talks is made with the character its owner designs. Personalize yours, ' +
+          'then send the design to the Mini-Talks team.'));
       }
       if (dev) {
         var n0 = countRecordings(dev);
@@ -856,8 +857,10 @@
         .forEach(function (k) { shelfEl.appendChild(kitCard(k)); });
   }
 
-  /* Fills the "Kits" counter in the profile header. */
+  /* Fills the "Kits" counter in the profile header, and the Fig-Talks request
+     status beside it once there is one. */
   function syncHeaderStat() {
+    syncFigStat();
     var n = Object.keys(state).length;
     var box = document.getElementById('mf-stat-kits');
     if (box) { box.textContent = 'Kits: ' + n; return; }
@@ -872,6 +875,22 @@
       row.appendChild(own);
     }
     own.textContent = 'Kits: ' + n;
+  }
+
+  function syncFigStat() {
+    var row = document.querySelector('.mf-stats-row');
+    if (!row) return;
+    var r   = figState().request;
+    var box = document.getElementById('md-stat-figtalks');
+
+    if (!r || r.status === 'draft') { if (box) box.remove(); return; }
+    if (!box) {
+      box = el('div', 'mf-stat-box md-stat-figtalks');
+      box.id = 'md-stat-figtalks';
+      row.appendChild(box);
+    }
+    box.textContent = 'Fig-Talks: ' + (r.status_label || r.status);
+    box.title = 'Your personalized Fig-Talks request';
   }
 
   /* ── kit popup ── */
@@ -960,8 +979,9 @@
       inner.appendChild(el('p', 'md-pop-banner md-pop-banner-demo',
         'Demo mode — sample kit. Everything here is interactive, and nothing is saved.'));
     } else if (!key) {
-      inner.appendChild(el('p', 'md-pop-banner',
-        'No ' + kit.name + ' is connected to your profile yet. You can still personalize yours below.'));
+      inner.appendChild(el('p', 'md-pop-banner', openCode === 'F'
+        ? 'Every Fig-Talks is made with the character its owner designs, so this is where yours starts. Recordings open up once it reaches you.'
+        : 'No ' + kit.name + ' is connected to your profile yet. You can still personalize yours below.'));
     } else if (!live) {
       inner.appendChild(el('p', 'md-pop-banner',
         'Not connected — showing the last sync. Plug the kit in to download audio, rename recordings or send faces.'));
@@ -977,7 +997,9 @@
                    sectionLabel(sec));
         b.type = 'button';
         b.disabled = lock;
-        if (lock) b.title = 'Available once your ' + kit.name + ' is connected.';
+        if (lock) b.title = openCode === 'F'
+          ? 'Available once your Fig-Talks has been made and arrives.'
+          : 'Available once your ' + kit.name + ' is connected.';
         else b.addEventListener('click', function () { openSection = sec; renderPopup(); });
         nav.appendChild(b);
       });
@@ -1116,8 +1138,7 @@
       figApi('figtalks/design', { config: cfg, image: img }).then(function (res) {
         if (res && res.message && !res.design) { setStatus(res.message, 'err'); return; }
         fig = res;
-        renderPopup();
-        renderShelf();
+        render();
         setStatus('Your Fig-Talks design was saved.', 'ok');
       });
     }, { title: 'Create Your Fig-Talks', subtitle: 'Face · Hairstyle · Hair colour', color: 'red' });
@@ -1156,7 +1177,8 @@
     if (!f.design) {
       host.appendChild(el('h3', 'md-fig-title', 'Create Your Fig-Talks'));
       host.appendChild(el('p', 'md-section-note',
-        'Personalize your figure to create a Fig-Talks character that feels familiar and uniquely yours.'));
+        'Personalize your figure to create a Fig-Talks character that feels familiar and uniquely yours. ' +
+        'Your Fig-Talks is made with the character you design here, so this comes first.'));
       host.appendChild(figStepList(false));
 
       var start = el('button', 'md-btn md-btn-primary md-fig-cta', 'Personalize Fig-Talks');
@@ -1202,8 +1224,7 @@
             return;
           }
           fig = res;
-          renderPopup();
-          renderShelf();
+          render();
           setStatus('Request sent \u2014 the Mini-Talks team will be in touch.', 'ok');
         });
       });

@@ -25,6 +25,34 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.10.0
+
+**A Fig-Talks is made with the character inside it, so the request comes first.**
+The copy now says so rather than treating an unlinked Fig-Talks as a connection
+problem: the locked sections read "available once your Fig-Talks has been made and
+arrives", and both the card and the Personalize screen explain that the figure is
+built from the design.
+
+**Email.** Plain `wp_mail()`, the way Mini-Forum already sends its mail, so the
+site's SMTP carries these too:
+
+| When | Who | What |
+|---|---|---|
+| Request sent | the team | member, email, the three choices, links to the render and the request |
+| Request sent | the member | confirmation, in the same words the profile shows |
+| Contacted · In Preparation · Completed | the member | the new status and what it means |
+
+Draft and Submitted raise no status mail — a draft is the member's own, and
+Submitted already has its confirmation. `md_figtalks_admin_email` redirects the team
+address; `md_figtalks_notify_statuses` changes which changes are worth an email.
+
+**The status is on the member's profile**, beside Posts / Events / Kits, as soon as
+a request is sent — and on the WordPress user profile as a read-only row with the
+date, the render and a link to the request, for whoever answers support.
+
+**Fixed:** the Fig-Talks flows called `renderPopup()` and `renderShelf()` directly,
+which skipped the profile counters `render()` also refreshes.
+
 ## mini-devices 2.9.0
 
 **Fig-Talks personalisation requests.** Fig-Talks is made to order, so it is not

@@ -1,4 +1,4 @@
-# Mini Devices — Connected Mini-Kits (v2.9.0)
+# Mini Devices — Connected Mini-Kits (v2.10.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -147,6 +147,30 @@ and `glassesTextureIndex` too, so glasses slot in later without changing this fl
 
 A sent request is frozen. Designing again opens a new request rather than rewriting
 one the team may already be acting on.
+
+### Notifications
+
+| When | Who | What |
+|---|---|---|
+| Request sent | the team | member, email, the three choices, a link to the render and to the request |
+| Request sent | the member | confirmation, in the same words the profile shows |
+| Contacted · In Preparation · Completed | the member | the new status and what it means |
+
+Plain `wp_mail()`, the way Mini-Forum sends its own mail, so whatever SMTP the site
+uses carries these too. Draft and Submitted raise no status mail — a draft is the
+member's own, and Submitted already has its confirmation.
+
+```php
+add_filter('md_figtalks_admin_email', function () { return 'kits@example.com'; });
+add_filter('md_figtalks_notify_statuses', function ($s) { return array('completed'); });
+```
+
+### Where the status shows
+
+- **The member's profile** — beside Posts / Events / Kits, once a request is sent.
+- **The Fig-Talks card** — *Personalized Fig-Talks · Status: …* and **View My Design**.
+- **The WordPress user profile** — a read-only Fig-Talks row with the status, the
+  date it was sent, the render and a link to the request, for whoever answers support.
 
 ### Where requests go
 

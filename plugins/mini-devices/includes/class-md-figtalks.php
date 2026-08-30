@@ -35,7 +35,11 @@ class MD_FigTalks {
     public static function init() {
         add_action('init', array(__CLASS__, 'register_cpt'));
         add_action('rest_api_init', array(__CLASS__, 'register_routes'));
+        add_action('md_figtalks_request_submitted', array(__CLASS__, 'mail_on_submit'), 10, 2);
+        add_action('md_figtalks_status_changed', array(__CLASS__, 'mail_on_status'), 10, 3);
         if (is_admin()) {
+            add_action('show_user_profile', array(__CLASS__, 'user_profile_field'));
+            add_action('edit_user_profile', array(__CLASS__, 'user_profile_field'));
             add_filter('manage_' . self::CPT . '_posts_columns', array(__CLASS__, 'columns'));
             add_action('manage_' . self::CPT . '_posts_custom_column', array(__CLASS__, 'column'), 10, 2);
             add_action('add_meta_boxes', array(__CLASS__, 'meta_box'));
@@ -249,6 +253,115 @@ class MD_FigTalks {
         return trailingslashit($up['baseurl']) . 'mf-avatars/' . $name;
     }
 
+    /* ── mail ───────────────────────────────────────────────────────── */
+
+    /** Where team notifications go. Site admin unless a filter says otherwise. */
+    public static function team_email() {
+        return apply_filters('md_figtalks_admin_email', get_option('admin_email'));
+    }
+
+    private static function site_name() {
+        return wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+    }
+
+    /** Statuses worth telling the member about. Draft and Submitted are not:
+     *  a draft is theirs, and Submitted already gets its own confirmation. */
+    public static function notify_statuses() {
+        return apply_filters('md_figtalks_notify_statuses',
+            array('contacted', 'preparation', 'completed'));
+    }
+
+    private static function status_message($status) {
+        $msg = array(
+            'contacted'   => "A member of the Mini-Talks team has reached out about your Fig-Talks. " .
+                             "If you have not seen anything, check your other mail folders.",
+            'preparation' => "Your Fig-Talks is being prepared. We will let you know as soon as it is ready.",
+            'completed'   => "Your Fig-Talks is ready. The team will be in touch about getting it to you.",
+        );
+        return isset($msg[$status]) ? $msg[$status] : '';
+    }
+
+    public static function mail_on_submit($post_id, $uid) {
+        $user = get_userdata($uid);
+        if (!$user) return;
+
+        $site  = self::site_name();
+        $nick  = get_post_meta($post_id, '_md_user_name', true);
+        $bits  = array(
+            'Face'        => get_post_meta($post_id, '_md_face', true),
+            'Hairstyle'   => get_post_meta($post_id, '_md_hairstyle', true),
+            'Hair colour' => get_post_meta($post_id, '_md_hair_color', true),
+        );
+
+        // Team
+        $lines = array(
+            'A member has sent a personalized Fig-Talks request.',
+            '',
+            'Member:  ' . $nick,
+            'Email:   ' . $user->user_email,
+        );
+        foreach ($bits as $label => $v) $lines[] = str_pad($label . ':', 9) . ($v !== '' ? $v : '—');
+        $img = get_post_meta($post_id, '_md_image', true);
+        if ($img) { $lines[] = ''; $lines[] = 'Design:  ' . $img; }
+        $lines[] = '';
+        $lines[] = 'Open the request: ' . admin_url('post.php?post=' . $post_id . '&action=edit');
+
+        $team = self::team_email();
+        if ($team) {
+            @wp_mail($team, sprintf('[%s] Fig-Talks request from %s', $site, $nick), implode("\n", $lines));
+        }
+
+        // Member — the same wording the profile shows, so nothing contradicts.
+        $body = "Hi " . $nick . ",\n\n" .
+                "Your personalized Fig-Talks design has been shared with the Mini-Talks team. " .
+                "We’ll contact you about the next steps.\n\n" .
+                "You can see your design any time under Connected Mini-Kits in your profile.\n\n" .
+                "— " . $site;
+        @wp_mail($user->user_email, sprintf('[%s] Your Fig-Talks request was received', $site), $body);
+    }
+
+    public static function mail_on_status($post_id, $status, $was) {
+        if (!in_array($status, self::notify_statuses(), true)) return;
+
+        $uid  = (int) get_post_field('post_author', $post_id);
+        $user = get_userdata($uid);
+        if (!$user) return;
+
+        $all  = self::statuses();
+        $site = self::site_name();
+        $nick = get_post_meta($post_id, '_md_user_name', true);
+        $note = self::status_message($status);
+
+        $body = "Hi " . $nick . ",\n\n" .
+                "Your Fig-Talks request is now: " . (isset($all[$status]) ? $all[$status] : $status) . ".\n\n" .
+                ($note ? $note . "\n\n" : '') .
+                "You can follow it under Connected Mini-Kits in your profile.\n\n" .
+                "— " . $site;
+
+        @wp_mail($user->user_email,
+                 sprintf('[%s] Fig-Talks request update: %s', $site, isset($all[$status]) ? $all[$status] : $status),
+                 $body);
+    }
+
+    /** Read-only status on the WordPress user profile, for whoever handles support. */
+    public static function user_profile_field($user) {
+        $req = self::latest_request($user->ID);
+        echo '<h2>Fig-Talks</h2><table class="form-table"><tr><th>Request status</th><td>';
+        if (!$req) {
+            echo '<em>No request yet.</em>';
+        } else {
+            printf('<strong>%s</strong>', esc_html($req['status_label']));
+            if ($req['submitted']) printf(' &middot; sent %s', esc_html(date_i18n('d M Y', $req['submitted'])));
+            printf(' &nbsp; <a href="%s">Open request</a>',
+                   esc_url(admin_url('post.php?post=' . $req['id'] . '&action=edit')));
+            if (!empty($req['image'])) {
+                printf('<br><img src="%s" alt="" style="margin-top:8px;width:90px;height:90px;object-fit:contain;background:#f6f6f6;border-radius:8px">',
+                       esc_url($req['image']));
+            }
+        }
+        echo '</td></tr></table>';
+    }
+
     /* ── admin ──────────────────────────────────────────────────────── */
 
     public static function columns($cols) {
@@ -319,7 +432,13 @@ class MD_FigTalks {
         if (!isset($_POST['md_status'])) return;
 
         $st = sanitize_key($_POST['md_status']);
-        if (isset(self::statuses()[$st])) update_post_meta($post_id, '_md_status', $st);
+        if (!isset(self::statuses()[$st])) return;
+
+        $was = get_post_meta($post_id, '_md_status', true);
+        if ($was === $st) return;
+
+        update_post_meta($post_id, '_md_status', $st);
+        do_action('md_figtalks_status_changed', $post_id, $st, $was);
     }
 
     public static function status_filter() {
