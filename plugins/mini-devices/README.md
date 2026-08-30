@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.2.1)
+# Mini Devices — Mini-Kits (v3.2.2)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -124,7 +124,9 @@ The three devices refuse a second request (`repeatable` is unset on them in
 `MD_Kits::all()`), and the screens never offer one — a sent request shows its status,
 not another Send.
 
-For Mini-Designs an earlier request is never edited. Picking new scenes in Explore
+For Mini-Designs the **Request** screen lists every request the member has made,
+newest first, each keeping its own scenes, note, status and date. An earlier request
+is never edited. Picking new scenes in Explore
 and sending them creates a **second** request, and the screen says so before you
 send. Scenes already asked for are marked in Explore with the status they carry and
 cannot be re-picked; the server drops any that slip through, so the same scene is

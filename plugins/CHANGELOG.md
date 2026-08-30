@@ -33,6 +33,21 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.2.2
+
+**Fixed: a second request looked as though it had deleted the first.** Nothing was
+ever deleted — both requests were in the database — but the Request screen read only
+the newest one, so the earlier request vanished from view while its scenes stayed
+marked in Explore. Two views of the same thing, disagreeing. The state now carries
+every request for a kit that takes several (`MD_Requests::all_requests()`), and the
+Request screen lists them newest first, each with its own scenes, note, status and
+progress rail.
+
+**Requested no longer looks like selected.** A scene already with the team was drawn
+in the same green as a scene ticked for sending, so it read as "still selected". It
+is now quiet — grey card, muted title, a green tick and *Requested · Submitted* —
+plainly settled rather than plainly chosen.
+
 ## mini-devices 3.2.1
 
 **Fixed: a second Mini-Designs request was refused.** 3.2.0 added the "Another

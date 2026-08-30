@@ -1145,6 +1145,13 @@
      fits where the request actually is. */
 
   function kitsState() { return kits || { kits: {}, design: null, catalogue: [] }; }
+  function allReqs(slug) {
+    var k = (kitsState().kits || {})[slug];
+    if (!k) return [];
+    if (k.requests) return k.requests;
+    return k.request ? [k.request] : [];
+  }
+
   function reqFor(slug) {
     var k = kitsState().kits || {};
     return (k[slug] && k[slug].request) || null;
@@ -1349,8 +1356,10 @@
       card.appendChild(thumb);
       card.appendChild(el('h5', 'md-design-name', d.name));
       if (got) {
-        card.appendChild(el('span', 'md-design-flag md-design-status',
-                            got.status_label || got.status));
+        var mark = el('span', 'md-design-flag md-design-asked');
+        mark.appendChild(el('span', 'md-design-tick', '\u2713'));
+        mark.appendChild(document.createTextNode('Requested \u00b7 ' + (got.status_label || got.status)));
+        card.appendChild(mark);
       } else if (!d.selectable) {
         card.appendChild(el('span', 'md-design-flag', d.label));
       } else {
@@ -1464,6 +1473,10 @@
     // A selection waiting to be sent is the whole point of this screen, so it
     // comes before any earlier request's status.
     if (kit.pre === 'catalogue' && pickedIds().length) { renderDesignReview(host, kit, req); return; }
+
+    // A kit that takes several requests shows all of them. Showing only the
+    // newest read as though the earlier one had been deleted.
+    if (kit.pre === 'catalogue' && req) { renderRequestList(host, kit); return; }
 
     /* nothing asked for yet */
     if (!req) {
@@ -1592,6 +1605,49 @@
       host.appendChild(el('p', 'md-fig-foot',
         'Your sent request stays exactly as it was. Designing again starts a new request rather than changing this one.'));
     }
+  }
+
+  /* Every request the member has made for this kit, newest first. Each one
+     keeps its own scenes, note, status and date — none of them replaces another. */
+  function renderRequestList(host, kit) {
+    var list = allReqs(kit.slug);
+
+    host.appendChild(el('h3', 'md-fig-title',
+      list.length === 1 ? 'Your request' : 'Your requests'));
+    host.appendChild(el('p', 'md-section-note', list.length === 1
+      ? 'Sent to the Mini-Talks team. They will be in touch about the next steps.'
+      : 'Each request stays as it was sent. Newest first.'));
+
+    list.forEach(function (r) {
+      var card = el('section', 'md-reqcard');
+
+      var head = el('div', 'md-reqcard-head');
+      head.appendChild(statusBadge(r));
+      if (r.submitted) head.appendChild(el('span', 'md-reqcard-when', fmtDay(r.submitted)));
+      card.appendChild(head);
+
+      card.appendChild(el('p', 'md-section-note', r.status_note || ''));
+
+      if (r.design_names && r.design_names.length) {
+        var ul = el('ul', 'md-req-designs');
+        r.design_names.forEach(function (n) { ul.appendChild(el('li', null, n)); });
+        card.appendChild(el('p', 'md-req-label', r.design_names.length === 1 ? 'Mini-Design' : 'Mini-Designs'));
+        card.appendChild(ul);
+      }
+      if (r.note) {
+        card.appendChild(el('p', 'md-req-label', 'Your note'));
+        card.appendChild(el('p', 'md-req-note', r.note));
+      }
+
+      var rail = statusRail(r);
+      if (rail) card.appendChild(rail);
+      host.appendChild(card);
+    });
+
+    var more = el('button', 'md-btn md-btn-primary md-fig-cta', 'Request more Mini-Designs');
+    more.type = 'button';
+    more.addEventListener('click', function () { gotoSection('explore'); });
+    host.appendChild(more);
   }
 
   /* Review what was picked in Explore, and send it. An earlier request is not

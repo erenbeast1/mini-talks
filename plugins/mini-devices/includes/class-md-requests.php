@@ -113,12 +113,8 @@ class MD_Requests {
         return is_array($d) ? $d : null;
     }
 
-    /**
-     * Every Mini-Design this member has asked for, across all their requests for
-     * the kit, newest request first. A scene asked for twice keeps the newer
-     * request's status, which is the one that still means something.
-     */
-    public static function kit_designs($uid, $kit_slug) {
+    /** Every request this member has made for the kit, newest first. */
+    public static function all_requests($uid, $kit_slug) {
         $posts = get_posts(array(
             'post_type'   => self::CPT,
             'author'      => $uid,
@@ -128,23 +124,28 @@ class MD_Requests {
             'post_status' => 'any',
             'meta_query'  => array(array('key' => '_md_kit', 'value' => $kit_slug)),
         ));
+        $out = array();
+        foreach ($posts as $post) $out[] = self::to_array($post);
+        return $out;
+    }
 
-        $all  = self::statuses();
+    /**
+     * Every Mini-Design this member has asked for, across all their requests for
+     * the kit, newest request first. A scene asked for twice keeps the newer
+     * request's status, which is the one that still means something.
+     */
+    public static function kit_designs($uid, $kit_slug) {
         $seen = array();
-        foreach ($posts as $post) {
-            $ids = get_post_meta($post->ID, '_md_designs', true);
-            if (!is_array($ids) || !$ids) continue;
-            $st  = self::normalise(get_post_meta($post->ID, '_md_status', true) ?: 'draft');
-            $sub = (int) get_post_meta($post->ID, '_md_submitted_at', true);
-            foreach ($ids as $id) {
+        foreach (self::all_requests($uid, $kit_slug) as $req) {
+            foreach ($req['designs'] as $id) {
                 $id = (int) $id;
                 if (isset($seen[$id])) continue;
                 $seen[$id] = array(
                     'id'           => $id,
-                    'request'      => $post->ID,
-                    'status'       => $st,
-                    'status_label' => isset($all[$st]) ? $all[$st] : $st,
-                    'submitted'    => $sub,
+                    'request'      => $req['id'],
+                    'status'       => $req['status'],
+                    'status_label' => $req['status_label'],
+                    'submitted'    => $req['submitted'],
                 );
             }
         }
@@ -194,6 +195,12 @@ class MD_Requests {
                 'request'  => $req,
                 'editable' => !$req || $req['status'] === 'draft',
             );
+            // A kit that takes several requests must show all of them: the
+            // Request screen listing only the newest read as though the earlier
+            // one had been deleted.
+            if (!empty($kit['repeatable'])) {
+                $kits[$slug]['requests'] = self::all_requests($uid, $slug);
+            }
             // "My Designs" is everything the member ever asked for, not just the
             // latest request — a second request must not hide the first.
             if ($kit['pre_request'] === 'catalogue') {
