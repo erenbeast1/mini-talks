@@ -25,6 +25,23 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.5.1
+
+**Studs use the forum's own recipe, not an approximation of it.** 2.5.0 placed ten
+copies at percentage stops — whole studs, but far too many and too small next to the
+`.mf-action-card` bricks on the forum home page. Mini-Forum has exactly two stud
+recipes and both place whole copies:
+
+| Where | Copies | Size |
+|---|---|---|
+| `.mf-action-card` (half-width) and `.mf-popup-studs` | 2 | 51% |
+| `.mf-guidelines-studs` (full width) | 4 | 26% |
+
+Kit cards are full width, so they use the second: four copies at 26%, positioned
+`left / 33% / 66% / right`. Each copy is drawn whole, so both edges land on a
+complete stud, and each lands near the ~220px the forum draws them at. The kit popup
+uses the two-copy recipe, matching the auth popup it sits beside.
+
 ## mini-devices 2.5.0
 
 **`[mini_kits_demo]` takes kit names.** `kits="display-talks"` instead of
