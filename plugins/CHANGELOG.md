@@ -1,5 +1,13 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.06.01
+
+**Fixed:** with a fourth box in it, the profile stats row broke every label
+across two lines — `Posts: / 1`, `Fig-Talks: / Submitted`. `.mf-stats-row` is
+`display:flex` with no `flex-wrap` above 900px, so the boxes shrank until their
+text wrapped instead. Labels now stay on one line and whole boxes wrap to a
+second row when the header column is too narrow.
+
 ## mini-forum 3.06.00
 
 **Profile tabs are real.** `Mini-Forum`, `Mini-Kits` and `App & Studio` were dead
@@ -24,6 +32,24 @@ the JS writes. Affected the sign-in and sign-up popups too.
 **Fixed:** the plugin header advertised `Version: 1.0.0` while `MF_VERSION` was
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
+
+## mini-devices 3.0.2
+
+**Fixed: the request read "Hair colour: 0".** The summary was written against
+guessed key names. The editor actually saves `hairCategory`, `hairTextureIndex`,
+a numeric `hairColor` index into its own palette, `eyeModelName`/`mouthModelName`
+(null while the member keeps the default face), and hex `eyeColor`,
+`eyebrowColor`, `glassesColor`. Every one of those is now translated, so a
+request sent without changing anything reads
+
+    Hair: Short — style 1, Dark brown (#4D1F00)
+    Face: Eyes: default · Mouth: default
+    Eye colour: Black (#000000)
+    Brows & lashes: Black (#000000)
+
+instead of two dashes and a zero. Colours carry both the name and the hex the
+workshop needs; glasses only appear when there are glasses. Requests already in
+the database re-read their stored config, so the fix is retroactive.
 
 ## mini-devices 3.0.1
 

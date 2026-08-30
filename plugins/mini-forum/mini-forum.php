@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini-Forum
  * Description: A calm, safe community forum for the Mini-Talks ecosystem.
- * Version: 3.06.00
+ * Version: 3.06.01
  * Author: Mini-Talks
  * Text Domain: mini-forum
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MF_VERSION', '3.06.00');
+define('MF_VERSION', '3.06.01');
 define('MF_PATH', plugin_dir_path(__FILE__));
 define('MF_URL', plugin_dir_url(__FILE__));
 

@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.0.1)
+# Mini Devices — Mini-Kits (v3.0.2)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 

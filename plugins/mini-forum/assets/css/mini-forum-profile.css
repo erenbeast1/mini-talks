@@ -63,3 +63,15 @@
   .mf-profile-settings{position:static!important;margin-top:14px!important}
   .mf-settings-btn{width:100%!important;justify-content:center!important}
 }
+
+/* ═══ STATS ROW ═══
+   .mf-stats-row is display:flex with no wrap, so once Mini-Devices adds a
+   fourth box the boxes shrink and their labels break onto a second line
+   ("Mini-Kit / requests: 2"). Keep each label on one line and let whole
+   boxes wrap instead. */
+.mf-stats-row{flex-wrap:wrap!important;row-gap:10px!important}
+.mf-stat-box{white-space:nowrap!important;flex:0 0 auto!important}
+
+@media(max-width:520px){
+  .mf-stat-box{padding:9px 16px!important;font-size:13px!important}
+}

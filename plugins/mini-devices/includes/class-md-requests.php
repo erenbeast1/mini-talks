@@ -279,16 +279,124 @@ class MD_Requests {
         return $id;
     }
 
-    /** The three Fig-Talks choices, read out of the editor's config. */
+    /**
+     * Read the avatar editor's own config. The keys and value types come from
+     * the editor bundle's save payload, not from guesswork:
+     *
+     *   hairCategory      string  "short" | "medium" | "long" | "tied" | "curly" | "fun" | "bun"
+     *   hairTextureIndex  int     which hair model, 0 = none
+     *   hairColor         int     index into the hair palette below
+     *   eyeModelName      string  null while the member keeps the default face
+     *   mouthModelName    string  null likewise
+     *   eyeColor          string  hex
+     *   eyebrowColor      string  hex
+     *   glassesColor      string  hex, only meaningful with glasses on
+     *
+     * Reading a numeric index as if it were a label is how "Hair colour: 0"
+     * ended up in the admin list, so every value is translated here.
+     */
+
+    /** The editor's hair palette, in its own order. */
+    public static function hair_palette() {
+        return array('#4D1F00', '#834400', '#E7CA63', '#000000', '#A8A8A8', '#F4F4F4', '#CC4422');
+    }
+
+    public static function hair_categories() {
+        return array('short' => 'Short', 'medium' => 'Medium', 'long' => 'Long',
+                     'tied' => 'Tied', 'curly' => 'Curly', 'fun' => 'Fun', 'bun' => 'Bun');
+    }
+
+    /** Every hex the editor's pickers can produce, named. */
+    public static function colour_names() {
+        return array(
+            '#000000' => 'Black',       '#1C1C1C' => 'Black',
+            '#4D1F00' => 'Dark brown',  '#5A3825' => 'Dark brown',
+            '#6B3E26' => 'Brown',       '#834400' => 'Brown',
+            '#8B5A2B' => 'Light brown', '#E7CA63' => 'Blond',
+            '#A8A8A8' => 'Grey',        '#B0B0B0' => 'Grey',
+            '#F4F4F4' => 'White',       '#CC4422' => 'Ginger',
+            '#D62828' => 'Red',         '#274C9B' => 'Blue',
+            '#4682B4' => 'Blue',        '#4E8B3A' => 'Green',
+            '#2E7D32' => 'Green',       '#FF6F00' => 'Orange',
+            '#EC4899' => 'Pink',        '#8E63C7' => 'Purple',
+        );
+    }
+
+    /** "Black (#000000)" — the name for people, the hex for the workshop. */
+    public static function colour_label($hex) {
+        $hex = strtoupper(trim((string) $hex));
+        if ($hex === '') return '';
+        if ($hex[0] !== '#') $hex = '#' . $hex;
+        $names = self::colour_names();
+        return isset($names[$hex]) ? $names[$hex] . ' (' . $hex . ')' : $hex;
+    }
+
+    /** GLB file names into something readable: "mouth_smile_02" → "Smile 02"
+     *  under the Mouth heading, which already says which slot it is. */
+    public static function model_label($name, $slot = '') {
+        $name = trim((string) $name);
+        if ($name === '') return '';
+        $name = preg_replace('/\.(glb|gltf)$/i', '', $name);
+        $name = trim(str_replace(array('_', '-'), ' ', $name));
+        $name = preg_replace('/\s+/', ' ', $name);
+        if ($slot !== '') {
+            $stripped = preg_replace('/^' . preg_quote($slot, '/') . '\s+/i', '', $name);
+            if ($stripped !== '') $name = $stripped;
+        }
+        return $name === '' ? '' : ucfirst($name);
+    }
+
+    /** What the member chose, in words. */
     public static function summarise($config) {
-        $g = function ($k) use ($config) {
-            return isset($config[$k]) && $config[$k] !== '' ? (string) $config[$k] : '';
+        $config = (array) $config;
+        $str = function ($k) use ($config) {
+            return isset($config[$k]) && is_string($config[$k]) ? trim($config[$k]) : '';
         };
-        $face = array_filter(array($g('eyeModelName'), $g('mouthModelName')));
+        $int = function ($k) use ($config) {
+            return isset($config[$k]) && is_numeric($config[$k]) ? (int) $config[$k] : null;
+        };
+
+        /* Hair: category, which model, which colour. */
+        $cats     = self::hair_categories();
+        $cat      = $str('hairCategory');
+        $texture  = $int('hairTextureIndex');
+        $palette  = self::hair_palette();
+        $ci       = $int('hairColor');
+        $hair_hex = ($ci !== null && isset($palette[$ci])) ? $palette[$ci] : '';
+
+        if ($texture === 0) {
+            $hairstyle = 'No hair';
+        } else {
+            $bits = array();
+            if ($cat !== '')     $bits[] = isset($cats[$cat]) ? $cats[$cat] : ucfirst($cat);
+            if ($texture !== null) $bits[] = 'style ' . $texture;
+            $hairstyle = $bits ? implode(' — ', $bits) : '';
+        }
+        // A colour under no hair tells the workshop nothing.
+        $hair_colour = ($hair_hex !== '' && $texture !== 0) ? self::colour_label($hair_hex) : '';
+
+        /* Face: the editor sends null for a slot the member left alone. */
+        $eyes  = self::model_label($str('eyeModelName'), 'eyes');
+        $mouth = self::model_label($str('mouthModelName'), 'mouth');
+        $face  = trim(($eyes  !== '' ? 'Eyes: ' . $eyes   : 'Eyes: default') . ' · ' .
+                      ($mouth !== '' ? 'Mouth: ' . $mouth : 'Mouth: default'));
+
+        $glasses = (stripos($str('eyeModelName'), 'glasses') !== false)
+                 ? self::colour_label($str('glassesColor')) : '';
+
+        $lines = array(
+            'Hair'           => trim($hairstyle . ($hair_colour !== '' ? ($hairstyle !== '' ? ', ' : '') . $hair_colour : '')),
+            'Face'           => $face,
+            'Eye colour'     => self::colour_label($str('eyeColor')),
+            'Brows & lashes' => self::colour_label($str('eyebrowColor')),
+            'Glasses'        => $glasses,
+        );
+
         return apply_filters('md_figtalks_summary', array(
-            'face'       => $face ? implode(' · ', $face) : '',
-            'hairstyle'  => $g('hairType'),
-            'hair_color' => $g('hairColor'),
+            'face'       => $face,
+            'hairstyle'  => $hairstyle,
+            'hair_color' => $hair_colour,
+            'lines'      => $lines,
         ), $config);
     }
 
@@ -341,9 +449,20 @@ class MD_Requests {
             $out[] = 'Designs: ' . ($names ? implode(', ', $names) : '—');
         }
         if ($kit['pre_request'] === 'personalize') {
-            foreach (array('Face' => '_md_face', 'Hairstyle' => '_md_hairstyle', 'Hair colour' => '_md_hair_color') as $l => $k) {
-                $v = get_post_meta($post_id, $k, true);
-                $out[] = $l . ': ' . ($v !== '' ? $v : '—');
+            // The config is the source of truth; the three metas are only kept
+            // so requests saved before this read still say something.
+            $cfg = json_decode((string) get_post_meta($post_id, '_md_config', true), true);
+            if (is_array($cfg) && $cfg) {
+                $sum = self::summarise($cfg);
+                foreach ($sum['lines'] as $l => $v) {
+                    if ($v === '' && $l === 'Glasses') continue; // no glasses, nothing to say
+                    $out[] = $l . ': ' . ($v !== '' ? $v : '—');
+                }
+            } else {
+                foreach (array('Face' => '_md_face', 'Hairstyle' => '_md_hairstyle', 'Hair colour' => '_md_hair_color') as $l => $k) {
+                    $v = get_post_meta($post_id, $k, true);
+                    $out[] = $l . ': ' . ($v !== '' ? $v : '—');
+                }
             }
         }
         $note = get_post_meta($post_id, '_md_note', true);
