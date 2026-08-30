@@ -25,6 +25,17 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.8.1
+
+**Stud spacing.** Copies were sized 51% and 26% — just over 100/N — so each one
+overlapped its neighbour and the studs bunched at every junction. Sizing them at
+exactly 100/N makes the copies abut: the position stops then land the spans edge to
+edge, since `offset(i) = (100 − size) · i/(N−1)` collapses to `size · i`.
+
+Copy counts now scale with the element so a stud is drawn at about the same size
+wherever it appears — roughly 210px per three-stud copy: four on a kit card, three
+on the kit popup, five on the wider editor popup.
+
 ## mini-devices 2.8.0
 
 **The face designer's close button no longer covers the editor's own HEAD / FACE

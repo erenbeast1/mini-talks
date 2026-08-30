@@ -7,7 +7,8 @@
    ========================================================================== */
 
 .md-wrap,
-.md-overlay{
+.md-overlay,
+.mdf-overlay{
   --md-red:var(--mf-red,#E52828);
   --md-yellow:var(--mf-yellow,#FFCC00);
   --md-blue:var(--mf-blue,#0055BF);
@@ -105,7 +106,7 @@
 .md-kit-brick{border-radius:16px!important;padding:9px 5px 13px!important;margin-top:-1px!important}
 
 /* Stud strip: two half-width PNGs, notched at the sides, like .mf-action-card. */
-.md-kit-studs{height:30px!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,33% bottom,66% bottom,right bottom!important;background-size:26% auto,26% auto,26% auto,26% auto!important;margin-bottom:-1px!important;position:relative!important;z-index:2!important;flex-shrink:0!important}
+.md-kit-studs{height:30px!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,33.3333% bottom,66.6667% bottom,right bottom!important;background-size:25.0000% auto,25.0000% auto,25.0000% auto,25.0000% auto!important;margin-bottom:-1px!important;position:relative!important;z-index:2!important;flex-shrink:0!important}
 .md-kit-red    .md-kit-studs{background-image:var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red)!important}
 .md-kit-red    .md-kit-brick{background:var(--md-red,#E52828)!important}
 .md-kit-blue   .md-kit-studs{background-image:var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue)!important}
@@ -186,10 +187,10 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 
 .md-popup-wrapper{width:100%!important;max-width:680px!important;max-height:100%!important;display:flex!important;flex-direction:column!important;border-radius:16px!important;margin:auto!important}
 
-.md-popup-studs{height:28px!important;flex-shrink:0!important;background-repeat:no-repeat,no-repeat!important;background-position:left bottom,right bottom!important;background-size:51% auto,51% auto!important;border-radius:16px 16px 0 0!important;overflow:hidden!important}
-.md-pop-red    .md-popup-studs{background-image:var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png'))!important}
-.md-pop-blue   .md-popup-studs{background-image:var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png')),var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png'))!important}
-.md-pop-yellow .md-popup-studs{background-image:var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png')),var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png'))!important}
+.md-popup-studs{height:28px!important;flex-shrink:0!important;background-repeat:no-repeat,no-repeat,no-repeat!important;background-position:left bottom,50.0000% bottom,right bottom!important;background-size:33.3333% auto,33.3333% auto,33.3333% auto!important;border-radius:16px 16px 0 0!important;overflow:hidden!important}
+.md-pop-red    .md-popup-studs{background-image:var(--md-stud-red),var(--md-stud-red),var(--md-stud-red)!important}
+.md-pop-blue   .md-popup-studs{background-image:var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue)!important}
+.md-pop-yellow .md-popup-studs{background-image:var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow)!important}
 
 /* The coloured 8px frame is the brick; white inner is the label on it. */
 .md-popup-modal{border-radius:16px!important;padding:16px 8px 8px!important;margin-top:-1px!important;flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important}
@@ -337,14 +338,14 @@ body.admin-bar .mdf-overlay{padding-top:52px!important}
 .mdf-wrapper{width:min(1040px,100%)!important;height:min(720px,100%)!important;display:flex!important;flex-direction:column!important;border-radius:16px!important;margin:auto!important}
 
 /* Four whole copies at 26%, the forum's full-width strip recipe — no cut studs. */
-.mdf-studs{height:28px!important;flex-shrink:0!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,33% bottom,66% bottom,right bottom!important;background-size:26% auto,26% auto,26% auto,26% auto!important;border-radius:16px 16px 0 0!important;overflow:hidden!important}
-.mdf-pop-red .mdf-studs{background-image:var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png'))!important}
+.mdf-studs{height:28px!important;flex-shrink:0!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,25.0000% bottom,50.0000% bottom,75.0000% bottom,right bottom!important;background-size:20.0000% auto,20.0000% auto,20.0000% auto,20.0000% auto,20.0000% auto!important;border-radius:16px 16px 0 0!important;overflow:hidden!important}
+.mdf-pop-red    .mdf-studs{background-image:var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red)!important}
+.mdf-pop-blue   .mdf-studs{background-image:var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue)!important}
+.mdf-pop-yellow .mdf-studs{background-image:var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow)!important}
 .mdf-pop-red .mdf-modal{background:var(--mf-red,#E52828)!important}
 .mdf-pop-red .mdf-close{background:var(--mf-red,#E52828)!important}
-.mdf-pop-blue .mdf-studs{background-image:var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png')),var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png')),var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png')),var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png'))!important}
 .mdf-pop-blue .mdf-modal{background:var(--mf-blue,#0055BF)!important}
 .mdf-pop-blue .mdf-close{background:var(--mf-blue,#0055BF)!important}
-.mdf-pop-yellow .mdf-studs{background-image:var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png')),var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png')),var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png')),var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png'))!important}
 .mdf-pop-yellow .mdf-modal{background:var(--mf-yellow,#FFCC00)!important}
 .mdf-pop-yellow .mdf-close{background:var(--mf-yellow,#FFCC00)!important}
 .mdf-pop-yellow .mdf-close{color:#1D1D1B!important}
