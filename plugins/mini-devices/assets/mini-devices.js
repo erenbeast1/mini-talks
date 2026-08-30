@@ -915,7 +915,7 @@
   /* What Manage holds differs per kit. */
   function manageSections(kit) {
     if (kit.code === 'D') return ['scenes', 'recordings', 'device'];
-    if (kit.code === 'B') return ['figs', 'slots', 'recordings', 'content'];
+    if (kit.code === 'B') return ['figs', 'slots', 'recordings', 'device'];
     if (kit.code === 'F') return ['my-fig', 'recordings', 'device'];
     return [];
   }
@@ -924,7 +924,7 @@
     return { explore: 'Explore', request: 'Request', 'my-designs': 'My Designs',
              connect: 'Connect', manage: 'Manage',
              scenes: 'Scenes', recordings: 'Recordings', slots: 'Slots',
-             figs: 'Figs', content: 'Content', device: 'Device Details',
+             figs: 'Figs', device: 'Device Details',
              'my-fig': 'My Fig' }[sec] || sec;
   }
 
@@ -1580,8 +1580,8 @@
 
   /* ── Connect ──
      Pairing happens over the kit's USB cable: the kit sends its own id, and the
-     site binds that id to this profile. A pairing code or QR route can be added
-     later without changing anything here \u2014 both would land on the same bind. */
+     site binds that id to this profile. That is the pairing route, and the only
+     one \u2014 the kit is in the child's hands, and the cable is what they have. */
   function renderConnect(host, kit, key, dev, live) {
     if (key) {
       host.appendChild(el('h3', 'md-fig-title', (dev.label || kit.name) + ' is connected.'));
@@ -1650,15 +1650,15 @@
     else if (openManage === 'slots')      renderSlots(body, key, dev, live);
     else if (openManage === 'scenes')     renderScenes(body, key, dev, live);
     else if (openManage === 'figs')       renderFigs(body, kit, key, dev, live);
-    else if (openManage === 'content')    renderContent(body, kit);
     else if (openManage === 'my-fig')     renderMyFig(body, kit);
     host.appendChild(body);
   }
 
   /* ── Figs ── Brick-Talks' digital characters.
-     A Fig lives in one of the kit's slots, so the library is the slots that
-     carry one. Naming, editing and deleting happen here; putting a Fig into a
-     particular slot stays under Slots, next to that slot's recording. */
+     A Fig lives in one of the kit's slots \u2014 that is how the kit itself is
+     built, so the list here is the slots that carry one. Naming, editing and
+     deleting happen here; a slot's Fig sits beside its recording under Slots,
+     because the two are halves of the same thing. */
   function renderFigs(host, kit, key, dev, live) {
     var hasEditor = window.MDFaces && window.MFAvatarEditor;
     host.appendChild(el('p', 'md-section-note', hasEditor
@@ -1760,13 +1760,6 @@
       });
     });
     return b;
-  }
-
-  /* ── Content ── nothing to show until there is content to show. */
-  function renderContent(host, kit) {
-    host.appendChild(emptyNote('No content yet',
-      'Animations, visual assets, Fig assets and other media that ship with your ' + kit.name +
-      ' will be listed here.'));
   }
 
   /* ── My Fig ── the physical figure the member designed before requesting. */

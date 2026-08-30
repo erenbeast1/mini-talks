@@ -33,6 +33,20 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.1.2
+
+**Connect is the cable, and only the cable.** The docs floated a pairing code or QR
+route as a later option; there is no such plan. The kit is in the child's hands and
+the cable is what they have, so the wording says that plainly now.
+
+**Manage → Content is gone.** It listed animation, visual and Fig assets that have no
+source and no owner — an empty tab promising a feature nobody had agreed to build.
+Brick-Talks' Manage is Figs · Slots · Recordings · Device Details.
+
+**Figs stay per slot.** A Fig lives in one of the kit's slots because that is how the
+kit is built, and designing one opens the avatar editor the site already has. No
+separate Fig library, and no change to the personalization screen.
+
 ## mini-devices 3.1.1
 
 **The site-wide "Connect a kit" button is gone.** With Connect living inside each

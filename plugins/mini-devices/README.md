@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.1.1)
+# Mini Devices — Mini-Kits (v3.1.2)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -15,7 +15,7 @@ Request | Connect | Manage, and everything a connected kit can do lives under Ma
 |---|---|---|
 | **Mini-Designs** | Explore \| Request \| My Designs | Explore → Select → Request → My Designs |
 | **Design-Talks** | Request \| Connect \| Manage | Request → Connect → Scenes / Recordings / Device Details |
-| **Brick-Talks** | Request \| Connect \| Manage | Request → Connect → Figs / Slots / Recordings / Content |
+| **Brick-Talks** | Request \| Connect \| Manage | Request → Connect → Figs / Slots / Recordings / Device Details |
 | **Fig-Talks** | Request \| Connect \| Manage | Request → Personalize → Review → Connect → My Fig / Recordings / Device Details |
 
 **Where personalization sits** differs by kit, and that is the point: a Fig-Talks
@@ -86,8 +86,8 @@ site-wide "Connect a kit" button, because a kit is never connected in the abstra
 you are always connecting *this* Design-Talks, *this* Brick-Talks.
 
 Pairing happens over the kit's USB cable: the kit reports its own id, and the site
-binds that id to the profile. A pairing code or QR route would land on exactly the
-same bind, so it can be added later without disturbing anything here.
+binds that id to the profile. This is the pairing route and the only one; the
+screen is a wrapper around the bind that has always been there.
 
 Connect is open at *Ready to Connect*, at *Connected*, and for a member who has no
 request on record at all — the profiles that pre-date requests must not be locked
@@ -98,16 +98,15 @@ out of their own hardware.
 | Kit | Sections |
 |---|---|
 | Design-Talks | Scenes (scene → level → mini) · Recordings · Device Details |
-| Brick-Talks | Figs · Slots · Recordings · Content |
+| Brick-Talks | Figs · Slots · Recordings · Device Details |
 | Fig-Talks | My Fig · Recordings · Device Details |
 
-**Figs** are Brick-Talks' digital characters. A Fig lives in one of the kit's slots,
-so the library is the slots that carry one: create, rename, edit, delete, and send to
-the kit. Putting a Fig into a particular slot stays under **Slots**, next to that
-slot's recording — the two are halves of the same object.
-
-**Content** (animations, visual assets, Fig assets, other media) has no source yet
-and says so rather than pretending.
+**Figs** are Brick-Talks' digital characters. A Fig lives in one of the kit's slots —
+that is how the kit itself is built — so the list is the slots that carry one:
+create, rename, edit, delete, and send to the kit. A slot's Fig also sits beside its
+recording under **Slots**, because the two are halves of the same object. Designing a
+Fig opens the same avatar editor the site already uses; nothing about that screen
+changes here.
 
 **Device Details** carries device id, connection state, connected date, firmware,
 last sync and the device name.
