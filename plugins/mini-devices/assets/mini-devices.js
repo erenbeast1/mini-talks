@@ -13,6 +13,110 @@
 
   var DEV_LABEL = { F: 'Fig-Talks', B: 'Display-Talks', D: 'Design-Talks' };
   var liveDev = null, liveType = null;   // kit currently held open over serial
+
+  /* Demo mode — an admin-only front-end preview. It swaps in sample kits so
+     every screen can be walked through without hardware. Nothing touches the
+     server: api() is short-circuited and downloads are synthesised locally. */
+  var demo = false;
+  var realState = null, realFaces = null;
+
+  function demoFace(bg, mouth) {
+    return 'data:image/svg+xml,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">' +
+      '<rect width="80" height="80" rx="10" fill="' + bg + '"/>' +
+      '<circle cx="28" cy="32" r="5"/><circle cx="52" cy="32" r="5"/>' +
+      '<path d="' + mouth + '" stroke="#000" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+      '</svg>');
+  }
+
+  function demoData() {
+    var now = Math.floor(Date.now() / 1000);
+    return {
+      state: {
+        'F-3C71BF2A': {
+          type: 'F', uid: 'F-3C71BF2A', fw: '1.4', label: '', last_sync: now - 240,
+          stats: { total_s: 214, count: 6, longest_s: 63, last_ts: now - 3600 },
+          slots: [
+            { i: 1, full: 1, len_ms: 12400, name: 'Mum' },
+            { i: 2, full: 1, len_ms: 8100,  name: 'Good morning' },
+            { i: 3, full: 1, len_ms: 63000, name: '' },
+            { i: 4, full: 0, len_ms: 0,     name: '' },
+            { i: 5, full: 0, len_ms: 0,     name: '' }
+          ]
+        },
+        'B-91A0C4E2': {
+          type: 'B', uid: 'B-91A0C4E2', fw: '2.1', label: 'Classroom screen', last_sync: now - 120,
+          stats: { total_s: 96, count: 3, longest_s: 41, last_ts: now - 5400 },
+          slots: [
+            { i: 1, full: 1, len_ms: 41000, name: 'Hello' },
+            { i: 2, full: 1, len_ms: 22000, name: 'Story time' },
+            { i: 3, full: 1, len_ms: 33000, name: '' },
+            { i: 4, full: 0, len_ms: 0,     name: '' }
+          ]
+        },
+        'D-77BE10A5': {
+          type: 'D', uid: 'D-77BE10A5', fw: '2.3', label: '', last_sync: now - 60,
+          stats: { total_s: 402, count: 11, longest_s: 88, last_ts: now - 900 },
+          slots: [],
+          scenes: [
+            { mode: 'default', stats: { total_s: 96, count: 4, longest_s: 31, last_ts: now - 7200 },
+              slots: [
+                { l: 1, m: 1, len_ms: 4200,  demo: 1 },
+                { l: 1, m: 2, len_ms: 6800,  demo: 0 },
+                { l: 2, m: 1, len_ms: 15300, demo: 1 },
+                { l: 3, m: 1, len_ms: 0,     demo: 1 }
+              ] },
+            { mode: 'scene_02', stats: { total_s: 187, count: 5, longest_s: 88, last_ts: now - 1800 },
+              slots: [
+                { l: 2, m: 1, len_ms: 21000, demo: 0 },
+                { l: 3, m: 2, len_ms: 47000, demo: 1 },
+                { l: 4, m: 1, len_ms: 88000, demo: 0 }
+              ] }
+          ],
+          cards: {
+            '04A1B2': { name: 'Caf\u00e9', stats: { total_s: 74, count: 2, longest_s: 44, last_ts: now - 10800 },
+              slots: [ { i: 1, full: 1, len_ms: 30000, name: 'Ordering' },
+                       { i: 2, full: 1, len_ms: 44000, name: '' } ] },
+            '04C9D7': { name: '', stats: { total_s: 45, count: 1, longest_s: 45, last_ts: now - 86400 },
+              slots: [ { i: 1, full: 1, len_ms: 45000, name: 'At the desk' } ] }
+          }
+        }
+      },
+      faces: {
+        'B-91A0C4E2': {
+          1: { url: demoFace('#FFCC00', 'M26 50 q14 12 28 0'), config: { demo: 1 } },
+          3: { url: demoFace('#4FC3F7', 'M26 54 q14 -10 28 0'), config: { demo: 1 } }
+        }
+      }
+    };
+  }
+
+  function setDemo(on) {
+    if (on === demo) return;
+    if (on) {
+      realState = state; realFaces = faces;
+      var d = demoData();
+      state = d.state; faces = d.faces;
+      demo = true;
+      setStatus('Demo mode is on — these are sample kits. Nothing you change here is saved.', 'ok');
+    } else {
+      state = realState || {}; faces = realFaces || {};
+      realState = realFaces = null;
+      demo = false;
+      closeKit();
+      setStatus('Demo mode is off.', 'ok');
+    }
+    var btn = document.getElementById('md-demo-toggle');
+    if (btn) btn.textContent = demo ? 'Leave demo mode' : 'Enter demo mode';
+    if (connectBtn) {
+      connectBtn.disabled = demo || !('serial' in navigator);
+      connectBtn.title = demo ? 'Leave demo mode to connect a real kit.' : '';
+    }
+    var bar = document.getElementById('md-demo-bar');
+    if (bar) bar.classList.toggle('is-on', demo);
+    if (root) root.classList.toggle('md-is-demo', demo);
+    render();
+  }
   var SR = 16000;
 
   var port = null, reader = null, writer = null;
@@ -67,12 +171,35 @@
   /* ---------------- REST ---------------- */
 
   function api(path, body) {
+    // Demo mode mutates the in-memory sample data and resolves as the server
+    // would, so the same UI code paths run without writing anything.
+    if (demo) return demoApi(path, body);
+
     return fetch(MD.rest + path, {
       method: body ? 'POST' : 'GET',
       headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': MD.nonce },
       body: body ? JSON.stringify(body) : undefined,
       credentials: 'same-origin'
     }).then(function (r) { return r.json(); });
+  }
+
+  function demoApi(path, body) {
+    var res = { ok: true };
+    if (path === 'faces' && body) {
+      if (!faces[body.dev]) faces[body.dev] = {};
+      faces[body.dev][body.slot] = {
+        config: body.config,
+        url: (body.image && body.image.indexOf('data:image') === 0)
+               ? body.image
+               : (faces[body.dev][body.slot] || {}).url || demoFace('#B0BEC5', 'M26 50 q14 8 28 0')
+      };
+      res.faces = faces;
+    } else if (path === 'faces') {
+      res = faces;
+    } else if (path === 'forget') {
+      delete state[body.dev];
+    }
+    return new Promise(function (r) { setTimeout(function () { r(res); }, 220); });
   }
 
   /* ---------------- seri port ---------------- */
@@ -142,6 +269,10 @@
   }
 
   function connect() {
+    if (demo) {
+      setStatus('Leave demo mode before connecting a real kit.', 'err');
+      return;
+    }
     if (!('serial' in navigator)) {
       document.getElementById('md-browser-note').hidden = false;
       return;
@@ -285,7 +416,46 @@
 
   /* ---------------- WAV indirme ---------------- */
 
+  /* A short chirp standing in for a real recording, so demo downloads produce
+     a WAV that actually plays. */
+  function demoSamples(ms) {
+    var n = Math.max(1, Math.round(SR * Math.min(ms || 1500, 6000) / 1000));
+    var out = new Array(n);
+    for (var i = 0; i < n; i++) {
+      var t = i / SR;
+      var env = Math.min(1, t * 8) * Math.min(1, (n - i) / SR * 8);
+      out[i] = Math.round(9000 * env * Math.sin(2 * Math.PI * (240 + 90 * Math.sin(t * 2.2)) * t));
+    }
+    return out;
+  }
+
+  function demoDump(fileName, ms, btn) {
+    var label = btn.textContent, step = 0;
+    btn.disabled = true;
+    var iv = setInterval(function () {
+      step += 20;
+      btn.textContent = Math.min(99, step) + '%';
+    }, 90);
+    return new Promise(function (r) {
+      setTimeout(function () {
+        clearInterval(iv);
+        btn.disabled = false;
+        btn.textContent = label;
+        downloadWav(demoSamples(ms), fileName);
+        setStatus(fileName + ' downloaded (demo audio).', 'ok');
+        r(true);
+      }, 700);
+    });
+  }
+
   function dumpSlot(slotNo, fileName, btn) {
+    if (demo) {
+      var sl = null, keys = Object.keys(state);
+      for (var i = 0; i < keys.length && !sl; i++) {
+        (state[keys[i]].slots || []).forEach(function (x) { if (x.i === slotNo && x.full) sl = x; });
+      }
+      return demoDump(fileName, sl ? sl.len_ms : 2000, btn);
+    }
     if (!port) { setStatus('Connect the kit first.', 'err'); return Promise.resolve(false); }
 
     var samples = [];
@@ -370,6 +540,7 @@
   /* ---------------- sahne kaydi indirme (Version_D) ---------------- */
 
   function dumpScene(mode, level, mini, isDemo, fileName, btn) {
+    if (demo) { demoDump(fileName, 3000, btn); return; }
     if (!port) { setStatus('Connect the kit first.', 'err'); return; }
     var samples = [], expected = 0;
     var old = btn.textContent;
@@ -410,6 +581,21 @@
   /* ---------------- yuz aktarimi ---------------- */
 
   function transferFace(devKey, slotNo, config, btn) {
+    if (demo) {
+      var lbl = btn.textContent, pct = 0;
+      btn.disabled = true;
+      var iv = setInterval(function () {
+        pct += 25;
+        btn.textContent = 'Transferring ' + Math.min(100, pct) + '%';
+        if (pct >= 100) {
+          clearInterval(iv);
+          btn.disabled = false;
+          btn.textContent = lbl;
+          setStatus('The face for slot ' + slotNo + ' was transferred (demo).', 'ok');
+        }
+      }, 220);
+      return;
+    }
     if (!port) { setStatus('Connect the kit first.', 'err'); return; }
     if (!window.MFAvatarEditor || !window.MFAvatarEditor.exportFace) {
       setStatus('The face engine did not load — is Mini-Forum up to date?', 'err'); return;
@@ -508,6 +694,7 @@
      linked — synced before, read-only view of the last sync
      new    — not part of this profile yet */
   function kitStatus(code) {
+    if (demo) return kitKey(code) ? 'live' : 'new';
     if (port && liveType === code) return 'live';
     return kitKey(code) ? 'linked' : 'new';
   }
@@ -701,7 +888,10 @@
     head.appendChild(pill(status));
     inner.appendChild(head);
 
-    if (!live) {
+    if (demo) {
+      inner.appendChild(el('p', 'md-pop-banner md-pop-banner-demo',
+        'Demo mode — sample kit. Everything here is interactive, and nothing is saved.'));
+    } else if (!live) {
       inner.appendChild(el('p', 'md-pop-banner',
         'Not connected — showing the last sync. Plug the kit in to download audio, rename recordings or send faces.'));
     }
@@ -741,9 +931,11 @@
     var forget = el('button', 'md-btn md-btn-danger', 'Remove from profile');
     forget.type = 'button';
     forget.addEventListener('click', function () {
-      if (!window.confirm('Remove ' + (dev.label || kit.name) + ' from your profile? ' +
-                          'Recordings on the kit itself are not deleted.')) return;
-      if (port && liveType === openCode) { try { send({ cmd: 'unbind' }); } catch (e) {} }
+      if (!window.confirm(demo
+            ? 'Remove ' + (dev.label || kit.name) + ' from the demo shelf? Nothing real is affected.'
+            : 'Remove ' + (dev.label || kit.name) + ' from your profile? ' +
+              'Recordings on the kit itself are not deleted.')) return;
+      if (!demo && port && liveType === openCode) { try { send({ cmd: 'unbind' }); } catch (e) {} }
       api('forget', { dev: key }).then(function () {
         delete state[key];
         closeKit();
@@ -838,6 +1030,7 @@
     row.appendChild(el('span', 'md-slot-len', slot.full ? fmtDur(slot.len_ms) : 'empty'));
 
     if (slot.full) {
+      var acts = el('div', 'md-slot-acts');
       var btn = el('button', 'md-btn md-btn-ghost md-btn-sm', 'Download');
       btn.type = 'button';
       btn.disabled = !live;
@@ -847,7 +1040,8 @@
         var dir  = folder ? safeName(folder) + ' - ' : '';
         dumpSlot(slot.i, dir + base + '.wav', btn);
       });
-      row.appendChild(btn);
+      acts.appendChild(btn);
+      row.appendChild(acts);
     }
     return row;
   }
@@ -941,21 +1135,26 @@
 
         var stem = (isDefault ? 'Default' : sc.mode.replace(/^scene_/, 'Scene ')) + ' - L' + sl.l + ' M' + sl.m;
 
+        // Demo first, Download last, so the primary action holds the same
+        // right-hand position on every row.
+        var acts = el('div', 'md-slot-acts');
+        if (sl.demo) {
+          var bd = el('button', 'md-btn md-btn-quiet md-btn-sm', 'Demo');
+          bd.type = 'button';
+          bd.disabled = !live;
+          bd.title = 'Download the built-in demo clip for this step.';
+          bd.addEventListener('click', function () { dumpScene(sc.mode, sl.l, sl.m, true, stem + ' demo.wav', bd); });
+          acts.appendChild(bd);
+        }
         if (sl.len_ms) {
           var b = el('button', 'md-btn md-btn-ghost md-btn-sm', 'Download');
           b.type = 'button';
           b.disabled = !live;
           b.title = live ? '' : 'Connect the kit to download.';
           b.addEventListener('click', function () { dumpScene(sc.mode, sl.l, sl.m, false, stem + '.wav', b); });
-          row.appendChild(b);
+          acts.appendChild(b);
         }
-        if (sl.demo) {
-          var bd = el('button', 'md-btn md-btn-quiet md-btn-sm', 'Demo');
-          bd.type = 'button';
-          bd.disabled = !live;
-          bd.addEventListener('click', function () { dumpScene(sc.mode, sl.l, sl.m, true, stem + ' demo.wav', bd); });
-          row.appendChild(bd);
-        }
+        row.appendChild(acts);
         folder.appendChild(row);
       });
 
@@ -1046,11 +1245,20 @@
 
     connectBtn.addEventListener('click', connect);
 
+    var demoBtn = document.getElementById('md-demo-toggle');
+    if (demoBtn && window.MD && MD.admin) {
+      demoBtn.addEventListener('click', function () { setDemo(!demo); });
+    }
+
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && openCode) closeKit();
     });
 
     render();
-    api('faces').then(function (f) { faces = f || {}; render(); }).catch(function () {});
+    api('faces').then(function (f) {
+      if (demo) { realFaces = f || {}; return; }
+      faces = f || {};
+      render();
+    }).catch(function () {});
   });
 })();

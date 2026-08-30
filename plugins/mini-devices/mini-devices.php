@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Each kit opens its own detail popup.
- * Version:     2.0.0
+ * Version:     2.1.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.0.0');
+define('MD_VER', '2.1.0');
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 
@@ -268,6 +268,9 @@ add_action('wp_enqueue_scripts', function () {
         'rest'  => esc_url_raw(rest_url('mini-devices/v1/')),
         'nonce' => wp_create_nonce('wp_rest'),
         'user'  => wp_get_current_user()->display_name,
+        // Demo mode is a front-end preview for admins. It never writes to the
+        // server, so the capability check is only about who is offered it.
+        'admin' => current_user_can('manage_options') ? 1 : 0,
     ));
 });
 
@@ -295,6 +298,16 @@ add_shortcode('connected_devices', function () {
         <p class="md-note" id="md-browser-note" hidden>
             This browser cannot talk to USB devices. Open the page in Chrome, Edge or Opera on a desktop computer.
         </p>
+
+        <?php if (current_user_can('manage_options')): ?>
+        <div class="md-demo-bar" id="md-demo-bar">
+            <div class="md-demo-text">
+                <strong>Admin preview</strong>
+                <span>Fill the shelf with sample kits to walk through every screen without hardware. Nothing is saved.</span>
+            </div>
+            <button type="button" class="md-btn md-btn-ghost md-btn-sm" id="md-demo-toggle">Enter demo mode</button>
+        </div>
+        <?php endif; ?>
 
         <div class="md-status" id="md-status" hidden></div>
 

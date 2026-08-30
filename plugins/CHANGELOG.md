@@ -25,6 +25,26 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.1.0
+
+**Admin demo mode.** Users with `manage_options` get an "Admin preview" bar above
+the shelf. It loads three sample kits, all reading as connected, so every screen —
+slot naming, face design and transfer, scene trees, card folders, downloads — can be
+walked through without hardware.
+
+The mode is front-end only: `api()` is short-circuited to mutate the samples in
+memory, so nothing reaches `usermeta`. Downloads synthesise a short chirp locally so
+the WAV that lands actually plays. "Connect a kit" is disabled while it is on, and a
+caution stripe plus a per-popup banner keep sample data from reading as real.
+
+**Also in this release**
+
+- Long popups (Design-Talks scenes) scrolled the header, section nav and footer off
+  the screen. The body scrolls on its own now, capped at 52vh.
+- Slot rows put their buttons in a right-aligned cluster with Download always last,
+  so rows with and without a Demo button line up. Demo buttons are outlined rather
+  than bare text, which read as a label before.
+
 ## mini-devices 2.0.0
 
 **Lives under Mini-Kits.** The block used to append itself to the profile through a

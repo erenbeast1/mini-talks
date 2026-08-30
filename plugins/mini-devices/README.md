@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.0.0)
+# Mini Devices — Mini-Kits (v2.1.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -64,6 +64,22 @@ Each card carries one of three states:
 Opening a kit gives a colour-matched popup with its own sections: **Overview**
 (stats, slot capacity, kit name), **Recordings** (numbered slots, naming, per-slot
 WAV download), **Faces** (Display-Talks only) and **Scenes** (Design-Talks only).
+
+## Admin demo mode
+
+Anyone with `manage_options` sees an **Admin preview** bar above the shelf. Turning
+it on fills the shelf with three sample kits — all reading as connected — so every
+screen can be walked through without hardware: slot naming, face design and
+transfer, scene trees, RFID card folders, downloads.
+
+It is entirely front-end. `api()` is short-circuited to mutate the sample data in
+memory, so nothing is written to `usermeta` and no real profile is touched.
+Downloads synthesise a short chirp locally, which means the WAV that lands actually
+plays. "Connect a kit" is disabled while demo mode is on, and the shelf carries a
+caution stripe plus a banner in every popup so sample data cannot be mistaken for a
+member's real kits.
+
+Leaving demo mode restores whatever was on the profile before.
 
 ## Kit ↔ profile link
 

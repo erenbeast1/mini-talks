@@ -72,6 +72,24 @@
 
 .md-privacy{margin:18px 0 0!important;font-size:12px!important;color:var(--md-mute)!important;line-height:1.55!important;text-align:center!important;font-weight:600!important}
 
+/* ═══════════════════════ ADMIN DEMO MODE ═══════════════════════ */
+/* Only rendered for manage_options. Loud on purpose — sample data must never
+   be mistaken for a member's real kits. */
+
+.md-demo-bar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;flex-wrap:wrap!important;text-align:left!important;margin:0 0 18px!important;padding:12px 16px!important;border:2px dashed var(--md-line,#ddd)!important;border-radius:12px!important;background:#FAFAFA!important}
+.md-demo-text{display:flex!important;flex-direction:column!important;gap:2px!important;min-width:0!important}
+.md-demo-text strong{font-size:12.5px!important;font-weight:900!important;color:var(--md-ink,#1D1D1B)!important;text-transform:uppercase!important;letter-spacing:.05em!important}
+.md-demo-text span{font-size:12.5px!important;font-weight:600!important;color:var(--md-soft,#555)!important;line-height:1.5!important}
+
+.md-demo-bar.is-on{border-style:solid!important;border-color:var(--md-yellow,#FFCC00)!important;background:#FFFBEB!important}
+.md-demo-bar.is-on .md-demo-text strong::before{content:'● '!important;color:var(--md-yellow,#FFCC00)!important}
+
+/* Diagonal caution stripe down the side of the whole shelf while demo is on. */
+.md-wrap.md-is-demo{position:relative!important;padding-left:14px!important}
+.md-wrap.md-is-demo::before{content:''!important;position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:6px!important;border-radius:3px!important;background:repeating-linear-gradient(-45deg,#FFCC00 0 8px,#1D1D1B 8px 16px)!important;opacity:.75!important}
+
+.md-pop-banner-demo{background:#FFFBEB!important;border-left-color:var(--mf-yellow,#FFCC00)!important;color:#5C4A00!important}
+
 /* ═══════════════════════ KIT SHELF ═══════════════════════ */
 
 .md-shelf{display:flex!important;flex-direction:column!important;gap:18px!important}
@@ -200,7 +218,9 @@
 .md-pop-blue   .md-pop-navbtn.is-on{background:var(--mf-blue,#0055BF)!important;border-color:var(--mf-blue,#0055BF)!important;border-bottom-color:#003D8C!important}
 .md-pop-yellow .md-pop-navbtn.is-on{background:var(--mf-yellow,#FFCC00)!important;border-color:var(--mf-yellow,#FFCC00)!important;border-bottom-color:#E5B800!important;color:#1D1D1B!important}
 
-.md-pop-body{padding:16px 0 4px!important}
+.md-pop-body{padding:16px 0 4px!important;max-height:52vh!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+.md-pop-body::-webkit-scrollbar{width:6px!important}
+.md-pop-body::-webkit-scrollbar-thumb{background:#ddd!important;border-radius:3px!important}
 .md-section-note{font-size:12.5px!important;color:#666!important;line-height:1.55!important;margin:0 0 14px!important;font-weight:600!important}
 
 .md-pop-foot{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;flex-wrap:wrap!important;padding-top:14px!important;border-top:2px solid #f0f0f0!important}
@@ -243,7 +263,10 @@
 .md-slot-name.md-saving{opacity:.55!important}
 .md-slot-name.md-saved{border-color:var(--mf-green,#237841)!important}
 
-.md-slot-len{font-size:12px!important;font-weight:700!important;color:#999!important;white-space:nowrap!important;flex:none!important}
+.md-slot-acts{display:flex!important;align-items:center!important;gap:7px!important;flex:none!important;margin-left:auto!important}
+.md-slot .md-btn-quiet{border:2px dashed var(--md-line,#ddd)!important;padding:7px 12px!important}
+.md-slot .md-btn-quiet:hover:not(:disabled){border-color:var(--md-mute,#999)!important;border-style:solid!important}
+.md-slot-len{min-width:54px!important;text-align:right!important;font-size:12px!important;font-weight:700!important;color:#999!important;white-space:nowrap!important;flex:none!important}
 .md-slot-lvl{flex:1 1 auto!important;font-size:13px!important;font-weight:700!important;color:#1D1D1B!important}
 
 /* ═══════════════════════ FACES ═══════════════════════ */
