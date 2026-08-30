@@ -315,6 +315,43 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 
 .md-designs-count{margin:0 0 14px!important;font-size:12.5px!important;font-weight:700!important;color:#666!important}
 
+/* ═══════════════════ MANAGE SUB-NAV ═══════════════════
+   Manage holds several parts, so it carries its own quieter row of tabs under
+   the kit's three main buttons. Lighter than .md-pop-nav on purpose: the
+   hierarchy has to read at a glance. */
+
+.md-pop-subnav{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin:0 0 16px!important;padding:5px!important;border-radius:11px!important;background:#F4F4F4!important}
+.md-pop-subbtn{padding:7px 13px!important;border-radius:8px!important;border:0!important;background:transparent!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:12px!important;font-weight:800!important;color:#666!important;cursor:pointer!important;transition:all .15s!important}
+.md-pop-subbtn:hover{color:#1D1D1B!important;background:#fff!important}
+.md-pop-subbtn.is-on{background:#fff!important;color:#1D1D1B!important;box-shadow:0 1px 0 rgba(0,0,0,.16)!important}
+.md-manage-body{display:block!important}
+
+/* ═══════════════════ EXPLORE / MY DESIGNS ═══════════════════ */
+
+.md-explore-bar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;flex-wrap:wrap!important;padding-top:4px!important}
+.md-explore-bar .md-designs-count{margin:0!important}
+.md-designs-preview .md-design{border-bottom-width:3px!important}
+.md-design-status{color:var(--mf-green,#237841)!important}
+.md-change-sel{margin:0 0 14px!important}
+
+/* ═══════════════════ CONNECT ═══════════════════ */
+
+.md-connect-facts{display:flex!important;gap:10px!important;flex-wrap:wrap!important;margin:0 0 16px!important}
+
+/* A spec list: label left, value right, one line each. */
+.md-fig-spec{display:grid!important;grid-template-columns:auto 1fr!important;gap:5px 14px!important;margin:0 0 14px!important}
+.md-fig-spec dt{font-size:11px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.05em!important;color:#AAA!important;align-self:center!important}
+.md-fig-spec dd{margin:0!important;font-size:13px!important;font-weight:700!important;color:#1D1D1B!important}
+.md-device-spec{margin-bottom:16px!important}
+
+/* ═══════════════════ FIGS ═══════════════════ */
+
+.md-figs{display:flex!important;flex-direction:column!important;gap:10px!important;margin:0 0 14px!important}
+.md-figcard{display:flex!important;align-items:center!important;gap:14px!important;padding:12px 14px!important;border:2.5px solid var(--mf-border,#ddd)!important;border-bottom-width:5px!important;border-radius:13px!important;background:#fff!important}
+.md-figcard-main{flex:1 1 auto!important;min-width:0!important;display:flex!important;flex-direction:column!important;gap:8px!important}
+.md-figcard-acts{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:wrap!important}
+.md-fig-slotno{font-size:10.5px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.05em!important;color:#AAA!important}
+
 /* ═══════════════════════ REQUEST NOTE ═══════════════════════ */
 
 .md-note-field{margin:0 0 14px!important}
@@ -514,9 +551,10 @@ body.admin-bar .mdf-overlay{padding-top:52px!important}
   .md-pop-head{padding-right:26px!important}
   .md-slot{flex-wrap:wrap!important}
   .md-slot-name{flex-basis:100%!important;order:3!important}
-  .md-slotcard{flex-direction:column!important;align-items:stretch!important}
+  .md-slotcard,.md-figcard{flex-direction:column!important;align-items:stretch!important}
   .md-face-thumb{align-self:center!important}
-  .md-slotcard-acts .md-btn{flex:1 1 auto!important}
+  .md-slotcard-acts .md-btn,.md-figcard-acts .md-btn{flex:1 1 auto!important}
+  .md-explore-bar{flex-direction:column!important;align-items:stretch!important}
   .md-pop-foot{flex-direction:column!important;align-items:stretch!important}
   .md-pop-foot .md-btn{width:100%!important}
 }

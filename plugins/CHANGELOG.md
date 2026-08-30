@@ -33,6 +33,48 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.1.0
+
+**Every kit screen now has three top-level buttons, and only three.** Mini-Designs
+reads Explore | Request | My Designs; Design-Talks, Brick-Talks and Fig-Talks read
+Request | Connect | Manage. What used to be a flat row of tabs (Request, Overview,
+Recordings, Slots, Scenes) is now one Manage section with its own quieter sub-nav,
+so the hierarchy reads at a glance.
+
+**Ready to Connect** joins the lifecycle between Preparing and Connected:
+
+    Draft → Submitted → Contacted → Preparing → Ready to Connect → Connected
+
+It is the point where the Connect button opens. Statuses saved as
+`ready_to_connect` normalise to it, and it raises its own mail telling the member to
+open Mini-Kits and connect. Manage stays shut until the kit has actually reported in.
+
+**Mini-Designs is three screens instead of one.** Explore is the catalogue and
+nothing else; Request reviews what was picked, takes the note and sends; My Designs
+lists what was asked for, each card carrying the request's status and date.
+
+**Connect** is its own screen: what to plug in, what the browser will ask, and the
+bind. Once linked it shows device id, firmware and the connected date, and hands you
+straight to Manage. A pairing code or QR route lands on the same bind and can be
+added without touching this.
+
+**Brick-Talks Manage → Figs.** Figs are the kit's digital characters: create,
+rename, edit, delete and send to the kit. `POST /faces` gained `remove` (delete a
+Fig, leaving that slot's recording alone) and a rename that no longer needs the
+config resent. Terminology follows the team's standard — every "face" in Brick-Talks
+is now a Fig.
+
+**Fig-Talks Manage → My Fig** shows the figure that was designed for the request,
+with hair, face and colours read out of the editor's config; the draft screen is now
+Review My Fig, listing the same lines with Edit Personalization beside Send.
+
+**Device Details** carries device id, connection state, connected date, firmware and
+last sync. `connected_at` is stamped on a device's first sync and never moves after.
+
+**Fixed:** a Fig-Talks request sent from the review screen carried whatever
+Mini-Designs scenes were selected at the time, because the draft screen posted
+`designs` for every kit. Only a catalogue kit sends them now.
+
 ## mini-devices 3.0.2
 
 **Fixed: the request read "Hair colour: 0".** The summary was written against

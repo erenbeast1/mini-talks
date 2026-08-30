@@ -7,7 +7,8 @@
  * Mini-Designs picks scenes, Fig-Talks personalises a figure, the other two go
  * straight there. After that all four share one lifecycle:
  *
- *   (not requested) → Submitted → Contacted → Preparing → Connected
+ *   (not requested) → Submitted → Contacted → Preparing → Ready to Connect
+ *                     → Connected
  *
  * Draft sits before Submitted for kits with a pre-request step: the design
  * exists but has not been sent.
@@ -29,6 +30,7 @@ class MD_Requests {
             'submitted' => 'Submitted',
             'contacted' => 'Contacted',
             'preparing' => 'Preparing',
+            'ready'     => 'Ready to Connect',
             'connected' => 'Connected',
         );
     }
@@ -39,6 +41,7 @@ class MD_Requests {
             'submitted' => 'Your request has been shared with the Mini-Talks team.',
             'contacted' => 'Our team has contacted you about the next steps.',
             'preparing' => 'Your Mini-Kit is being prepared.',
+            'ready'     => 'Your Mini-Kit is ready — connect it to your profile.',
             'connected' => 'This Mini-Kit is now connected to your profile.',
         );
     }
@@ -53,13 +56,15 @@ class MD_Requests {
             array('key' => 'submitted', 'label' => 'Submitted'),
             array('key' => 'contacted', 'label' => 'Contacted'),
             array('key' => 'preparing', 'label' => 'Preparing'),
+            array('key' => 'ready',     'label' => 'Ready to Connect'),
             array('key' => 'connected', 'label' => 'Connected'),
         );
     }
 
     /** Earlier builds used other keys. */
     private static function normalise($status) {
-        $map = array('preparation' => 'preparing', 'completed' => 'connected');
+        $map = array('preparation' => 'preparing', 'completed' => 'connected',
+                     'ready_to_connect' => 'ready');
         return isset($map[$status]) ? $map[$status] : $status;
     }
 
@@ -427,7 +432,7 @@ class MD_Requests {
     /** Draft and Submitted raise no status mail: a draft is the member's own,
      *  and Submitted already has its own confirmation. */
     public static function notify_statuses() {
-        return apply_filters('md_kit_notify_statuses', array('contacted', 'preparing', 'connected'));
+        return apply_filters('md_kit_notify_statuses', array('contacted', 'preparing', 'ready', 'connected'));
     }
 
     private static function status_message($status, $kit_name) {
@@ -435,6 +440,7 @@ class MD_Requests {
             'contacted' => "Our team has contacted you about the next steps. " .
                            "If you have not seen anything, check your other mail folders.",
             'preparing' => "Your " . $kit_name . " is being prepared. We will let you know as soon as it is ready.",
+            'ready'     => "Your " . $kit_name . " is ready. Open Mini-Kits on your profile and use Connect to link it to your account.",
             'connected' => "Your " . $kit_name . " is now connected to your profile.",
         );
         return isset($msg[$status]) ? $msg[$status] : '';

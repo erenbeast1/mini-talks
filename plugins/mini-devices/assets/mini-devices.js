@@ -36,7 +36,7 @@
     return {
       state: {
         'F-3C71BF2A': {
-          type: 'F', uid: 'F-3C71BF2A', fw: '1.4', label: '', last_sync: now - 240,
+          type: 'F', uid: 'F-3C71BF2A', fw: '1.4', label: '', last_sync: now - 240, connected_at: now - 864000,
           stats: { total_s: 214, count: 6, longest_s: 63, last_ts: now - 3600 },
           slots: [
             { i: 1, full: 1, len_ms: 12400, name: 'Mum' },
@@ -47,7 +47,7 @@
           ]
         },
         'B-91A0C4E2': {
-          type: 'B', uid: 'B-91A0C4E2', fw: '2.1', label: '', last_sync: now - 120,
+          type: 'B', uid: 'B-91A0C4E2', fw: '2.1', label: '', last_sync: now - 120, connected_at: now - 864000,
           stats: { total_s: 96, count: 3, longest_s: 41, last_ts: now - 5400 },
           slots: [
             { i: 1, full: 1, len_ms: 41000, name: 'Hello' },
@@ -57,7 +57,7 @@
           ]
         },
         'D-77BE10A5': {
-          type: 'D', uid: 'D-77BE10A5', fw: '2.3', label: '', last_sync: now - 60,
+          type: 'D', uid: 'D-77BE10A5', fw: '2.3', label: '', last_sync: now - 60, connected_at: now - 864000,
           stats: { total_s: 402, count: 11, longest_s: 88, last_ts: now - 900 },
           slots: [],
           scenes: [
@@ -843,9 +843,12 @@
   function cardAction(kit, req, dev) {
     if (!req) return dev ? 'Open kit' : 'Open';
     if (req.status === 'draft') {
-      return kit.pre === 'personalize' ? 'Review your design' : 'Review your selection';
+      return kit.pre === 'personalize' ? 'Review your design'
+           : kit.pre === 'catalogue'   ? 'Review your selection'
+                                       : 'Finish your request';
     }
     if (req.status === 'connected' && dev) return 'Open kit';
+    if (req.status === 'ready') return 'Connect it';
     return kit.pre === 'personalize' ? 'View My Design' : 'View Request';
   }
 
@@ -898,38 +901,69 @@
     box.title = live.join(' · ');
   }
 
-  /* ── kit detail ── */
+  /* ── kit detail ──
+     The architecture the team settled on: a kit screen has three top-level
+     buttons and only three. Mini-Designs has no hardware, so it reads
+     Explore | Request | My Designs; the three devices read
+     Request | Connect | Manage, and everything a connected kit can do lives
+     under Manage. */
 
-  var openSlug = null, openSection = null;
+  var openSlug = null, openSection = null, openManage = null;
 
   function kitSections(kit) {
-    var secs = ['request'];
-    if (kit.code === 'F') secs = secs.concat(['overview', 'recordings']);
-    if (kit.code === 'B') secs = secs.concat(['overview', 'slots']);
-    if (kit.code === 'D') secs = secs.concat(['overview', 'scenes']);
-    return secs;
+    return kit.code ? ['request', 'connect', 'manage']
+                    : ['explore', 'request', 'my-designs'];
   }
 
-  function sectionAvailable(kit, sec) {
-    if (sec === 'request') return true;
-    var key = kitKey(kit), dev = key ? state[key] : null;
-    if (sec === 'scenes') return !dev || !!((dev.scenes || []).length || (dev.cards && Object.keys(dev.cards).length));
-    return true;
+  /* What Manage holds differs per kit. */
+  function manageSections(kit) {
+    if (kit.code === 'D') return ['scenes', 'recordings', 'device'];
+    if (kit.code === 'B') return ['figs', 'slots', 'recordings', 'content'];
+    if (kit.code === 'F') return ['my-fig', 'recordings', 'device'];
+    return [];
   }
 
-  /* A kit section needs the kit itself. Every Mini-Kit is made to order, so it
-     cannot exist before the request does — say that rather than "not connected". */
+  function sectionLabel(sec) {
+    return { explore: 'Explore', request: 'Request', 'my-designs': 'My Designs',
+             connect: 'Connect', manage: 'Manage',
+             scenes: 'Scenes', recordings: 'Recordings', slots: 'Slots',
+             figs: 'Figs', content: 'Content', device: 'Device Details',
+             'my-fig': 'My Fig' }[sec] || sec;
+  }
+
+  /* Which button is live at which point in the lifecycle.
+     Connect stays open for a member who owns a kit but has no request on
+     record — the profiles that pre-date requests would otherwise be shut out
+     of their own hardware. */
   function sectionLocked(kit, sec) {
-    if (sec === 'request') return false;
-    return !kitKey(kit);
+    var req = reqFor(kit.slug), st = req ? req.status : '';
+
+    if (!kit.code) {                       // Mini-Designs
+      if (sec === 'request') return !pickedIds().length && !req;
+      return false;
+    }
+    var linked = !!kitKey(kit);
+    if (sec === 'manage')  return !linked;
+    // Connected without a device record means the team marked it connected
+    // before the kit ever synced. Leaving Connect shut there would strand the
+    // member with no way in.
+    if (sec === 'connect') return !linked && !!req && st !== 'ready' && st !== 'connected';
+    return false;
+  }
+
+  function lockReason(kit, sec) {
+    if (sec === 'request')  return 'Pick at least one Mini-Design in Explore first.';
+    if (sec === 'connect')  return 'Available once your ' + kit.name + ' is ready to connect.';
+    return 'Available once your ' + kit.name + ' is connected.';
   }
 
   function openKit(slug) {
     openSlug = slug;
-    var kit   = kitBySlug(slug);
-    var avail = kitSections(kit).filter(function (sec) { return sectionAvailable(kit, sec); });
-    var open  = avail.filter(function (sec) { return !sectionLocked(kit, sec); });
-    if (open.indexOf(openSection) < 0) openSection = open[0] || avail[0];
+    var kit  = kitBySlug(slug);
+    var open = kitSections(kit).filter(function (sec) { return !sectionLocked(kit, sec); });
+    if (open.indexOf(openSection) < 0) openSection = open[0] || kitSections(kit)[0];
+    var subs = manageSections(kit);
+    if (subs.indexOf(openManage) < 0) openManage = subs[0] || null;
     renderPopup();
     document.body.style.overflow = 'hidden';
   }
@@ -940,10 +974,7 @@
     document.body.style.overflow = '';
   }
 
-  function sectionLabel(sec) {
-    return { request: 'Request', overview: 'Overview', recordings: 'Recordings',
-             slots: 'Slots', scenes: 'Scenes' }[sec] || sec;
-  }
+  function gotoSection(sec) { openSection = sec; renderPopup(); }
 
   function renderPopup() {
     modalRoot.innerHTML = '';
@@ -995,31 +1026,31 @@
         : 'Demo mode — sample data. Everything here is interactive, and nothing is saved.'));
     } else if (dev && !live) {
       inner.appendChild(el('p', 'md-pop-banner',
-        'Not connected — showing the last sync. Plug the kit in to download audio, rename recordings or send faces.'));
+        'Not connected — showing the last sync. Plug the kit in to download audio, rename recordings or send Figs.'));
     }
 
-    var avail = kitSections(kit).filter(function (sec) { return sectionAvailable(kit, sec); });
-    if (avail.length > 1) {
-      var nav = el('nav', 'md-pop-nav');
-      avail.forEach(function (sec) {
-        var lock = sectionLocked(kit, sec);
-        var b = el('button', 'md-pop-navbtn' + (sec === openSection ? ' is-on' : '') + (lock ? ' is-locked' : ''),
-                   sectionLabel(sec));
-        b.type = 'button';
-        b.disabled = lock;
-        if (lock) b.title = 'Available once your ' + kit.name + ' has been made and reaches you.';
-        else b.addEventListener('click', function () { openSection = sec; renderPopup(); });
-        nav.appendChild(b);
-      });
-      inner.appendChild(nav);
-    }
+    var secs = kitSections(kit);
+    if (secs.indexOf(openSection) < 0) openSection = secs[0];
+    var nav = el('nav', 'md-pop-nav');
+    secs.forEach(function (sec) {
+      var lock  = sectionLocked(kit, sec);
+      var label = (sec === 'connect' && key) ? 'Connected \u2713' : sectionLabel(sec);
+      var b = el('button', 'md-pop-navbtn' + (sec === openSection ? ' is-on' : '') + (lock ? ' is-locked' : ''),
+                 label);
+      b.type = 'button';
+      b.disabled = lock;
+      if (lock) b.title = lockReason(kit, sec);
+      else b.addEventListener('click', function () { gotoSection(sec); });
+      nav.appendChild(b);
+    });
+    inner.appendChild(nav);
 
     var bodyEl = el('div', 'md-pop-body');
-    if (openSection === 'request')          renderRequest(bodyEl, kit);
-    else if (openSection === 'overview')    renderOverview(bodyEl, key, dev, live);
-    else if (openSection === 'recordings')  renderRecordings(bodyEl, key, dev, live);
-    else if (openSection === 'slots')       renderSlots(bodyEl, key, dev, live);
-    else if (openSection === 'scenes')      renderScenes(bodyEl, key, dev, live);
+    if      (openSection === 'explore')     renderExplore(bodyEl, kit);
+    else if (openSection === 'request')     renderRequest(bodyEl, kit);
+    else if (openSection === 'my-designs')  renderMyDesigns(bodyEl, kit);
+    else if (openSection === 'connect')     renderConnect(bodyEl, kit, key, dev, live);
+    else if (openSection === 'manage')      renderManage(bodyEl, kit, key, dev, live);
     inner.appendChild(bodyEl);
 
     if (dev && !publicDemo) {
@@ -1136,7 +1167,7 @@
     var first = kit.pre === 'personalize' ? 'Personalized' : (kit.pre === 'catalogue' ? 'Selected' : 'Started');
     return [{ key: 'draft', label: first }, { key: 'submitted', label: 'Submitted' },
             { key: 'contacted', label: 'Contacted' }, { key: 'preparing', label: 'Preparing' },
-            { key: 'connected', label: 'Connected' }];
+            { key: 'ready', label: 'Ready to Connect' }, { key: 'connected', label: 'Connected' }];
   }
 
   var DEMO_NOTES = {
@@ -1275,6 +1306,85 @@
 
   function pickedIds() { return Object.keys(designPick).map(Number); }
 
+  function designsById(ids) {
+    var cat = kitsState().catalogue || [], out = [];
+    (ids || []).forEach(function (id) {
+      for (var i = 0; i < cat.length; i++) if (String(cat[i].id) === String(id)) { out.push(cat[i]); return; }
+    });
+    return out;
+  }
+
+  /* Small read-only cards, for reviewing a selection and for My Designs. */
+  function designPreviews(items, extra) {
+    var grid = el('div', 'md-designs md-designs-preview');
+    items.forEach(function (d) {
+      var card = el('article', 'md-design');
+      var thumb = el('div', 'md-design-thumb');
+      if (d.image) {
+        var img = el('img'); img.src = d.image; img.alt = ''; img.loading = 'lazy';
+        thumb.appendChild(img);
+      } else {
+        thumb.appendChild(el('span', 'md-face-placeholder', d.name.slice(0, 1)));
+      }
+      card.appendChild(thumb);
+      card.appendChild(el('h5', 'md-design-name', d.name));
+      if (extra) { var x = extra(d); if (x) card.appendChild(x); }
+      grid.appendChild(card);
+    });
+    return grid;
+  }
+
+  /* ── Explore ── the catalogue, and nothing else. */
+  function renderExplore(host, kit) {
+    host.appendChild(el('h3', 'md-fig-title', 'Explore Mini-Designs'));
+    host.appendChild(el('p', 'md-section-note',
+      'Every scene is on show. Pick the ones you would like built \u2014 anything that cannot be ' +
+      'built right now says so, and can be picked another time.'));
+    host.appendChild(designGrid(kit));
+
+    var picked = pickedIds();
+    var bar = el('div', 'md-explore-bar');
+    bar.appendChild(el('p', 'md-designs-count',
+      picked.length ? picked.length + (picked.length === 1 ? ' design selected' : ' designs selected')
+                    : 'Nothing selected yet.'));
+    var go = el('button', 'md-btn md-btn-primary', 'Continue to Request');
+    go.type = 'button';
+    go.disabled = !picked.length;
+    go.addEventListener('click', function () { gotoSection('request'); });
+    bar.appendChild(go);
+    host.appendChild(bar);
+  }
+
+  /* ── My Designs ── what the member asked for, and where it stands. */
+  function renderMyDesigns(host, kit) {
+    var req = reqFor(kit.slug);
+    var mine = req ? designsById(req.designs) : [];
+
+    if (!mine.length) {
+      host.appendChild(emptyNote('No Mini-Designs yet',
+        'The scenes you request appear here with their status.'));
+      var go = el('button', 'md-btn md-btn-primary md-fig-cta', 'Explore Mini-Designs');
+      go.type = 'button';
+      go.addEventListener('click', function () { gotoSection('explore'); });
+      host.appendChild(go);
+      return;
+    }
+
+    host.appendChild(el('h3', 'md-fig-title', 'My Mini-Designs'));
+    var when = req.submitted ? ' \u00b7 ' + fmtDay(req.submitted) : '';
+    host.appendChild(el('p', 'md-section-note',
+      (req.status_note || '') + (req.submitted ? ' Requested on ' + fmtDay(req.submitted) + '.' : '')));
+    host.appendChild(designPreviews(mine, function () {
+      var b = el('span', 'md-design-flag md-design-status', (req.status_label || req.status));
+      return b;
+    }));
+
+    var open = el('button', 'md-btn md-btn-ghost md-fig-cta', 'View My Request');
+    open.type = 'button';
+    open.addEventListener('click', function () { gotoSection('request'); });
+    host.appendChild(open);
+  }
+
   /* ── the request screen ── */
 
   function renderRequest(host, kit) {
@@ -1283,8 +1393,10 @@
 
     /* nothing asked for yet */
     if (!req) {
-      host.appendChild(el('h3', 'md-fig-title', kit.pre === 'personalize'
-        ? 'Create Your Fig-Talks' : 'Request ' + kit.name));
+      host.appendChild(el('h3', 'md-fig-title',
+        kit.pre === 'personalize' ? 'Create Your Fig-Talks'
+      : kit.pre === 'catalogue'   ? 'Review your selection'
+                                  : 'Request ' + kit.name));
       host.appendChild(el('p', 'md-section-note', requestIntro(kit)));
 
       if (kit.pre === 'personalize') {
@@ -1297,18 +1409,29 @@
       }
 
       if (kit.pre === 'catalogue') {
-        host.appendChild(designGrid(kit));
         var picked = pickedIds();
-        var sum = el('p', 'md-designs-count',
-          picked.length ? picked.length + (picked.length === 1 ? ' design selected' : ' designs selected')
-                        : 'Choose the scenes you would like.');
-        host.appendChild(sum);
+        if (!picked.length) {
+          host.appendChild(emptyNote('Nothing selected yet',
+            'Pick your scenes in Explore, then come back here to send the request.'));
+          var back = el('button', 'md-btn md-btn-primary md-fig-cta', 'Explore Mini-Designs');
+          back.type = 'button';
+          back.addEventListener('click', function () { gotoSection('explore'); });
+          host.appendChild(back);
+          return;
+        }
+        host.appendChild(el('p', 'md-designs-count',
+          picked.length + (picked.length === 1 ? ' design selected' : ' designs selected')));
+        host.appendChild(designPreviews(designsById(picked)));
+        var change = el('button', 'md-btn md-btn-ghost md-btn-sm md-change-sel', 'Change selection');
+        change.type = 'button';
+        change.addEventListener('click', function () { gotoSection('explore'); });
+        host.appendChild(change);
+
         var note1 = noteField('');
         host.appendChild(note1);
         var send1 = sendButton('Send Request', function (done) {
           submitRequest(kit.slug, { designs: pickedIds(), note: note1.input.value }, done);
         });
-        send1.disabled = !picked.length;
         send1.classList.add('md-fig-cta');
         host.appendChild(send1);
         return;
@@ -1331,22 +1454,34 @@
 
       var side = el('div', 'md-fig-review-main');
       side.appendChild(el('h3', 'md-fig-title', kit.pre === 'personalize'
-        ? 'Your Fig-Talks is ready.' : 'Review your selection'));
+        ? 'Review My Fig' : 'Review your selection'));
       side.appendChild(el('p', 'md-section-note',
         'Send your request to the Mini-Talks team. We’ll contact you about the next steps.'));
+
+      if (kit.pre === 'personalize' && st.design && st.design.config) {
+        var spec = el('dl', 'md-fig-spec');
+        figSpecLines(st.design.config).forEach(function (pair) {
+          spec.appendChild(el('dt', null, pair[0]));
+          spec.appendChild(el('dd', null, pair[1]));
+        });
+        side.appendChild(spec);
+      }
 
       var note3 = noteField(req.note);
       side.appendChild(note3);
 
       var acts = el('div', 'md-fig-acts');
       acts.appendChild(sendButton('Send My Request', function (done) {
-        submitRequest(kit.slug, { note: note3.input.value, designs: pickedIds() }, done);
+        var payload = { note: note3.input.value };
+        if (kit.pre === 'catalogue') payload.designs = pickedIds();
+        submitRequest(kit.slug, payload, done);
       }));
       var again = el('button', 'md-btn md-btn-ghost',
-        kit.pre === 'personalize' ? 'Continue Personalizing' : 'Change selection');
+        kit.pre === 'personalize' ? 'Edit Personalization' : 'Change selection');
       again.type = 'button';
       again.addEventListener('click', kit.pre === 'personalize' ? openFigEditor : function () {
         kits.kits[kit.slug] = { request: null, editable: true };
+        if (kit.pre === 'catalogue') { gotoSection('explore'); return; }
         renderPopup();
       });
       acts.appendChild(again);
@@ -1378,14 +1513,20 @@
       main.appendChild(el('p', 'md-req-note', req.note));
     }
 
-    if (req.status === 'connected') {
+    if (kit.code && !sectionLocked(kit, 'manage')) {
       var mn = el('div', 'md-fig-acts');
-      var manage = el('button', 'md-btn md-btn-ghost', 'Manage Mini-Kit');
+      var manage = el('button', 'md-btn md-btn-ghost', 'Manage ' + kit.name);
       manage.type = 'button';
-      manage.disabled = true;
-      manage.title = 'Coming soon.';
+      manage.addEventListener('click', function () { gotoSection('manage'); });
       mn.appendChild(manage);
       main.appendChild(mn);
+    } else if (kit.code && !sectionLocked(kit, 'connect')) {
+      var cn = el('div', 'md-fig-acts');
+      var conn = el('button', 'md-btn md-btn-primary', 'Connect ' + kit.name);
+      conn.type = 'button';
+      conn.addEventListener('click', function () { gotoSection('connect'); });
+      cn.appendChild(conn);
+      main.appendChild(cn);
     }
 
     row2.appendChild(main);
@@ -1406,15 +1547,15 @@
              'Your Fig-Talks is made with the character you design here, so this comes first.';
     }
     if (kit.pre === 'catalogue') {
-      return 'Choose the scenes you would like built. Everything is on show; anything that cannot be ' +
-             'built right now says so and can be picked another time.';
+      return 'These are the scenes you picked. Add anything the team should know, then send your ' +
+             'request \u2014 they will get in touch about the next steps.';
     }
     return kit.tagline + ' Every Mini-Kit is made to order, so tell the team you would like one ' +
            'and they will get in touch.';
   }
 
   var FIG_STEPS = ['Choose Your Face', 'Choose Your Hairstyle',
-                   'Choose Your Hair Color', 'Review Your Fig-Talks'];
+                   'Choose Your Hair Color', 'Review My Fig'];
 
   function figStepList() {
     var ol = el('ol', 'md-fig-steps');
@@ -1440,8 +1581,293 @@
     return box;
   }
 
+  /* ── Connect ──
+     Pairing happens over the kit's USB cable: the kit sends its own id, and the
+     site binds that id to this profile. A pairing code or QR route can be added
+     later without changing anything here \u2014 both would land on the same bind. */
+  function renderConnect(host, kit, key, dev, live) {
+    if (key) {
+      host.appendChild(el('h3', 'md-fig-title', (dev.label || kit.name) + ' is connected.'));
+      host.appendChild(el('p', 'md-section-note', live
+        ? 'The kit is plugged in right now, so everything under Manage is live.'
+        : 'Linked to your profile. Plug it in when you want to download audio or send Figs.'));
+      var facts = el('div', 'md-connect-facts');
+      if (dev.uid) facts.appendChild(fact(dev.uid, 'Device ID'));
+      if (dev.fw)  facts.appendChild(fact(dev.fw, 'Firmware'));
+      facts.appendChild(fact(fmtDate(dev.connected_at || dev.last_sync), 'Connected'));
+      host.appendChild(facts);
+
+      var go = el('button', 'md-btn md-btn-primary md-fig-cta', 'Manage ' + kit.name);
+      go.type = 'button';
+      go.addEventListener('click', function () { gotoSection('manage'); });
+      host.appendChild(go);
+      return;
+    }
+
+    host.appendChild(el('h3', 'md-fig-title', 'Connect your ' + kit.name));
+    host.appendChild(el('p', 'md-section-note',
+      'Plug the kit into this computer with its USB cable, then press Connect. Your browser ' +
+      'will ask which device to use \u2014 pick the kit, and it links itself to your profile.'));
+
+    var ol = el('ol', 'md-fig-steps');
+    ['Plug the kit in', 'Press Connect and pick the kit', 'Confirm \u2014 it is yours'].forEach(function (t, i) {
+      var li = el('li', 'md-fig-step' + (i === 2 ? ' is-next' : ''));
+      li.appendChild(el('span', 'md-fig-step-no', String(i + 1)));
+      li.appendChild(el('span', null, t));
+      ol.appendChild(li);
+    });
+    host.appendChild(ol);
+
+    var b = el('button', 'md-btn md-btn-primary md-fig-cta', 'Connect ' + kit.name);
+    b.type = 'button';
+    if (!navigator.serial && !demo) {
+      b.disabled = true;
+      b.title = 'This browser cannot talk to the kit. Use Chrome or Edge on a computer.';
+    }
+    b.addEventListener('click', function () { connect(); });
+    host.appendChild(b);
+
+    if (!navigator.serial && !demo) {
+      host.appendChild(el('p', 'md-fig-foot',
+        'Connecting needs Chrome or Edge on a computer \u2014 phones and Safari cannot reach the kit yet.'));
+    }
+  }
+
+  /* ── Manage ── one home for everything a connected kit can do. */
+  function renderManage(host, kit, key, dev, live) {
+    var subs = manageSections(kit);
+    if (subs.indexOf(openManage) < 0) openManage = subs[0];
+
+    var nav = el('nav', 'md-pop-subnav');
+    subs.forEach(function (sec) {
+      var b = el('button', 'md-pop-subbtn' + (sec === openManage ? ' is-on' : ''), sectionLabel(sec));
+      b.type = 'button';
+      b.addEventListener('click', function () { openManage = sec; renderPopup(); });
+      nav.appendChild(b);
+    });
+    host.appendChild(nav);
+
+    var body = el('div', 'md-manage-body');
+    if      (openManage === 'device')     renderOverview(body, key, dev, live);
+    else if (openManage === 'recordings') renderRecordings(body, key, dev, live);
+    else if (openManage === 'slots')      renderSlots(body, key, dev, live);
+    else if (openManage === 'scenes')     renderScenes(body, key, dev, live);
+    else if (openManage === 'figs')       renderFigs(body, kit, key, dev, live);
+    else if (openManage === 'content')    renderContent(body, kit);
+    else if (openManage === 'my-fig')     renderMyFig(body, kit);
+    host.appendChild(body);
+  }
+
+  /* ── Figs ── Brick-Talks' digital characters.
+     A Fig lives in one of the kit's slots, so the library is the slots that
+     carry one. Naming, editing and deleting happen here; putting a Fig into a
+     particular slot stays under Slots, next to that slot's recording. */
+  function renderFigs(host, kit, key, dev, live) {
+    var hasEditor = window.MDFaces && window.MFAvatarEditor;
+    host.appendChild(el('p', 'md-section-note', hasEditor
+      ? 'Figs are the characters on your Brick-Talks. They are kept on your profile, so you can ' +
+        'keep working on them while the kit is unplugged, and send them over when you plug it in.'
+      : 'The avatar editor did not load on this page, so Figs cannot be designed here \u2014 reload, ' +
+        'and check that Mini-Forum is active.'));
+
+    var slots = dev.slots || [];
+    if (!slots.length) {
+      host.appendChild(emptyNote('No slots reported yet',
+        'Connect the kit once so it can tell the site how many Figs it holds.'));
+      return;
+    }
+
+    var mine = slots.filter(function (sl) { return faces[key] && faces[key][sl.i]; });
+    var free = slots.filter(function (sl) { return !(faces[key] && faces[key][sl.i]); });
+
+    if (!mine.length) {
+      host.appendChild(emptyNote('No Figs yet', 'Create your first Fig and it will appear here.'));
+    } else {
+      var grid = el('div', 'md-figs');
+      mine.forEach(function (sl) {
+        var f = faces[key][sl.i];
+        var card = el('article', 'md-figcard');
+
+        var thumb = el('div', 'md-face-thumb has-face');
+        if (f.url) { var img = el('img'); img.src = f.url; img.alt = ''; thumb.appendChild(img); }
+        else thumb.appendChild(el('span', 'md-face-placeholder', '?'));
+        card.appendChild(thumb);
+
+        var main = el('div', 'md-figcard-main');
+        var nameIn = el('input', 'md-slot-name');
+        nameIn.type = 'text';
+        nameIn.value = f.name || '';
+        nameIn.placeholder = 'Fig in slot ' + sl.i;
+        nameIn.addEventListener('change', function () {
+          api('faces', { dev: key, slot: sl.i, name: nameIn.value }).then(function (res) {
+            faces = res.faces || faces;
+            nameIn.classList.add('md-saved');
+            setTimeout(function () { nameIn.classList.remove('md-saved'); }, 900);
+          });
+        });
+        main.appendChild(nameIn);
+        main.appendChild(el('span', 'md-fig-slotno', 'Slot ' + sl.i));
+
+        var acts = el('div', 'md-figcard-acts');
+        acts.appendChild(figEditButton('Edit Fig', kit, key, sl.i, f, hasEditor));
+
+        var send = el('button', 'md-btn md-btn-primary md-btn-sm', 'Send to kit');
+        send.type = 'button';
+        send.disabled = !live;
+        send.title = live ? '' : 'Connect the kit to send it.';
+        send.addEventListener('click', function () { transferFace(key, sl.i, f.config, send); });
+        acts.appendChild(send);
+
+        var del = el('button', 'md-btn md-btn-danger md-btn-sm', 'Delete Fig');
+        del.type = 'button';
+        del.addEventListener('click', function () {
+          if (!window.confirm('Delete this Fig? The recording in slot ' + sl.i + ' is not touched.')) return;
+          api('faces', { dev: key, slot: sl.i, remove: true }).then(function (res) {
+            faces = res.faces || faces;
+            render();
+            setStatus('The Fig was deleted.', 'ok');
+          });
+        });
+        acts.appendChild(del);
+
+        main.appendChild(acts);
+        card.appendChild(main);
+        grid.appendChild(card);
+      });
+      host.appendChild(grid);
+    }
+
+    var create = figEditButton('Create Fig', kit, key, free.length ? free[0].i : 0, null, hasEditor && !!free.length);
+    create.classList.add('md-btn-primary');
+    create.classList.remove('md-btn-ghost', 'md-btn-sm');
+    create.classList.add('md-fig-cta');
+    if (!free.length) create.title = 'Every slot already holds a Fig. Delete one to make room.';
+    host.appendChild(create);
+  }
+
+  function figEditButton(label, kit, key, slot, f, enabled) {
+    var b = el('button', 'md-btn md-btn-ghost md-btn-sm', label);
+    b.type = 'button';
+    b.disabled = !enabled;
+    b.addEventListener('click', function () {
+      window.MDFaces.designFace(f && f.config, function (cfg, img) {
+        api('faces', { dev: key, slot: slot, config: cfg, image: img }).then(function (res) {
+          faces = res.faces || faces;
+          render();
+          setStatus(f ? 'The Fig was saved.' : 'Your new Fig was saved to slot ' + slot + '.', 'ok');
+        });
+      }, {
+        title: f ? 'Edit Fig' : 'Create a Fig',
+        subtitle: kit.name + ' \u00b7 Slot ' + slot,
+        color: kit.colour
+      });
+    });
+    return b;
+  }
+
+  /* ── Content ── nothing to show until there is content to show. */
+  function renderContent(host, kit) {
+    host.appendChild(emptyNote('No content yet',
+      'Animations, visual assets, Fig assets and other media that ship with your ' + kit.name +
+      ' will be listed here.'));
+  }
+
+  /* ── My Fig ── the physical figure the member designed before requesting. */
+  function renderMyFig(host, kit) {
+    var st  = kitsState();
+    var req = reqFor(kit.slug);
+    var cfg = st.design && st.design.config;
+
+    if (!st.design && !req) {
+      host.appendChild(emptyNote('No Fig yet',
+        'The figure you personalize when you request your ' + kit.name + ' appears here.'));
+      return;
+    }
+
+    var row = el('div', 'md-fig-review');
+    row.appendChild(figPreview(st.design && st.design.url));
+
+    var main = el('div', 'md-fig-review-main');
+    main.appendChild(el('h3', 'md-fig-title', 'My Fig'));
+    if (cfg) {
+      var dl = el('dl', 'md-fig-spec');
+      figSpecLines(cfg).forEach(function (pair) {
+        dl.appendChild(el('dt', null, pair[0]));
+        dl.appendChild(el('dd', null, pair[1]));
+      });
+      main.appendChild(dl);
+    }
+    if (req && req.submitted) main.appendChild(el('p', 'md-fig-when', 'Created for the request sent on ' + fmtDay(req.submitted)));
+    if (req) {
+      var open = el('button', 'md-btn md-btn-ghost', 'View My Request');
+      open.type = 'button';
+      open.addEventListener('click', function () { gotoSection('request'); });
+      main.appendChild(open);
+    }
+    row.appendChild(main);
+    host.appendChild(row);
+  }
+
+  /* The editor's config in words. Kept in step with the same read on the PHP
+     side, which is what the team sees on the request. */
+  var HAIR_PALETTE = ['#4D1F00', '#834400', '#E7CA63', '#000000', '#A8A8A8', '#F4F4F4', '#CC4422'];
+  var HAIR_CATS = { short: 'Short', medium: 'Medium', long: 'Long', tied: 'Tied',
+                    curly: 'Curly', fun: 'Fun', bun: 'Bun' };
+  var COLOUR_NAMES = {
+    '#000000': 'Black', '#1C1C1C': 'Black', '#4D1F00': 'Dark brown', '#5A3825': 'Dark brown',
+    '#6B3E26': 'Brown', '#834400': 'Brown', '#8B5A2B': 'Light brown', '#E7CA63': 'Blond',
+    '#A8A8A8': 'Grey', '#B0B0B0': 'Grey', '#F4F4F4': 'White', '#CC4422': 'Ginger',
+    '#D62828': 'Red', '#274C9B': 'Blue', '#4682B4': 'Blue', '#4E8B3A': 'Green',
+    '#2E7D32': 'Green', '#FF6F00': 'Orange', '#EC4899': 'Pink', '#8E63C7': 'Purple'
+  };
+
+  function colourLabel(hex) {
+    if (!hex) return '';
+    var k = String(hex).toUpperCase();
+    if (k.charAt(0) !== '#') k = '#' + k;
+    return (COLOUR_NAMES[k] || k);
+  }
+
+  function modelLabel(name, slot) {
+    if (!name) return 'Default';
+    var t = String(name).replace(/\.(glb|gltf)$/i, '').replace(/[_-]+/g, ' ').trim();
+    if (slot) t = t.replace(new RegExp('^' + slot + '\\s+', 'i'), '') || t;
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  function figSpecLines(cfg) {
+    var out = [];
+    var cat = cfg.hairCategory ? (HAIR_CATS[cfg.hairCategory] || cfg.hairCategory) : '';
+    var tex = typeof cfg.hairTextureIndex === 'number' ? cfg.hairTextureIndex : null;
+    var hair = tex === 0 ? 'No hair'
+             : [cat, tex !== null ? 'style ' + tex : ''].filter(Boolean).join(' \u2014 ');
+    if (tex !== 0 && typeof cfg.hairColor === 'number' && HAIR_PALETTE[cfg.hairColor]) {
+      hair += (hair ? ', ' : '') + colourLabel(HAIR_PALETTE[cfg.hairColor]);
+    }
+    out.push(['Hair', hair || '\u2014']);
+    out.push(['Face', 'Eyes: ' + modelLabel(cfg.eyeModelName, 'eyes') +
+                      ' \u00b7 Mouth: ' + modelLabel(cfg.mouthModelName, 'mouth')]);
+    if (cfg.eyeColor)     out.push(['Eye colour', colourLabel(cfg.eyeColor)]);
+    if (cfg.eyebrowColor) out.push(['Brows & lashes', colourLabel(cfg.eyebrowColor)]);
+    return out;
+  }
+
   function renderOverview(host, key, dev, live) {
     host.appendChild(statGrid(dev.stats));
+
+    var rows = [
+      ['Device ID', dev.uid || '\u2014'],
+      ['Connection', live ? 'Connected' : 'Linked \u2014 not plugged in'],
+      ['Connected on', fmtDate(dev.connected_at || dev.last_sync)],
+      ['Firmware', dev.fw || '\u2014'],
+      ['Last sync', fmtDate(dev.last_sync)]
+    ];
+    var dl = el('dl', 'md-fig-spec md-device-spec');
+    rows.forEach(function (r) {
+      dl.appendChild(el('dt', null, r[0]));
+      dl.appendChild(el('dd', null, r[1]));
+    });
+    host.appendChild(dl);
 
     var used = (dev.slots || []).filter(function (s) { return s.full; }).length;
     var cap  = (dev.slots || []).length;
@@ -1460,7 +1886,7 @@
     }
 
     var name = el('div', 'md-field');
-    name.appendChild(el('label', null, 'Kit name'));
+    name.appendChild(el('label', null, 'Device name'));
     var input = el('input', 'md-input');
     input.type = 'text';
     input.value = dev.label || '';
@@ -1531,8 +1957,8 @@
     var hasEditor = window.MDFaces && window.MFAvatarEditor;
 
     host.appendChild(el('p', 'md-section-note', hasEditor
-      ? 'Each slot holds one recording and one face. Faces are stored on your profile, so you can keep editing them while the kit is unplugged.'
-      : 'Each slot holds one recording and one face. The avatar editor did not load on this page, so face design is unavailable \u2014 reload, and check that Mini-Forum is active.'));
+      ? 'Each slot holds one recording and one Fig. Figs are kept on your profile, so you can keep working on them while the kit is unplugged.'
+      : 'Each slot holds one recording and one Fig. The avatar editor did not load on this page, so Figs cannot be designed here \u2014 reload, and check that Mini-Forum is active.'));
 
     var slots = dev.slots || [];
     if (!slots.length) {
@@ -1550,7 +1976,7 @@
       if (f && f.url) {
         var img = el('img');
         img.src = f.url;
-        img.alt = 'Face for slot ' + slot.i;
+        img.alt = 'Fig in slot ' + slot.i;
         thumb.appendChild(img);
       } else {
         thumb.appendChild(el('span', 'md-face-placeholder', '?'));
@@ -1577,7 +2003,7 @@
 
       var acts = el('div', 'md-slotcard-acts');
 
-      var design = el('button', 'md-btn md-btn-ghost md-btn-sm', f ? 'Edit face' : 'Design face');
+      var design = el('button', 'md-btn md-btn-ghost md-btn-sm', f ? 'Change Fig' : 'Assign Fig');
       design.type = 'button';
       design.disabled = !hasEditor;
       design.addEventListener('click', function () {
@@ -1585,20 +2011,20 @@
           api('faces', { dev: key, slot: slot.i, config: cfg, image: img }).then(function (res) {
             faces = res.faces || faces;
             render();
-            setStatus('The face for slot ' + slot.i + ' was saved.', 'ok');
+            setStatus('The Fig in slot ' + slot.i + ' was saved.', 'ok');
           });
         }, {
-          title: f ? 'Edit face' : 'Design a face',
+          title: f ? 'Change Fig' : 'Assign a Fig',
           subtitle: (dev.label || kitBySlug(openSlug).name) + ' \u00b7 Slot ' + slot.i,
           color: kitBySlug(openSlug).colour
         });
       });
       acts.appendChild(design);
 
-      var send = el('button', 'md-btn md-btn-primary md-btn-sm', 'Send face');
+      var send = el('button', 'md-btn md-btn-primary md-btn-sm', 'Send Fig');
       send.type = 'button';
       send.disabled = !live || !f;
-      send.title = !f ? 'Design a face for this slot first.'
+      send.title = !f ? 'Assign a Fig to this slot first.'
                       : (!live ? 'Connect the kit to send it.' : '');
       send.addEventListener('click', function () { transferFace(key, slot.i, f && f.config, send); });
       acts.appendChild(send);

@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.0.2)
+# Mini Devices — Mini-Kits (v3.1.0)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -7,23 +7,35 @@ asks for it. The profile is organised **by kit, not by action** — you pick a
 Mini-Kit first, and its own screen shows the one thing that fits where the request
 actually is.
 
-```
-Mini-Kits → Mini-Designs  → choose scenes → note → Send Request → status
-          → Design-Talks  → note → Send Request → status
-          → Brick-Talks   → note → Send Request → status
-          → Fig-Talks     → personalize → review → note → Send Request → status
-```
+Each kit screen has **three top-level buttons and only three**. Mini-Designs has no
+hardware, so it reads Explore | Request | My Designs; the three devices read
+Request | Connect | Manage, and everything a connected kit can do lives under Manage.
 
-| Kit | Before the request | Device |
+| Kit | Buttons | Flow |
 |---|---|---|
-| **Mini-Designs** | choose from the scene catalogue | — |
-| **Design-Talks** | nothing | `D` |
-| **Brick-Talks** | nothing | `B` |
-| **Fig-Talks** | personalize a figure (face, hairstyle, hair colour) | `F` |
+| **Mini-Designs** | Explore \| Request \| My Designs | Explore → Select → Request → My Designs |
+| **Design-Talks** | Request \| Connect \| Manage | Request → Connect → Scenes / Recordings / Device Details |
+| **Brick-Talks** | Request \| Connect \| Manage | Request → Connect → Figs / Slots / Recordings / Content |
+| **Fig-Talks** | Request \| Connect \| Manage | Request → Personalize → Review → Connect → My Fig / Recordings / Device Details |
+
+**Where personalization sits** differs by kit, and that is the point: a Fig-Talks
+figure is manufactured, so it is designed *before* the request; Brick-Talks Figs are
+digital, so they are created *after* the kit is connected, under Manage → Figs.
+
+| Kit | Personalization | Why |
+|---|---|---|
+| Mini-Designs | — | the member picks available scenes |
+| Design-Talks | — | request + connect + manage |
+| Brick-Talks | Manage → Figs | digital Figs are made once the kit is connected |
+| Fig-Talks | Request | it decides what gets physically built |
 
 ## Status
 
-    (nothing yet) → Draft → Submitted → Contacted → Preparing → Connected
+    (nothing yet) → Draft → Submitted → Contacted → Preparing → Ready to Connect → Connected
+
+*Ready to Connect* is the point where the **Connect** button opens: the kit exists
+and is waiting to be linked. Before that Connect is inert, and Manage stays shut
+until the kit has actually reported in.
 
 *Draft* is work that has not been sent — a figure designed, scenes chosen.
 *Connected* is the end: the kit is made and linked to the profile. No shipping or
@@ -66,6 +78,35 @@ MD_Designs::import_names($names); // returns how many scenes were created
 Every imported scene lands *Currently Unavailable* and stays there until someone
 opens it in wp-admin. Import never touches a scene that already exists, so it cannot
 re-open one the team closed, nor close one they opened.
+
+## Connect
+
+Pairing happens over the kit's USB cable: the kit reports its own id, and the site
+binds that id to the profile. A pairing code or QR route would land on exactly the
+same bind, so it can be added later without disturbing anything here.
+
+Connect is open at *Ready to Connect*, at *Connected*, and for a member who has no
+request on record at all — the profiles that pre-date requests must not be locked
+out of their own hardware.
+
+## Manage
+
+| Kit | Sections |
+|---|---|
+| Design-Talks | Scenes (scene → level → mini) · Recordings · Device Details |
+| Brick-Talks | Figs · Slots · Recordings · Content |
+| Fig-Talks | My Fig · Recordings · Device Details |
+
+**Figs** are Brick-Talks' digital characters. A Fig lives in one of the kit's slots,
+so the library is the slots that carry one: create, rename, edit, delete, and send to
+the kit. Putting a Fig into a particular slot stays under **Slots**, next to that
+slot's recording — the two are halves of the same object.
+
+**Content** (animations, visual assets, Fig assets, other media) has no source yet
+and says so rather than pretending.
+
+**Device Details** carries device id, connection state, connected date, firmware,
+last sync and the device name.
 
 ## Where requests go
 

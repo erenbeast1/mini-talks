@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits section to the Mini-Forum profile. Members pick a Mini-Kit and request it — Mini-Designs by choosing scenes, Fig-Talks by personalising a figure — and follow it through Submitted, Contacted, Preparing, Connected. Connected kits also talk to the site over USB (WebSerial).
- * Version:     3.0.2
+ * Version:     3.1.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '3.0.2');
+define('MD_VER', '3.1.0');
 define('MD_PATH', plugin_dir_path(__FILE__));
 
 require_once MD_PATH . 'includes/class-md-kits.php';
@@ -142,6 +142,9 @@ function md_rest_sync($req) {
     $all[$dev]['bound']     = $bound;
     $all[$dev]['fw']        = isset($body['fw']) ? sanitize_text_field($body['fw']) : '';
     $all[$dev]['last_sync'] = time();
+    // When the kit first reached this profile. Device Details shows it, and it
+    // must not move on every later sync.
+    if (empty($all[$dev]['connected_at'])) $all[$dev]['connected_at'] = time();
 
     // istatistikler
     foreach (array('total_s', 'count', 'longest_s', 'last_ts') as $k) {
@@ -556,6 +559,23 @@ function md_rest_face_save($req) {
     if (!is_array($all)) $all = array();
     if (!isset($all[$dev]) || !is_array($all[$dev])) $all[$dev] = array();
 
+    // Deleting a Fig clears the slot. The recording in that slot lives on the
+    // kit itself and is untouched.
+    if (!empty($body['remove'])) {
+        unset($all[$dev][$slot]);
+        update_user_meta($uid, 'md_faces', wp_json_encode($all));
+        return rest_ensure_response(array('ok' => true, 'faces' => $all));
+    }
+
+    // A rename carries no config or image: keep what the slot already holds.
+    $prev = isset($all[$dev][$slot]) && is_array($all[$dev][$slot]) ? $all[$dev][$slot] : array();
+    if (!isset($body['config']) && !isset($body['image']) && isset($body['name'])) {
+        $prev['name'] = sanitize_text_field($body['name']);
+        $all[$dev][$slot] = $prev;
+        update_user_meta($uid, 'md_faces', wp_json_encode($all));
+        return rest_ensure_response(array('ok' => true, 'faces' => $all));
+    }
+
     $entry = array(
         'config'  => isset($body['config']) && is_array($body['config']) ? $body['config'] : null,
         'updated' => time(),
@@ -580,7 +600,8 @@ function md_rest_face_save($req) {
     if (empty($entry['url']) && isset($all[$dev][$slot]['url'])) {
         $entry['url'] = $all[$dev][$slot]['url'];
     }
-    if (isset($body['name'])) $entry['name'] = sanitize_text_field($body['name']);
+    if (isset($body['name']))        $entry['name'] = sanitize_text_field($body['name']);
+    elseif (isset($prev['name']))    $entry['name'] = $prev['name'];
 
     $all[$dev][$slot] = $entry;
     update_user_meta($uid, 'md_faces', wp_json_encode($all));
