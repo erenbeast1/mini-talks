@@ -1,15 +1,18 @@
 <?php
 /**
  * Plugin Name: Mini Devices — Mini-Kits
- * Description: Adds the Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Each kit opens its own detail popup.
- * Version:     2.8.1
+ * Description: Adds the Connected Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Fig-Talks is personalised in the profile and requested from the Mini-Talks team.
+ * Version:     2.9.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.8.1');
+define('MD_VER', '2.9.0');
+define('MD_PATH', plugin_dir_path(__FILE__));
+
+require_once MD_PATH . 'includes/class-md-figtalks.php';
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 
@@ -344,17 +347,19 @@ function md_page_has_preview() {
  * ------------------------------------------------------------------ */
 add_shortcode('connected_devices', function () {
     if (!is_user_logged_in()) {
-        return '<div class="md-wrap"><p class="md-empty">Sign in to see your Mini-Kits.</p></div>';
+        return '<div class="md-wrap"><p class="md-empty">Sign in to see your Connected Mini-Kits.</p></div>';
     }
 
     $data = md_get_user_devices(get_current_user_id());
 
     ob_start(); ?>
-    <div class="md-wrap" id="md-root" data-initial="<?php echo esc_attr(wp_json_encode($data)); ?>">
+    <div class="md-wrap" id="md-root"
+         data-initial="<?php echo esc_attr(wp_json_encode($data)); ?>"
+         data-figtalks="<?php echo esc_attr(wp_json_encode(MD_FigTalks::state(get_current_user_id()))); ?>">
 
         <header class="md-shelf-head">
-            <h3 class="md-title">Mini-Kits</h3>
-            <p class="md-sub">Your Mini-Talks kits live here. Plug one in over USB to open it, name its recordings, design faces and download audio.</p>
+            <h3 class="md-title">Connected Mini-Kits</h3>
+            <p class="md-sub">Personalize, request, and manage the Mini-Kits connected to your Mini-Talks profile.</p>
             <button type="button" class="md-btn md-btn-primary" id="md-connect">
                 <span class="md-stud-dot"></span> Connect a kit
             </button>

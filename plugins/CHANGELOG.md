@@ -25,6 +25,37 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.9.0
+
+**Fig-Talks personalisation requests.** Fig-Talks is made to order, so it is not
+sold from the shelf. A member personalises a figure in their profile and sends the
+design to the Mini-Talks team: Personalize → Send My Request → the team contacts
+you. No cart, no checkout, no prices anywhere in the copy.
+
+The flow lives inside the Fig-Talks kit, under a **Personalize** section that is
+open whether or not a Fig-Talks is connected — you personalise one before you own
+it. Overview and Recordings stay visible but locked until a kit is linked, so the
+card still explains what the kit does.
+
+The design is made in Mini-Forum's avatar editor, which already offers face,
+hairstyle and hair colour with a live 3D preview; its config carries the glasses
+fields too, so that option slots in later without reworking this. A sent request is
+frozen — designing again opens a new one rather than rewriting work the team may
+already have started.
+
+Requests are `md_fig_request` posts authored by the member, listed under **Fig-Talks
+Requests** in wp-admin with the render, the member and email, the three choices and
+the status (Draft → Request Submitted → Contacted → In Preparation → Completed),
+filterable by status. `do_action('md_figtalks_request_submitted')` fires on submit
+for a future email or Slack hook.
+
+The section is titled **Connected Mini-Kits** now, with the brief's wording.
+
+Also: the Fig-Talks card no longer shows "Not linked yet" beside "Status: Request
+Submitted" — a kit being made for you is not a connection failure. And the
+`.md-fig-acts` primary button uses a bordered box so it stands the same height as
+the ghost beside it, the same mismatch fixed for slot rows in 2.5.0.
+
 ## mini-devices 2.8.1
 
 **Stud spacing.** Copies were sized 51% and 26% — just over 100/N — so each one

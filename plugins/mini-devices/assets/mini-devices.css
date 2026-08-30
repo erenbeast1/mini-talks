@@ -286,6 +286,48 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-slot-len{min-width:54px!important;text-align:right!important;font-size:12px!important;font-weight:700!important;color:#999!important;white-space:nowrap!important;flex:none!important}
 .md-slot-lvl{flex:1 1 auto!important;font-size:13px!important;font-weight:700!important;color:#1D1D1B!important}
 
+/* ═══════════════════════ FIG-TALKS PERSONALISATION ═══════════════════════ */
+/* A request, not a purchase — no cart language, no price, no checkout. */
+
+.md-fig-title{margin:0 0 6px!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:18px!important;font-weight:900!important;color:#1D1D1B!important;text-align:left!important;line-height:1.25!important}
+
+.md-fig-steps{list-style:none!important;margin:0 0 18px!important;padding:0!important;display:flex!important;flex-direction:column!important;gap:8px!important}
+.md-fig-step{display:flex!important;align-items:center!important;gap:11px!important;padding:9px 12px!important;border-radius:11px!important;background:#F8F8F8!important;font-size:13.5px!important;font-weight:700!important;color:#1D1D1B!important}
+.md-fig-step-no{width:26px!important;height:26px!important;flex:none!important;display:grid!important;place-items:center!important;border-radius:7px!important;background:var(--mf-yellow,#FFCC00)!important;color:#1D1D1B!important;font-size:12.5px!important;font-weight:900!important;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)!important}
+.md-fig-step.is-next{background:#FCFCFC!important;border:2px dashed #E5E5E5!important;padding:7px 10px!important}
+.md-fig-step.is-next .md-fig-step-no{background:#E5E5E5!important;color:#999!important;box-shadow:inset 0 -3px 0 rgba(0,0,0,.07)!important}
+
+.md-fig-cta{width:100%!important}
+
+.md-fig-review{display:flex!important;align-items:flex-start!important;gap:18px!important}
+.md-fig-review-main{flex:1 1 auto!important;min-width:0!important}
+.md-fig-preview{width:130px!important;height:170px!important;flex:none!important;border-radius:14px!important;border:2.5px solid var(--mf-border,#ddd)!important;border-bottom-width:6px!important;background:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:6px!important;overflow:hidden!important}
+.md-fig-preview img{max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain!important;display:block!important}
+
+.md-pop-red    .md-fig-preview{border-color:var(--mf-red,#E52828)!important;border-bottom-color:#B31D1D!important}
+.md-pop-blue   .md-fig-preview{border-color:var(--mf-blue,#0055BF)!important;border-bottom-color:#003D8C!important}
+.md-pop-yellow .md-fig-preview{border-color:var(--mf-yellow,#FFCC00)!important;border-bottom-color:#E5B800!important}
+
+.md-fig-acts{display:flex!important;gap:9px!important;flex-wrap:wrap!important;margin-top:14px!important}
+/* Same trick as the slot rows: the primary's hard shadow sits outside its box
+   and the ghost's border sits inside, so side by side they never lined up. */
+.md-fig-acts .md-btn-primary{box-shadow:none!important;border:2px solid rgba(0,0,0,.12)!important;border-bottom:5px solid #E5B800!important}
+.md-fig-acts .md-btn-primary:hover:not(:disabled),.md-fig-acts .md-btn-primary:active:not(:disabled){transform:none!important;box-shadow:none!important;filter:brightness(1.04)!important}
+.md-fig-foot{margin:16px 0 0!important;font-size:12px!important;font-weight:600!important;color:#999!important;line-height:1.55!important}
+
+.md-kit-line{margin:0 0 8px!important;font-size:13px!important;font-weight:700!important;color:var(--md-soft,#555)!important}
+.md-kit-facts-row{display:flex!important;gap:22px!important;flex-wrap:wrap!important;margin-top:10px!important}
+
+/* A kit section you cannot reach until the kit itself arrives. */
+.md-pop-navbtn.is-locked{opacity:.42!important;cursor:not-allowed!important;background:#FAFAFA!important}
+.md-pop-navbtn.is-locked:hover{transform:none!important}
+
+@media(max-width:560px){
+  .md-fig-review{flex-direction:column!important;align-items:center!important;text-align:center!important}
+  .md-fig-acts{justify-content:center!important}
+  .md-fig-acts .md-btn{flex:1 1 auto!important}
+}
+
 /* ═══════════════════════ SLOT CARDS (face + recording) ═══════════════════════ */
 /* One card per slot, stacked. A slot's face and its recording belong together,
    and stacking removes the sideways rail that kept clipping its last tile. */

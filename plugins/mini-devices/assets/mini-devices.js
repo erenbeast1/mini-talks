@@ -18,7 +18,8 @@
      every screen can be walked through without hardware. Nothing touches the
      server: api() is short-circuited and downloads are synthesised locally. */
   var demo = false, publicDemo = false;
-  var realState = null, realFaces = null;
+  var fig = null;   // Fig-Talks design + request, from /figtalks
+  var realState = null, realFaces = null, realFig = null;
   var onlyKits = null;   // public preview may show a single kit
 
   function demoFace(bg, mouth) {
@@ -95,7 +96,8 @@
   function setDemo(on) {
     if (on === demo) return;
     if (on) {
-      realState = state; realFaces = faces;
+      realState = state; realFaces = faces; realFig = fig;
+      fig = { design: null, request: null, editable: true };
       var d = demoData();
       state = d.state; faces = d.faces;
       demo = true;
@@ -104,7 +106,8 @@
       }
     } else {
       state = realState || {}; faces = realFaces || {};
-      realState = realFaces = null;
+      fig = realFig || null;
+      realState = realFaces = realFig = null;
       demo = false;
       closeKit();
       setStatus('Demo mode is off.', 'ok');
@@ -634,8 +637,8 @@
   var KITS = [
     {
       code: 'F', name: 'Fig-Talks', color: 'red',
-      tagline: 'A minifigure that listens, keeps what it hears, and plays it back.',
-      sections: ['overview', 'recordings'],
+      tagline: 'A personalized figure designed to represent you.',
+      sections: ['personalize', 'overview', 'recordings'],
       art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
            '<rect x="22" y="4" width="20" height="7" rx="3" class="a1"/>' +
            '<rect x="17" y="10" width="30" height="22" rx="7" class="a1"/>' +
@@ -770,12 +773,37 @@
     var main = el('div', 'md-kit-main');
     var row  = el('div', 'md-kit-titlerow');
     row.appendChild(el('h4', 'md-kit-name', dev && dev.label ? dev.label : kit.name));
-    row.appendChild(pill(status));
+    // A requested Fig-Talks reads its request status below; the connection pill
+    // on top of that just says "not linked yet" about a kit being made for you.
+    var figRequested = kit.code === 'F' && figState().request &&
+                       figState().request.status !== 'draft' && !dev;
+    if (!figRequested) row.appendChild(pill(status));
     main.appendChild(row);
     main.appendChild(el('p', 'md-kit-tagline', kit.tagline));
 
     var facts = el('div', 'md-kit-facts');
-    if (dev) {
+    if (kit.code === 'F') {
+      var f = figState(), r = f.request;
+      if (r && r.status !== 'draft') {
+        facts.appendChild(el('p', 'md-kit-line', 'Personalized Fig-Talks'));
+        var sp = el('span', 'md-pill md-pill-linked');
+        sp.appendChild(el('span', 'md-pill-dot'));
+        sp.appendChild(document.createTextNode('Status: ' + (r.status_label || r.status)));
+        facts.appendChild(sp);
+      } else if (f.design) {
+        facts.appendChild(el('p', 'md-kit-line', 'Your design is ready to send.'));
+      } else {
+        facts.appendChild(el('p', 'md-kit-hint',
+          'Personalize a figure that represents you, then send the design to the Mini-Talks team.'));
+      }
+      if (dev) {
+        var n0 = countRecordings(dev);
+        var sub = el('div', 'md-kit-facts-row');
+        sub.appendChild(fact(String(n0), n0 === 1 ? 'recording' : 'recordings'));
+        sub.appendChild(fact(fmtTotal(dev.stats && dev.stats.total_s), 'recorded'));
+        facts.appendChild(sub);
+      }
+    } else if (dev) {
       var n = countRecordings(dev);
       facts.appendChild(fact(String(n), n === 1 ? 'recording' : 'recordings'));
       facts.appendChild(fact(fmtTotal(dev.stats && dev.stats.total_s), 'recorded'));
@@ -790,7 +818,14 @@
     var cta = el('div', 'md-kit-cta');
     var open = el('button', 'md-btn md-btn-open', status === 'live' ? 'Open kit' : 'View details');
     open.type = 'button';
-    if (status === 'new') {
+
+    if (kit.code === 'F') {
+      // Fig-Talks always opens: it is personalised before one is ever owned.
+      var fs = figState();
+      open.textContent = (fs.request && fs.request.status !== 'draft') ? 'View My Design'
+                       : (fs.design ? 'Finish your request' : 'Personalize Fig-Talks');
+      open.addEventListener('click', function () { openKit(kit.code); });
+    } else if (status === 'new') {
       open.textContent = 'Connect to open';
       open.disabled = true;
       open.title = 'This kit is not linked to your profile yet.';
@@ -798,7 +833,7 @@
       open.addEventListener('click', function () { openKit(kit.code); });
     }
     cta.appendChild(open);
-    if (status === 'linked') {
+    if (status === 'linked' && kit.code !== 'F') {
       cta.appendChild(el('span', 'md-kit-note', 'Read-only until you plug it in'));
     }
     body.appendChild(cta);
@@ -847,7 +882,8 @@
     openCode = code;
     var kit = kitByCode(code);
     var avail = kit.sections.filter(function (sec) { return sectionAvailable(code, sec); });
-    openSection = avail.indexOf(openSection) >= 0 ? openSection : avail[0];
+    var open  = avail.filter(function (sec) { return !sectionLocked(code, sec); });
+    if (open.indexOf(openSection) < 0) openSection = open[0] || avail[0];
     renderPopup();
     document.body.style.overflow = 'hidden';
   }
@@ -860,9 +896,17 @@
 
   function sectionAvailable(code, sec) {
     var key = kitKey(code), dev = key ? state[key] : null;
+    if (sec === 'personalize') return code === 'F';
     if (sec === 'scenes')  return !!(dev && ((dev.scenes || []).length || (dev.cards && Object.keys(dev.cards).length)));
     if (sec === 'slots')   return code === 'B';
     return true;
+  }
+
+  /* A kit section needs the kit. Fig-Talks can be personalised long before one
+     arrives, so those tabs stay visible but locked rather than disappearing. */
+  function sectionLocked(code, sec) {
+    if (sec === 'personalize') return false;
+    return !kitKey(code);
   }
 
   function renderPopup() {
@@ -874,7 +918,8 @@
     var live   = status === 'live';
     var key    = kitKey(openCode);
     var dev    = key ? state[key] : null;
-    if (!dev) { closeKit(); return; }
+    if (!dev && openCode !== 'F') { closeKit(); return; }
+    if (!dev) dev = { type: 'F', slots: [], stats: {} };   // personalise before you own one
 
     var overlay = el('div', 'md-overlay');
     overlay.id = 'md-kit-overlay';
@@ -901,7 +946,8 @@
     var meta = el('div', 'md-pop-meta');
     if (dev.uid) meta.appendChild(el('span', 'md-uid', dev.uid));
     if (dev.fw)  meta.appendChild(el('span', 'md-fw', 'Firmware ' + dev.fw));
-    meta.appendChild(el('span', 'md-sync', 'Last sync: ' + fmtDate(dev.last_sync)));
+    if (key) meta.appendChild(el('span', 'md-sync', 'Last sync: ' + fmtDate(dev.last_sync)));
+    else     meta.appendChild(el('span', 'md-sync', 'Not connected to this profile yet'));
     htxt.appendChild(meta);
     head.appendChild(htxt);
     head.appendChild(pill(status));
@@ -913,6 +959,9 @@
     } else if (demo) {
       inner.appendChild(el('p', 'md-pop-banner md-pop-banner-demo',
         'Demo mode — sample kit. Everything here is interactive, and nothing is saved.'));
+    } else if (!key) {
+      inner.appendChild(el('p', 'md-pop-banner',
+        'No ' + kit.name + ' is connected to your profile yet. You can still personalize yours below.'));
     } else if (!live) {
       inner.appendChild(el('p', 'md-pop-banner',
         'Not connected — showing the last sync. Plug the kit in to download audio, rename recordings or send faces.'));
@@ -923,9 +972,13 @@
     if (avail.length > 1) {
       var nav = el('nav', 'md-pop-nav');
       avail.forEach(function (sec) {
-        var b = el('button', 'md-pop-navbtn' + (sec === openSection ? ' is-on' : ''), sectionLabel(sec));
+        var lock = sectionLocked(openCode, sec);
+        var b = el('button', 'md-pop-navbtn' + (sec === openSection ? ' is-on' : '') + (lock ? ' is-locked' : ''),
+                   sectionLabel(sec));
         b.type = 'button';
-        b.addEventListener('click', function () { openSection = sec; renderPopup(); });
+        b.disabled = lock;
+        if (lock) b.title = 'Available once your ' + kit.name + ' is connected.';
+        else b.addEventListener('click', function () { openSection = sec; renderPopup(); });
         nav.appendChild(b);
       });
       inner.appendChild(nav);
@@ -933,7 +986,8 @@
 
     /* section body */
     var bodyEl = el('div', 'md-pop-body');
-    if (openSection === 'overview')        renderOverview(bodyEl, key, dev, live);
+    if (openSection === 'personalize')     renderPersonalize(bodyEl);
+    else if (openSection === 'overview')   renderOverview(bodyEl, key, dev, live);
     else if (openSection === 'recordings') renderRecordings(bodyEl, key, dev, live);
     else if (openSection === 'slots')      renderSlots(bodyEl, key, dev, live);
     else if (openSection === 'scenes')     renderScenes(bodyEl, key, dev, live);
@@ -941,6 +995,13 @@
 
     /* footer */
     var foot = el('footer', 'md-pop-foot');
+    if (!key) {           // nothing to download or unlink yet
+      modal.appendChild(inner);
+      wrap.appendChild(modal);
+      overlay.appendChild(wrap);
+      modalRoot.appendChild(overlay);
+      return;
+    }
     var full = (dev.slots || []).filter(function (s) { return s.full; });
     if (full.length) {
       var all = el('button', 'md-btn md-btn-ghost', 'Download all ' + full.length + ' recordings');
@@ -984,7 +1045,8 @@
   }
 
   function sectionLabel(sec) {
-    return { overview: 'Overview', recordings: 'Recordings', slots: 'Slots', scenes: 'Scenes' }[sec] || sec;
+    return { personalize: 'Personalize', overview: 'Overview', recordings: 'Recordings',
+             slots: 'Slots', scenes: 'Scenes' }[sec] || sec;
   }
 
   /* ── popup sections ── */
@@ -1003,6 +1065,169 @@
       wrap.appendChild(b);
     });
     return wrap;
+  }
+
+  /* ══════════════ Fig-Talks personalisation ══════════════
+     Not a shop. A member personalises a figure and sends the design to the
+     Mini-Talks team, who get in touch. Personalise → Send My Request →
+     the team contacts you. A sent request is frozen; designing again opens a
+     new one, so the team never has work change under them. */
+
+  var FIG_STEPS = ['Choose Your Face', 'Choose Your Hairstyle',
+                   'Choose Your Hair Color', 'Review Your Fig-Talks'];
+
+  function figState() { return fig || { design: null, request: null, editable: true }; }
+
+  function figApi(path, body) {
+    if (demo) {                     // sample data; nothing reaches the server
+      return new Promise(function (r) { setTimeout(function () { r(demoFig(path, body)); }, 260); });
+    }
+    return fetch(MD.rest + path, {
+      method: body ? 'POST' : 'GET',
+      headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': MD.nonce },
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: 'same-origin'
+    }).then(function (r) { return r.json(); });
+  }
+
+  function demoFig(path, body) {
+    var f = figState();
+    if (path === 'figtalks/design') {
+      fig = { design: { config: body.config, url: body.image || (f.design || {}).url, updated: Date.now() / 1000 },
+              request: f.request && f.request.status !== 'draft' ? f.request
+                     : { status: 'draft', status_label: 'Draft' },
+              editable: true };
+    } else if (path === 'figtalks/request') {
+      fig = { design: f.design,
+              request: { status: 'submitted', status_label: 'Request Submitted',
+                         submitted: Math.floor(Date.now() / 1000) },
+              editable: false };
+    }
+    return figState();
+  }
+
+  function openFigEditor() {
+    if (!window.MDFaces || !window.MFAvatarEditor) {
+      setStatus('The designer did not load on this page. Reload and try again.', 'err');
+      return;
+    }
+    var f = figState();
+    window.MDFaces.designFace(f.design && f.design.config, function (cfg, img) {
+      figApi('figtalks/design', { config: cfg, image: img }).then(function (res) {
+        if (res && res.message && !res.design) { setStatus(res.message, 'err'); return; }
+        fig = res;
+        renderPopup();
+        renderShelf();
+        setStatus('Your Fig-Talks design was saved.', 'ok');
+      });
+    }, { title: 'Create Your Fig-Talks', subtitle: 'Face · Hairstyle · Hair colour', color: 'red' });
+  }
+
+  function figStepList(done) {
+    var ol = el('ol', 'md-fig-steps');
+    FIG_STEPS.forEach(function (label, i) {
+      var li = el('li', 'md-fig-step' + (done ? ' is-done' : (i < 3 ? '' : ' is-next')));
+      li.appendChild(el('span', 'md-fig-step-no', String(i + 1)));
+      li.appendChild(el('span', null, label));
+      ol.appendChild(li);
+    });
+    return ol;
+  }
+
+  function figPreview(url) {
+    var box = el('div', 'md-fig-preview');
+    if (url) {
+      var img = el('img');
+      img.src = url;
+      img.alt = 'Your Fig-Talks design';
+      box.appendChild(img);
+    } else {
+      box.appendChild(el('span', 'md-face-placeholder', '?'));
+    }
+    return box;
+  }
+
+  function renderPersonalize(host) {
+    var f    = figState();
+    var req  = f.request;
+    var sent = req && req.status !== 'draft';
+
+    /* ── nothing designed yet ── */
+    if (!f.design) {
+      host.appendChild(el('h3', 'md-fig-title', 'Create Your Fig-Talks'));
+      host.appendChild(el('p', 'md-section-note',
+        'Personalize your figure to create a Fig-Talks character that feels familiar and uniquely yours.'));
+      host.appendChild(figStepList(false));
+
+      var start = el('button', 'md-btn md-btn-primary md-fig-cta', 'Personalize Fig-Talks');
+      start.type = 'button';
+      start.addEventListener('click', openFigEditor);
+      host.appendChild(start);
+      return;
+    }
+
+    /* ── designed ── */
+    var row = el('div', 'md-fig-review');
+    row.appendChild(figPreview(f.design.url));
+
+    var side = el('div', 'md-fig-review-main');
+    if (sent) {
+      side.appendChild(el('h3', 'md-fig-title', 'Request sent!'));
+      side.appendChild(el('p', 'md-section-note',
+        'Your personalized Fig-Talks design has been shared with the Mini-Talks team. ' +
+        'We\u2019ll contact you about the next steps.'));
+      var pill = el('span', 'md-pill md-pill-linked');
+      pill.appendChild(el('span', 'md-pill-dot'));
+      pill.appendChild(document.createTextNode('Status: ' + (req.status_label || req.status)));
+      side.appendChild(pill);
+    } else {
+      side.appendChild(el('h3', 'md-fig-title', 'Your Fig-Talks is ready.'));
+      side.appendChild(el('p', 'md-section-note',
+        'Send your personalized design to the Mini-Talks team. We\u2019ll contact you about the next steps.'));
+    }
+
+    var acts = el('div', 'md-fig-acts');
+    if (!sent) {
+      var send = el('button', 'md-btn md-btn-primary', 'Send My Request');
+      send.type = 'button';
+      send.addEventListener('click', function () {
+        var label = send.textContent;
+        send.disabled = true;
+        send.textContent = 'Sending\u2026';
+        figApi('figtalks/request', { send: 1 }).then(function (res) {
+          send.disabled = false;
+          send.textContent = label;
+          if (!res || !res.request) {
+            setStatus((res && res.message) || 'The request could not be sent.', 'err');
+            return;
+          }
+          fig = res;
+          renderPopup();
+          renderShelf();
+          setStatus('Request sent \u2014 the Mini-Talks team will be in touch.', 'ok');
+        });
+      });
+      acts.appendChild(send);
+
+      var edit = el('button', 'md-btn md-btn-ghost', 'Edit design');
+      edit.type = 'button';
+      edit.addEventListener('click', openFigEditor);
+      acts.appendChild(edit);
+    } else {
+      var again = el('button', 'md-btn md-btn-ghost', 'Start a new design');
+      again.type = 'button';
+      again.title = 'Your sent request stays as it is. A new design becomes a new request.';
+      again.addEventListener('click', openFigEditor);
+      acts.appendChild(again);
+    }
+    side.appendChild(acts);
+    row.appendChild(side);
+    host.appendChild(row);
+
+    if (sent) {
+      host.appendChild(el('p', 'md-fig-foot',
+        'Your sent request stays exactly as it was. Designing again starts a new request rather than changing this one.'));
+    }
   }
 
   function renderOverview(host, key, dev, live) {
@@ -1309,6 +1534,7 @@
 
     try { state = JSON.parse(root.dataset.initial || '{}') || {}; } catch (e) { state = {}; }
     if (Array.isArray(state)) state = {};
+    try { fig = JSON.parse(root.dataset.figtalks || 'null'); } catch (e) { fig = null; }
 
     publicDemo = root.dataset.demo === '1';
     onlyKits = (root.dataset.kits || '').split(',')

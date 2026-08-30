@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.8.1)
+# Mini Devices — Connected Mini-Kits (v2.9.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -122,6 +122,45 @@ cross-origin reads — the same CORS setup members already rely on (see
 If a page builder keeps the shortcode out of `post_content`, the assets may not be
 detected. The shortcode enqueues them itself as a fallback, and
 `add_filter('md_page_has_preview', '__return_true')` forces it.
+
+## Fig-Talks personalisation requests
+
+Fig-Talks is made to order, so it is not sold from the shelf. A member personalises
+a figure inside their profile and sends the design to the Mini-Talks team, who get
+in touch: **Personalize → Send My Request → the team contacts you**. No cart, no
+checkout, no prices.
+
+The flow lives inside the Fig-Talks kit itself, under a **Personalize** section.
+That section is open whether or not a Fig-Talks is connected — you personalise one
+before you own it — while Overview and Recordings stay visible but locked until a
+kit is linked.
+
+| State | What the member sees |
+|---|---|
+| Nothing designed | *Create Your Fig-Talks*, the four steps, **Personalize Fig-Talks** |
+| Designed, not sent | The render, *Your Fig-Talks is ready.*, **Send My Request** + Edit design |
+| Sent | *Request sent!*, the status, **Start a new design** |
+
+The design itself is made in Mini-Forum's avatar editor, which already offers face,
+hairstyle and hair colour with a live 3D preview. Its config carries `glassesColor`
+and `glassesTextureIndex` too, so glasses slot in later without changing this flow.
+
+A sent request is frozen. Designing again opens a new request rather than rewriting
+one the team may already be acting on.
+
+### Where requests go
+
+Each request is a `md_fig_request` post authored by the member, listed under
+**Fig-Talks Requests** in wp-admin with the render, the member and their email, the
+three choices, and the status. Statuses: Draft, Request Submitted, Contacted, In
+Preparation, Completed — set from the sidebar of a request, filterable from the list.
+
+Stored per request: user id (post author), name, email, face, hairstyle, hair
+colour, the full editor config, the render, the created and submitted dates, and the
+status.
+
+`do_action('md_figtalks_request_submitted', $post_id, $user_id)` fires on submit, if
+you later want an email or a Slack ping.
 
 ## Kit artwork
 
