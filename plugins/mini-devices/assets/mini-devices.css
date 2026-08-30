@@ -24,6 +24,7 @@
   --md-stud-red:var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png'));
   --md-stud-blue:var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png'));
   --md-stud-yellow:var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png'));
+  --md-stud-green:var(--stud-green,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-yesil.png'));
 
   font-family:var(--md-font)!important;
   color:var(--md-ink)!important;
@@ -113,6 +114,9 @@
 .md-kit-blue   .md-kit-brick{background:var(--md-blue,#0055BF)!important}
 .md-kit-yellow .md-kit-studs{background-image:var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow)!important}
 .md-kit-yellow .md-kit-brick{background:var(--md-yellow,#FFCC00)!important}
+.md-kit-green  .md-kit-studs{background-image:var(--md-stud-green),var(--md-stud-green),var(--md-stud-green),var(--md-stud-green)!important}
+.md-kit-green  .md-kit-brick{background:var(--md-green,#237841)!important}
+.md-kit-green  .md-kit-art{color:var(--md-green,#237841)}
 
 .md-kit-body{display:flex!important;align-items:center!important;gap:20px!important;background:#fff!important;border:none!important;border-radius:12px!important;padding:18px 22px!important;transition:transform .15s,box-shadow .15s!important}
 .md-kit-yellow .md-kit-body{border-color:var(--md-yellow)!important;border-bottom-color:#E5B800!important}
@@ -191,12 +195,14 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-pop-red    .md-popup-studs{background-image:var(--md-stud-red),var(--md-stud-red),var(--md-stud-red)!important}
 .md-pop-blue   .md-popup-studs{background-image:var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue)!important}
 .md-pop-yellow .md-popup-studs{background-image:var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow)!important}
+.md-pop-green  .md-popup-studs{background-image:var(--md-stud-green),var(--md-stud-green),var(--md-stud-green)!important}
 
 /* The coloured 8px frame is the brick; white inner is the label on it. */
 .md-popup-modal{border-radius:16px!important;padding:16px 8px 8px!important;margin-top:-1px!important;flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important}
 .md-pop-red    .md-popup-modal{background:var(--mf-red,#E52828)!important}
 .md-pop-blue   .md-popup-modal{background:var(--mf-blue,#0055BF)!important}
 .md-pop-yellow .md-popup-modal{background:var(--mf-yellow,#FFCC00)!important}
+.md-pop-green  .md-popup-modal{background:var(--mf-green,#237841)!important}
 
 .md-popup-inner{background:#fff!important;border-radius:12px!important;padding:24px 26px 20px!important;position:relative!important;flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
 
@@ -204,6 +210,7 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-pop-red    .md-popup-close{background:var(--mf-red,#E52828)!important}
 .md-pop-blue   .md-popup-close{background:var(--mf-blue,#0055BF)!important}
 .md-pop-yellow .md-popup-close{background:#D9A800!important}
+.md-pop-green  .md-popup-close{background:var(--mf-green,#237841)!important}
 .md-popup-close:hover{opacity:.75!important}
 
 /* ── popup header ── */
@@ -216,6 +223,7 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-pop-red    .md-pop-brick{background:var(--mf-red,#E52828)!important}
 .md-pop-blue   .md-pop-brick{background:var(--mf-blue,#0055BF)!important}
 .md-pop-yellow .md-pop-brick{background:var(--mf-yellow,#FFCC00)!important}
+.md-pop-green  .md-pop-brick{background:var(--mf-green,#237841)!important}
 
 .md-pop-headtext{flex:1 1 auto!important;min-width:0!important}
 .md-pop-headtext h2{margin:0 0 4px!important;font-size:19px!important;font-weight:900!important;text-align:left!important;color:#1D1D1B!important}
@@ -234,6 +242,7 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-pop-red    .md-pop-navbtn.is-on{background:var(--mf-red,#E52828)!important;border-color:var(--mf-red,#E52828)!important;border-bottom-color:#B31D1D!important}
 .md-pop-blue   .md-pop-navbtn.is-on{background:var(--mf-blue,#0055BF)!important;border-color:var(--mf-blue,#0055BF)!important;border-bottom-color:#003D8C!important}
 .md-pop-yellow .md-pop-navbtn.is-on{background:var(--mf-yellow,#FFCC00)!important;border-color:var(--mf-yellow,#FFCC00)!important;border-bottom-color:#E5B800!important;color:#1D1D1B!important}
+.md-pop-green  .md-pop-navbtn.is-on{background:var(--mf-green,#237841)!important;border-color:var(--mf-green,#237841)!important;border-bottom-color:#17512C!important}
 
 .md-pop-body{padding:16px 4px 4px 0!important;flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important}
 .md-pop-body::-webkit-scrollbar{width:6px!important}
@@ -286,6 +295,44 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-slot-len{min-width:54px!important;text-align:right!important;font-size:12px!important;font-weight:700!important;color:#999!important;white-space:nowrap!important;flex:none!important}
 .md-slot-lvl{flex:1 1 auto!important;font-size:13px!important;font-weight:700!important;color:#1D1D1B!important}
 
+/* ═══════════════════════ MINI-DESIGNS CATALOGUE ═══════════════════════ */
+/* Every scene stays on show. Hiding what cannot be built right now would make
+   Mini-Designs look far smaller than it is — so unavailable reads plainly
+   instead of disappearing. */
+
+.md-designs{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(146px,1fr))!important;gap:12px!important;margin:0 0 14px!important}
+
+.md-design{border:2.5px solid var(--mf-border,#ddd)!important;border-bottom-width:5px!important;border-radius:13px!important;background:#fff!important;padding:10px!important;display:flex!important;flex-direction:column!important;gap:8px!important;transition:border-color .15s!important}
+.md-design.is-picked{border-color:var(--mf-green,#237841)!important;border-bottom-color:#17512C!important;background:#F4FBF6!important}
+.md-design.is-unavailable{opacity:.55!important;background:#FBFBFB!important;border-style:dashed!important;border-bottom-width:2.5px!important}
+
+.md-design-thumb{width:100%!important;aspect-ratio:4/3!important;border-radius:9px!important;background:#F4F4F4!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
+.md-design-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+.md-design-name{margin:0!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:13px!important;font-weight:800!important;color:#1D1D1B!important;line-height:1.3!important}
+.md-design-flag{font-size:10.5px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.04em!important;color:#999!important}
+.md-design-pick{width:100%!important}
+.md-design.is-picked .md-design-pick{background:var(--mf-green,#237841)!important;border-color:var(--mf-green,#237841)!important;border-bottom-color:#17512C!important;color:#fff!important}
+
+.md-designs-count{margin:0 0 14px!important;font-size:12.5px!important;font-weight:700!important;color:#666!important}
+
+/* ═══════════════════════ REQUEST NOTE ═══════════════════════ */
+
+.md-note-field{margin:0 0 14px!important}
+.md-note-field label{display:flex!important;align-items:center!important;gap:8px!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:12.5px!important;font-weight:800!important;color:#1D1D1B!important;margin-bottom:6px!important}
+.md-note-optional{font-size:10.5px!important;font-weight:700!important;color:#AAA!important;text-transform:uppercase!important;letter-spacing:.05em!important}
+.md-note-input{width:100%!important;padding:10px 13px!important;border-radius:10px!important;border:2px solid #1D1D1B!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:13.5px!important;line-height:1.5!important;background:#fff!important;color:#1D1D1B!important;outline:none!important;resize:vertical!important}
+.md-note-input:focus{border-color:var(--mf-blue,#0055BF)!important;box-shadow:0 0 0 3px rgba(0,85,191,.15)!important}
+
+.md-req-label{margin:14px 0 4px!important;font-size:11px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.05em!important;color:#AAA!important}
+.md-req-designs{margin:0!important;padding-left:18px!important;font-size:13px!important;font-weight:700!important;color:#1D1D1B!important;line-height:1.6!important}
+.md-req-note{margin:0!important;font-size:13px!important;color:#555!important;line-height:1.55!important;white-space:pre-wrap!important}
+
+/* A kit nobody has asked for yet sits quietly; it is an invitation, not a gap. */
+.md-kit.is-quiet .md-kit-brick{opacity:.9!important}
+.md-kit{cursor:pointer!important}
+.md-kit:focus-visible{outline:3px solid var(--mf-blue,#0055BF)!important;outline-offset:3px!important}
+.md-kit:hover .md-kit-body{transform:translateY(-1px)!important}
+
 /* ═══════════════════════ FIG-TALKS PERSONALISATION ═══════════════════════ */
 /* A request, not a purchase — no cart language, no price, no checkout. */
 
@@ -307,6 +354,7 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-pop-red    .md-fig-preview{border-color:var(--mf-red,#E52828)!important;border-bottom-color:#B31D1D!important}
 .md-pop-blue   .md-fig-preview{border-color:var(--mf-blue,#0055BF)!important;border-bottom-color:#003D8C!important}
 .md-pop-yellow .md-fig-preview{border-color:var(--mf-yellow,#FFCC00)!important;border-bottom-color:#E5B800!important}
+.md-pop-green  .md-fig-preview{border-color:var(--mf-green,#237841)!important;border-bottom-color:#17512C!important}
 
 .md-fig-acts{display:flex!important;gap:9px!important;flex-wrap:wrap!important;margin-top:14px!important}
 /* Same trick as the slot rows: the primary's hard shadow sits outside its box

@@ -25,6 +25,48 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.0.0
+
+**The section is organised by Mini-Kit, not by action.** It used to be a shelf of
+devices with a Fig-Talks request bolted on. It is now four kits — **Mini-Designs**,
+**Design-Talks**, **Brick-Talks**, **Fig-Talks** — where you pick one first and its
+own screen shows the single action that fits where its request actually is.
+
+    Mini-Kits → Mini-Designs → choose scenes → note → Send Request → status
+              → Design-Talks → note → Send Request → status
+              → Brick-Talks  → note → Send Request → status
+              → Fig-Talks    → personalize → review → note → Send Request → status
+
+All four share one lifecycle — Draft → Submitted → Contacted → Preparing →
+Connected — and every request takes an optional note. Only Fig-Talks personalises;
+only Mini-Designs picks from a catalogue.
+
+**The cards say nothing until there is something to say.** "Not Requested" reads as
+a database column rather than an invitation, so a kit nobody has asked for shows its
+name and what it is, and the request lives one click in. The whole card opens the
+kit.
+
+**Mini-Designs is a catalogue, not a product.** A new **Mini-Designs** post type
+holds the buildable scenes, each with an availability the team edits: Available,
+Currently Unavailable, Coming Soon. Unavailable scenes stay on show — hiding them
+would make Mini-Designs look far smaller than it is — reading plainly and not
+selectable. It seeds once with the scenes that can be built today; the wider list
+from the game's database can be imported later, arriving unavailable until the team
+says otherwise.
+
+**Requests are generalised.** One admin screen, **Mini-Kit Requests**, filterable by
+kit and by status, showing what was asked for — scenes, or face/hairstyle/hair
+colour — plus the note. The post type keeps its original slug so Fig-Talks requests
+made before the other kits existed are not orphaned; they carry `kit = fig-talks`.
+`md_kit_request_submitted` and `md_kit_status_changed` replace the Fig-Talks-only
+hooks, and `md_kits` lets a kit be renamed, retagged or added without touching the
+plugin.
+
+**Device features moved under their kit.** Overview, Recordings, Slots and Scenes
+are sections of the kit that owns them, visible but locked until the kit is made and
+reaches its member — a kit made to order cannot be connected before it exists, so
+saying "not connected" was the wrong shape.
+
 ## mini-devices 2.11.0
 
 **Status names that read as a community request, not an order.**

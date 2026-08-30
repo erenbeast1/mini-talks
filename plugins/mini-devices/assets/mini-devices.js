@@ -18,8 +18,8 @@
      every screen can be walked through without hardware. Nothing touches the
      server: api() is short-circuited and downloads are synthesised locally. */
   var demo = false, publicDemo = false;
-  var fig = null;   // Fig-Talks design + request, from /figtalks
-  var realState = null, realFaces = null, realFig = null;
+  var kits = null;  // requests + Fig-Talks design + Mini-Designs catalogue, from /kits
+  var realState = null, realFaces = null, realKits = null;
   var onlyKits = null;   // public preview may show a single kit
 
   function demoFace(bg, mouth) {
@@ -96,8 +96,8 @@
   function setDemo(on) {
     if (on === demo) return;
     if (on) {
-      realState = state; realFaces = faces; realFig = fig;
-      fig = { design: null, request: null, editable: true };
+      realState = state; realFaces = faces; realKits = kits;
+      kits = { kits: {}, design: null, catalogue: (kits && kits.catalogue) || [] };
       var d = demoData();
       state = d.state; faces = d.faces;
       demo = true;
@@ -106,8 +106,8 @@
       }
     } else {
       state = realState || {}; faces = realFaces || {};
-      fig = realFig || null;
-      realState = realFaces = realFig = null;
+      kits = realKits || null;
+      realState = realFaces = realKits = null;
       demo = false;
       closeKit();
       setStatus('Demo mode is off.', 'ok');
@@ -634,38 +634,30 @@
 
   /* One entry per Mini-Talks kit. The shelf always shows all three, so a
      kit the user does not own yet still reads as part of the family. */
+  /* The four Mini-Kits. The profile is organised by kit, not by action:
+     Mini-Kits → pick one → that kit's own screen. What differs between them is
+     the step before a request; after that they share one lifecycle. */
   var KITS = [
     {
-      code: 'F', name: 'Fig-Talks', color: 'red',
-      tagline: 'Your personalized Mini-Kit',
-      sections: ['personalize', 'overview', 'recordings'],
+      slug: 'mini-designs', code: '', colour: 'green',
+      name: 'Mini-Designs',
+      tagline: 'Buildable scenes for Mini-Talks.',
+      pre: 'catalogue', cta: 'Choose your Mini-Designs',
       art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
-           '<rect x="22" y="4" width="20" height="7" rx="3" class="a1"/>' +
-           '<rect x="17" y="10" width="30" height="22" rx="7" class="a1"/>' +
-           '<circle cx="26" cy="20" r="2.6" class="ink"/><circle cx="38" cy="20" r="2.6" class="ink"/>' +
-           '<path d="M26 26 q6 5 12 0" class="stroke"/>' +
-           '<rect x="14" y="34" width="36" height="24" rx="5" class="a2"/>' +
-           '<rect x="6" y="38" width="9" height="16" rx="4" class="a2"/>' +
-           '<rect x="49" y="38" width="9" height="16" rx="4" class="a2"/>' +
-           '<circle cx="32" cy="45" r="4.5" class="hole"/></svg>'
+           '<rect x="5" y="20" width="26" height="26" rx="4" class="a2"/>' +
+           '<rect x="33" y="20" width="26" height="26" rx="4" class="a1"/>' +
+           '<rect x="5" y="48" width="26" height="12" rx="4" class="a1"/>' +
+           '<rect x="33" y="48" width="26" height="12" rx="4" class="a2"/>' +
+           '<rect x="11" y="14" width="7" height="6" rx="2.5" class="a2"/>' +
+           '<rect x="21" y="14" width="7" height="6" rx="2.5" class="a2"/>' +
+           '<rect x="39" y="14" width="7" height="6" rx="2.5" class="a1"/>' +
+           '<rect x="49" y="14" width="7" height="6" rx="2.5" class="a1"/></svg>'
     },
     {
-      code: 'B', name: 'Brick-Talks', color: 'blue',
-      tagline: 'A screen kit. Design a face for every slot and send it over.',
-      sections: ['overview', 'slots'],
-      art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
-           '<rect x="18" y="3" width="8" height="6" rx="2.5" class="a1"/>' +
-           '<rect x="38" y="3" width="8" height="6" rx="2.5" class="a1"/>' +
-           '<rect x="8" y="8" width="48" height="42" rx="7" class="a1"/>' +
-           '<rect x="14" y="15" width="36" height="26" rx="4" class="screen"/>' +
-           '<circle cx="25" cy="26" r="3" class="ink"/><circle cx="39" cy="26" r="3" class="ink"/>' +
-           '<path d="M25 33 q7 5 14 0" class="stroke"/>' +
-           '<rect x="20" y="52" width="24" height="8" rx="3" class="a2"/></svg>'
-    },
-    {
-      code: 'D', name: 'Design-Talks', color: 'yellow',
-      tagline: 'Scene cards and level-by-level practice, from sound to dialogue.',
-      sections: ['overview', 'scenes'],
+      slug: 'design-talks', code: 'D', colour: 'yellow',
+      name: 'Design-Talks',
+      tagline: 'Turn Mini-Designs into interactive communication experiences.',
+      pre: '', cta: 'Request Design-Talks',
       art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
            '<rect x="6" y="20" width="30" height="38" rx="5" class="a2" transform="rotate(-9 21 39)"/>' +
            '<rect x="18" y="14" width="30" height="38" rx="5" class="a1"/>' +
@@ -676,33 +668,68 @@
            '<rect x="25" y="38" width="10" height="3.5" rx="1.75" class="line"/>' +
            '<circle cx="47" cy="47" r="9" class="chip"/>' +
            '<path d="M43 47h8M47 43v8" class="stroke-w"/></svg>'
+    },
+    {
+      slug: 'brick-talks', code: 'B', colour: 'blue',
+      name: 'Brick-Talks',
+      tagline: 'Bring personalized characters to life through voice and animation.',
+      pre: '', cta: 'Request Brick-Talks',
+      art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
+           '<rect x="18" y="3" width="8" height="6" rx="2.5" class="a1"/>' +
+           '<rect x="38" y="3" width="8" height="6" rx="2.5" class="a1"/>' +
+           '<rect x="8" y="8" width="48" height="42" rx="7" class="a1"/>' +
+           '<rect x="14" y="15" width="36" height="26" rx="4" class="screen"/>' +
+           '<circle cx="25" cy="26" r="3" class="ink"/><circle cx="39" cy="26" r="3" class="ink"/>' +
+           '<path d="M25 33 q7 5 14 0" class="stroke"/>' +
+           '<rect x="20" y="52" width="24" height="8" rx="3" class="a2"/></svg>'
+    },
+    {
+      slug: 'fig-talks', code: 'F', colour: 'red',
+      name: 'Fig-Talks',
+      tagline: 'A personalized figure designed to represent the child.',
+      pre: 'personalize', cta: 'Personalize Fig-Talks',
+      art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
+           '<rect x="22" y="4" width="20" height="7" rx="3" class="a1"/>' +
+           '<rect x="17" y="10" width="30" height="22" rx="7" class="a1"/>' +
+           '<circle cx="26" cy="20" r="2.6" class="ink"/><circle cx="38" cy="20" r="2.6" class="ink"/>' +
+           '<path d="M26 26 q6 5 12 0" class="stroke"/>' +
+           '<rect x="14" y="34" width="36" height="24" rx="5" class="a2"/>' +
+           '<rect x="6" y="38" width="9" height="16" rx="4" class="a2"/>' +
+           '<rect x="49" y="38" width="9" height="16" rx="4" class="a2"/>' +
+           '<circle cx="32" cy="45" r="4.5" class="hole"/></svg>'
     }
   ];
+
+  function kitBySlug(slug) {
+    for (var i = 0; i < KITS.length; i++) if (KITS[i].slug === slug) return KITS[i];
+    return null;
+  }
 
   var LEVELS = ['Sound', 'Word', 'Sentence', 'Dialogue'];
 
   function kitByCode(code) {
+    if (!code) return null;
     for (var i = 0; i < KITS.length; i++) if (KITS[i].code === code) return KITS[i];
     return null;
   }
 
   /* The device key for a kit type, or null when the profile has none. */
-  function kitKey(code) {
+  /* The device key for a kit that has hardware, or null. */
+  function kitKey(kit) {
+    if (!kit || !kit.code) return null;
     var keys = Object.keys(state);
     for (var i = 0; i < keys.length; i++) {
       var d = state[keys[i]];
-      if ((d.type || keys[i]) === code) return keys[i];
+      if ((d.type || keys[i]) === kit.code) return keys[i];
     }
     return null;
   }
 
-  /* live   — plugged in right now, everything is available
-     linked — synced before, read-only view of the last sync
-     new    — not part of this profile yet */
-  function kitStatus(code) {
-    if (demo) return kitKey(code) ? 'live' : 'new';
-    if (port && liveType === code) return 'live';
-    return kitKey(code) ? 'linked' : 'new';
+  function kitStatus(kit) {
+    if (!kit.code) return 'none';
+    if (demo) return kitKey(kit) ? 'live' : 'new';
+    if (port && liveType === kit.code) return 'live';
+    return kitKey(kit) ? 'linked' : 'new';
   }
 
   function saveName(payload, input) {
@@ -714,14 +741,12 @@
     });
   }
 
-  /* ── shelf ── */
-
   function pill(status) {
     var map = {
       live:   ['md-pill md-pill-live',   'Connected'],
-      linked: ['md-pill md-pill-linked', 'Not connected'],
-      'new':  ['md-pill md-pill-new',    'Not linked yet']
+      linked: ['md-pill md-pill-linked', 'Not connected']
     };
+    if (!map[status]) return null;
     var p = el('span', map[status][0]);
     p.appendChild(el('span', 'md-pill-dot'));
     p.appendChild(document.createTextNode(map[status][1]));
@@ -741,30 +766,34 @@
     return n;
   }
 
-  function kitCard(kit) {
-    var status = kitStatus(kit.code);
-    var key    = kitKey(kit.code);
-    var dev    = key ? state[key] : null;
+  /* ── shelf ──
+     Four cards, kept plain. No "Not Requested" caption: that reads as a
+     database column, not an invitation. The whole card opens the kit. */
 
-    var figActive = kit.code === 'F' && !!figState().request;
-    var card = el('article', 'md-kit md-kit-' + kit.color +
-                  ' is-' + (figActive && status === 'new' ? 'requested' : status));
+  function kitCard(kit) {
+    var req    = reqFor(kit.slug);
+    var key    = kitKey(kit);
+    var dev    = key ? state[key] : null;
+    var status = kitStatus(kit);
+
+    var card = el('article', 'md-kit md-kit-' + kit.colour +
+                  (req || dev ? ' is-active' : ' is-quiet'));
+    card.setAttribute('role', 'button');
+    card.tabIndex = 0;
+    card.setAttribute('aria-label', 'Open ' + kit.name);
 
     card.appendChild(el('div', 'md-kit-studs'));
 
-    // studs → coloured brick → white inner, the same shell the forum's detail
-    // popup uses. The brick's top padding is the coloured band under the studs.
     var brick = el('div', 'md-kit-brick');
     var body  = el('div', 'md-kit-body');
 
     var art = el('div', 'md-kit-art');
-    var iconUrl = window.MD && MD.icons && MD.icons[kit.code];
+    var iconUrl = window.MD && MD.icons && MD.icons[kit.slug];
     if (iconUrl) {
       var icon = el('img', 'md-kit-icon');
       icon.src = iconUrl;
       icon.alt = '';
       icon.loading = 'lazy';
-      // A missing or blocked render must not leave an empty tile.
       icon.addEventListener('error', function () { art.innerHTML = kit.art; });
       art.appendChild(icon);
     } else {
@@ -775,76 +804,49 @@
     var main = el('div', 'md-kit-main');
     var row  = el('div', 'md-kit-titlerow');
     row.appendChild(el('h4', 'md-kit-name', dev && dev.label ? dev.label : kit.name));
-    // A requested Fig-Talks reads its request status below; the connection pill
-    // on top of that just says "not linked yet" about a kit being made for you.
-    var figRequested = kit.code === 'F' && figState().request &&
-                       figState().request.status !== 'draft' && !dev;
-    if (!figRequested) row.appendChild(pill(status));
+    if (req) row.appendChild(statusBadge(req));
+    else if (dev) { var p = pill(status); if (p) row.appendChild(p); }
     main.appendChild(row);
     main.appendChild(el('p', 'md-kit-tagline', kit.tagline));
 
-    var facts = el('div', 'md-kit-facts' + (kit.code === 'F' ? ' md-kit-facts-stack' : ''));
-    if (kit.code === 'F') {
-      var f = figState(), r = f.request;
-      if (r) {
-        facts.appendChild(figBadge(r));
-        if (r.status_note) facts.appendChild(el('p', 'md-kit-line', r.status_note));
-        if (r.submitted) {
-          facts.appendChild(el('p', 'md-fig-when',
-            (r.status === 'draft' ? 'Started ' : 'Submitted on ') + fmtDay(r.submitted)));
-        }
-      } else if (f.design) {
-        facts.appendChild(el('p', 'md-kit-line', 'Your design is ready to send.'));
-      } else {
-        facts.appendChild(el('p', 'md-kit-hint',
-          'Every Fig-Talks is made with the character its owner designs. Personalize yours, ' +
-          'then send the design to the Mini-Talks team.'));
-      }
-      if (dev) {
-        var n0 = countRecordings(dev);
-        var sub = el('div', 'md-kit-facts-row');
-        sub.appendChild(fact(String(n0), n0 === 1 ? 'recording' : 'recordings'));
-        sub.appendChild(fact(fmtTotal(dev.stats && dev.stats.total_s), 'recorded'));
-        facts.appendChild(sub);
-      }
-    } else if (dev) {
+    if (req && req.status_note) main.appendChild(el('p', 'md-kit-line', req.status_note));
+    if (req && req.submitted)   main.appendChild(el('p', 'md-fig-when', 'Submitted on ' + fmtDay(req.submitted)));
+
+    if (dev) {
+      var facts = el('div', 'md-kit-facts');
       var n = countRecordings(dev);
       facts.appendChild(fact(String(n), n === 1 ? 'recording' : 'recordings'));
       facts.appendChild(fact(fmtTotal(dev.stats && dev.stats.total_s), 'recorded'));
-      facts.appendChild(fact(fmtDate(dev.last_sync).split(' ').slice(0, 3).join(' '), 'last sync'));
-    } else {
-      facts.appendChild(el('p', 'md-kit-hint',
-        'Plug this kit into your computer with a USB data cable, then press “Connect a kit”.'));
+      facts.appendChild(fact(fmtDay(dev.last_sync), 'last sync'));
+      main.appendChild(facts);
     }
-    main.appendChild(facts);
     body.appendChild(main);
 
     var cta = el('div', 'md-kit-cta');
-    var open = el('button', 'md-btn md-btn-open', status === 'live' ? 'Open kit' : 'View details');
+    var open = el('button', 'md-btn md-btn-open', cardAction(kit, req, dev));
     open.type = 'button';
-
-    if (kit.code === 'F') {
-      // Fig-Talks always opens: it is personalised before one is ever owned.
-      var fs = figState();
-      open.textContent = (fs.request && fs.request.status !== 'draft') ? 'View My Design'
-                       : (fs.design ? 'Finish your request' : 'Personalize Fig-Talks');
-      open.addEventListener('click', function () { openKit(kit.code); });
-    } else if (status === 'new') {
-      open.textContent = 'Connect to open';
-      open.disabled = true;
-      open.title = 'This kit is not linked to your profile yet.';
-    } else {
-      open.addEventListener('click', function () { openKit(kit.code); });
-    }
+    open.addEventListener('click', function (e) { e.stopPropagation(); openKit(kit.slug); });
     cta.appendChild(open);
-    if (status === 'linked' && kit.code !== 'F') {
-      cta.appendChild(el('span', 'md-kit-note', 'Read-only until you plug it in'));
-    }
     body.appendChild(cta);
 
     brick.appendChild(body);
     card.appendChild(brick);
+
+    card.addEventListener('click', function () { openKit(kit.slug); });
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openKit(kit.slug); }
+    });
     return card;
+  }
+
+  /* One action per state, never a menu of everything. */
+  function cardAction(kit, req, dev) {
+    if (!req) return dev ? 'Open kit' : 'Open';
+    if (req.status === 'draft') {
+      return kit.pre === 'personalize' ? 'Review your design' : 'Review your selection';
+    }
+    if (req.status === 'connected' && dev) return 'Open kit';
+    return kit.pre === 'personalize' ? 'View My Design' : 'View Request';
   }
 
   function fact(value, label) {
@@ -856,19 +858,15 @@
 
   function renderShelf() {
     shelfEl.innerHTML = '';
-    KITS.filter(function (k) { return !onlyKits || onlyKits.indexOf(k.code) >= 0; })
+    KITS.filter(function (k) { return !onlyKits || onlyKits.indexOf(k.slug) >= 0 || (k.code && onlyKits.indexOf(k.code.toLowerCase()) >= 0); })
         .forEach(function (k) { shelfEl.appendChild(kitCard(k)); });
   }
 
-  /* Fills the "Kits" counter in the profile header, and the Fig-Talks request
-     status beside it once there is one. */
   function syncHeaderStat() {
-    syncFigStat();
+    syncKitStat();
     var n = Object.keys(state).length;
     var box = document.getElementById('mf-stat-kits');
     if (box) { box.textContent = 'Kits: ' + n; return; }
-
-    // Older Mini-Forum has no id on the box — append our own instead.
     var row = document.querySelector('.mf-stats-row');
     if (!row) return;
     var own = document.getElementById('md-stat-box');
@@ -880,74 +878,88 @@
     own.textContent = 'Kits: ' + n;
   }
 
-  function syncFigStat() {
+  /* The member's own profile carries how many requests are in flight. */
+  function syncKitStat() {
     var row = document.querySelector('.mf-stats-row');
     if (!row) return;
-    var r   = figState().request;
-    var box = document.getElementById('md-stat-figtalks');
-
-    if (!r || r.status === 'draft') { if (box) box.remove(); return; }
+    var live = [];
+    KITS.forEach(function (k) {
+      var r = reqFor(k.slug);
+      if (r && r.status !== 'draft') live.push(k.name + ': ' + r.status_label);
+    });
+    var box = document.getElementById('md-stat-requests');
+    if (!live.length) { if (box) box.remove(); return; }
     if (!box) {
       box = el('div', 'mf-stat-box md-stat-figtalks');
-      box.id = 'md-stat-figtalks';
+      box.id = 'md-stat-requests';
       row.appendChild(box);
     }
-    box.textContent = 'Fig-Talks: ' + (r.status_label || r.status);
-    box.title = 'Your personalized Fig-Talks request';
+    box.textContent = live.length === 1 ? live[0] : 'Mini-Kit requests: ' + live.length;
+    box.title = live.join(' · ');
   }
 
-  /* ── kit popup ── */
+  /* ── kit detail ── */
 
-  var openCode = null, openSection = null;
+  var openSlug = null, openSection = null;
 
-  function openKit(code) {
-    openCode = code;
-    var kit = kitByCode(code);
-    var avail = kit.sections.filter(function (sec) { return sectionAvailable(code, sec); });
-    var open  = avail.filter(function (sec) { return !sectionLocked(code, sec); });
+  function kitSections(kit) {
+    var secs = ['request'];
+    if (kit.code === 'F') secs = secs.concat(['overview', 'recordings']);
+    if (kit.code === 'B') secs = secs.concat(['overview', 'slots']);
+    if (kit.code === 'D') secs = secs.concat(['overview', 'scenes']);
+    return secs;
+  }
+
+  function sectionAvailable(kit, sec) {
+    if (sec === 'request') return true;
+    var key = kitKey(kit), dev = key ? state[key] : null;
+    if (sec === 'scenes') return !dev || !!((dev.scenes || []).length || (dev.cards && Object.keys(dev.cards).length));
+    return true;
+  }
+
+  /* A kit section needs the kit itself. Every Mini-Kit is made to order, so it
+     cannot exist before the request does — say that rather than "not connected". */
+  function sectionLocked(kit, sec) {
+    if (sec === 'request') return false;
+    return !kitKey(kit);
+  }
+
+  function openKit(slug) {
+    openSlug = slug;
+    var kit   = kitBySlug(slug);
+    var avail = kitSections(kit).filter(function (sec) { return sectionAvailable(kit, sec); });
+    var open  = avail.filter(function (sec) { return !sectionLocked(kit, sec); });
     if (open.indexOf(openSection) < 0) openSection = open[0] || avail[0];
     renderPopup();
     document.body.style.overflow = 'hidden';
   }
 
   function closeKit() {
-    openCode = null;
+    openSlug = null;
     modalRoot.innerHTML = '';
     document.body.style.overflow = '';
   }
 
-  function sectionAvailable(code, sec) {
-    var key = kitKey(code), dev = key ? state[key] : null;
-    if (sec === 'personalize') return code === 'F';
-    if (sec === 'scenes')  return !!(dev && ((dev.scenes || []).length || (dev.cards && Object.keys(dev.cards).length)));
-    if (sec === 'slots')   return code === 'B';
-    return true;
-  }
-
-  /* A kit section needs the kit. Fig-Talks can be personalised long before one
-     arrives, so those tabs stay visible but locked rather than disappearing. */
-  function sectionLocked(code, sec) {
-    if (sec === 'personalize') return false;
-    return !kitKey(code);
+  function sectionLabel(sec) {
+    return { request: 'Request', overview: 'Overview', recordings: 'Recordings',
+             slots: 'Slots', scenes: 'Scenes' }[sec] || sec;
   }
 
   function renderPopup() {
     modalRoot.innerHTML = '';
-    if (!openCode) return;
+    if (!openSlug) return;
 
-    var kit    = kitByCode(openCode);
-    var status = kitStatus(openCode);
-    var live   = status === 'live';
-    var key    = kitKey(openCode);
-    var dev    = key ? state[key] : null;
-    if (!dev && openCode !== 'F') { closeKit(); return; }
-    if (!dev) dev = { type: 'F', slots: [], stats: {} };   // personalise before you own one
+    var kit  = kitBySlug(openSlug);
+    var req  = reqFor(openSlug);
+    var key  = kitKey(kit);
+    var dev  = key ? state[key] : null;
+    var live = kitStatus(kit) === 'live';
 
     var overlay = el('div', 'md-overlay');
     overlay.id = 'md-kit-overlay';
     overlay.addEventListener('click', function (e) { if (e.target === overlay) closeKit(); });
 
-    var wrap  = el('div', 'md-popup-wrapper md-pop-' + kit.color);
+    var wrap = el('div', 'md-popup-wrapper md-pop-' + kit.colour);
     wrap.appendChild(el('div', 'md-popup-studs'));
 
     var modal = el('div', 'md-popup-modal');
@@ -959,126 +971,92 @@
     close.addEventListener('click', closeKit);
     inner.appendChild(close);
 
-    /* header */
     var head = el('header', 'md-pop-head');
-    var brick = el('span', 'md-pop-brick');
-    head.appendChild(brick);
+    head.appendChild(el('span', 'md-pop-brick'));
     var htxt = el('div', 'md-pop-headtext');
-    htxt.appendChild(el('h2', null, dev.label || kit.name));
+    htxt.appendChild(el('h2', null, dev && dev.label ? dev.label : kit.name));
     var meta = el('div', 'md-pop-meta');
-    if (dev.uid) meta.appendChild(el('span', 'md-uid', dev.uid));
-    if (dev.fw)  meta.appendChild(el('span', 'md-fw', 'Firmware ' + dev.fw));
-    var figReq = openCode === 'F' ? figState().request : null;
-    if (key)            meta.appendChild(el('span', 'md-sync', 'Last sync: ' + fmtDate(dev.last_sync)));
-    else if (!figReq)   meta.appendChild(el('span', 'md-sync', 'Not connected to this profile yet'));
+    if (dev) {
+      if (dev.uid) meta.appendChild(el('span', 'md-uid', dev.uid));
+      if (dev.fw)  meta.appendChild(el('span', 'md-fw', 'Firmware ' + dev.fw));
+      meta.appendChild(el('span', 'md-sync', 'Last sync: ' + fmtDate(dev.last_sync)));
+    } else {
+      meta.appendChild(el('span', 'md-sync', kit.tagline));
+    }
     htxt.appendChild(meta);
     head.appendChild(htxt);
-    // With a request in flight the badge below says where things stand; a
-    // "not linked yet" pill on top of it only contradicts.
-    if (figReq && !key) head.appendChild(figBadge(figReq));
-    else                head.appendChild(pill(status));
+    if (req) head.appendChild(statusBadge(req));
+    else if (dev) { var hp = pill(kitStatus(kit)); if (hp) head.appendChild(hp); }
     inner.appendChild(head);
 
-    if (publicDemo) {
-      inner.appendChild(el('p', 'md-pop-banner md-pop-banner-demo',
-        'Preview kit — this is what you see on your profile once a kit is linked. Try anything; nothing is saved.'));
-    } else if (demo) {
-      inner.appendChild(el('p', 'md-pop-banner md-pop-banner-demo',
-        'Demo mode — sample kit. Everything here is interactive, and nothing is saved.'));
-    } else if (!key) {
-      inner.appendChild(el('p', 'md-pop-banner', openCode === 'F'
-        ? 'Every Fig-Talks is made with the character its owner designs, so this is where yours starts. Recordings open up once it reaches you.'
-        : 'No ' + kit.name + ' is connected to your profile yet. You can still personalize yours below.'));
-    } else if (!live) {
+    if (demo) {
+      inner.appendChild(el('p', 'md-pop-banner md-pop-banner-demo', publicDemo
+        ? 'Preview — try anything; nothing is saved.'
+        : 'Demo mode — sample data. Everything here is interactive, and nothing is saved.'));
+    } else if (dev && !live) {
       inner.appendChild(el('p', 'md-pop-banner',
         'Not connected — showing the last sync. Plug the kit in to download audio, rename recordings or send faces.'));
     }
 
-    /* section nav */
-    var avail = kit.sections.filter(function (sec) { return sectionAvailable(openCode, sec); });
+    var avail = kitSections(kit).filter(function (sec) { return sectionAvailable(kit, sec); });
     if (avail.length > 1) {
       var nav = el('nav', 'md-pop-nav');
       avail.forEach(function (sec) {
-        var lock = sectionLocked(openCode, sec);
+        var lock = sectionLocked(kit, sec);
         var b = el('button', 'md-pop-navbtn' + (sec === openSection ? ' is-on' : '') + (lock ? ' is-locked' : ''),
                    sectionLabel(sec));
         b.type = 'button';
         b.disabled = lock;
-        if (lock) b.title = openCode === 'F'
-          ? 'Available once your Fig-Talks has been made and arrives.'
-          : 'Available once your ' + kit.name + ' is connected.';
+        if (lock) b.title = 'Available once your ' + kit.name + ' has been made and reaches you.';
         else b.addEventListener('click', function () { openSection = sec; renderPopup(); });
         nav.appendChild(b);
       });
       inner.appendChild(nav);
     }
 
-    /* section body */
     var bodyEl = el('div', 'md-pop-body');
-    if (openSection === 'personalize')     renderPersonalize(bodyEl);
-    else if (openSection === 'overview')   renderOverview(bodyEl, key, dev, live);
-    else if (openSection === 'recordings') renderRecordings(bodyEl, key, dev, live);
-    else if (openSection === 'slots')      renderSlots(bodyEl, key, dev, live);
-    else if (openSection === 'scenes')     renderScenes(bodyEl, key, dev, live);
+    if (openSection === 'request')          renderRequest(bodyEl, kit);
+    else if (openSection === 'overview')    renderOverview(bodyEl, key, dev, live);
+    else if (openSection === 'recordings')  renderRecordings(bodyEl, key, dev, live);
+    else if (openSection === 'slots')       renderSlots(bodyEl, key, dev, live);
+    else if (openSection === 'scenes')      renderScenes(bodyEl, key, dev, live);
     inner.appendChild(bodyEl);
 
-    /* footer */
-    var foot = el('footer', 'md-pop-foot');
-    if (!key) {           // nothing to download or unlink yet
-      modal.appendChild(inner);
-      wrap.appendChild(modal);
-      overlay.appendChild(wrap);
-      modalRoot.appendChild(overlay);
-      return;
-    }
-    var full = (dev.slots || []).filter(function (s) { return s.full; });
-    if (full.length) {
-      var all = el('button', 'md-btn md-btn-ghost', 'Download all ' + full.length + ' recordings');
-      all.type = 'button';
-      all.disabled = !live;
-      all.title = live ? '' : 'Connect the kit to download.';
-      all.addEventListener('click', function () { downloadAll(full, all); });
-      foot.appendChild(all);
-    }
-    if (publicDemo) {           // nothing to remove from on a marketing page
-      inner.appendChild(foot);
-      modal.appendChild(inner);
-      wrap.appendChild(modal);
-      overlay.appendChild(wrap);
-      modalRoot.appendChild(overlay);
-      return;
-    }
-
-    var forget = el('button', 'md-btn md-btn-danger', 'Remove from profile');
-    forget.type = 'button';
-    forget.addEventListener('click', function () {
-      if (!window.confirm(demo
-            ? 'Remove ' + (dev.label || kit.name) + ' from the demo shelf? Nothing real is affected.'
-            : 'Remove ' + (dev.label || kit.name) + ' from your profile? ' +
-              'Recordings on the kit itself are not deleted.')) return;
-      if (!demo && port && liveType === openCode) { try { send({ cmd: 'unbind' }); } catch (e) {} }
-      api('forget', { dev: key }).then(function () {
-        delete state[key];
-        closeKit();
-        render();
-        setStatus('The kit was removed from your profile.', 'ok');
+    if (dev && !publicDemo) {
+      var foot = el('footer', 'md-pop-foot');
+      var full = (dev.slots || []).filter(function (s) { return s.full; });
+      if (full.length) {
+        var all = el('button', 'md-btn md-btn-ghost', 'Download all ' + full.length + ' recordings');
+        all.type = 'button';
+        all.disabled = !live;
+        all.title = live ? '' : 'Connect the kit to download.';
+        all.addEventListener('click', function () { downloadAll(full, all); });
+        foot.appendChild(all);
+      }
+      var forget = el('button', 'md-btn md-btn-danger', 'Remove from profile');
+      forget.type = 'button';
+      forget.addEventListener('click', function () {
+        if (!window.confirm(demo
+              ? 'Remove ' + (dev.label || kit.name) + ' from the demo shelf? Nothing real is affected.'
+              : 'Remove ' + (dev.label || kit.name) + ' from your profile? ' +
+                'Recordings on the kit itself are not deleted.')) return;
+        if (!demo && port && liveType === kit.code) { try { send({ cmd: 'unbind' }); } catch (e) {} }
+        api('forget', { dev: key }).then(function () {
+          delete state[key];
+          closeKit();
+          render();
+          setStatus('The kit was removed from your profile.', 'ok');
+        });
       });
-    });
-    foot.appendChild(forget);
-    inner.appendChild(foot);
+      foot.appendChild(forget);
+      inner.appendChild(foot);
+    }
 
     modal.appendChild(inner);
     wrap.appendChild(modal);
     overlay.appendChild(wrap);
     modalRoot.appendChild(overlay);
   }
-
-  function sectionLabel(sec) {
-    return { personalize: 'Personalize', overview: 'Overview', recordings: 'Recordings',
-             slots: 'Slots', scenes: 'Scenes' }[sec] || sec;
-  }
-
-  /* ── popup sections ── */
 
   function statGrid(stats) {
     var wrap = el('div', 'md-stats');
@@ -1102,16 +1080,17 @@
      the team contacts you. A sent request is frozen; designing again opens a
      new one, so the team never has work change under them. */
 
-  var DEMO_FIG_STEPS = [
-    { key: 'draft', label: 'Personalized' }, { key: 'submitted', label: 'Submitted' },
-    { key: 'contacted', label: 'Contacted' }, { key: 'preparing', label: 'Preparing' },
-    { key: 'connected', label: 'Connected' }
-  ];
+  /* ══════════════ Requests ══════════════
+     Every Mini-Kit is made to order, so none of them are bought. A member opens
+     a kit and asks for it; what differs is the step before the ask. After that
+     all four share one lifecycle, and each screen shows the one action that
+     fits where the request actually is. */
 
-  var FIG_STEPS = ['Choose Your Face', 'Choose Your Hairstyle',
-                   'Choose Your Hair Color', 'Review Your Fig-Talks'];
-
-  function figState() { return fig || { design: null, request: null, editable: true }; }
+  function kitsState() { return kits || { kits: {}, design: null, catalogue: [] }; }
+  function reqFor(slug) {
+    var k = kitsState().kits || {};
+    return (k[slug] && k[slug].request) || null;
+  }
 
   function fmtDay(epoch) {
     if (!epoch) return '';
@@ -1119,16 +1098,15 @@
       { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
-  function figBadge(req) {
+  function statusBadge(req) {
     var b = el('span', 'md-fig-badge is-' + (req.status || 'draft'));
     b.appendChild(el('span', 'md-fig-badge-dot'));
     b.appendChild(document.createTextNode((req.status_label || req.status).toUpperCase()));
     return b;
   }
 
-  /* Personalized → Submitted → Contacted → Preparing → Connected.
-     Deliberately not a delivery tracker: no shipping words, no ETA. */
-  function figProgress(req) {
+  /* Deliberately not a delivery tracker: no shipping words, no ETA. */
+  function statusRail(req) {
     var steps = (req && req.steps) || [];
     if (!steps.length) return null;
     var at = 0;
@@ -1144,10 +1122,8 @@
     return rail;
   }
 
-  function figApi(path, body) {
-    if (demo) {                     // sample data; nothing reaches the server
-      return new Promise(function (r) { setTimeout(function () { r(demoFig(path, body)); }, 260); });
-    }
+  function kitApi(path, body) {
+    if (demo) return new Promise(function (r) { setTimeout(function () { r(demoKits(path, body)); }, 260); });
     return fetch(MD.rest + path, {
       method: body ? 'POST' : 'GET',
       headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': MD.nonce },
@@ -1156,22 +1132,45 @@
     }).then(function (r) { return r.json(); });
   }
 
-  function demoFig(path, body) {
-    var f = figState();
-    if (path === 'figtalks/design') {
-      fig = { design: { config: body.config, url: body.image || (f.design || {}).url, updated: Date.now() / 1000 },
-              request: f.request && f.request.status !== 'draft' ? f.request
-                     : { status: 'draft', status_label: 'Draft', steps: DEMO_FIG_STEPS,
-                         status_note: 'Your Fig-Talks design is still being personalized.' },
-              editable: true };
-    } else if (path === 'figtalks/request') {
-      fig = { design: f.design,
-              request: { status: 'submitted', status_label: 'Submitted',
-                         status_note: 'Your Fig-Talks design has been shared with the Mini-Talks team.',
-                         submitted: Math.floor(Date.now() / 1000), steps: DEMO_FIG_STEPS },
-              editable: false };
+  function demoSteps(kit) {
+    var first = kit.pre === 'personalize' ? 'Personalized' : (kit.pre === 'catalogue' ? 'Selected' : 'Started');
+    return [{ key: 'draft', label: first }, { key: 'submitted', label: 'Submitted' },
+            { key: 'contacted', label: 'Contacted' }, { key: 'preparing', label: 'Preparing' },
+            { key: 'connected', label: 'Connected' }];
+  }
+
+  var DEMO_NOTES = {
+    draft:     'Your design is still being personalized.',
+    submitted: 'Your request has been shared with the Mini-Talks team.'
+  };
+
+  function demoKits(path, body) {
+    var st = kitsState();
+    st.kits = st.kits || {};
+    if (path === 'kits/design') {
+      st.design = { config: body.config, url: body.image || (st.design || {}).url };
+      var cur = st.kits['fig-talks'] && st.kits['fig-talks'].request;
+      if (!cur || cur.status === 'draft') {
+        st.kits['fig-talks'] = { request: { kit: 'fig-talks', status: 'draft', status_label: 'Draft',
+          status_note: DEMO_NOTES.draft, steps: demoSteps(kitBySlug('fig-talks')) }, editable: true };
+      }
+    } else if (path === 'kits/request') {
+      var kit = kitBySlug(body.kit);
+      st.kits[body.kit] = { request: { kit: body.kit, status: 'submitted', status_label: 'Submitted',
+        status_note: DEMO_NOTES.submitted, steps: demoSteps(kit),
+        submitted: Math.floor(Date.now() / 1000), note: body.note || '',
+        designs: body.designs || [], design_names: designNames(body.designs || []) }, editable: false };
     }
-    return figState();
+    kits = st;
+    return st;
+  }
+
+  function designNames(ids) {
+    var out = [], cat = kitsState().catalogue || [];
+    ids.forEach(function (id) {
+      cat.forEach(function (d) { if (String(d.id) === String(id)) out.push(d.name); });
+    });
+    return out;
   }
 
   function openFigEditor() {
@@ -1179,21 +1178,248 @@
       setStatus('The designer did not load on this page. Reload and try again.', 'err');
       return;
     }
-    var f = figState();
-    window.MDFaces.designFace(f.design && f.design.config, function (cfg, img) {
-      figApi('figtalks/design', { config: cfg, image: img }).then(function (res) {
-        if (res && res.message && !res.design) { setStatus(res.message, 'err'); return; }
-        fig = res;
+    var st = kitsState();
+    window.MDFaces.designFace(st.design && st.design.config, function (cfg, img) {
+      kitApi('kits/design', { config: cfg, image: img }).then(function (res) {
+        if (!res || !res.kits) { setStatus('The design could not be saved.', 'err'); return; }
+        kits = res;
         render();
         setStatus('Your Fig-Talks design was saved.', 'ok');
       });
     }, { title: 'Create Your Fig-Talks', subtitle: 'Face · Hairstyle · Hair colour', color: 'red' });
   }
 
-  function figStepList(done) {
+  /* Optional note, on every kit's request. */
+  function noteField(existing) {
+    var wrap = el('div', 'md-note-field');
+    var lab  = el('label', null, 'Add a note');
+    lab.appendChild(el('span', 'md-note-optional', 'Optional'));
+    wrap.appendChild(lab);
+    var ta = el('textarea', 'md-note-input');
+    ta.rows = 3;
+    ta.placeholder = 'Anything you’d like us to know?';
+    ta.value = existing || '';
+    wrap.appendChild(ta);
+    wrap.input = ta;
+    return wrap;
+  }
+
+  function sendButton(label, onSend) {
+    var b = el('button', 'md-btn md-btn-primary', label);
+    b.type = 'button';
+    b.addEventListener('click', function () {
+      var old = b.textContent;
+      b.disabled = true;
+      b.textContent = 'Sending…';
+      onSend(function (ok, msg) {
+        b.disabled = false;
+        b.textContent = old;
+        if (!ok) setStatus(msg || 'The request could not be sent.', 'err');
+      });
+    });
+    return b;
+  }
+
+  function submitRequest(slug, payload, done) {
+    kitApi('kits/request', Object.assign({ kit: slug }, payload)).then(function (res) {
+      if (!res || !res.kits || !(res.kits[slug] && res.kits[slug].request)) {
+        done(false, res && res.message); return;
+      }
+      kits = res;
+      done(true);
+      render();
+      setStatus('Request sent — the Mini-Talks team will be in touch.', 'ok');
+    });
+  }
+
+  /* ── the Mini-Designs catalogue ──
+     Every scene stays on show. Hiding what cannot be built right now would make
+     Mini-Designs look far smaller than it is. */
+
+  var designPick = {};
+
+  function designGrid(kit) {
+    var cat  = kitsState().catalogue || [];
+    var grid = el('div', 'md-designs');
+    if (!cat.length) {
+      return emptyNote('The catalogue is empty', 'Mini-Designs will appear here once the team adds them.');
+    }
+    cat.forEach(function (d) {
+      var card = el('article', 'md-design' + (d.selectable ? '' : ' is-unavailable') +
+                               (designPick[d.id] ? ' is-picked' : ''));
+      var thumb = el('div', 'md-design-thumb');
+      if (d.image) {
+        var img = el('img'); img.src = d.image; img.alt = ''; img.loading = 'lazy';
+        thumb.appendChild(img);
+      } else {
+        thumb.appendChild(el('span', 'md-face-placeholder', d.name.slice(0, 1)));
+      }
+      card.appendChild(thumb);
+      card.appendChild(el('h5', 'md-design-name', d.name));
+      if (!d.selectable) {
+        card.appendChild(el('span', 'md-design-flag', d.label));
+      } else {
+        var pick = el('button', 'md-btn md-btn-ghost md-btn-sm md-design-pick',
+                      designPick[d.id] ? 'Selected' : 'Select');
+        pick.type = 'button';
+        pick.addEventListener('click', function () {
+          if (designPick[d.id]) delete designPick[d.id]; else designPick[d.id] = true;
+          renderPopup();
+        });
+        card.appendChild(pick);
+      }
+      grid.appendChild(card);
+    });
+    return grid;
+  }
+
+  function pickedIds() { return Object.keys(designPick).map(Number); }
+
+  /* ── the request screen ── */
+
+  function renderRequest(host, kit) {
+    var req = reqFor(kit.slug);
+    var st  = kitsState();
+
+    /* nothing asked for yet */
+    if (!req) {
+      host.appendChild(el('h3', 'md-fig-title', kit.pre === 'personalize'
+        ? 'Create Your Fig-Talks' : 'Request ' + kit.name));
+      host.appendChild(el('p', 'md-section-note', requestIntro(kit)));
+
+      if (kit.pre === 'personalize') {
+        host.appendChild(figStepList());
+        var start = el('button', 'md-btn md-btn-primary md-fig-cta', kit.cta);
+        start.type = 'button';
+        start.addEventListener('click', openFigEditor);
+        host.appendChild(start);
+        return;
+      }
+
+      if (kit.pre === 'catalogue') {
+        host.appendChild(designGrid(kit));
+        var picked = pickedIds();
+        var sum = el('p', 'md-designs-count',
+          picked.length ? picked.length + (picked.length === 1 ? ' design selected' : ' designs selected')
+                        : 'Choose the scenes you would like.');
+        host.appendChild(sum);
+        var note1 = noteField('');
+        host.appendChild(note1);
+        var send1 = sendButton('Send Request', function (done) {
+          submitRequest(kit.slug, { designs: pickedIds(), note: note1.input.value }, done);
+        });
+        send1.disabled = !picked.length;
+        send1.classList.add('md-fig-cta');
+        host.appendChild(send1);
+        return;
+      }
+
+      var note2 = noteField('');
+      host.appendChild(note2);
+      var send2 = sendButton(kit.cta, function (done) {
+        submitRequest(kit.slug, { note: note2.input.value }, done);
+      });
+      send2.classList.add('md-fig-cta');
+      host.appendChild(send2);
+      return;
+    }
+
+    /* designed or selected, not sent */
+    if (req.status === 'draft') {
+      var row = el('div', 'md-fig-review');
+      if (kit.pre === 'personalize') row.appendChild(figPreview(st.design && st.design.url));
+
+      var side = el('div', 'md-fig-review-main');
+      side.appendChild(el('h3', 'md-fig-title', kit.pre === 'personalize'
+        ? 'Your Fig-Talks is ready.' : 'Review your selection'));
+      side.appendChild(el('p', 'md-section-note',
+        'Send your request to the Mini-Talks team. We’ll contact you about the next steps.'));
+
+      var note3 = noteField(req.note);
+      side.appendChild(note3);
+
+      var acts = el('div', 'md-fig-acts');
+      acts.appendChild(sendButton('Send My Request', function (done) {
+        submitRequest(kit.slug, { note: note3.input.value, designs: pickedIds() }, done);
+      }));
+      var again = el('button', 'md-btn md-btn-ghost',
+        kit.pre === 'personalize' ? 'Continue Personalizing' : 'Change selection');
+      again.type = 'button';
+      again.addEventListener('click', kit.pre === 'personalize' ? openFigEditor : function () {
+        kits.kits[kit.slug] = { request: null, editable: true };
+        renderPopup();
+      });
+      acts.appendChild(again);
+      side.appendChild(acts);
+      row.appendChild(side);
+      host.appendChild(row);
+      return;
+    }
+
+    /* sent — one view, whatever stage it is at */
+    var row2 = el('div', 'md-fig-review');
+    if (kit.pre === 'personalize') row2.appendChild(figPreview(st.design && st.design.url));
+
+    var main = el('div', 'md-fig-review-main');
+    main.appendChild(el('h3', 'md-fig-title',
+      req.status === 'submitted' ? 'Request sent!' : 'Your ' + kit.name + ' request'));
+    main.appendChild(statusBadge(req));
+    main.appendChild(el('p', 'md-section-note', req.status_note || ''));
+    if (req.submitted) main.appendChild(el('p', 'md-fig-when', 'Submitted on ' + fmtDay(req.submitted)));
+
+    if (req.design_names && req.design_names.length) {
+      var list = el('ul', 'md-req-designs');
+      req.design_names.forEach(function (n) { list.appendChild(el('li', null, n)); });
+      main.appendChild(el('p', 'md-req-label', 'Your Mini-Designs'));
+      main.appendChild(list);
+    }
+    if (req.note) {
+      main.appendChild(el('p', 'md-req-label', 'Your note'));
+      main.appendChild(el('p', 'md-req-note', req.note));
+    }
+
+    if (req.status === 'connected') {
+      var mn = el('div', 'md-fig-acts');
+      var manage = el('button', 'md-btn md-btn-ghost', 'Manage Mini-Kit');
+      manage.type = 'button';
+      manage.disabled = true;
+      manage.title = 'Coming soon.';
+      mn.appendChild(manage);
+      main.appendChild(mn);
+    }
+
+    row2.appendChild(main);
+    host.appendChild(row2);
+
+    var rail = statusRail(req);
+    if (rail) host.appendChild(rail);
+
+    if (kit.pre === 'personalize') {
+      host.appendChild(el('p', 'md-fig-foot',
+        'Your sent request stays exactly as it was. Designing again starts a new request rather than changing this one.'));
+    }
+  }
+
+  function requestIntro(kit) {
+    if (kit.pre === 'personalize') {
+      return 'Personalize your figure to create a Fig-Talks character that feels familiar and uniquely yours. ' +
+             'Your Fig-Talks is made with the character you design here, so this comes first.';
+    }
+    if (kit.pre === 'catalogue') {
+      return 'Choose the scenes you would like built. Everything is on show; anything that cannot be ' +
+             'built right now says so and can be picked another time.';
+    }
+    return kit.tagline + ' Every Mini-Kit is made to order, so tell the team you would like one ' +
+           'and they will get in touch.';
+  }
+
+  var FIG_STEPS = ['Choose Your Face', 'Choose Your Hairstyle',
+                   'Choose Your Hair Color', 'Review Your Fig-Talks'];
+
+  function figStepList() {
     var ol = el('ol', 'md-fig-steps');
     FIG_STEPS.forEach(function (label, i) {
-      var li = el('li', 'md-fig-step' + (done ? ' is-done' : (i < 3 ? '' : ' is-next')));
+      var li = el('li', 'md-fig-step' + (i < 3 ? '' : ' is-next'));
       li.appendChild(el('span', 'md-fig-step-no', String(i + 1)));
       li.appendChild(el('span', null, label));
       ol.appendChild(li);
@@ -1212,91 +1438,6 @@
       box.appendChild(el('span', 'md-face-placeholder', '?'));
     }
     return box;
-  }
-
-  function renderPersonalize(host) {
-    var f    = figState();
-    var req  = f.request;
-    var sent = req && req.status !== 'draft';
-
-    /* ── nothing designed yet ── */
-    if (!f.design) {
-      host.appendChild(el('h3', 'md-fig-title', 'Create Your Fig-Talks'));
-      host.appendChild(el('p', 'md-section-note',
-        'Personalize your figure to create a Fig-Talks character that feels familiar and uniquely yours. ' +
-        'Your Fig-Talks is made with the character you design here, so this comes first.'));
-      host.appendChild(figStepList(false));
-
-      var start = el('button', 'md-btn md-btn-primary md-fig-cta', 'Personalize Fig-Talks');
-      start.type = 'button';
-      start.addEventListener('click', openFigEditor);
-      host.appendChild(start);
-      return;
-    }
-
-    /* ── designed ── */
-    var row = el('div', 'md-fig-review');
-    row.appendChild(figPreview(f.design.url));
-
-    var side = el('div', 'md-fig-review-main');
-    if (sent) {
-      side.appendChild(el('h3', 'md-fig-title',
-        req.status === 'submitted' ? 'Request sent!' : 'Your Fig-Talks request'));
-      side.appendChild(figBadge(req));
-      side.appendChild(el('p', 'md-section-note',
-        req.status_note || 'Your personalized Fig-Talks design has been shared with the Mini-Talks team.'));
-      if (req.submitted) {
-        side.appendChild(el('p', 'md-fig-when', 'Submitted on ' + fmtDay(req.submitted)));
-      }
-    } else {
-      side.appendChild(el('h3', 'md-fig-title', 'Your Fig-Talks is ready.'));
-      side.appendChild(el('p', 'md-section-note',
-        'Send your personalized design to the Mini-Talks team. We\u2019ll contact you about the next steps.'));
-    }
-
-    var acts = el('div', 'md-fig-acts');
-    if (!sent) {
-      var send = el('button', 'md-btn md-btn-primary', 'Send My Request');
-      send.type = 'button';
-      send.addEventListener('click', function () {
-        var label = send.textContent;
-        send.disabled = true;
-        send.textContent = 'Sending\u2026';
-        figApi('figtalks/request', { send: 1 }).then(function (res) {
-          send.disabled = false;
-          send.textContent = label;
-          if (!res || !res.request) {
-            setStatus((res && res.message) || 'The request could not be sent.', 'err');
-            return;
-          }
-          fig = res;
-          render();
-          setStatus('Request sent \u2014 the Mini-Talks team will be in touch.', 'ok');
-        });
-      });
-      acts.appendChild(send);
-
-      var edit = el('button', 'md-btn md-btn-ghost', 'Edit design');
-      edit.type = 'button';
-      edit.addEventListener('click', openFigEditor);
-      acts.appendChild(edit);
-    } else {
-      var again = el('button', 'md-btn md-btn-ghost', 'Start a new design');
-      again.type = 'button';
-      again.title = 'Your sent request stays as it is. A new design becomes a new request.';
-      again.addEventListener('click', openFigEditor);
-      acts.appendChild(again);
-    }
-    side.appendChild(acts);
-    row.appendChild(side);
-    host.appendChild(row);
-
-    if (sent) {
-      var rail = figProgress(req);
-      if (rail) host.appendChild(rail);
-      host.appendChild(el('p', 'md-fig-foot',
-        'Your sent request stays exactly as it was. Designing again starts a new request rather than changing this one.'));
-    }
   }
 
   function renderOverview(host, key, dev, live) {
@@ -1323,7 +1464,7 @@
     var input = el('input', 'md-input');
     input.type = 'text';
     input.value = dev.label || '';
-    input.placeholder = kitByCode(openCode).name;
+    input.placeholder = kitBySlug(openSlug).name;
     input.disabled = !live;
     input.title = live ? '' : 'Connect the kit to rename it.';
     input.addEventListener('change', function () {
@@ -1448,8 +1589,8 @@
           });
         }, {
           title: f ? 'Edit face' : 'Design a face',
-          subtitle: (dev.label || kitByCode(openCode).name) + ' \u00b7 Slot ' + slot.i,
-          color: kitByCode(openCode).color
+          subtitle: (dev.label || kitBySlug(openSlug).name) + ' \u00b7 Slot ' + slot.i,
+          color: kitBySlug(openSlug).colour
         });
       });
       acts.appendChild(design);
@@ -1586,7 +1727,7 @@
   function render() {
     syncHeaderStat();
     renderShelf();
-    if (openCode) renderPopup();
+    if (openSlug) renderPopup();
   }
 
   /* ── boot ── */
@@ -1603,11 +1744,11 @@
 
     try { state = JSON.parse(root.dataset.initial || '{}') || {}; } catch (e) { state = {}; }
     if (Array.isArray(state)) state = {};
-    try { fig = JSON.parse(root.dataset.figtalks || 'null'); } catch (e) { fig = null; }
+    try { kits = JSON.parse(root.dataset.kits || 'null'); } catch (e) { kits = null; }
 
     publicDemo = root.dataset.demo === '1';
-    onlyKits = (root.dataset.kits || '').split(',')
-                 .map(function (t) { return t.trim().toUpperCase(); })
+    onlyKits = (root.dataset.only || '').split(',')
+                 .map(function (t) { return t.trim().toLowerCase(); })
                  .filter(Boolean);
     if (!onlyKits.length) onlyKits = null;
 
@@ -1625,7 +1766,7 @@
     }
 
     document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape' || !openCode) return;
+      if (e.key !== 'Escape' || !openSlug) return;
       // The face designer sits on top and closes itself on Escape; one press
       // should not collapse the kit popup underneath it as well.
       if (document.querySelector('.mdf-overlay')) return;

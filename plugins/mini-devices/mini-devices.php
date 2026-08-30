@@ -1,18 +1,20 @@
 <?php
 /**
  * Plugin Name: Mini Devices — Mini-Kits
- * Description: Adds the Connected Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Fig-Talks is personalised in the profile and requested from the Mini-Talks team.
- * Version:     2.11.0
+ * Description: Adds the Mini-Kits section to the Mini-Forum profile. Members pick a Mini-Kit and request it — Mini-Designs by choosing scenes, Fig-Talks by personalising a figure — and follow it through Submitted, Contacted, Preparing, Connected. Connected kits also talk to the site over USB (WebSerial).
+ * Version:     3.0.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.11.0');
+define('MD_VER', '3.0.0');
 define('MD_PATH', plugin_dir_path(__FILE__));
 
-require_once MD_PATH . 'includes/class-md-figtalks.php';
+require_once MD_PATH . 'includes/class-md-kits.php';
+require_once MD_PATH . 'includes/class-md-designs.php';
+require_once MD_PATH . 'includes/class-md-requests.php';
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 
@@ -278,9 +280,10 @@ function md_enqueue_assets() {
         // swapped without touching the plugin; the built-in SVG stands in if an
         // image is missing or fails to load.
         'icons' => apply_filters('md_kit_icons', array(
-            'F' => 'https://mini-talks.org/wp-content/uploads/2026/03/13_fig_talks_3D.png',
-            'B' => 'https://mini-talks.org/wp-content/uploads/2026/03/12_brick_talks_3D.png',
-            'D' => 'https://mini-talks.org/wp-content/uploads/2026/03/35_mini_settings_3D-e1772742962173.png',
+            'fig-talks'    => 'https://mini-talks.org/wp-content/uploads/2026/03/13_fig_talks_3D.png',
+            'brick-talks'  => 'https://mini-talks.org/wp-content/uploads/2026/03/12_brick_talks_3D.png',
+            'design-talks' => 'https://mini-talks.org/wp-content/uploads/2026/03/35_mini_settings_3D-e1772742962173.png',
+            'mini-designs' => '',
         )),
     ));
 }
@@ -347,7 +350,7 @@ function md_page_has_preview() {
  * ------------------------------------------------------------------ */
 add_shortcode('connected_devices', function () {
     if (!is_user_logged_in()) {
-        return '<div class="md-wrap"><p class="md-empty">Sign in to see your Connected Mini-Kits.</p></div>';
+        return '<div class="md-wrap"><p class="md-empty">Sign in to see your Mini-Kits.</p></div>';
     }
 
     $data = md_get_user_devices(get_current_user_id());
@@ -355,11 +358,11 @@ add_shortcode('connected_devices', function () {
     ob_start(); ?>
     <div class="md-wrap" id="md-root"
          data-initial="<?php echo esc_attr(wp_json_encode($data)); ?>"
-         data-figtalks="<?php echo esc_attr(wp_json_encode(MD_FigTalks::state(get_current_user_id()))); ?>">
+         data-kits="<?php echo esc_attr(wp_json_encode(MD_Requests::state(get_current_user_id()))); ?>">
 
         <header class="md-shelf-head">
-            <h3 class="md-title">Connected Mini-Kits</h3>
-            <p class="md-sub">Personalize, request, and manage the Mini-Kits connected to your Mini-Talks profile.</p>
+            <h3 class="md-title">Mini-Kits</h3>
+            <p class="md-sub">Choose a Mini-Kit to see what you can do with it. Request one, personalize yours, and follow where it is.</p>
             <button type="button" class="md-btn md-btn-primary" id="md-connect">
                 <span class="md-stud-dot"></span> Connect a kit
             </button>
@@ -417,14 +420,13 @@ add_shortcode('mini_kits_demo', function ($atts) {
         'intro' => 'This is exactly what you see on your profile once a kit is linked. Open one, name a recording, design a face — nothing is saved.',
     ), $atts, 'mini_kits_demo');
 
-    // Accept kit names as well as the internal codes, so a page author can
-    // write kits="brick-talks" instead of remembering that it is "B".
+    // Kit names, with a few short forms and the old device codes.
     $names = array(
-        'fig-talks'     => 'F', 'figtalks'     => 'F', 'fig'     => 'F', 'f' => 'F',
-        'brick-talks'   => 'B', 'bricktalks'   => 'B', 'brick'   => 'B', 'b' => 'B',
-        // Former name, kept so any page already using it keeps working.
-        'display-talks' => 'B', 'displaytalks' => 'B', 'display' => 'B',
-        'design-talks'  => 'D', 'designtalks'  => 'D', 'design'  => 'D', 'd' => 'D',
+        'mini-designs'  => 'mini-designs', 'minidesigns' => 'mini-designs', 'designs' => 'mini-designs',
+        'design-talks'  => 'design-talks', 'designtalks' => 'design-talks', 'd' => 'design-talks',
+        'brick-talks'   => 'brick-talks',  'bricktalks'  => 'brick-talks',  'brick' => 'brick-talks', 'b' => 'brick-talks',
+        'display-talks' => 'brick-talks',  'displaytalks' => 'brick-talks', // former name
+        'fig-talks'     => 'fig-talks',    'figtalks'    => 'fig-talks',    'fig' => 'fig-talks', 'f' => 'fig-talks',
     );
     $codes = array();
     foreach (explode(',', strtolower($a['kits'])) as $c) {
@@ -436,7 +438,7 @@ add_shortcode('mini_kits_demo', function ($atts) {
     <div class="md-wrap md-preview" id="md-root"
          data-initial="{}"
          data-demo="1"
-         data-kits="<?php echo esc_attr(implode(',', $codes)); ?>">
+         data-only="<?php echo esc_attr(implode(',', $codes)); ?>">
 
         <header class="md-shelf-head">
             <?php if ($a['title'] !== ''): ?>

@@ -1,8 +1,101 @@
-# Mini Devices — Connected Mini-Kits (v2.11.0)
+# Mini Devices — Mini-Kits (v3.0.0)
 
-Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
-(WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
-Each kit opens its own detail popup.
+Adds the **Mini-Kits** section to the Mini-Forum profile.
+
+Every Mini-Kit is made to order, so none of them are sold: a member opens a kit and
+asks for it. The profile is organised **by kit, not by action** — you pick a
+Mini-Kit first, and its own screen shows the one thing that fits where the request
+actually is.
+
+```
+Mini-Kits → Mini-Designs  → choose scenes → note → Send Request → status
+          → Design-Talks  → note → Send Request → status
+          → Brick-Talks   → note → Send Request → status
+          → Fig-Talks     → personalize → review → note → Send Request → status
+```
+
+| Kit | Before the request | Device |
+|---|---|---|
+| **Mini-Designs** | choose from the scene catalogue | — |
+| **Design-Talks** | nothing | `D` |
+| **Brick-Talks** | nothing | `B` |
+| **Fig-Talks** | personalize a figure (face, hairstyle, hair colour) | `F` |
+
+## Status
+
+    (nothing yet) → Draft → Submitted → Contacted → Preparing → Connected
+
+*Draft* is work that has not been sent — a figure designed, scenes chosen.
+*Connected* is the end: the kit is made and linked to the profile. No shipping or
+order words anywhere; **Connected** is what Connected Mini-Kits means.
+
+The cards say nothing at all until there is something to say. "Not Requested" reads
+as a database column, not an invitation — so a kit nobody has asked for simply shows
+its name and what it is, and the request lives one click in.
+
+Each status carries one plain sentence, defined once in PHP and used by the card,
+the kit screen and the member's email, so the three cannot drift apart.
+
+Every request takes an optional **note**.
+
+## Mini-Designs catalogue
+
+Mini-Designs is not one product but a library of buildable LEGO scenes. Whether one
+can be built right now depends on parts, which changes week to week, so availability
+is a field the team edits under **Mini-Designs** in wp-admin: *Available*,
+*Currently Unavailable*, *Coming Soon*.
+
+Unavailable scenes stay on show — hiding them would make Mini-Designs look far
+smaller than it is. They read plainly, cannot be selected, and can be picked another
+time.
+
+The catalogue seeds once with the scenes that can be built today; after that it is
+the team's to manage. The wider scene list lives in the game's own database and can
+be imported later — those arrive unavailable until the team says otherwise.
+
+## Where requests go
+
+**Mini-Kit Requests** in wp-admin: the kit, the member and their email, what was
+asked for (scenes, or face/hairstyle/hair colour, plus the note), and the status.
+Filter by kit or by status; set the status from the request's sidebar.
+
+Stored per request: user id (post author), name, email, the note, the selected
+scenes or the design config and render, the created and submitted dates, the status.
+
+### Notifications
+
+| When | Who | What |
+|---|---|---|
+| Request sent | the team | member, email, what was asked for, links to the render and the request |
+| Request sent | the member | confirmation |
+| Contacted · Preparing · Connected | the member | the new status and what it means |
+
+Plain `wp_mail()`, the way Mini-Forum sends its own mail.
+
+```php
+add_filter('md_kit_admin_email', function () { return 'kits@example.com'; });
+add_filter('md_kit_notify_statuses', function ($s) { return array('connected'); });
+add_filter('md_kits', function ($k) { /* rename, retag, add a kit */ return $k; });
+add_filter('md_designs_seed', function ($names) { return $names; });
+```
+
+`do_action('md_kit_request_submitted', $post_id, $user_id)` and
+`do_action('md_kit_status_changed', $post_id, $status, $was)` are there for anything
+else you want to hang off them.
+
+### Where the status shows
+
+- **The member's profile** — beside Posts / Events / Kits, once a request is sent.
+- **The kit card** — status badge, that status's sentence, and the date.
+- **The kit screen** — the same, plus the progress rail and what was asked for.
+- **The WordPress user profile** — a row per kit, for whoever answers support.
+
+## Connected kits
+
+Three of the four are physical devices. Once one reaches a member it connects over
+USB (WebSerial) and its own sections open up — Overview, Recordings, Slots, Scenes.
+Until then those tabs are visible but locked, saying the kit has to be made first
+rather than treating it as a connection failure.
 
 ## Install
 
