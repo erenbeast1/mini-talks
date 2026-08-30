@@ -124,7 +124,10 @@
 
 /* ── artwork ── */
 
-.md-kit-art{width:78px!important;height:78px!important;flex:none!important;display:grid!important;place-items:center!important;border-radius:14px!important;background:var(--md-sunken)!important}
+.md-kit-art{width:78px!important;height:78px!important;flex:none!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:6px!important;border-radius:14px!important;background:var(--md-sunken,#F6F6F6)!important;overflow:hidden!important}
+/* max-width/max-height, not 100%: an <img> in a centred box keeps its own
+   aspect and would overflow. Works for any render's proportions. */
+.md-kit-icon{max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain!important;display:block!important}
 .md-kit-art svg{width:56px!important;height:56px!important;display:block!important}
 .md-kit-art .a1{fill:currentColor}
 .md-kit-art .a2{fill:currentColor;opacity:.55}
@@ -334,20 +337,42 @@ body.admin-bar .mdf-overlay{padding-top:52px!important}
 .mdf-wrapper{width:min(1040px,100%)!important;height:min(720px,100%)!important;display:flex!important;flex-direction:column!important;border-radius:16px!important;margin:auto!important}
 
 /* Four whole copies at 26%, the forum's full-width strip recipe — no cut studs. */
-.mdf-studs{height:28px!important;flex-shrink:0!important;background-image:var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png'))!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,33% bottom,66% bottom,right bottom!important;background-size:26% auto,26% auto,26% auto,26% auto!important;border-radius:16px 16px 0 0!important;overflow:hidden!important}
+.mdf-studs{height:28px!important;flex-shrink:0!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,33% bottom,66% bottom,right bottom!important;background-size:26% auto,26% auto,26% auto,26% auto!important;border-radius:16px 16px 0 0!important;overflow:hidden!important}
+.mdf-pop-red .mdf-studs{background-image:var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png')),var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png'))!important}
+.mdf-pop-red .mdf-modal{background:var(--mf-red,#E52828)!important}
+.mdf-pop-red .mdf-close{background:var(--mf-red,#E52828)!important}
+.mdf-pop-blue .mdf-studs{background-image:var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png')),var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png')),var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png')),var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png'))!important}
+.mdf-pop-blue .mdf-modal{background:var(--mf-blue,#0055BF)!important}
+.mdf-pop-blue .mdf-close{background:var(--mf-blue,#0055BF)!important}
+.mdf-pop-yellow .mdf-studs{background-image:var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png')),var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png')),var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png')),var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png'))!important}
+.mdf-pop-yellow .mdf-modal{background:var(--mf-yellow,#FFCC00)!important}
+.mdf-pop-yellow .mdf-close{background:var(--mf-yellow,#FFCC00)!important}
+.mdf-pop-yellow .mdf-close{color:#1D1D1B!important}
 
-.mdf-modal{background:var(--mf-red,#E52828)!important;border-radius:16px!important;padding:16px 8px 8px!important;margin-top:-1px!important;flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important}
+.mdf-modal{border-radius:16px!important;padding:16px 8px 8px!important;margin-top:-1px!important;flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important}
 
-.mdf-inner{background:#fff!important;border-radius:12px!important;flex:1 1 auto!important;min-height:0!important;position:relative!important;overflow:hidden!important;display:flex!important}
+.mdf-inner{background:#fff!important;border-radius:12px!important;flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
+
+/* Header row of our own. The close button used to float over the canvas and
+   covered the editor's HEAD / FACE tabs; this keeps the editor's own chrome
+   untouched. */
+.mdf-head{flex-shrink:0!important;display:flex!important;align-items:center!important;gap:10px!important;padding:14px 16px 10px 22px!important;border-bottom:1px solid #f1f5f9!important}
+.mdf-head h2{margin:0!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:18px!important;font-weight:900!important;color:#1f2937!important;letter-spacing:.4px!important;text-align:left!important;line-height:1.2!important}
+.mdf-head-sub{font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:12px!important;font-weight:700!important;color:#999!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.mdf-head .mdf-close{margin-left:auto!important}
 
 .mdf-editor-host{flex:1 1 auto!important;min-width:0!important;min-height:0!important}
 
-.mdf-close{position:absolute!important;top:10px!important;right:10px!important;z-index:10!important;width:32px!important;height:32px!important;padding:0!important;border:none!important;border-radius:50%!important;background:var(--mf-red,#E52828)!important;color:#fff!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:17px!important;font-weight:800!important;line-height:1!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 2px 10px rgba(0,0,0,.25)!important;transition:opacity .2s!important}
+/* Same button as .mf-avatar-popup-close, which this popup mirrors. */
+.mdf-close{flex:none!important;width:28px!important;height:28px!important;padding:0!important;border:none!important;border-radius:50%!important;color:#fff!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:14px!important;font-weight:800!important;line-height:1!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important;text-shadow:none!important;-webkit-appearance:none!important;appearance:none!important;transition:opacity .2s!important}
 .mdf-close:hover{opacity:.78!important}
 
 @media(max-width:560px){
   .mdf-overlay{padding:12px 10px!important}
-  .mdf-close{top:8px!important;right:8px!important;width:28px!important;height:28px!important;font-size:15px!important}
+  .mdf-head{padding:10px 10px 9px 14px!important}
+  .mdf-head h2{font-size:14.5px!important}
+  .mdf-head-sub{display:none!important}
+  .mdf-close{width:26px!important;height:26px!important;font-size:13px!important}
 }
 
 /* ═══════════════════════ RESPONSIVE ═══════════════════════ */

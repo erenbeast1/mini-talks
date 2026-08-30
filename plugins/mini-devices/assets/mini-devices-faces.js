@@ -145,7 +145,8 @@
    * mf_avatar_save istegi ARAYA GIRILIR — profil avatari degismez, config
    * bizim callback'imize gelir. mini-forum dosyalarina dokunulmaz.
    */
-  MDF.designFace = function (initialConfig, onSaved) {
+  MDF.designFace = function (initialConfig, onSaved, opts) {
+    opts = opts || {};
     if (!window.MFAvatarEditor || !window.MFAvatarEditor.mount) {
       alert('The avatar editor did not load. Reload the page and try again.');
       return;
@@ -156,7 +157,8 @@
     overlay.className = 'mdf-overlay';
 
     var wrapper = document.createElement('div');
-    wrapper.className = 'mdf-wrapper';
+    // Wear the colour of the kit this was opened from.
+    wrapper.className = 'mdf-wrapper mdf-pop-' + (opts.color || 'red');
 
     var studs = document.createElement('div');
     studs.className = 'mdf-studs';
@@ -168,13 +170,29 @@
     var inner = document.createElement('div');
     inner.className = 'mdf-inner';
 
+    var head = document.createElement('header');
+    head.className = 'mdf-head';
+
+    var title = document.createElement('h2');
+    title.textContent = opts.title || 'Design a face';
+    head.appendChild(title);
+
+    if (opts.subtitle) {
+      var sub = document.createElement('span');
+      sub.className = 'mdf-head-sub';
+      sub.textContent = opts.subtitle;
+      head.appendChild(sub);
+    }
+
     var closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.className = 'mdf-close';
     closeBtn.setAttribute('aria-label', 'Close the face designer without saving');
     closeBtn.innerHTML = '&times;';
     closeBtn.addEventListener('click', function () { close(); });
-    inner.appendChild(closeBtn);
+    head.appendChild(closeBtn);
+
+    inner.appendChild(head);
 
     var host = document.createElement('div');
     host.className = 'mdf-editor-host';

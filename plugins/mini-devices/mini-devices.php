@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Each kit opens its own detail popup.
- * Version:     2.7.0
+ * Version:     2.8.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.7.0');
+define('MD_VER', '2.8.0');
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 
@@ -271,6 +271,14 @@ function md_enqueue_assets() {
         // Demo mode is a front-end preview for admins. It never writes to the
         // server, so the capability check is only about who is offered it.
         'admin' => current_user_can('manage_options') ? 1 : 0,
+        // Product renders for the shelf cards. Filterable so the artwork can be
+        // swapped without touching the plugin; the built-in SVG stands in if an
+        // image is missing or fails to load.
+        'icons' => apply_filters('md_kit_icons', array(
+            'F' => 'https://mini-talks.org/wp-content/uploads/2026/03/13_fig_talks_3D.png',
+            'B' => 'https://mini-talks.org/wp-content/uploads/2026/03/12_brick_talks_3D.png',
+            'D' => 'https://mini-talks.org/wp-content/uploads/2026/03/35_mini_settings_3D-e1772742962173.png',
+        )),
     ));
 }
 

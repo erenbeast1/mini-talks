@@ -753,7 +753,18 @@
     var body  = el('div', 'md-kit-body');
 
     var art = el('div', 'md-kit-art');
-    art.innerHTML = kit.art;
+    var iconUrl = window.MD && MD.icons && MD.icons[kit.code];
+    if (iconUrl) {
+      var icon = el('img', 'md-kit-icon');
+      icon.src = iconUrl;
+      icon.alt = '';
+      icon.loading = 'lazy';
+      // A missing or blocked render must not leave an empty tile.
+      icon.addEventListener('error', function () { art.innerHTML = kit.art; });
+      art.appendChild(icon);
+    } else {
+      art.innerHTML = kit.art;
+    }
     body.appendChild(art);
 
     var main = el('div', 'md-kit-main');
@@ -1141,6 +1152,10 @@
             render();
             setStatus('The face for slot ' + slot.i + ' was saved.', 'ok');
           });
+        }, {
+          title: f ? 'Edit face' : 'Design a face',
+          subtitle: (dev.label || kitByCode(openCode).name) + ' \u00b7 Slot ' + slot.i,
+          color: kitByCode(openCode).color
         });
       });
       acts.appendChild(design);

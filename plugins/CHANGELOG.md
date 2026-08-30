@@ -25,6 +25,23 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.8.0
+
+**The face designer's close button no longer covers the editor's own HEAD / FACE
+tabs.** It floated over the canvas in 2.7.0. The popup now carries a header row of
+its own — title, which kit and slot is being designed, and the × on the right —
+above the editor, mirroring `.mf-avatar-popup-header` down to its measurements
+(`14px 22px 10px`, `1px solid #f1f5f9`) and its 28px close button. The editor's own
+chrome is untouched; this is still all in the overlay Mini-Devices owns.
+
+**The designer wears the colour of the kit it was opened from.** Studs, frame and
+close button follow: red from Fig-Talks, blue from Brick-Talks, yellow from
+Design-Talks, instead of always red.
+
+**Shelf cards show the product renders.** Passed from PHP and filterable through
+`md_kit_icons`, keyed by kit code. Any aspect works, and a missing or blocked image
+falls back to the built-in SVG rather than leaving an empty tile.
+
 ## mini-devices 2.7.0
 
 **The face designer is a LEGO popup like every other one.** It used to be a bare

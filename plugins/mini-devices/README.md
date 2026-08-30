@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.7.0)
+# Mini Devices — Mini-Kits (v2.8.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -122,6 +122,21 @@ cross-origin reads — the same CORS setup members already rely on (see
 If a page builder keeps the shortcode out of `post_content`, the assets may not be
 detected. The shortcode enqueues them itself as a fallback, and
 `add_filter('md_page_has_preview', '__return_true')` forces it.
+
+## Kit artwork
+
+Shelf cards show the product renders, passed from PHP and filterable:
+
+```php
+add_filter('md_kit_icons', function ($icons) {
+    $icons['B'] = 'https://example.com/brick-talks.png';
+    return $icons;
+});
+```
+
+Keys are the kit codes `F`, `B`, `D`. Any aspect ratio works — the tile fits the
+image rather than cropping it. If an image is missing or fails to load, the card
+falls back to the built-in SVG, so a bad URL never leaves an empty tile.
 
 ## Kit ↔ profile link
 
