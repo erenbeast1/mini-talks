@@ -1,4 +1,4 @@
-# Mini Devices — Connected Mini-Kits (v2.10.0)
+# Mini Devices — Connected Mini-Kits (v2.11.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -139,7 +139,7 @@ kit is linked.
 |---|---|
 | Nothing designed | *Create Your Fig-Talks*, the four steps, **Personalize Fig-Talks** |
 | Designed, not sent | The render, *Your Fig-Talks is ready.*, **Send My Request** + Edit design |
-| Sent | *Request sent!*, the status, **Start a new design** |
+| Sent | *Request sent!*, the status badge, the date, the progress rail, **Start a new design** |
 
 The design itself is made in Mini-Forum's avatar editor, which already offers face,
 hairstyle and hair colour with a live 3D preview. Its config carries `glassesColor`
@@ -154,7 +154,7 @@ one the team may already be acting on.
 |---|---|---|
 | Request sent | the team | member, email, the three choices, a link to the render and to the request |
 | Request sent | the member | confirmation, in the same words the profile shows |
-| Contacted · In Preparation · Completed | the member | the new status and what it means |
+| Contacted · Preparing · Connected | the member | the new status and what it means |
 
 Plain `wp_mail()`, the way Mini-Forum sends its own mail, so whatever SMTP the site
 uses carries these too. Draft and Submitted raise no status mail — a draft is the
@@ -176,8 +176,13 @@ add_filter('md_figtalks_notify_statuses', function ($s) { return array('complete
 
 Each request is a `md_fig_request` post authored by the member, listed under
 **Fig-Talks Requests** in wp-admin with the render, the member and their email, the
-three choices, and the status. Statuses: Draft, Request Submitted, Contacted, In
-Preparation, Completed — set from the sidebar of a request, filterable from the list.
+three choices, and the status. Statuses: Draft, Submitted, Contacted,
+Preparing, Connected — set from the sidebar of a request, filterable from the list.
+
+The journey reads **Personalized → Submitted → Contacted → Preparing → Connected**.
+No shipping or order words: the end state is *Connected*, which is what Connected
+Mini-Kits means. Each status carries one plain sentence, shown on the card and in
+the member's mail, so the two never drift apart.
 
 Stored per request: user id (post author), name, email, face, hairstyle, hair
 colour, the full editor config, the render, the created and submitted dates, and the

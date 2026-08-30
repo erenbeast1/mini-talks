@@ -637,7 +637,7 @@
   var KITS = [
     {
       code: 'F', name: 'Fig-Talks', color: 'red',
-      tagline: 'A personalized figure designed to represent you.',
+      tagline: 'Your personalized Mini-Kit',
       sections: ['personalize', 'overview', 'recordings'],
       art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
            '<rect x="22" y="4" width="20" height="7" rx="3" class="a1"/>' +
@@ -746,7 +746,9 @@
     var key    = kitKey(kit.code);
     var dev    = key ? state[key] : null;
 
-    var card = el('article', 'md-kit md-kit-' + kit.color + ' is-' + status);
+    var figActive = kit.code === 'F' && !!figState().request;
+    var card = el('article', 'md-kit md-kit-' + kit.color +
+                  ' is-' + (figActive && status === 'new' ? 'requested' : status));
 
     card.appendChild(el('div', 'md-kit-studs'));
 
@@ -781,15 +783,16 @@
     main.appendChild(row);
     main.appendChild(el('p', 'md-kit-tagline', kit.tagline));
 
-    var facts = el('div', 'md-kit-facts');
+    var facts = el('div', 'md-kit-facts' + (kit.code === 'F' ? ' md-kit-facts-stack' : ''));
     if (kit.code === 'F') {
       var f = figState(), r = f.request;
-      if (r && r.status !== 'draft') {
-        facts.appendChild(el('p', 'md-kit-line', 'Personalized Fig-Talks'));
-        var sp = el('span', 'md-pill md-pill-linked');
-        sp.appendChild(el('span', 'md-pill-dot'));
-        sp.appendChild(document.createTextNode('Status: ' + (r.status_label || r.status)));
-        facts.appendChild(sp);
+      if (r) {
+        facts.appendChild(figBadge(r));
+        if (r.status_note) facts.appendChild(el('p', 'md-kit-line', r.status_note));
+        if (r.submitted) {
+          facts.appendChild(el('p', 'md-fig-when',
+            (r.status === 'draft' ? 'Started ' : 'Submitted on ') + fmtDay(r.submitted)));
+        }
       } else if (f.design) {
         facts.appendChild(el('p', 'md-kit-line', 'Your design is ready to send.'));
       } else {
@@ -965,11 +968,15 @@
     var meta = el('div', 'md-pop-meta');
     if (dev.uid) meta.appendChild(el('span', 'md-uid', dev.uid));
     if (dev.fw)  meta.appendChild(el('span', 'md-fw', 'Firmware ' + dev.fw));
-    if (key) meta.appendChild(el('span', 'md-sync', 'Last sync: ' + fmtDate(dev.last_sync)));
-    else     meta.appendChild(el('span', 'md-sync', 'Not connected to this profile yet'));
+    var figReq = openCode === 'F' ? figState().request : null;
+    if (key)            meta.appendChild(el('span', 'md-sync', 'Last sync: ' + fmtDate(dev.last_sync)));
+    else if (!figReq)   meta.appendChild(el('span', 'md-sync', 'Not connected to this profile yet'));
     htxt.appendChild(meta);
     head.appendChild(htxt);
-    head.appendChild(pill(status));
+    // With a request in flight the badge below says where things stand; a
+    // "not linked yet" pill on top of it only contradicts.
+    if (figReq && !key) head.appendChild(figBadge(figReq));
+    else                head.appendChild(pill(status));
     inner.appendChild(head);
 
     if (publicDemo) {
@@ -1095,10 +1102,47 @@
      the team contacts you. A sent request is frozen; designing again opens a
      new one, so the team never has work change under them. */
 
+  var DEMO_FIG_STEPS = [
+    { key: 'draft', label: 'Personalized' }, { key: 'submitted', label: 'Submitted' },
+    { key: 'contacted', label: 'Contacted' }, { key: 'preparing', label: 'Preparing' },
+    { key: 'connected', label: 'Connected' }
+  ];
+
   var FIG_STEPS = ['Choose Your Face', 'Choose Your Hairstyle',
                    'Choose Your Hair Color', 'Review Your Fig-Talks'];
 
   function figState() { return fig || { design: null, request: null, editable: true }; }
+
+  function fmtDay(epoch) {
+    if (!epoch) return '';
+    return new Date(epoch * 1000).toLocaleDateString('en-GB',
+      { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function figBadge(req) {
+    var b = el('span', 'md-fig-badge is-' + (req.status || 'draft'));
+    b.appendChild(el('span', 'md-fig-badge-dot'));
+    b.appendChild(document.createTextNode((req.status_label || req.status).toUpperCase()));
+    return b;
+  }
+
+  /* Personalized → Submitted → Contacted → Preparing → Connected.
+     Deliberately not a delivery tracker: no shipping words, no ETA. */
+  function figProgress(req) {
+    var steps = (req && req.steps) || [];
+    if (!steps.length) return null;
+    var at = 0;
+    steps.forEach(function (st, i) { if (st.key === req.status) at = i; });
+
+    var rail = el('ol', 'md-fig-rail');
+    steps.forEach(function (st, i) {
+      var li = el('li', 'md-fig-rail-step' + (i < at ? ' is-past' : (i === at ? ' is-now' : '')));
+      li.appendChild(el('span', 'md-fig-rail-dot'));
+      li.appendChild(el('span', 'md-fig-rail-label', st.label));
+      rail.appendChild(li);
+    });
+    return rail;
+  }
 
   function figApi(path, body) {
     if (demo) {                     // sample data; nothing reaches the server
@@ -1117,12 +1161,14 @@
     if (path === 'figtalks/design') {
       fig = { design: { config: body.config, url: body.image || (f.design || {}).url, updated: Date.now() / 1000 },
               request: f.request && f.request.status !== 'draft' ? f.request
-                     : { status: 'draft', status_label: 'Draft' },
+                     : { status: 'draft', status_label: 'Draft', steps: DEMO_FIG_STEPS,
+                         status_note: 'Your Fig-Talks design is still being personalized.' },
               editable: true };
     } else if (path === 'figtalks/request') {
       fig = { design: f.design,
-              request: { status: 'submitted', status_label: 'Request Submitted',
-                         submitted: Math.floor(Date.now() / 1000) },
+              request: { status: 'submitted', status_label: 'Submitted',
+                         status_note: 'Your Fig-Talks design has been shared with the Mini-Talks team.',
+                         submitted: Math.floor(Date.now() / 1000), steps: DEMO_FIG_STEPS },
               editable: false };
     }
     return figState();
@@ -1194,14 +1240,14 @@
 
     var side = el('div', 'md-fig-review-main');
     if (sent) {
-      side.appendChild(el('h3', 'md-fig-title', 'Request sent!'));
+      side.appendChild(el('h3', 'md-fig-title',
+        req.status === 'submitted' ? 'Request sent!' : 'Your Fig-Talks request'));
+      side.appendChild(figBadge(req));
       side.appendChild(el('p', 'md-section-note',
-        'Your personalized Fig-Talks design has been shared with the Mini-Talks team. ' +
-        'We\u2019ll contact you about the next steps.'));
-      var pill = el('span', 'md-pill md-pill-linked');
-      pill.appendChild(el('span', 'md-pill-dot'));
-      pill.appendChild(document.createTextNode('Status: ' + (req.status_label || req.status)));
-      side.appendChild(pill);
+        req.status_note || 'Your personalized Fig-Talks design has been shared with the Mini-Talks team.'));
+      if (req.submitted) {
+        side.appendChild(el('p', 'md-fig-when', 'Submitted on ' + fmtDay(req.submitted)));
+      }
     } else {
       side.appendChild(el('h3', 'md-fig-title', 'Your Fig-Talks is ready.'));
       side.appendChild(el('p', 'md-section-note',
@@ -1246,6 +1292,8 @@
     host.appendChild(row);
 
     if (sent) {
+      var rail = figProgress(req);
+      if (rail) host.appendChild(rail);
       host.appendChild(el('p', 'md-fig-foot',
         'Your sent request stays exactly as it was. Designing again starts a new request rather than changing this one.'));
     }

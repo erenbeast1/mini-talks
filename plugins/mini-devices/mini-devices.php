@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Connected Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Fig-Talks is personalised in the profile and requested from the Mini-Talks team.
- * Version:     2.10.0
+ * Version:     2.11.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.10.0');
+define('MD_VER', '2.11.0');
 define('MD_PATH', plugin_dir_path(__FILE__));
 
 require_once MD_PATH . 'includes/class-md-figtalks.php';

@@ -24,12 +24,40 @@ class MD_FigTalks {
     /** Request lifecycle. Draft is the design before it is sent. */
     public static function statuses() {
         return array(
-            'draft'       => 'Draft',
-            'submitted'   => 'Request Submitted',
-            'contacted'   => 'Contacted',
-            'preparation' => 'In Preparation',
-            'completed'   => 'Completed',
+            'draft'     => 'Draft',
+            'submitted' => 'Submitted',
+            'contacted' => 'Contacted',
+            'preparing' => 'Preparing',
+            'connected' => 'Connected',
         );
+    }
+
+    /** One plain sentence per status, shown on the card and in mail. */
+    public static function status_notes() {
+        return array(
+            'draft'     => 'Your Fig-Talks design is still being personalized.',
+            'submitted' => 'Your Fig-Talks design has been shared with the Mini-Talks team.',
+            'contacted' => 'Our team has contacted you about the next steps.',
+            'preparing' => 'Your personalized Fig-Talks is being prepared.',
+            'connected' => 'Your Fig-Talks is now connected to your profile.',
+        );
+    }
+
+    /** The journey, for the progress rail. Draft reads as "Personalized". */
+    public static function steps() {
+        return array(
+            array('key' => 'draft',     'label' => 'Personalized'),
+            array('key' => 'submitted', 'label' => 'Submitted'),
+            array('key' => 'contacted', 'label' => 'Contacted'),
+            array('key' => 'preparing', 'label' => 'Preparing'),
+            array('key' => 'connected', 'label' => 'Connected'),
+        );
+    }
+
+    /** Earlier builds used different keys; keep old rows readable. */
+    private static function normalise($status) {
+        $map = array('preparation' => 'preparing', 'completed' => 'connected');
+        return isset($map[$status]) ? $map[$status] : $status;
     }
 
     public static function init() {
@@ -110,12 +138,15 @@ class MD_FigTalks {
     }
 
     private static function to_array($post) {
-        $status = get_post_meta($post->ID, '_md_status', true) ?: 'draft';
+        $status = self::normalise(get_post_meta($post->ID, '_md_status', true) ?: 'draft');
         $all    = self::statuses();
+        $notes  = self::status_notes();
         return array(
             'id'         => $post->ID,
             'status'     => $status,
             'status_label' => isset($all[$status]) ? $all[$status] : $status,
+            'status_note'  => isset($notes[$status]) ? $notes[$status] : '',
+            'steps'        => self::steps(),
             'created'    => get_post_time('U', true, $post),
             'submitted'  => (int) get_post_meta($post->ID, '_md_submitted_at', true),
             'face'       => get_post_meta($post->ID, '_md_face', true),
@@ -268,15 +299,16 @@ class MD_FigTalks {
      *  a draft is theirs, and Submitted already gets its own confirmation. */
     public static function notify_statuses() {
         return apply_filters('md_figtalks_notify_statuses',
-            array('contacted', 'preparation', 'completed'));
+            array('contacted', 'preparing', 'connected'));
     }
 
     private static function status_message($status) {
         $msg = array(
-            'contacted'   => "A member of the Mini-Talks team has reached out about your Fig-Talks. " .
-                             "If you have not seen anything, check your other mail folders.",
-            'preparation' => "Your Fig-Talks is being prepared. We will let you know as soon as it is ready.",
-            'completed'   => "Your Fig-Talks is ready. The team will be in touch about getting it to you.",
+            'contacted' => "Our team has contacted you about the next steps. " .
+                           "If you have not seen anything, check your other mail folders.",
+            'preparing' => "Your personalized Fig-Talks is being prepared. " .
+                           "We will let you know as soon as it is ready.",
+            'connected' => "Your Fig-Talks is now connected to your profile.",
         );
         return isset($msg[$status]) ? $msg[$status] : '';
     }
@@ -395,7 +427,7 @@ class MD_FigTalks {
             echo $bits ? esc_html(implode(' / ', $bits)) : '<span style="color:#999">—</span>';
         } elseif ($col === 'md_status') {
             $all = self::statuses();
-            $st  = get_post_meta($id, '_md_status', true) ?: 'draft';
+            $st  = self::normalise(get_post_meta($id, '_md_status', true) ?: 'draft');
             printf('<strong>%s</strong>', esc_html(isset($all[$st]) ? $all[$st] : $st));
         }
     }
@@ -403,7 +435,7 @@ class MD_FigTalks {
     public static function meta_box() {
         add_meta_box('md_fig_status', 'Request', function ($post) {
             wp_nonce_field('md_fig_status', 'md_fig_status_nonce');
-            $st  = get_post_meta($post->ID, '_md_status', true) ?: 'draft';
+            $st  = self::normalise(get_post_meta($post->ID, '_md_status', true) ?: 'draft');
             $img = get_post_meta($post->ID, '_md_image', true);
             $cfg = get_post_meta($post->ID, '_md_config', true);
             echo '<p><label for="md_status"><strong>Status</strong></label><br>';
@@ -431,10 +463,10 @@ class MD_FigTalks {
         if (!current_user_can('edit_post', $post_id)) return;
         if (!isset($_POST['md_status'])) return;
 
-        $st = sanitize_key($_POST['md_status']);
+        $st = self::normalise(sanitize_key($_POST['md_status']));
         if (!isset(self::statuses()[$st])) return;
 
-        $was = get_post_meta($post_id, '_md_status', true);
+        $was = self::normalise(get_post_meta($post_id, '_md_status', true));
         if ($was === $st) return;
 
         update_post_meta($post_id, '_md_status', $st);

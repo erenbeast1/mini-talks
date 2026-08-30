@@ -318,6 +318,38 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 /* Request status in the profile header, beside the Kits counter. */
 .md-stat-figtalks{border-color:var(--mf-green,#237841)!important;border-bottom-color:#17512C!important;color:#17512C!important}
 
+/* Status badge. Calm and community-shaped — not an order tracker. */
+.md-fig-badge{display:inline-flex!important;align-items:center!important;gap:7px!important;padding:5px 13px!important;border-radius:20px!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:11px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.05em!important;white-space:nowrap!important;margin:0 0 9px!important;background:#F2F2F2!important;color:#555!important}
+.md-fig-badge-dot{width:7px!important;height:7px!important;border-radius:50%!important;flex:none!important;background:currentColor!important}
+.md-fig-badge.is-draft{background:#F4F4F4!important;color:#777!important}
+.md-fig-badge.is-submitted{background:#E8F0FE!important;color:#0B3E8F!important}
+.md-fig-badge.is-contacted{background:#FFF4DB!important;color:#7A5A00!important}
+.md-fig-badge.is-preparing{background:#FFF0E6!important;color:#8A3E00!important}
+.md-fig-badge.is-connected{background:#E8F5EC!important;color:#17512C!important}
+.md-fig-badge.is-connected .md-fig-badge-dot{box-shadow:0 0 0 3px rgba(35,120,65,.2)!important}
+
+/* A Fig-Talks with a request in flight reads as active, not as an empty slot. */
+.md-kit.is-requested{opacity:1!important}
+.md-kit.is-requested .md-kit-brick{background:var(--md-red,#E52828)!important}
+.md-kit.is-requested .md-kit-body{background:#fff!important;border:none!important}
+.md-kit.is-requested .md-kit-studs{opacity:1!important}
+
+.md-kit-facts-stack{flex-direction:column!important;align-items:flex-start!important;gap:0!important}
+
+.md-fig-when{margin:6px 0 0!important;font-size:11.5px!important;font-weight:700!important;color:#999!important}
+
+/* Personalized → Submitted → Contacted → Preparing → Connected */
+.md-fig-rail{list-style:none!important;display:flex!important;align-items:flex-start!important;margin:20px 0 0!important;padding:0!important}
+.md-fig-rail-step{flex:1 1 0!important;position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:7px!important;text-align:center!important;min-width:0!important}
+.md-fig-rail-step::before{content:''!important;position:absolute!important;top:6px!important;left:-50%!important;width:100%!important;height:3px!important;background:#EDEDED!important;border-radius:2px!important}
+.md-fig-rail-step:first-child::before{display:none!important}
+.md-fig-rail-step.is-past::before,.md-fig-rail-step.is-now::before{background:var(--mf-green,#237841)!important}
+.md-fig-rail-dot{position:relative!important;z-index:1!important;width:15px!important;height:15px!important;border-radius:50%!important;background:#fff!important;border:3px solid #DEDEDE!important;flex:none!important}
+.md-fig-rail-step.is-past .md-fig-rail-dot{background:var(--mf-green,#237841)!important;border-color:var(--mf-green,#237841)!important}
+.md-fig-rail-step.is-now .md-fig-rail-dot{border-color:var(--mf-green,#237841)!important;box-shadow:0 0 0 4px rgba(35,120,65,.18)!important}
+.md-fig-rail-label{font-size:10.5px!important;font-weight:800!important;color:#AAA!important;letter-spacing:.02em!important;line-height:1.3!important}
+.md-fig-rail-step.is-past .md-fig-rail-label,.md-fig-rail-step.is-now .md-fig-rail-label{color:#1D1D1B!important}
+
 .md-kit-line{margin:0 0 8px!important;font-size:13px!important;font-weight:700!important;color:var(--md-soft,#555)!important}
 .md-kit-facts-row{display:flex!important;gap:22px!important;flex-wrap:wrap!important;margin-top:10px!important}
 
@@ -327,6 +359,7 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 
 @media(max-width:560px){
   .md-fig-review{flex-direction:column!important;align-items:center!important;text-align:center!important}
+  .md-fig-rail-label{font-size:9px!important}
   .md-fig-acts{justify-content:center!important}
   .md-fig-acts .md-btn{flex:1 1 auto!important}
 }

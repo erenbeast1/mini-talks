@@ -25,6 +25,35 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.11.0
+
+**Status names that read as a community request, not an order.**
+Draft → Submitted → Contacted → **Preparing** → **Connected**, replacing "In
+Preparation" and "Completed". *Connected* as the end state is what Connected
+Mini-Kits means, and it keeps shipping language out entirely. Rows written under the
+old keys still read correctly.
+
+Each status carries one plain sentence, defined once in PHP and used by the card,
+the popup and the member's email, so the three cannot drift apart:
+
+| Status | Sentence |
+|---|---|
+| Draft | Your Fig-Talks design is still being personalized. |
+| Submitted | Your Fig-Talks design has been shared with the Mini-Talks team. |
+| Contacted | Our team has contacted you about the next steps. |
+| Preparing | Your personalized Fig-Talks is being prepared. |
+| Connected | Your Fig-Talks is now connected to your profile. |
+
+**The card follows the layout asked for**: name, *Your personalized Mini-Kit*, a
+status badge, that sentence, the date it was sent, and **View My Design**. The
+popup adds a progress rail — Personalized → Submitted → Contacted → Preparing →
+Connected — where there is room for it.
+
+**Fixed:** a Fig-Talks with a request in flight was still drawn as an empty slot —
+faded, dashed, captioned "Not linked yet" beside its own "Submitted" badge. A kit
+being made for you is not a kit you lack, so the card is a solid brick now and the
+duplicate pill is gone from the card and the popup header alike.
+
 ## mini-devices 2.10.0
 
 **A Fig-Talks is made with the character inside it, so the request comes first.**
