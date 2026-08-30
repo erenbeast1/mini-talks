@@ -25,6 +25,25 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.4.2
+
+**Kit cards are real bricks now, built the way the forum already solved it.**
+`.mfe-detail-*` (the event detail popup) does two things this plugin was not:
+`background-position: center bottom` on the stud strip, so a centred repeat splits
+the partial stud evenly across both edges instead of leaving one cut stud on the
+right; and a modal whose top padding is thicker than its sides, which is where the
+coloured band under the studs comes from.
+
+A kit card is now studs → coloured brick (14px top padding) → white inner, the same
+shell. That restores the rounded outer corners lost in 2.4.0, and replaces the
+gradient base band, which was a workaround for a problem the forum had already
+fixed properly.
+
+**Face previews are bigger and crop to the head.** 2.4.1 fitted the whole figure
+into the thumbnail, which left it too small to recognise. The thumbnail is 78×78 and
+uses `object-fit: cover` with `object-position: center 30%`, trimming top and bottom
+so the face fills the tile.
+
 ## mini-devices 2.4.1
 
 Two things 2.4.0 got wrong.

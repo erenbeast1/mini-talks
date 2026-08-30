@@ -95,22 +95,28 @@
 
 .md-shelf{display:flex!important;flex-direction:column!important;gap:18px!important}
 
-.md-kit{border-radius:16px!important;position:relative!important}
+.md-kit{border-radius:16px!important;position:relative!important;display:flex!important;flex-direction:column!important}
+
+/* Coloured frame. The 14px top padding is the band under the studs — the forum
+   detail popup does the same with padding:16px 8px 8px. */
+.md-kit-brick{border-radius:16px!important;padding:14px 8px 8px!important;margin-top:-1px!important}
 
 /* Stud strip: two half-width PNGs, notched at the sides, like .mf-action-card. */
-.md-kit-studs{height:24px!important;background-repeat:repeat-x,no-repeat!important;background-position:left top,left bottom!important;background-size:auto 18px,100% 9px!important;border-radius:13px 13px 0 0!important;overflow:hidden!important;margin-bottom:0!important;position:relative!important;z-index:2!important}
-.md-kit-red    .md-kit-studs{background-image:var(--md-stud-red),linear-gradient(var(--md-red,#E52828),var(--md-red,#E52828))!important}
-.md-kit-blue   .md-kit-studs{background-image:var(--md-stud-blue),linear-gradient(var(--md-blue,#0055BF),var(--md-blue,#0055BF))!important}
-.md-kit-yellow .md-kit-studs{background-image:var(--md-stud-yellow),linear-gradient(var(--md-yellow,#FFCC00),var(--md-yellow,#FFCC00))!important}
+.md-kit-studs{height:26px!important;background-repeat:repeat-x!important;background-position:center bottom!important;background-size:auto 26px!important;border-radius:16px 16px 0 0!important;overflow:hidden!important;flex-shrink:0!important}
+.md-kit-red    .md-kit-studs{background-image:var(--md-stud-red)!important}
+.md-kit-red    .md-kit-brick{background:var(--md-red,#E52828)!important}
+.md-kit-blue   .md-kit-studs{background-image:var(--md-stud-blue)!important}
+.md-kit-blue   .md-kit-brick{background:var(--md-blue,#0055BF)!important}
+.md-kit-yellow .md-kit-studs{background-image:var(--md-stud-yellow)!important}
+.md-kit-yellow .md-kit-brick{background:var(--md-yellow,#FFCC00)!important}
 
-.md-kit-body{display:flex!important;align-items:center!important;gap:20px!important;background:#fff!important;border:3px solid var(--md-line)!important;border-bottom-width:8px!important;border-radius:0 0 16px 16px!important;padding:18px 22px!important;transition:transform .15s,box-shadow .15s!important}
-.md-kit-red    .md-kit-body{border-color:var(--md-red)!important;border-bottom-color:#B31D1D!important}
-.md-kit-blue   .md-kit-body{border-color:var(--md-blue)!important;border-bottom-color:#003D8C!important}
+.md-kit-body{display:flex!important;align-items:center!important;gap:20px!important;background:#fff!important;border:none!important;border-radius:12px!important;padding:18px 22px!important;transition:transform .15s,box-shadow .15s!important}
 .md-kit-yellow .md-kit-body{border-color:var(--md-yellow)!important;border-bottom-color:#E5B800!important}
 
-.md-kit.is-live .md-kit-body{box-shadow:0 0 0 4px rgba(35,120,65,.14)!important}
+.md-kit.is-live .md-kit-brick{box-shadow:0 0 0 4px rgba(35,120,65,.18)!important}
 .md-kit.is-new{opacity:.72!important}
-.md-kit.is-new .md-kit-body{border-style:dashed!important;border-bottom-width:2.5px!important;background:#FCFCFC!important}
+.md-kit.is-new .md-kit-brick{background:#EDEDED!important}
+.md-kit.is-new .md-kit-body{background:#FCFCFC!important;border:2px dashed #D8D8D8!important}
 .md-kit.is-new .md-kit-studs{opacity:.45!important}
 
 /* ── artwork ── */
@@ -174,13 +180,13 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 
 .md-popup-wrapper{width:100%!important;max-width:680px!important;max-height:100%!important;display:flex!important;flex-direction:column!important;border-radius:16px!important;margin:auto!important}
 
-.md-popup-studs{height:28px!important;flex-shrink:0!important;background-repeat:repeat-x!important;background-position:left bottom!important;background-size:auto 28px!important;border-radius:16px 16px 0 0!important;overflow:hidden!important}
+.md-popup-studs{height:28px!important;flex-shrink:0!important;background-repeat:repeat-x!important;background-position:center bottom!important;background-size:auto 28px!important;border-radius:16px 16px 0 0!important;overflow:hidden!important}
 .md-pop-red    .md-popup-studs{background-image:var(--stud-red,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png'))!important}
 .md-pop-blue   .md-popup-studs{background-image:var(--stud-blue,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png'))!important}
 .md-pop-yellow .md-popup-studs{background-image:var(--stud-yellow,url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png'))!important}
 
 /* The coloured 8px frame is the brick; white inner is the label on it. */
-.md-popup-modal{border-radius:16px!important;padding:10px!important;flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important}
+.md-popup-modal{border-radius:16px!important;padding:16px 8px 8px!important;margin-top:-1px!important;flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important}
 .md-pop-red    .md-popup-modal{background:var(--mf-red,#E52828)!important}
 .md-pop-blue   .md-popup-modal{background:var(--mf-blue,#0055BF)!important}
 .md-pop-yellow .md-popup-modal{background:var(--mf-yellow,#FFCC00)!important}
@@ -288,9 +294,12 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 
 /* contain, not cover: the saved preview is a head on empty space, and cropping
    it to fill was cutting the chin off. */
-.md-face-thumb{width:64px!important;height:86px!important;flex:none!important;border-radius:12px!important;background:#F6F6F6!important;border:2px solid transparent!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:4px!important;overflow:hidden!important}
+.md-face-thumb{width:78px!important;height:78px!important;flex:none!important;border-radius:12px!important;background:#F6F6F6!important;border:2px solid transparent!important;display:block!important;overflow:hidden!important;position:relative!important}
+.md-face-thumb .md-face-placeholder{position:absolute!important;inset:0!important;display:grid!important;place-items:center!important}
 .md-face-thumb.has-face{border-color:var(--mf-blue,#0055BF)!important;background:#fff!important}
-.md-face-thumb img{max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important;object-fit:contain!important;display:block!important}
+/* cover with the focal point up near the head: the preview is a full figure,
+   and the face is what identifies the slot. */
+.md-face-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 30%!important;display:block!important}
 .md-face-placeholder{font-size:26px!important;font-weight:900!important;color:#D5D5D5!important}
 
 /* ═══════════════════════ SCENE / CARD FOLDERS ═══════════════════════ */

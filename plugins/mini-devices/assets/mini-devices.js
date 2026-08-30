@@ -747,7 +747,10 @@
 
     card.appendChild(el('div', 'md-kit-studs'));
 
-    var body = el('div', 'md-kit-body');
+    // studs → coloured brick → white inner, the same shell the forum's detail
+    // popup uses. The brick's top padding is the coloured band under the studs.
+    var brick = el('div', 'md-kit-brick');
+    var body  = el('div', 'md-kit-body');
 
     var art = el('div', 'md-kit-art');
     art.innerHTML = kit.art;
@@ -789,7 +792,8 @@
     }
     body.appendChild(cta);
 
-    card.appendChild(body);
+    brick.appendChild(body);
+    card.appendChild(brick);
     return card;
   }
 
