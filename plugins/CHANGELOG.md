@@ -25,6 +25,25 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.4.1
+
+Two things 2.4.0 got wrong.
+
+**Studs vanished.** 2.4.0 painted the brick colour behind the whole stud strip to
+stop the studs floating. But `yeni-3-*.png` is studs *on transparency* in that same
+colour, so filling the strip with it erased their silhouette — a flat coloured bar.
+The strip now layers properly: the stud image sits clear at the top and the colour
+is a 9px base band beneath it, so the studs read against the page and still meet the
+card.
+
+**Face previews were cut off below the hair.** The `object-fit: contain` in 2.4.0
+never took effect: inside a `display:grid; place-items:center` thumbnail the image
+kept its intrinsic aspect and rendered 70×112 in a 74×74 box, so `overflow:hidden`
+cropped it. Measured, not guessed. The thumbnail is portrait now (64×86) and the
+image is bounded by `max-width`/`max-height` instead of `height:100%`, which does not
+depend on how the parent lays its children out. The whole avatar shows — hair, face,
+torso — at 45×74.
+
 ## mini-devices 2.4.0
 
 **Display-Talks: Recordings and Faces merged into one Slots section.** A slot holds
