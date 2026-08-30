@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Each kit opens its own detail popup.
- * Version:     2.1.0
+ * Version:     2.2.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.1.0');
+define('MD_VER', '2.2.0');
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 
@@ -248,11 +248,11 @@ function md_rest_forget($req) {
 /* ------------------------------------------------------------------ *
  *  Varlıklar
  * ------------------------------------------------------------------ */
-add_action('wp_enqueue_scripts', function () {
-    if (!is_user_logged_in() || is_admin()) return;
+function md_enqueue_assets() {
+    static $done = false;
+    if ($done || is_admin()) return;
+    $done = true;
 
-    // Blok, forum kisa kodunun ciktisina filtre ile ekleniyor; o an wp_head
-    // basilmis oluyor. Bu yuzden varliklar kosulsuz (ve erkenden) yuklenir.
     // filemtime, not MD_VER: a CDN or page cache otherwise keeps serving the
     // old asset after an in-place update.
     $dir   = plugin_dir_path(__FILE__) . 'assets/';
@@ -272,7 +272,23 @@ add_action('wp_enqueue_scripts', function () {
         // server, so the capability check is only about who is offered it.
         'admin' => current_user_can('manage_options') ? 1 : 0,
     ));
+}
+
+add_action('wp_enqueue_scripts', function () {
+    if (is_admin()) return;
+
+    // Signed-in members always get them (the profile shelf is theirs). Everyone
+    // else only when the page carries the public preview.
+    if (is_user_logged_in() || md_page_has_preview()) md_enqueue_assets();
 });
+
+/** Does the current post embed [mini_kits_demo]? */
+function md_page_has_preview() {
+    $post = get_post();
+    $hit  = $post && has_shortcode($post->post_content, 'mini_kits_demo');
+    // Page builders keep content outside post_content; let a theme force it.
+    return (bool) apply_filters('md_page_has_preview', $hit, $post);
+}
 
 /* ------------------------------------------------------------------ *
  *  Shortcode:  [connected_devices]
@@ -316,6 +332,58 @@ add_shortcode('connected_devices', function () {
         <p class="md-privacy">
             Audio recordings stay on the kit — they are never uploaded to the site. Only recording counts and durations are saved to your profile.
         </p>
+    </div>
+    <div id="md-modal-root"></div>
+    <?php
+    return ob_get_clean();
+});
+
+/* ------------------------------------------------------------------ *
+ *  Shortcode:  [mini_kits_demo]
+ *  A public, always-on preview of the Mini-Kits shelf for marketing and
+ *  onboarding pages. Sample kits only — it never reads or writes a profile,
+ *  so it is safe for logged-out visitors.
+ *
+ *    [mini_kits_demo]
+ *    [mini_kits_demo kits="B"]
+ *    [mini_kits_demo kits="F,B" title="Try it" intro="Open a kit…"]
+ * ------------------------------------------------------------------ */
+
+add_shortcode('mini_kits_demo', function ($atts) {
+    md_enqueue_assets();   // page builders can hide the shortcode from has_shortcode()
+
+    $a = shortcode_atts(array(
+        'kits'  => '',
+        'title' => 'Try a Mini-Kit',
+        'intro' => 'This is exactly what you see on your profile once a kit is linked. Open one, name a recording, design a face — nothing is saved.',
+    ), $atts, 'mini_kits_demo');
+
+    // Only the three real kit codes are accepted.
+    $codes = array();
+    foreach (explode(',', strtoupper($a['kits'])) as $c) {
+        $c = trim($c);
+        if (in_array($c, array('F', 'B', 'D'), true)) $codes[] = $c;
+    }
+
+    ob_start(); ?>
+    <div class="md-wrap md-preview" id="md-root"
+         data-initial="{}"
+         data-demo="1"
+         data-kits="<?php echo esc_attr(implode(',', $codes)); ?>">
+
+        <header class="md-shelf-head">
+            <?php if ($a['title'] !== ''): ?>
+                <h3 class="md-title"><?php echo esc_html($a['title']); ?></h3>
+            <?php endif; ?>
+            <?php if ($a['intro'] !== ''): ?>
+                <p class="md-sub"><?php echo esc_html($a['intro']); ?></p>
+            <?php endif; ?>
+            <p class="md-preview-tag">Live preview</p>
+        </header>
+
+        <div class="md-status" id="md-status" hidden></div>
+
+        <div class="md-shelf" id="md-shelf"></div>
     </div>
     <div id="md-modal-root"></div>
     <?php

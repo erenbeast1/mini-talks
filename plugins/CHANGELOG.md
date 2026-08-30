@@ -25,6 +25,36 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.2.0
+
+**Fixed: popups ran off the page.** The overlay only capped its own height, so a
+long popup (Design-Talks scenes) pushed its header and footer past the viewport and
+sat under the WordPress admin bar. The shell now uses the same flex pattern as the
+avatar editor popup — the wrapper caps at the viewport, only the section body
+scrolls, and the admin bar is accounted for at both breakpoints.
+
+**Fixed: a stray horizontal scrollbar in every popup.** Setting `overflow-y:auto`
+alone makes the other axis compute to `auto` too, so a pixel of overflow produced a
+horizontal bar. `overflow-x` is now pinned off.
+
+**Fixed: dates rendered in the browser's language** ("16 Ağu 2026") inside an
+English interface. They are formatted as `en-GB` now, matching the base language
+TranslatePress translates from.
+
+**Studs.** Kit cards and popups stretched two copies of the stud PNG to half the
+width each, which made a handful of enormous studs. They tile at their natural
+aspect now (`repeat-x`), the same as `.mf-studs` and the avatar editor popup — many
+small studs. Brick borders are heavier to match.
+
+**Faces are a rail, not a grid.** Slots scroll sideways with snap points, prev/next
+buttons for pointer users and swipe on touch, instead of wrapping into rows.
+
+**Public preview shortcode.** `[mini_kits_demo]` renders the shelf as an always-on
+preview for product and onboarding pages — sample kits, no profile access, works
+logged out. Takes `kits`, `title` and `intro`. Since the avatar editor bundle is
+members-only, logged-out visitors get a built-in preset face picker so
+personalisation is still demonstrable.
+
 ## mini-devices 2.1.0
 
 **Admin demo mode.** Users with `manage_options` get an "Admin preview" bar above

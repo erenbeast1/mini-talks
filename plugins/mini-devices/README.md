@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.1.0)
+# Mini Devices — Mini-Kits (v2.2.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -80,6 +80,32 @@ caution stripe plus a banner in every popup so sample data cannot be mistaken fo
 member's real kits.
 
 Leaving demo mode restores whatever was on the profile before.
+
+## Public preview shortcode
+
+For a product or onboarding page, `[mini_kits_demo]` renders the same shelf as a
+public, always-on preview. It shows sample kits only, never reads or writes a
+profile, and works for logged-out visitors.
+
+```
+[mini_kits_demo]
+[mini_kits_demo kits="B"]
+[mini_kits_demo kits="F,B" title="Try it yourself" intro="Open a kit and design a face."]
+```
+
+| Attribute | Default | Notes |
+|---|---|---|
+| `kits` | all three | Comma-separated `F`, `B`, `D`. Anything else is ignored. |
+| `title` | `Try a Mini-Kit` | Pass an empty string to drop the heading. |
+| `intro` | see plugin | Pass an empty string to drop the paragraph. |
+
+The full avatar editor only loads for signed-in members, so a logged-out visitor
+gets a built-in preset face picker instead — personalisation still demonstrates,
+without the 3D bundle.
+
+If a page builder keeps the shortcode out of `post_content`, the assets may not be
+detected. The shortcode enqueues them itself as a fallback, and
+`add_filter('md_page_has_preview', '__return_true')` forces it.
 
 ## Kit ↔ profile link
 

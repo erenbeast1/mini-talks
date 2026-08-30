@@ -17,8 +17,9 @@
   /* Demo mode — an admin-only front-end preview. It swaps in sample kits so
      every screen can be walked through without hardware. Nothing touches the
      server: api() is short-circuited and downloads are synthesised locally. */
-  var demo = false;
+  var demo = false, publicDemo = false;
   var realState = null, realFaces = null;
+  var onlyKits = null;   // public preview may show a single kit
 
   function demoFace(bg, mouth) {
     return 'data:image/svg+xml,' + encodeURIComponent(
@@ -98,7 +99,9 @@
       var d = demoData();
       state = d.state; faces = d.faces;
       demo = true;
-      setStatus('Demo mode is on — these are sample kits. Nothing you change here is saved.', 'ok');
+      if (!publicDemo) {
+        setStatus('Demo mode is on — these are sample kits. Nothing you change here is saved.', 'ok');
+      }
     } else {
       state = realState || {}; faces = realFaces || {};
       realState = realFaces = null;
@@ -114,7 +117,7 @@
     }
     var bar = document.getElementById('md-demo-bar');
     if (bar) bar.classList.toggle('is-on', demo);
-    if (root) root.classList.toggle('md-is-demo', demo);
+    if (root) root.classList.toggle('md-is-demo', demo && !publicDemo);
     render();
   }
   var SR = 16000;
@@ -160,8 +163,8 @@
   function fmtDate(epoch) {
     if (!epoch) return 'never';
     var d = new Date(epoch * 1000);
-    return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) +
-           ' ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+           ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
   }
 
   function safeName(s) {
@@ -799,7 +802,8 @@
 
   function renderShelf() {
     shelfEl.innerHTML = '';
-    KITS.forEach(function (k) { shelfEl.appendChild(kitCard(k)); });
+    KITS.filter(function (k) { return !onlyKits || onlyKits.indexOf(k.code) >= 0; })
+        .forEach(function (k) { shelfEl.appendChild(kitCard(k)); });
   }
 
   /* Fills the "Kits" counter in the profile header. */
@@ -888,7 +892,10 @@
     head.appendChild(pill(status));
     inner.appendChild(head);
 
-    if (demo) {
+    if (publicDemo) {
+      inner.appendChild(el('p', 'md-pop-banner md-pop-banner-demo',
+        'Preview kit — this is what you see on your profile once a kit is linked. Try anything; nothing is saved.'));
+    } else if (demo) {
       inner.appendChild(el('p', 'md-pop-banner md-pop-banner-demo',
         'Demo mode — sample kit. Everything here is interactive, and nothing is saved.'));
     } else if (!live) {
@@ -928,6 +935,15 @@
       all.addEventListener('click', function () { downloadAll(full, all); });
       foot.appendChild(all);
     }
+    if (publicDemo) {           // nothing to remove from on a marketing page
+      inner.appendChild(foot);
+      modal.appendChild(inner);
+      wrap.appendChild(modal);
+      overlay.appendChild(wrap);
+      modalRoot.appendChild(overlay);
+      return;
+    }
+
     var forget = el('button', 'md-btn md-btn-danger', 'Remove from profile');
     forget.type = 'button';
     forget.addEventListener('click', function () {
@@ -1058,18 +1074,72 @@
     host.appendChild(list);
   }
 
-  function renderFaces(host, key, dev, live) {
-    if (!window.MDFaces) {
-      host.appendChild(emptyNote('Face designer unavailable',
-        'The face module did not load. Reload the page and try again.'));
-      return;
-    }
+  /* Presets stand in when the full avatar editor is not on the page — a
+     logged-out visitor on a marketing page never gets that bundle. */
+  var FACE_PRESETS = [
+    ['#FFCC00', 'M26 50 q14 12 28 0'], ['#4FC3F7', 'M26 54 q14 -10 28 0'],
+    ['#8BC34A', 'M26 52 h28'],         ['#FF8A65', 'M28 50 q12 14 24 0'],
+    ['#BA68C8', 'M26 48 q14 14 28 0'], ['#4DB6AC', 'M30 52 q10 8 20 0'],
+    ['#F06292', 'M26 51 q14 10 28 0'], ['#90A4AE', 'M28 53 h24']
+  ];
 
+  function presetFaceUrl(i) {
+    var f = FACE_PRESETS[i % FACE_PRESETS.length];
+    return demoFace(f[0], f[1]);
+  }
+
+  function presetPicker(cb) {
+    var ov = el('div', 'mdf-overlay md-preset-overlay');
+    var card = el('div', 'md-preset-card');
+    card.appendChild(el('h3', 'md-preset-title', 'Pick a face'));
+    card.appendChild(el('p', 'md-preset-sub', 'Choose a look for this slot.'));
+
+    var grid = el('div', 'md-preset-grid');
+    FACE_PRESETS.forEach(function (_, i) {
+      var b = el('button', 'md-preset');
+      b.type = 'button';
+      var img = el('img');
+      img.src = presetFaceUrl(i);
+      img.alt = 'Face option ' + (i + 1);
+      b.appendChild(img);
+      b.addEventListener('click', function () {
+        ov.remove();
+        cb({ preset: i }, presetFaceUrl(i));
+      });
+      grid.appendChild(b);
+    });
+    card.appendChild(grid);
+
+    var cancel = el('button', 'md-btn md-btn-ghost md-btn-sm', 'Cancel');
+    cancel.type = 'button';
+    cancel.addEventListener('click', function () { ov.remove(); });
+    card.appendChild(cancel);
+
+    ov.appendChild(card);
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+    (modalRoot || document.body).appendChild(ov);
+  }
+
+  function designFace(config, cb) {
+    if (window.MDFaces && window.MDFaces.designFace && window.MFAvatarEditor) {
+      return window.MDFaces.designFace(config, cb);
+    }
+    return presetPicker(cb);
+  }
+
+  function renderFaces(host, key, dev, live) {
     host.appendChild(el('p', 'md-section-note',
       'Design a face for each slot, then send it to the kit. Faces are stored on your profile, so you can keep editing them while the kit is unplugged.'));
 
+    var slots = dev.slots || [];
+    if (!slots.length) {
+      host.appendChild(emptyNote('No slots reported yet',
+        'Connect the kit once so it can tell the site how many slots it has.'));
+      return;
+    }
+    var rail = el('div', 'md-faces-rail');
     var list = el('div', 'md-faces');
-    (dev.slots || []).forEach(function (slot) {
+    slots.forEach(function (slot) {
       var f = (faces[key] && faces[key][slot.i]) || null;
       var tile = el('div', 'md-face' + (f ? ' has-face' : ''));
 
@@ -1090,7 +1160,7 @@
       var design = el('button', 'md-btn md-btn-ghost md-btn-sm', f ? 'Edit face' : 'Design face');
       design.type = 'button';
       design.addEventListener('click', function () {
-        window.MDFaces.designFace(f && f.config, function (cfg, img) {
+        designFace(f && f.config, function (cfg, img) {
           api('faces', { dev: key, slot: slot.i, config: cfg, image: img }).then(function (res) {
             faces = res.faces || faces;
             render();
@@ -1111,7 +1181,39 @@
       tile.appendChild(acts);
       list.appendChild(tile);
     });
-    host.appendChild(list);
+
+    rail.appendChild(list);
+
+    // Touch can swipe; a mouse needs something to click.
+    var prev = railBtn('\u2039', 'Previous slots', -1, list);
+    var next = railBtn('\u203A', 'More slots', 1, list);
+    rail.appendChild(prev);
+    rail.appendChild(next);
+    host.appendChild(rail);
+
+    function syncArrows() {
+      var max = list.scrollWidth - list.clientWidth;
+      var hidden = max < 4;                       // everything already visible
+      prev.hidden = next.hidden = hidden;
+      if (hidden) return;
+      prev.disabled = list.scrollLeft < 4;
+      next.disabled = list.scrollLeft > max - 4;
+    }
+    list.addEventListener('scroll', syncArrows);
+    // Widths are only real once the popup is laid out.
+    requestAnimationFrame(syncArrows);
+  }
+
+  function railBtn(glyph, label, dir, list) {
+    var b = el('button', 'md-rail-btn md-rail-' + (dir < 0 ? 'prev' : 'next'), glyph);
+    b.type = 'button';
+    b.setAttribute('aria-label', label);
+    b.addEventListener('click', function () {
+      var tile = list.querySelector('.md-face');
+      var step = tile ? tile.getBoundingClientRect().width + 12 : 160;
+      list.scrollBy({ left: dir * step, behavior: 'smooth' });
+    });
+    return b;
   }
 
   function renderScenes(host, key, dev, live) {
@@ -1238,12 +1340,19 @@
     try { state = JSON.parse(root.dataset.initial || '{}') || {}; } catch (e) { state = {}; }
     if (Array.isArray(state)) state = {};
 
+    publicDemo = root.dataset.demo === '1';
+    onlyKits = (root.dataset.kits || '').split(',')
+                 .map(function (t) { return t.trim().toUpperCase(); })
+                 .filter(Boolean);
+    if (!onlyKits.length) onlyKits = null;
+
+    var note = document.getElementById('md-browser-note');
     if (!('serial' in navigator)) {
-      document.getElementById('md-browser-note').hidden = false;
-      connectBtn.disabled = true;
+      if (note) note.hidden = false;
+      if (connectBtn) connectBtn.disabled = true;
     }
 
-    connectBtn.addEventListener('click', connect);
+    if (connectBtn) connectBtn.addEventListener('click', connect);
 
     var demoBtn = document.getElementById('md-demo-toggle');
     if (demoBtn && window.MD && MD.admin) {
@@ -1253,6 +1362,8 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && openCode) closeKit();
     });
+
+    if (publicDemo) { setDemo(true); return; }
 
     render();
     api('faces').then(function (f) {
