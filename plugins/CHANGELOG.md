@@ -33,6 +33,15 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.1.1
+
+**The site-wide "Connect a kit" button is gone.** With Connect living inside each
+kit it was a second, contradictory way in: it asked the member to connect a kit in
+the abstract, before the section had established *which* kit. The shelf header is
+now just the title and the four cards. The USB-support warning moved with it — it
+shows on the kit's own Connect screen, where someone is actually trying to connect,
+instead of sitting above the shelf for a member who only wants Mini-Designs.
+
 ## mini-devices 3.1.0
 
 **Every kit screen now has three top-level buttons, and only three.** Mini-Designs

@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.1.0)
+# Mini Devices — Mini-Kits (v3.1.1)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -80,6 +80,10 @@ opens it in wp-admin. Import never touches a scene that already exists, so it ca
 re-open one the team closed, nor close one they opened.
 
 ## Connect
+
+Connecting lives inside the kit, on its own **Connect** screen — there is no
+site-wide "Connect a kit" button, because a kit is never connected in the abstract:
+you are always connecting *this* Design-Talks, *this* Brick-Talks.
 
 Pairing happens over the kit's USB cable: the kit reports its own id, and the site
 binds that id to the profile. A pairing code or QR route would land on exactly the
@@ -232,8 +236,8 @@ transfer, scene trees, RFID card folders, downloads.
 It is entirely front-end. `api()` is short-circuited to mutate the sample data in
 memory, so nothing is written to `usermeta` and no real profile is touched.
 Downloads synthesise a short chirp locally, which means the WAV that lands actually
-plays. "Connect a kit" is disabled while demo mode is on, and the shelf carries a
-caution stripe plus a banner in every popup so sample data cannot be mistaken for a
+plays. Connecting a real kit is refused while demo mode is on, and the shelf carries
+a caution stripe plus a banner in every popup so sample data cannot be mistaken for a
 member's real kits.
 
 Leaving demo mode restores whatever was on the profile before.
@@ -441,8 +445,8 @@ page derives the kit name from that code.
 ## Browser support
 
 WebSerial runs only in **desktop Chrome, Edge and Opera**. In Safari, Firefox and
-on mobile the page still opens and stored data still shows, but "Connect a kit" is
-disabled and the reason is stated.
+on mobile the page still opens and stored data still shows, but the kit's **Connect**
+button is disabled and the reason is stated on that screen.
 
 The site must be served over **HTTPS** (localhost excepted) — WebSerial requires a
 secure context.

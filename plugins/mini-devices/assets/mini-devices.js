@@ -114,10 +114,6 @@
     }
     var btn = document.getElementById('md-demo-toggle');
     if (btn) btn.textContent = demo ? 'Leave demo mode' : 'Enter demo mode';
-    if (connectBtn) {
-      connectBtn.disabled = demo || !('serial' in navigator);
-      connectBtn.title = demo ? 'Leave demo mode to connect a real kit.' : '';
-    }
     var bar = document.getElementById('md-demo-bar');
     if (bar) bar.classList.toggle('is-on', demo);
     if (root) root.classList.toggle('md-is-demo', demo && !publicDemo);
@@ -131,7 +127,7 @@
   var state = {};            // sunucudan gelen cihaz verisi
   var faces = {};            // md_faces: { devUid: { slot: {config,url,name} } }
 
-  var root, listEl, statusEl, connectBtn;
+  var root, listEl, statusEl;
 
   /* ---------------- yardimcilar ---------------- */
 
@@ -280,7 +276,8 @@
       return;
     }
     if (!('serial' in navigator)) {
-      document.getElementById('md-browser-note').hidden = false;
+      setStatus('This browser cannot talk to USB devices. Open the page in Chrome, Edge or Opera ' +
+                'on a desktop computer.', 'err');
       return;
     }
     setStatus('Choosing a kit…');
@@ -2165,7 +2162,6 @@
     if (!root) return;
     shelfEl    = document.getElementById('md-shelf');
     statusEl   = document.getElementById('md-status');
-    connectBtn = document.getElementById('md-connect');
     modalRoot  = document.getElementById('md-modal-root') || document.body;
 
     try { state = JSON.parse(root.dataset.initial || '{}') || {}; } catch (e) { state = {}; }
@@ -2177,14 +2173,6 @@
                  .map(function (t) { return t.trim().toLowerCase(); })
                  .filter(Boolean);
     if (!onlyKits.length) onlyKits = null;
-
-    var note = document.getElementById('md-browser-note');
-    if (!('serial' in navigator)) {
-      if (note) note.hidden = false;
-      if (connectBtn) connectBtn.disabled = true;
-    }
-
-    if (connectBtn) connectBtn.addEventListener('click', connect);
 
     var demoBtn = document.getElementById('md-demo-toggle');
     if (demoBtn && window.MD && MD.admin) {

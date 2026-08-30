@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits section to the Mini-Forum profile. Members pick a Mini-Kit and request it — Mini-Designs by choosing scenes, Fig-Talks by personalising a figure — and follow it through Submitted, Contacted, Preparing, Connected. Connected kits also talk to the site over USB (WebSerial).
- * Version:     3.1.0
+ * Version:     3.1.1
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '3.1.0');
+define('MD_VER', '3.1.1');
 define('MD_PATH', plugin_dir_path(__FILE__));
 
 require_once MD_PATH . 'includes/class-md-kits.php';
@@ -366,14 +366,7 @@ add_shortcode('connected_devices', function () {
         <header class="md-shelf-head">
             <h3 class="md-title">Mini-Kits</h3>
             <p class="md-sub">Choose a Mini-Kit to see what you can do with it. Request one, personalize yours, and follow where it is.</p>
-            <button type="button" class="md-btn md-btn-primary" id="md-connect">
-                <span class="md-stud-dot"></span> Connect a kit
-            </button>
         </header>
-
-        <p class="md-note" id="md-browser-note" hidden>
-            This browser cannot talk to USB devices. Open the page in Chrome, Edge or Opera on a desktop computer.
-        </p>
 
         <?php if (current_user_can('manage_options')): ?>
         <div class="md-demo-bar" id="md-demo-bar">
