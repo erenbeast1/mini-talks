@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.2.0)
+# Mini Devices — Mini-Kits (v2.3.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -99,9 +99,16 @@ profile, and works for logged-out visitors.
 | `title` | `Try a Mini-Kit` | Pass an empty string to drop the heading. |
 | `intro` | see plugin | Pass an empty string to drop the paragraph. |
 
-The full avatar editor only loads for signed-in members, so a logged-out visitor
-gets a built-in preset face picker instead — personalisation still demonstrates,
-without the 3D bundle.
+"Design face" opens the same avatar editor members use. Mini-Forum enqueues that
+bundle only for signed-in users, so this plugin enqueues it itself on a preview
+page. Everything it needs works logged out: `get_config(0)` returns null and
+`mf_get_user_role(0)` falls back to `Family`. The editor's save request is
+intercepted client-side by `MDFaces`, so a visitor's changes never leave the
+browser.
+
+This does mean the preview needs the GLB models on `mini-talks.com` to allow
+cross-origin reads — the same CORS setup members already rely on (see
+`CORS_SETUP.md`).
 
 If a page builder keeps the shortcode out of `post_content`, the assets may not be
 detected. The shortcode enqueues them itself as a fallback, and

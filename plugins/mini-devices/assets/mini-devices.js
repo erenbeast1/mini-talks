@@ -1074,60 +1074,13 @@
     host.appendChild(list);
   }
 
-  /* Presets stand in when the full avatar editor is not on the page — a
-     logged-out visitor on a marketing page never gets that bundle. */
-  var FACE_PRESETS = [
-    ['#FFCC00', 'M26 50 q14 12 28 0'], ['#4FC3F7', 'M26 54 q14 -10 28 0'],
-    ['#8BC34A', 'M26 52 h28'],         ['#FF8A65', 'M28 50 q12 14 24 0'],
-    ['#BA68C8', 'M26 48 q14 14 28 0'], ['#4DB6AC', 'M30 52 q10 8 20 0'],
-    ['#F06292', 'M26 51 q14 10 28 0'], ['#90A4AE', 'M28 53 h24']
-  ];
-
-  function presetFaceUrl(i) {
-    var f = FACE_PRESETS[i % FACE_PRESETS.length];
-    return demoFace(f[0], f[1]);
-  }
-
-  function presetPicker(cb) {
-    var ov = el('div', 'mdf-overlay md-preset-overlay');
-    var card = el('div', 'md-preset-card');
-    card.appendChild(el('h3', 'md-preset-title', 'Pick a face'));
-    card.appendChild(el('p', 'md-preset-sub', 'Choose a look for this slot.'));
-
-    var grid = el('div', 'md-preset-grid');
-    FACE_PRESETS.forEach(function (_, i) {
-      var b = el('button', 'md-preset');
-      b.type = 'button';
-      var img = el('img');
-      img.src = presetFaceUrl(i);
-      img.alt = 'Face option ' + (i + 1);
-      b.appendChild(img);
-      b.addEventListener('click', function () {
-        ov.remove();
-        cb({ preset: i }, presetFaceUrl(i));
-      });
-      grid.appendChild(b);
-    });
-    card.appendChild(grid);
-
-    var cancel = el('button', 'md-btn md-btn-ghost md-btn-sm', 'Cancel');
-    cancel.type = 'button';
-    cancel.addEventListener('click', function () { ov.remove(); });
-    card.appendChild(cancel);
-
-    ov.appendChild(card);
-    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-    (modalRoot || document.body).appendChild(ov);
-  }
-
-  function designFace(config, cb) {
-    if (window.MDFaces && window.MDFaces.designFace && window.MFAvatarEditor) {
-      return window.MDFaces.designFace(config, cb);
-    }
-    return presetPicker(cb);
-  }
-
   function renderFaces(host, key, dev, live) {
+    if (!window.MDFaces || !window.MFAvatarEditor) {
+      host.appendChild(emptyNote('Face designer unavailable',
+        'The avatar editor did not load on this page. Reload, and check that Mini-Forum is active.'));
+      return;
+    }
+
     host.appendChild(el('p', 'md-section-note',
       'Design a face for each slot, then send it to the kit. Faces are stored on your profile, so you can keep editing them while the kit is unplugged.'));
 
@@ -1160,7 +1113,7 @@
       var design = el('button', 'md-btn md-btn-ghost md-btn-sm', f ? 'Edit face' : 'Design face');
       design.type = 'button';
       design.addEventListener('click', function () {
-        designFace(f && f.config, function (cfg, img) {
+        window.MDFaces.designFace(f && f.config, function (cfg, img) {
           api('faces', { dev: key, slot: slot.i, config: cfg, image: img }).then(function (res) {
             faces = res.faces || faces;
             render();

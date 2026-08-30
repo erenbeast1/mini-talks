@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Each kit opens its own detail popup.
- * Version:     2.2.0
+ * Version:     2.3.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.2.0');
+define('MD_VER', '2.3.0');
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 
@@ -279,8 +279,49 @@ add_action('wp_enqueue_scripts', function () {
 
     // Signed-in members always get them (the profile shelf is theirs). Everyone
     // else only when the page carries the public preview.
-    if (is_user_logged_in() || md_page_has_preview()) md_enqueue_assets();
+    if (is_user_logged_in()) {
+        md_enqueue_assets();
+    } elseif (md_page_has_preview()) {
+        md_enqueue_assets();
+        md_enqueue_avatar_editor();   // the preview needs the real face designer
+    }
 });
+
+/**
+ * Enqueue Mini-Forum's avatar editor when it would not otherwise load.
+ *
+ * Mini-Forum gates the editor bundle behind is_user_logged_in(), so the public
+ * preview has no face designer without this. Everything it localises works for
+ * a logged-out visitor: get_config(0) returns null, mf_get_user_role(0) falls
+ * back to 'Family'. Its dependencies (mf-avatar-script, mf-auth-script) are
+ * enqueued unconditionally by Mini-Forum, so the handle resolves.
+ */
+function md_enqueue_avatar_editor() {
+    if (!defined('MF_PATH') || !defined('MF_URL')) return;          // Mini-Forum absent
+    if (!class_exists('Mini_Forum_Avatar')) return;
+    if (wp_script_is('mf-avatar-editor', 'enqueued')) return;        // Mini-Forum did it
+
+    $js  = MF_PATH . 'assets/avatar-editor/mf-avatar-editor.js';
+    $css = MF_PATH . 'assets/avatar-editor/mf-avatar-editor.css';
+    if (!file_exists($js)) return;
+
+    if (file_exists($css)) {
+        wp_enqueue_style('mf-avatar-editor-style', MF_URL . 'assets/avatar-editor/mf-avatar-editor.css',
+                         array('mf-avatar-style'), filemtime($css));
+    }
+    wp_enqueue_script('mf-avatar-editor', MF_URL . 'assets/avatar-editor/mf-avatar-editor.js',
+                      array('mf-avatar-script'), filemtime($js), true);
+
+    $role = function_exists('mf_get_user_role') ? mf_get_user_role(0) : 'Family';
+
+    wp_localize_script('mf-avatar-editor', 'mf_avatar_editor', array(
+        'glb_base'       => rtrim(apply_filters('mf_avatar_glb_base', 'https://mini-talks.com/models'), '/'),
+        'body_glb_url'   => Mini_Forum_Avatar::resolve_body_glb_url(),
+        'role'           => $role,
+        'torso_id'       => function_exists('mf_role_torso_id') ? mf_role_torso_id($role) : '',
+        'initial_config' => null,
+    ));
+}
 
 /** Does the current post embed [mini_kits_demo]? */
 function md_page_has_preview() {
@@ -350,7 +391,9 @@ add_shortcode('connected_devices', function () {
  * ------------------------------------------------------------------ */
 
 add_shortcode('mini_kits_demo', function ($atts) {
-    md_enqueue_assets();   // page builders can hide the shortcode from has_shortcode()
+    // Page builders can hide the shortcode from has_shortcode(); enqueue again.
+    md_enqueue_assets();
+    if (!is_user_logged_in()) md_enqueue_avatar_editor();
 
     $a = shortcode_atts(array(
         'kits'  => '',

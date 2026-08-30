@@ -25,6 +25,24 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.3.0
+
+**The public preview loads the real avatar editor.** 2.2.0 shipped a preset face
+picker as a stand-in, because Mini-Forum enqueues the editor bundle only for
+signed-in users and a logged-out visitor clicking "Design face" would get nothing.
+That was the wrong fix — it put a second, different personalisation flow in front of
+visitors. The plugin now enqueues Mini-Forum's editor itself on a preview page and
+the preset picker is gone; "Design face" opens the same screen everywhere.
+
+Everything the editor localises works logged out (`get_config(0)` returns null,
+`mf_get_user_role(0)` falls back to `Family`), and its save request is already
+intercepted client-side by `MDFaces`, so a visitor's changes never leave the
+browser. The preview does depend on the GLB models allowing cross-origin reads —
+the same CORS setup members rely on.
+
+If the editor is genuinely missing (Mini-Forum inactive), the Faces section says so
+instead of offering a different flow.
+
 ## mini-devices 2.2.0
 
 **Fixed: popups ran off the page.** The overlay only capped its own height, so a
@@ -51,9 +69,7 @@ buttons for pointer users and swipe on touch, instead of wrapping into rows.
 
 **Public preview shortcode.** `[mini_kits_demo]` renders the shelf as an always-on
 preview for product and onboarding pages — sample kits, no profile access, works
-logged out. Takes `kits`, `title` and `intro`. Since the avatar editor bundle is
-members-only, logged-out visitors get a built-in preset face picker so
-personalisation is still demonstrable.
+logged out. Takes `kits`, `title` and `intro`.
 
 ## mini-devices 2.1.0
 
