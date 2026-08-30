@@ -1,145 +1,178 @@
-# Mini Devices — Connected Devices (v1.2.0)
+# Mini Devices — Mini-Kits (v2.0.0)
 
-Kullanıcı profiline "Connected Devices" bölümü ekler. Cihazlar USB kablosuyla
-(WebSerial) bağlanır; kayıt istatistikleri profile işlenir, ses kayıtları
-klasör bazlı WAV olarak indirilir.
+Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
+(WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
+Each kit opens its own detail popup.
 
-## Kurulum
+## Install
 
-1. `mini-devices` klasörünü `/wp-content/plugins/` altına yükle
-2. Eklentiler → **Mini Devices** → Etkinleştir
-Bu kadar — **başka bir şey yapmana gerek yok.**
+1. Upload the `mini-devices` folder to `/wp-content/plugins/`
+2. Plugins → **Mini Devices** → Activate
 
-Forum tek bir kısa koddan render edildiği ve ayrı bir "profil sayfası"
-bulunmadığı için eklenti, forum kısa kodunun çıktısını yakalar ve görünüm
-profil ise (`?view=profile`) Connected Devices bölümünü sonuna ekler.
-mini-forum dosyalarına dokunulmaz.
+That is all. With **Mini-Forum 3.06 or newer** the shelf appears under the
+profile's Mini-Kits tab automatically.
 
-### Elle yerleştirmek istersen
+### How it attaches
+
+Mini-Forum 3.06+ renders a Mini-Kits panel and fires `mf_profile_kits_panel`
+inside it; this plugin hooks that action. Mini-Forum's own files are never
+modified.
+
+On **Mini-Forum < 3.06** there is no such panel, so the plugin falls back to its
+old behaviour: it filters the forum shortcode's output and appends the shelf when
+the view is `?view=profile`. The fallback is skipped as soon as the panel hook
+has fired, so the two never double up.
+
+### Placing it by hand
 
 ```
 [connected_devices]
 ```
 
-### Otomatik yerleştirmeyi değiştirmek
+### Changing the fallback
 
-`functions.php` içine:
+In `functions.php`:
 
 ```php
-// Otomatik eklemeyi kapat
+// Turn the automatic fallback off
 add_filter('md_is_forum_tag', '__return_false');
 
-// Başka bir görünümde göster
+// Show it on a different view
 add_filter('md_is_profile_view', function ($is, $view) {
     return $view === 'settings';
 }, 10, 2);
 ```
 
-## Cihaz ↔ profil bağı (v1.1)
+## The shelf
 
-Firmware v1.2+ her cihaza MAC adresinden türetilen değişmez bir kimlik verir
-(`F-3C71BF2A` gibi) ve `/owner.json` içinde hangi WordPress profiline bağlı
-olduğunu tutar.
+All three kits are always listed, whether or not the profile owns them:
 
-Bağlanma akışı:
+| Kit | Code | Colour | What it does |
+|---|---|---|---|
+| Fig-Talks | `F` | red | A minifigure that records and plays back |
+| Display-Talks | `B` | blue | A screen kit with a designable face per slot |
+| Design-Talks | `D` | yellow | Scene cards and level-by-level practice |
 
-1. Sayfa `hello` gönderir, cihaz `uid` + `profile` döner
-2. `profile` boşsa → "Bu cihaz profiline bağlansın mı?" sorulur, onay verilirse
-   `bind` komutuyla cihaza kullanıcı ID'si ve adı yazılır
-3. `profile` başka bir kullanıcıya aitse → uyarı çıkar; kullanıcı isterse
-   sahipliği devralabilir (kayıtlar silinmez)
-4. Sunucu tarafı da korur: `sync` isteği başka profile bağlı cihazdan gelirse
-   **409** ile reddedilir
+Each card carries one of three states:
 
-"Profilden kaldır" hem sunucudaki kaydı siler hem cihaza `unbind` gönderir.
+| State | Meaning | What is available |
+|---|---|---|
+| **Connected** | plugged in over USB right now | everything |
+| **Not connected** | synced before, unplugged now | read the last sync; renaming, downloads and face transfer are disabled and say why |
+| **Not linked yet** | not on this profile | the card is dashed and cannot be opened |
 
-Cihaz verisi artık **uid ile anahtarlanır** — aynı kullanıcı birden fazla
-Version_F sahibi olabilir, karışmaz. Eski firmware'ler (uid göndermeyen)
-tip koduyla geriye dönük çalışmaya devam eder.
+Opening a kit gives a colour-matched popup with its own sections: **Overview**
+(stats, slot capacity, kit name), **Recordings** (numbered slots, naming, per-slot
+WAV download), **Faces** (Display-Talks only) and **Scenes** (Design-Talks only).
 
-## Kayıt geçmişi
+## Kit ↔ profile link
 
-Cihaz her kaydı `/log.jsonl` içine yazar (son ~100 kayıt, dolunca başa döner):
+Firmware v1.2+ gives each kit an immutable id derived from its MAC address
+(`F-3C71BF2A`) and stores which WordPress profile it belongs to in `/owner.json`.
+
+1. The page sends `hello`; the kit returns `uid` + `profile`
+2. `profile` empty → the user is asked whether to link it; on confirmation `bind`
+   writes the user id and name to the kit
+3. `profile` belongs to someone else → a warning; the user may take ownership
+   (recordings are not deleted)
+4. The server enforces it too: a `sync` from a kit bound elsewhere is rejected
+   with **409**
+
+"Remove from profile" deletes the server record *and* sends `unbind` to the kit.
+
+Kit data is **keyed by uid**, so one person can own several Version_F kits without
+them colliding. Older firmware that sends no uid still works, keyed by type code.
+
+## Recording history
+
+The kit appends every recording to `/log.jsonl` (last ~100, wrapping):
 
 ```
 {"slot":2,"ts":1786649100,"len":4200}
 ```
 
-`{"cmd":"history"}` ile okunur. Arayüz bunu henüz göstermiyor — veri hazır.
+Read with `{"cmd":"history"}`. The interface does not surface this yet — the data
+is there.
 
-## Veri nerede tutuluyor
+## Where the data lives
 
-`usermeta` → anahtar **`md_devices`** (JSON). Yeni tablo açılmaz.
+`usermeta` → key **`md_devices`** (JSON). No new tables.
 
 ```
 {
-  "F": {
+  "F-3C71BF2A": {
+    "type": "F",
     "fw": "1.1",
     "last_sync": 1786650000,
     "stats": { "total_s": 84, "count": 6, "longest_s": 22, "last_ts": 1786649100 },
-    "slots": [ { "i": 1, "full": 1, "len_ms": 4200, "name": "Anne" }, ... ]
+    "slots": [ { "i": 1, "full": 1, "len_ms": 4200, "name": "Mum" } ]
   },
-  "D": {
-    "cards": { "04A1B2": { "name": "Kafe", "stats": {...} } }
+  "D-91A0C4": {
+    "cards": { "04A1B2": { "name": "Café", "stats": {} } }
   }
 }
 ```
 
-**Slot ve kart isimleri kullanıcıya aittir**, cihazda tutulmaz — her
-eşitlemede korunur, cihaz sıfırlansa bile profilde kalır.
+Slot and card names **belong to the user**, not the kit. They survive every sync
+and stay on the profile even if the kit is wiped.
 
-## REST uçları
+Slot faces live under a separate key, `md_faces`, with the preview PNG written to
+`uploads/mf-avatars/`.
 
-| Yol | Metot | İş |
+## REST endpoints
+
+| Path | Method | Purpose |
 |---|---|---|
-| `/wp-json/mini-devices/v1/data` | GET | Kullanıcının cihaz verisi |
-| `/wp-json/mini-devices/v1/sync` | POST | Cihazdan gelen istatistik + slot listesi |
-| `/wp-json/mini-devices/v1/name` | POST | Slot / kart / cihaz adı güncelle |
-| `/wp-json/mini-devices/v1/whoami` | GET | Bağlama için kullanıcı kimliği |
-| `/wp-json/mini-devices/v1/forget` | POST | Cihazı profilden kaldır |
+| `/wp-json/mini-devices/v1/data` | GET | The user's kit data |
+| `/wp-json/mini-devices/v1/sync` | POST | Stats + slot list coming off a kit |
+| `/wp-json/mini-devices/v1/name` | POST | Rename a slot, card or kit |
+| `/wp-json/mini-devices/v1/faces` | GET/POST | Read or save a slot face |
+| `/wp-json/mini-devices/v1/whoami` | GET | The identity used for binding |
+| `/wp-json/mini-devices/v1/forget` | POST | Unlink a kit from the profile |
 
-Hepsi oturum açmış kullanıcıyla sınırlı, `X-WP-Nonce` ile korunur.
+All are limited to signed-in users and protected with `X-WP-Nonce`.
 
-## Cihaz protokolü
+## Kit protocol
 
-Satır başına bir JSON, 115200 baud:
+One JSON object per line, 115200 baud:
 
-| Gönderilen | Dönen |
+| Sent | Returned |
 |---|---|
 | `{"cmd":"hello"}` | `{"dev":"F","fw":"1.1","slots":5}` |
 | `{"cmd":"time","epoch":1786650000}` | `{"ok":1}` |
 | `{"cmd":"stats"}` | `{"total_s":..,"count":..,"longest_s":..,"last_ts":..,"slots":[...]}` |
-| `{"cmd":"dump","slot":1}` | `{"dump":1,"samples":N,"sr":16000}` + örnek akışı + `EOF` |
+| `{"cmd":"dump","slot":1}` | `{"dump":1,"samples":N,"sr":16000}` + sample stream + `EOF` |
 | `{"cmd":"bind","profile":12,"owner":"Eren"}` | `{"ok":1,"uid":"F-...","profile":12}` |
 | `{"cmd":"unbind"}` | `{"ok":1,"profile":0}` |
-| `{"cmd":"history"}` | `{"history":1}` + satır satır kayıt + `EOF` |
+| `{"cmd":"history"}` | `{"history":1}` + one record per line + `EOF` |
 
-`dev` alanı: **F** = Version_F · **B** = Version_B · **D** = Version_D.
-Sayfa bu koddan cihaz adını kendisi türetir.
+The `dev` field: **F** = Version_F · **B** = Version_B · **D** = Version_D. The
+page derives the kit name from that code.
 
-## Tarayıcı desteği
+## Browser support
 
-WebSerial yalnız **masaüstü Chrome / Edge / Opera**'da çalışır. Safari,
-Firefox ve mobil tarayıcılarda sayfa açılır, kayıtlı veriler görünür, ama
-"Cihaz bağla" düğmesi kapalıdır ve kullanıcıya sebebi yazılır.
+WebSerial runs only in **desktop Chrome, Edge and Opera**. In Safari, Firefox and
+on mobile the page still opens and stored data still shows, but "Connect a kit" is
+disabled and the reason is stated.
 
-Site **HTTPS** olmalı (localhost hariç) — WebSerial güvenli bağlam ister.
+The site must be served over **HTTPS** (localhost excepted) — WebSerial requires a
+secure context.
 
-## Ses kayıtları nerede
+## Where the audio is
 
-**Sunucuda değil.** Kayıtlar cihazın flash belleğinde durur; site yalnızca
-cihaz USB ile bağlıyken `dump` komutuyla okur ve tarayıcıda WAV'a çevirip
-indirir. Sunucuya hiçbir ses yüklenmez.
+**Not on the server.** Recordings sit in the kit's flash. The site reads them with
+`dump` only while the kit is plugged in, converts to WAV in the browser and
+downloads. No audio is ever uploaded.
 
-Bunun sonucu: cihaz bağlı değilken indirme düğmeleri pasiftir ve sebebini
-yazar. Profilde kalıcı olan tek şey **istatistikler ve isimlerdir** — cihaz
-sıfırlansa bile bunlar durur.
+That is why download buttons are disabled when a kit is unplugged. The only things
+that persist on the profile are **stats, names and faces** — those survive a kit
+reset.
 
-## Bilinen sınırlar
+## Known limits
 
-- Ses aktarımı seri porttan metin olarak akıyor: 30 saniyelik kayıt ~15-20 sn
-  sürer. İkili aktarım ileride hızlandırılabilir.
-- "Hepsini indir" kayıtları sırayla iner; tarayıcı çoklu indirmeye izin
-  vermezse tek tek indirmek gerekir.
-- Version_D kart bazlı ses dökümü, cihaz firmware'i kart klasörlerini
-  raporlamaya başlayınca etkinleşir (yapı hazır, `cards` alanı bekliyor).
+- Audio streams over the serial link as text: a 30-second recording takes ~15-20
+  seconds. A binary transfer would speed this up.
+- "Download all" fetches recordings one at a time; if the browser blocks multiple
+  downloads they have to be taken individually.
+- Version_D per-card audio dumps switch on once the firmware reports card folders
+  — the structure is ready and the `cards` field is waiting.
