@@ -154,21 +154,35 @@
     var cfgWp = window.mf_avatar_editor || {};
     var overlay = document.createElement('div');
     overlay.className = 'mdf-overlay';
+
+    var wrapper = document.createElement('div');
+    wrapper.className = 'mdf-wrapper';
+
+    var studs = document.createElement('div');
+    studs.className = 'mdf-studs';
+    wrapper.appendChild(studs);
+
     var box = document.createElement('div');
     box.className = 'mdf-modal';
+
+    var inner = document.createElement('div');
+    inner.className = 'mdf-inner';
+
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'mdf-close';
+    closeBtn.setAttribute('aria-label', 'Close the face designer without saving');
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', function () { close(); });
+    inner.appendChild(closeBtn);
+
     var host = document.createElement('div');
     host.className = 'mdf-editor-host';
-    box.appendChild(host);
+    inner.appendChild(host);
 
-    var back = document.createElement('button');
-    back.type = 'button';
-    back.className = 'mdf-back';
-    back.setAttribute('aria-label', 'Close the face designer without saving');
-    back.innerHTML = '<span aria-hidden="true">\u2190</span> Back';
-    back.addEventListener('click', function () { close(); });
-    box.appendChild(back);
-
-    overlay.appendChild(box);
+    box.appendChild(inner);
+    wrapper.appendChild(box);
+    overlay.appendChild(wrapper);
     document.body.appendChild(overlay);
 
     function onKey(e) { if (e.key === 'Escape') close(); }

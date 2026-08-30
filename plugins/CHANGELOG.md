@@ -25,6 +25,19 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.7.0
+
+**The face designer is a LEGO popup like every other one.** It used to be a bare
+8px-bordered box floating on a dim backdrop. Now it is the site's standard shell —
+stud strip → coloured brick → white inner — with the round close button the auth and
+kit popups use. Red, matching Mini-Forum's own avatar editor popup, which is this
+same editor. The 2.6.1 "Back" pill is gone; the × replaces it, and Escape still
+works.
+
+Studs use the full-width recipe (four whole copies at 26%), so neither edge cuts a
+stud. The shell caps at the viewport and clears the WordPress admin bar at both
+breakpoints, checked at 1200×820 and 390×780.
+
 ## mini-devices 2.6.1
 
 **A way out of the face designer.** The editor offers only Save, Reset and Random,
