@@ -1,0 +1,532 @@
+/* ============================================================
+   Mini-Forum Avatar System — v1.93
+   Popup styling matches the sign-in popup (mf-popup-* pattern):
+   - Stud-PNG strip on top
+   - Red modal frame (8px padding showing red border)
+   - White inner with rounded corners
+   - Compact, vertically scaled — bust portrait fits comfortably
+   ============================================================ */
+
+/* ── Avatar img classes (used everywhere via mf_avatar_html) ─ */
+.mf-av {
+  display: inline-block !important;
+  object-fit: cover !important;
+  background: var(--mf-yellow, #FFCC00) !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+.mf-av-xs { width: 24px !important; height: 24px !important; border-radius: 50% !important; }
+.mf-av-sm { width: 30px !important; height: 30px !important; border-radius: 50% !important; }
+.mf-av-md { width: 54px !important; height: 54px !important; border-radius: 50% !important; }
+.mf-av-lg {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  background: var(--mf-yellow, #FFCC00) !important;
+}
+
+/* ── Profile avatar wrapper (NO hover overlay, just the image) ─ */
+.mf-av-editable {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+.mf-av-editable .mf-av {
+  transition: filter 0.18s ease;
+}
+.mf-av-editable:hover .mf-av {
+  filter: brightness(1.04);
+}
+.mf-av-edit-overlay {
+  display: none !important;
+}
+
+/* "Customize Avatar" pill button — sits below the profile avatar */
+.mf-av-edit-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 9px 16px !important;
+  border-radius: 10px !important;
+  border: 2.5px solid #1D1D1B !important;
+  border-bottom-width: 4px !important;
+  background: #fff !important;
+  background-image: none !important;
+  color: #1D1D1B !important;
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  font-family: 'Montserrat', sans-serif !important;
+  transition: all 0.18s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.4px !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  white-space: nowrap !important;
+  width: auto !important;
+  margin-top: 0 !important;
+}
+.mf-av-edit-btn:hover {
+  background: #1D1D1B !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+.mf-av-edit-btn svg {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+/* ============================================================
+   Gender selection modal — matches sign-in popup pattern
+   (red modal, red studs on top)
+   ============================================================ */
+
+.mf-gender-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  padding: 16px !important;
+  font-family: 'Montserrat', sans-serif !important;
+}
+.mf-gender-overlay.is-open {
+  display: flex !important;
+}
+
+.mf-gender-wrapper {
+  width: 100% !important;
+  max-width: 480px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  margin: auto !important;
+  animation: mfGenderIn 0.22s ease-out;
+}
+@keyframes mfGenderIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.mf-gender-studs {
+  height: 28px !important;
+  background-image:
+    url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png'),
+    url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png') !important;
+  background-repeat: no-repeat, no-repeat !important;
+  background-position: left bottom, right bottom !important;
+  background-size: 51% auto, 51% auto !important;
+  border-radius: 16px 16px 0 0 !important;
+  overflow: hidden !important;
+}
+.mf-gender-modal {
+  background: #E52828 !important;
+  border-radius: 16px !important;
+  padding: 8px !important;
+}
+.mf-gender-inner {
+  background: #fff !important;
+  border-radius: 14px !important;
+  padding: 22px 22px 18px !important;
+  position: relative !important;
+}
+
+.mf-gender-close {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  background: #E52828 !important;
+  background-image: none !important;
+  border: none !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  font-size: 14px !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  transition: opacity 0.2s !important;
+  padding: 0 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+.mf-gender-close:hover {
+  opacity: 0.75 !important;
+}
+.mf-gender-title {
+  margin: 0 0 4px 0 !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  color: #1f2937 !important;
+  text-align: center !important;
+}
+.mf-gender-prompt {
+  text-align: center !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  margin: 0 0 18px 0 !important;
+  line-height: 1.4 !important;
+}
+.mf-gender-prompt b {
+  color: #E31E24 !important;
+  font-weight: 700 !important;
+}
+.mf-gender-options {
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+}
+.mf-gender-opt {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 120px !important;
+  padding: 14px 10px !important;
+  border: 3px solid #d1d5db !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  background-image: none !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  font-family: inherit !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+.mf-gender-opt:hover {
+  border-color: #E31E24 !important;
+  background: #fef2f2 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(229, 40, 40, 0.15) !important;
+}
+.mf-gender-opt.is-selected {
+  border-color: #16a34a !important;
+  background: #f0fdf4 !important;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15) !important;
+}
+.mf-gender-opt-icon {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background: #FFCC00 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 32px !important;
+}
+.mf-gender-opt-label {
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  color: #333 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+.mf-gender-warning {
+  margin-top: 14px !important;
+  padding: 10px 12px !important;
+  background: #fef3c7 !important;
+  border-left: 4px solid #f59e0b !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  color: #78350f !important;
+  line-height: 1.4 !important;
+  display: none !important;
+}
+.mf-gender-warning.is-visible {
+  display: block !important;
+}
+
+/* ============================================================
+   Avatar editor popup — same shell pattern as sign-in
+   ============================================================ */
+
+.mf-avatar-popup-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99998 !important;
+  padding: 20px 16px !important;
+  font-family: 'Montserrat', sans-serif !important;
+}
+.mf-avatar-popup-overlay.is-open {
+  display: flex !important;
+}
+
+/* Wrapper holds studs + modal stacked vertically */
+.mf-avatar-popup-wrapper {
+  width: 100% !important;
+  max-width: 1120px !important;
+  height: calc(100vh - 32px) !important;
+  max-height: 680px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  margin: auto !important;
+}
+.mf-avatar-popup-studs {
+  height: 28px !important;
+  flex-shrink: 0 !important;
+  background-image: url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png') !important;
+  background-repeat: repeat-x !important;
+  background-position: left bottom !important;
+  background-size: auto 100% !important;
+  border-radius: 16px 16px 0 0 !important;
+  overflow: hidden !important;
+}
+.mf-avatar-popup-modal {
+  background: #E52828 !important;
+  border-radius: 16px !important;
+  padding: 8px !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.mf-avatar-popup-inner {
+  background: #fff !important;
+  border-radius: 14px !important;
+  position: relative !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Header bar inside the white inner */
+.mf-avatar-popup-header {
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 14px 22px 10px 22px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+.mf-avatar-popup-header h2 {
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #1f2937 !important;
+  letter-spacing: 0.4px !important;
+}
+.mf-avatar-popup-header-actions {
+  display: flex !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+.mf-av-change-gender-btn {
+  background: #fff !important;
+  background-image: none !important;
+  border: 2px solid #E52828 !important;
+  color: #E52828 !important;
+  border-radius: 16px !important;
+  padding: 6px 14px !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  letter-spacing: 0.4px !important;
+  text-transform: uppercase !important;
+  font-family: 'Montserrat', sans-serif !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  line-height: 1 !important;
+  transition: all 0.15s !important;
+}
+.mf-av-change-gender-btn:hover {
+  background: #E52828 !important;
+  color: #fff !important;
+}
+
+/* Small red close button — matches sign-in popup close */
+.mf-avatar-popup-close {
+  background: #E52828 !important;
+  background-image: none !important;
+  border: none !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  font-size: 14px !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  transition: opacity 0.2s !important;
+  padding: 0 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+.mf-avatar-popup-close:hover {
+  opacity: 0.75 !important;
+}
+
+/* Body — where the React editor mounts */
+.mf-avatar-popup-body {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  background: #fff !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+}
+.mf-avatar-popup-coming-soon {
+  text-align: center !important;
+  color: #6b7280 !important;
+  padding: 40px !important;
+  margin: auto !important;
+}
+.mf-avatar-popup-coming-soon h3 {
+  font-size: 22px !important;
+  color: #374151 !important;
+  margin: 0 0 8px 0 !important;
+}
+.mf-avatar-popup-coming-soon p {
+  font-size: 14px !important;
+  margin: 0 !important;
+}
+
+/* ============================================================
+   Custom confirm / alert modal — replaces browser's window.confirm()
+   Same sign-in popup pattern, sits ABOVE everything (z 100000+)
+   ============================================================ */
+
+.mf-confirm-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 100001 !important;
+  padding: 16px !important;
+  font-family: 'Montserrat', sans-serif !important;
+}
+.mf-confirm-wrapper {
+  width: 100% !important;
+  max-width: 400px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  animation: mfConfirmIn 0.18s ease-out;
+}
+@keyframes mfConfirmIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.mf-confirm-studs {
+  height: 22px !important;
+  flex-shrink: 0 !important;
+  background-image: url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png') !important;
+  background-repeat: repeat-x !important;
+  background-position: left bottom !important;
+  background-size: auto 100% !important;
+  border-radius: 16px 16px 0 0 !important;
+  overflow: hidden !important;
+}
+.mf-confirm-modal {
+  background: #E52828 !important;
+  border-radius: 16px !important;
+  padding: 7px !important;
+}
+.mf-confirm-inner {
+  background: #fff !important;
+  border-radius: 14px !important;
+  padding: 24px 22px 20px !important;
+}
+.mf-confirm-title {
+  margin: 0 0 8px 0 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #1f2937 !important;
+  text-align: center !important;
+}
+.mf-confirm-message {
+  margin: 0 0 18px 0 !important;
+  font-size: 14px !important;
+  color: #4b5563 !important;
+  text-align: center !important;
+  line-height: 1.45 !important;
+}
+.mf-confirm-message b {
+  color: #E52828 !important;
+  font-weight: 800 !important;
+}
+.mf-confirm-actions {
+  display: flex !important;
+  gap: 10px !important;
+  justify-content: center !important;
+}
+.mf-confirm-btn {
+  flex: 1 !important;
+  max-width: 160px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  border: 2.5px solid #1D1D1B !important;
+  border-bottom-width: 4px !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  letter-spacing: 0.4px !important;
+  text-transform: uppercase !important;
+  font-family: 'Montserrat', sans-serif !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  transition: all 0.15s ease !important;
+}
+.mf-confirm-cancel {
+  background: #fff !important;
+  color: #1D1D1B !important;
+}
+.mf-confirm-cancel:hover {
+  background: #f3f4f6 !important;
+}
+.mf-confirm-ok {
+  background: #1D1D1B !important;
+  color: #fff !important;
+  border-color: #1D1D1B !important;
+}
+.mf-confirm-ok:hover {
+  background: #000 !important;
+}
+.mf-confirm-ok.is-danger {
+  background: #E52828 !important;
+  border-color: #E52828 !important;
+  color: #fff !important;
+}
+.mf-confirm-ok.is-danger:hover {
+  background: #c41e1e !important;
+  border-color: #c41e1e !important;
+}

@@ -1,0 +1,65 @@
+/* ==========================================================================
+   Mini-Forum — Profile tabs + Settings popup
+   Follows the forum design language: Montserrat, LEGO colours, thick
+   bottom borders, stud strips. !important mirrors mini-forum.css, which
+   has to outrank the theme.
+   ========================================================================== */
+
+/* ═══ TABS ═══ */
+
+.mf-profile-tab{position:relative!important}
+.mf-profile-tab:hover{transform:translateY(-1px)!important;box-shadow:0 3px 0 rgba(0,0,0,.08)!important}
+
+/* Active tab fills with its own brick colour. */
+.mf-profile-tab.mf-tab-active{color:#fff!important;border-bottom-width:4px!important}
+.mf-profile-tab.tab-yellow.mf-tab-active{background:var(--mf-yellow)!important;color:var(--mf-text)!important;border-color:var(--mf-yellow)!important;border-bottom-color:#E5B800!important}
+.mf-profile-tab.tab-blue.mf-tab-active{background:var(--mf-blue)!important;border-color:var(--mf-blue)!important;border-bottom-color:#003D8C!important}
+.mf-profile-tab.tab-green.mf-tab-active{background:var(--mf-green)!important;border-color:var(--mf-green)!important;border-bottom-color:#17512C!important}
+.mf-profile-tab.tab-red.mf-tab-active{background:var(--mf-red)!important;border-color:var(--mf-red)!important;border-bottom-color:#B31D1D!important}
+.mf-profile-tab.mf-tab-active .tab-dot{background:#fff!important}
+.mf-profile-tab.tab-yellow.mf-tab-active .tab-dot{background:var(--mf-text)!important}
+
+.mf-profile-panel[hidden]{display:none!important}
+
+/* ═══ SETTINGS TRIGGER (profile header, top right) ═══ */
+
+.mf-profile-settings{position:absolute!important;top:0!important;right:0!important}
+.mf-settings-btn{display:inline-flex!important;align-items:center!important;gap:7px!important;padding:8px 16px!important;border-radius:10px!important;border:2px solid var(--mf-border)!important;border-bottom-width:4px!important;background:#fff!important;font-family:var(--mf-font)!important;font-size:13px!important;font-weight:700!important;color:var(--mf-text)!important;cursor:pointer!important;transition:all .15s!important}
+.mf-settings-btn:hover{border-color:var(--mf-blue)!important;border-bottom-color:#003D8C!important;transform:translateY(-1px)!important}
+.mf-settings-btn svg{width:16px!important;height:16px!important;flex-shrink:0!important}
+
+/* ═══ SETTINGS POPUP ═══ */
+/* Shell (studs → red brick → white inner) is inherited from
+   mini-forum-auth.css; only the settings-specific bits live here. */
+
+.mf-settings-section{margin-top:18px!important;padding-top:18px!important;border-top:2px solid #f0f0f0!important}
+.mf-settings-section:first-of-type{margin-top:8px!important;padding-top:0!important;border-top:none!important}
+
+.mf-settings-heading{display:flex!important;align-items:center!important;gap:9px!important;font-family:var(--mf-font),sans-serif!important;font-size:15px!important;font-weight:800!important;color:var(--mf-text)!important;margin:0 0 14px!important;text-align:left!important}
+
+/* Small LEGO brick bullet — 2x2 stud top, like the site's brick motif. */
+.mf-settings-brick{width:18px!important;height:18px!important;border-radius:4px!important;background:var(--mf-red,#E52828)!important;box-shadow:inset 0 -3px 0 rgba(0,0,0,.22)!important;flex:none!important;position:relative!important}
+.mf-settings-brick::before,.mf-settings-brick::after{content:''!important;position:absolute!important;top:-3px!important;width:6px!important;height:4px!important;border-radius:2px 2px 0 0!important;background:var(--mf-red,#E52828)!important}
+.mf-settings-brick::before{left:2px!important}
+.mf-settings-brick::after{right:2px!important}
+
+/* Strength meter under the new-password field. */
+.mf-pwd-meter{height:5px!important;border-radius:3px!important;background:#eee!important;margin-top:6px!important;overflow:hidden!important}
+.mf-pwd-meter span{display:block!important;height:100%!important;width:0!important;border-radius:3px!important;transition:width .25s,background .25s!important}
+.mf-pwd-meter[data-level="0"] span{width:12%!important;background:#ddd!important}
+.mf-pwd-meter[data-level="1"] span{width:38%!important;background:var(--mf-red,#E52828)!important}
+.mf-pwd-meter[data-level="2"] span{width:70%!important;background:var(--mf-yellow,#FFCC00)!important}
+.mf-pwd-meter[data-level="3"] span{width:100%!important;background:var(--mf-green,#237841)!important}
+
+.mf-settings-hint{font-size:12.5px!important;color:var(--mf-muted,#999)!important;text-align:center!important;margin:10px 0 0!important;font-weight:600!important}
+.mf-settings-hint a{color:var(--mf-blue,#0055BF)!important;font-weight:800!important;text-decoration:none!important}
+.mf-settings-hint a:hover{text-decoration:underline!important}
+
+.mf-settings-msg{display:none;padding:9px 14px!important;border-radius:10px!important;font-size:13px!important;font-weight:700!important;text-align:center!important;margin-top:12px!important;border:2px solid transparent!important}
+.mf-settings-msg-ok{background:#E8F5EC!important;border-color:var(--mf-green,#237841)!important;color:#17512C!important}
+.mf-settings-msg-err{background:#FEE2E2!important;border-color:#F87171!important;color:#B91C1C!important}
+
+@media(max-width:900px){
+  .mf-profile-settings{position:static!important;margin-top:14px!important}
+  .mf-settings-btn{width:100%!important;justify-content:center!important}
+}
