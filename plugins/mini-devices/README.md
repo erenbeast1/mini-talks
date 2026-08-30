@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.0.0)
+# Mini Devices — Mini-Kits (v3.0.1)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -49,9 +49,23 @@ Unavailable scenes stay on show — hiding them would make Mini-Designs look far
 smaller than it is. They read plainly, cannot be selected, and can be picked another
 time.
 
-The catalogue seeds once with the scenes that can be built today; after that it is
-the team's to manage. The wider scene list lives in the game's own database and can
-be imported later — those arrive unavailable until the team says otherwise.
+The catalogue seeds once with the ten scenes the team confirmed they can build —
+Classroom, Coffee Shop, Supermarket, Choir Performance, Robotics Tournament,
+Playground, Beach, Swimming Pool, Basketball Court, Tennis Court — and those, and
+only those, start *Available*. After that the catalogue is the team's to manage.
+
+A scene with no explicit answer counts as *Currently Unavailable*, never as
+available. That matters for the wider scene list in the game's own database
+(minitalks-api, `select * from scenes`): it is the whole game, not what the workshop
+can build. Import it with
+
+```php
+MD_Designs::import_names($names); // returns how many scenes were created
+```
+
+Every imported scene lands *Currently Unavailable* and stays there until someone
+opens it in wp-admin. Import never touches a scene that already exists, so it cannot
+re-open one the team closed, nor close one they opened.
 
 ## Where requests go
 

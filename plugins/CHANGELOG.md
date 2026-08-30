@@ -25,6 +25,20 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.0.1
+
+**Only the confirmed scenes are available.** Availability now has one reader,
+`MD_Designs::availability()`, and a scene with no explicit answer counts as
+*Currently Unavailable* rather than *Available*. The seed asserts *Available* on
+exactly the ten scenes the team confirmed; everything else has to be opened by hand
+in wp-admin.
+
+**An import path for the game's scenes.** `MD_Designs::import_names()` brings names
+in from the game's own database (minitalks-api, `select * from scenes`). Every
+imported scene arrives *Currently Unavailable* — that list is the whole game, not
+what the workshop can build. Existing scenes are left alone, so an import can never
+re-open a scene the team closed.
+
 ## mini-devices 3.0.0
 
 **The section is organised by Mini-Kit, not by action.** It used to be a shelf of
