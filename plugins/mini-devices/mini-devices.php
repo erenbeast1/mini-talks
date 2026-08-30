@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Each kit opens its own detail popup.
- * Version:     2.5.1
+ * Version:     2.6.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.5.1');
+define('MD_VER', '2.6.0');
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 
@@ -386,10 +386,10 @@ add_shortcode('connected_devices', function () {
  *  so it is safe for logged-out visitors.
  *
  *    [mini_kits_demo]
- *    [mini_kits_demo kits="display-talks"]
- *    [mini_kits_demo kits="fig-talks,display-talks" title="Try it" intro="Open a kit…"]
+ *    [mini_kits_demo kits="brick-talks"]
+ *    [mini_kits_demo kits="fig-talks,brick-talks" title="Try it" intro="Open a kit…"]
  *
- *  kits accepts names (fig-talks, display-talks, design-talks) or the internal
+ *  kits accepts names (fig-talks, brick-talks, design-talks) or the internal
  *  codes (F, B, D). Unknown values are ignored.
  * ------------------------------------------------------------------ */
 
@@ -405,10 +405,12 @@ add_shortcode('mini_kits_demo', function ($atts) {
     ), $atts, 'mini_kits_demo');
 
     // Accept kit names as well as the internal codes, so a page author can
-    // write kits="display-talks" instead of remembering that it is "B".
+    // write kits="brick-talks" instead of remembering that it is "B".
     $names = array(
         'fig-talks'     => 'F', 'figtalks'     => 'F', 'fig'     => 'F', 'f' => 'F',
-        'display-talks' => 'B', 'displaytalks' => 'B', 'display' => 'B', 'b' => 'B',
+        'brick-talks'   => 'B', 'bricktalks'   => 'B', 'brick'   => 'B', 'b' => 'B',
+        // Former name, kept so any page already using it keeps working.
+        'display-talks' => 'B', 'displaytalks' => 'B', 'display' => 'B',
         'design-talks'  => 'D', 'designtalks'  => 'D', 'design'  => 'D', 'd' => 'D',
     );
     $codes = array();

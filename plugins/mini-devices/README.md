@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.5.1)
+# Mini Devices — Mini-Kits (v2.6.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -50,7 +50,7 @@ All three kits are always listed, whether or not the profile owns them:
 | Kit | Code | Colour | What it does |
 |---|---|---|---|
 | Fig-Talks | `F` | red | A minifigure that records and plays back |
-| Display-Talks | `B` | blue | A screen kit with a designable face per slot |
+| Brick-Talks | `B` | blue | A screen kit with a designable face per slot |
 | Design-Talks | `D` | yellow | Scene cards and level-by-level practice |
 
 Each card carries one of three states:
@@ -66,10 +66,10 @@ Opening a kit gives a colour-matched popup with its own sections:
 | Kit | Sections |
 |---|---|
 | Fig-Talks | **Overview** · **Recordings** |
-| Display-Talks | **Overview** · **Slots** |
+| Brick-Talks | **Overview** · **Slots** |
 | Design-Talks | **Overview** · **Scenes** |
 
-Display-Talks gets one **Slots** section rather than separate Recordings and Faces
+Brick-Talks gets one **Slots** section rather than separate Recordings and Faces
 tabs: a slot holds one recording *and* one face, so each card shows the face, the
 recording name and duration, and all three actions (design face, send face,
 download audio) together.
@@ -98,13 +98,13 @@ profile, and works for logged-out visitors.
 
 ```
 [mini_kits_demo]
-[mini_kits_demo kits="display-talks"]
-[mini_kits_demo kits="fig-talks,display-talks" title="Try it yourself" intro="Open a kit and design a face."]
+[mini_kits_demo kits="brick-talks"]
+[mini_kits_demo kits="fig-talks,brick-talks" title="Try it yourself" intro="Open a kit and design a face."]
 ```
 
 | Attribute | Default | Notes |
 |---|---|---|
-| `kits` | all three | Comma-separated kit names — `fig-talks`, `display-talks`, `design-talks`. The internal codes `F`, `B`, `D` also work. Unknown values are ignored. |
+| `kits` | all three | Comma-separated kit names — `fig-talks`, `brick-talks`, `design-talks`. The internal codes `F`, `B`, `D` also work, as does the former name `display-talks`. Unknown values are ignored. |
 | `title` | `Try a Mini-Kit` | Pass an empty string to drop the heading. |
 | `intro` | see plugin | Pass an empty string to drop the paragraph. |
 

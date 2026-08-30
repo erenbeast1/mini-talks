@@ -25,6 +25,17 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.6.0
+
+**The screen kit is Brick-Talks, not Display-Talks.** Renamed everywhere it is
+shown: the shelf card, the kit popup header, connection messages. `kits="brick-talks"`
+is the shortcode name (`brick`, `bricktalks` and the code `B` also work);
+`display-talks` still resolves so any page already published keeps working.
+
+The sample Brick-Talks kit no longer carries a nickname ("Classroom screen"). On a
+public preview a visitor should see the product name, not someone's rename — the
+rename feature is still demonstrated by the Kit name field under Overview.
+
 ## mini-devices 2.5.1
 
 **Studs use the forum's own recipe, not an approximation of it.** 2.5.0 placed ten

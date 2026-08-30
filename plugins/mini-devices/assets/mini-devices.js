@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  var DEV_LABEL = { F: 'Fig-Talks', B: 'Display-Talks', D: 'Design-Talks' };
+  var DEV_LABEL = { F: 'Fig-Talks', B: 'Brick-Talks', D: 'Design-Talks' };
   var liveDev = null, liveType = null;   // kit currently held open over serial
 
   /* Demo mode — an admin-only front-end preview. It swaps in sample kits so
@@ -46,7 +46,7 @@
           ]
         },
         'B-91A0C4E2': {
-          type: 'B', uid: 'B-91A0C4E2', fw: '2.1', label: 'Classroom screen', last_sync: now - 120,
+          type: 'B', uid: 'B-91A0C4E2', fw: '2.1', label: '', last_sync: now - 120,
           stats: { total_s: 96, count: 3, longest_s: 41, last_ts: now - 5400 },
           slots: [
             { i: 1, full: 1, len_ms: 41000, name: 'Hello' },
@@ -647,7 +647,7 @@
            '<circle cx="32" cy="45" r="4.5" class="hole"/></svg>'
     },
     {
-      code: 'B', name: 'Display-Talks', color: 'blue',
+      code: 'B', name: 'Brick-Talks', color: 'blue',
       tagline: 'A screen kit. Design a face for every slot and send it over.',
       sections: ['overview', 'slots'],
       art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
@@ -1078,7 +1078,7 @@
     host.appendChild(list);
   }
 
-  /* Display-Talks: one card per slot, carrying that slot's face and its
+  /* Brick-Talks: one card per slot, carrying that slot's face and its
      recording together. They are two halves of the same object — splitting them
      across tabs made you line up slot numbers by eye. */
   function renderSlots(host, key, dev, live) {
