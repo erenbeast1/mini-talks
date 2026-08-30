@@ -73,6 +73,10 @@
 .md-status-ok{background:#E8F5EC!important;border-left-color:var(--md-green)!important;color:#17512C!important}
 .md-status-err{background:#FEE2E2!important;border-left-color:var(--md-red)!important;color:#B91C1C!important}
 
+/* The popup's own message line. Same look as the shelf's, but it sits where the
+   action was taken instead of behind the overlay. */
+.md-pop-msg{margin:14px 0 0!important;flex-shrink:0!important}
+
 .md-note{margin:0 0 18px!important;padding:11px 16px!important;border-radius:10px!important;background:#FFF8E1!important;border-left:5px solid var(--md-yellow)!important;font-size:13px!important;font-weight:600!important;line-height:1.5!important}
 
 .md-privacy{margin:18px 0 0!important;font-size:12px!important;color:var(--md-mute)!important;line-height:1.55!important;text-align:center!important;font-weight:600!important}

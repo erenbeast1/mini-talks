@@ -257,9 +257,14 @@ class MD_Requests {
         $kit  = MD_Kits::get($slug);
         if (!$kit) return new WP_Error('md_bad_kit', 'Unknown Mini-Kit', array('status' => 400));
 
+        // A kit a member owns one of takes one request at a time. A catalogue
+        // takes as many as they like — asking for three more scenes next month is
+        // ordinary, and each ask is its own batch.
         $existing = self::latest_request($uid, $slug);
-        if ($existing && $existing['status'] !== 'draft') {
-            return new WP_Error('md_already_sent', 'That request has already been sent.', array('status' => 409));
+        if ($existing && $existing['status'] !== 'draft' && empty($kit['repeatable'])) {
+            return new WP_Error('md_already_sent',
+                'You already have a ' . $kit['name'] . ' request with the team.',
+                array('status' => 409));
         }
 
         $extra = array('note' => isset($body['note']) ? sanitize_textarea_field($body['note']) : '');
@@ -268,6 +273,15 @@ class MD_Requests {
             $ids = MD_Designs::filter_selectable(isset($body['designs']) ? (array) $body['designs'] : array());
             if (!$ids) {
                 return new WP_Error('md_no_designs', 'Choose at least one available Mini-Design.', array('status' => 400));
+            }
+            // Asking twice for the same scene helps nobody: keep only what is new.
+            $had = array();
+            foreach (self::kit_designs($uid, $slug) as $d) $had[] = (int) $d['id'];
+            $ids = array_values(array_diff($ids, $had));
+            if (!$ids) {
+                return new WP_Error('md_designs_already',
+                    'Those Mini-Designs are already with the team. Pick something else to add.',
+                    array('status' => 409));
             }
             $extra['designs'] = $ids;
         }

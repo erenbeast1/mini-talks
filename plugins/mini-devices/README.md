@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.2.0)
+# Mini Devices — Mini-Kits (v3.2.1)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -113,13 +113,26 @@ that screen changes here.
 **Device Details** carries device id, connection state, connected date, firmware,
 last sync and the device name.
 
-## Asking for more Mini-Designs
+## How many requests a kit takes
 
-An earlier request is never edited. Picking new scenes in Explore and sending them
-creates a **second** request, and the screen says so before you send. Scenes already
-asked for are marked in Explore with the status they carry, so nothing is requested
-twice by accident, and **My Designs** rolls up every request the member has made —
-a second request cannot hide the first.
+| Kit | Open requests | Why |
+|---|---|---|
+| **Mini-Designs** | as many as they like | it is a catalogue; asking for three more scenes next month is ordinary, and each ask is its own batch |
+| Design-Talks, Brick-Talks, Fig-Talks | one at a time | a member owns one of each, so a second request while the first is in flight is a mistake, not an intention |
+
+The three devices refuse a second request (`repeatable` is unset on them in
+`MD_Kits::all()`), and the screens never offer one — a sent request shows its status,
+not another Send.
+
+For Mini-Designs an earlier request is never edited. Picking new scenes in Explore
+and sending them creates a **second** request, and the screen says so before you
+send. Scenes already asked for are marked in Explore with the status they carry and
+cannot be re-picked; the server drops any that slip through, so the same scene is
+never asked for twice. **My Designs** rolls up every request the member has made — a
+second request cannot hide the first.
+
+A genuine second device — a sibling's Brick-Talks — is the team's to arrange, not a
+button. That is a conversation, and the request they already have is where it starts.
 
 ## Where requests go
 

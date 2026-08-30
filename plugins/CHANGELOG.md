@@ -33,6 +33,22 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.2.1
+
+**Fixed: a second Mini-Designs request was refused.** 3.2.0 added the "Another
+request" screen, but the server still allowed exactly one request per kit, so
+sending returned *That request has already been sent.* How many requests a kit takes
+is now a property of the kit: Mini-Designs is a catalogue and takes as many as the
+member likes, each its own batch, while the three devices take one at a time —
+someone owns one Brick-Talks, so a second request while the first is in flight is a
+mistake rather than an intention. Scenes already requested are dropped from a new
+batch, so the same scene is never asked for twice.
+
+**Fixed: the refusal appeared behind the popup.** Every message went to the shelf's
+status line, which sits under the overlay — a refusal nobody could see, at the top
+of the page, away from the button that caused it. Messages raised while a kit is open
+now render inside that kit's popup, right under its buttons.
+
 ## mini-devices 3.2.0
 
 **Brick-Talks' Manage is one list, not three.** Figs, Slots and Recordings were the

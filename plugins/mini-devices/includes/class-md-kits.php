@@ -23,6 +23,12 @@ class MD_Kits {
      *   ''           straight to the request
      *
      * device — the serial device code this kit maps to, if it has one.
+     *
+     * repeatable — whether a member may have more than one request open at a
+     * time. Mini-Designs is a catalogue: asking for three more scenes next month
+     * is ordinary, and each ask is its own batch. The three devices are objects a
+     * member owns one of, so a second request while the first is in flight is a
+     * mistake rather than an intention; the team handles a genuine second unit.
      */
     public static function all() {
         return apply_filters('md_kits', array(
@@ -32,6 +38,7 @@ class MD_Kits {
                 'colour'      => 'green',
                 'pre_request' => 'catalogue',
                 'device'      => '',
+                'repeatable'  => true,
                 'cta'         => 'Choose your Mini-Designs',
             ),
             'design-talks' => array(

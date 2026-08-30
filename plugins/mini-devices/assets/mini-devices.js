@@ -138,7 +138,18 @@
     return n;
   }
 
+  /* A message answers the thing that was just done, so it belongs where that
+     happened. The shelf's status line sits behind the overlay — a refusal shown
+     there is a refusal nobody sees. */
   function setStatus(msg, kind) {
+    var pop = modalRoot && modalRoot.querySelector('.md-pop-msg');
+    if (pop) {
+      pop.hidden = !msg;
+      pop.textContent = msg || '';
+      pop.className = 'md-pop-msg md-status' + (kind ? ' md-status-' + kind : '');
+      if (msg && pop.scrollIntoView) pop.scrollIntoView({ block: 'nearest' });
+      return;
+    }
     if (!statusEl) return;
     statusEl.hidden = !msg;
     statusEl.textContent = msg || '';
@@ -1053,6 +1064,10 @@
     });
     inner.appendChild(nav);
 
+    var msg = el('div', 'md-pop-msg');
+    msg.hidden = true;
+    inner.appendChild(msg);
+
     var bodyEl = el('div', 'md-pop-body');
     if      (openSection === 'explore')     renderExplore(bodyEl, kit);
     else if (openSection === 'request')     renderRequest(bodyEl, kit);
@@ -1199,10 +1214,22 @@
       }
     } else if (path === 'kits/request') {
       var kit = kitBySlug(body.kit);
+      var was = st.kits[body.kit] || {};
       st.kits[body.kit] = { request: { kit: body.kit, status: 'submitted', status_label: 'Submitted',
         status_note: DEMO_NOTES.submitted, steps: demoSteps(kit),
         submitted: Math.floor(Date.now() / 1000), note: body.note || '',
         designs: body.designs || [], design_names: designNames(body.designs || []) }, editable: false };
+      // Keep the roll-up the real state carries, so a second demo request does
+      // not hide the first.
+      if (kit && kit.pre === 'catalogue') {
+        var roll = st.kits[body.kit].designs = (was.designs || []).slice();
+        (body.designs || []).forEach(function (id) {
+          if (!roll.some(function (d) { return d.id === id; })) {
+            roll.push({ id: id, status: 'submitted', status_label: 'Submitted',
+                        submitted: Math.floor(Date.now() / 1000) });
+          }
+        });
+      }
     }
     kits = st;
     return st;
