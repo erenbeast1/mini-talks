@@ -649,7 +649,7 @@
     {
       code: 'B', name: 'Display-Talks', color: 'blue',
       tagline: 'A screen kit. Design a face for every slot and send it over.',
-      sections: ['overview', 'recordings', 'faces'],
+      sections: ['overview', 'slots'],
       art: '<svg viewBox="0 0 64 64" aria-hidden="true">' +
            '<rect x="18" y="3" width="8" height="6" rx="2.5" class="a1"/>' +
            '<rect x="38" y="3" width="8" height="6" rx="2.5" class="a1"/>' +
@@ -846,7 +846,7 @@
   function sectionAvailable(code, sec) {
     var key = kitKey(code), dev = key ? state[key] : null;
     if (sec === 'scenes')  return !!(dev && ((dev.scenes || []).length || (dev.cards && Object.keys(dev.cards).length)));
-    if (sec === 'faces')   return code === 'B';
+    if (sec === 'slots')   return code === 'B';
     return true;
   }
 
@@ -920,7 +920,7 @@
     var bodyEl = el('div', 'md-pop-body');
     if (openSection === 'overview')        renderOverview(bodyEl, key, dev, live);
     else if (openSection === 'recordings') renderRecordings(bodyEl, key, dev, live);
-    else if (openSection === 'faces')      renderFaces(bodyEl, key, dev, live);
+    else if (openSection === 'slots')      renderSlots(bodyEl, key, dev, live);
     else if (openSection === 'scenes')     renderScenes(bodyEl, key, dev, live);
     inner.appendChild(bodyEl);
 
@@ -969,7 +969,7 @@
   }
 
   function sectionLabel(sec) {
-    return { overview: 'Overview', recordings: 'Recordings', faces: 'Faces', scenes: 'Scenes' }[sec] || sec;
+    return { overview: 'Overview', recordings: 'Recordings', slots: 'Slots', scenes: 'Scenes' }[sec] || sec;
   }
 
   /* ── popup sections ── */
@@ -1074,15 +1074,15 @@
     host.appendChild(list);
   }
 
-  function renderFaces(host, key, dev, live) {
-    if (!window.MDFaces || !window.MFAvatarEditor) {
-      host.appendChild(emptyNote('Face designer unavailable',
-        'The avatar editor did not load on this page. Reload, and check that Mini-Forum is active.'));
-      return;
-    }
+  /* Display-Talks: one card per slot, carrying that slot's face and its
+     recording together. They are two halves of the same object — splitting them
+     across tabs made you line up slot numbers by eye. */
+  function renderSlots(host, key, dev, live) {
+    var hasEditor = window.MDFaces && window.MFAvatarEditor;
 
-    host.appendChild(el('p', 'md-section-note',
-      'Design a face for each slot, then send it to the kit. Faces are stored on your profile, so you can keep editing them while the kit is unplugged.'));
+    host.appendChild(el('p', 'md-section-note', hasEditor
+      ? 'Each slot holds one recording and one face. Faces are stored on your profile, so you can keep editing them while the kit is unplugged.'
+      : 'Each slot holds one recording and one face. The avatar editor did not load on this page, so face design is unavailable \u2014 reload, and check that Mini-Forum is active.'));
 
     var slots = dev.slots || [];
     if (!slots.length) {
@@ -1090,28 +1090,46 @@
         'Connect the kit once so it can tell the site how many slots it has.'));
       return;
     }
-    var rail = el('div', 'md-faces-rail');
-    var list = el('div', 'md-faces');
+
+    var list = el('div', 'md-slotcards');
     slots.forEach(function (slot) {
       var f = (faces[key] && faces[key][slot.i]) || null;
-      var tile = el('div', 'md-face' + (f ? ' has-face' : ''));
+      var card = el('article', 'md-slotcard' + (slot.full ? '' : ' is-empty'));
 
-      var thumbWrap = el('div', 'md-face-thumb');
+      var thumb = el('div', 'md-face-thumb' + (f ? ' has-face' : ''));
       if (f && f.url) {
         var img = el('img');
         img.src = f.url;
         img.alt = 'Face for slot ' + slot.i;
-        thumbWrap.appendChild(img);
+        thumb.appendChild(img);
       } else {
-        thumbWrap.appendChild(el('span', 'md-face-placeholder', '?'));
+        thumb.appendChild(el('span', 'md-face-placeholder', '?'));
       }
-      thumbWrap.appendChild(el('span', 'md-face-no', String(slot.i)));
-      tile.appendChild(thumbWrap);
+      card.appendChild(thumb);
 
-      var acts = el('div', 'md-face-acts');
+      var main = el('div', 'md-slotcard-main');
+      var top = el('div', 'md-slotcard-top');
+      top.appendChild(el('span', 'md-slot-no', String(slot.i)));
+
+      var input = el('input', 'md-slot-name');
+      input.type = 'text';
+      input.placeholder = !slot.full ? 'Empty slot'
+                        : (live ? 'Name this recording' : 'Unnamed recording');
+      input.value = slot.name || '';
+      input.disabled = !slot.full || !live;
+      input.addEventListener('change', function () {
+        slot.name = input.value;
+        saveName({ dev: key, slot: slot.i, name: input.value }, input);
+      });
+      top.appendChild(input);
+      top.appendChild(el('span', 'md-slot-len', slot.full ? fmtDur(slot.len_ms) : 'empty'));
+      main.appendChild(top);
+
+      var acts = el('div', 'md-slotcard-acts');
 
       var design = el('button', 'md-btn md-btn-ghost md-btn-sm', f ? 'Edit face' : 'Design face');
       design.type = 'button';
+      design.disabled = !hasEditor;
       design.addEventListener('click', function () {
         window.MDFaces.designFace(f && f.config, function (cfg, img) {
           api('faces', { dev: key, slot: slot.i, config: cfg, image: img }).then(function (res) {
@@ -1123,50 +1141,30 @@
       });
       acts.appendChild(design);
 
-      var send2 = el('button', 'md-btn md-btn-primary md-btn-sm', 'Send to kit');
-      send2.type = 'button';
-      send2.disabled = !live || !f;
-      send2.title = !f ? 'Design a face for this slot first.'
-                       : (!live ? 'Connect the kit to send it.' : '');
-      send2.addEventListener('click', function () { transferFace(key, slot.i, f && f.config, send2); });
-      acts.appendChild(send2);
+      var send = el('button', 'md-btn md-btn-primary md-btn-sm', 'Send face');
+      send.type = 'button';
+      send.disabled = !live || !f;
+      send.title = !f ? 'Design a face for this slot first.'
+                      : (!live ? 'Connect the kit to send it.' : '');
+      send.addEventListener('click', function () { transferFace(key, slot.i, f && f.config, send); });
+      acts.appendChild(send);
 
-      tile.appendChild(acts);
-      list.appendChild(tile);
+      if (slot.full) {
+        var dl = el('button', 'md-btn md-btn-ghost md-btn-sm', 'Download audio');
+        dl.type = 'button';
+        dl.disabled = !live;
+        dl.title = live ? 'Download as WAV' : 'Recordings live on the kit \u2014 connect it to download.';
+        dl.addEventListener('click', function () {
+          dumpSlot(slot.i, (safeName(slot.name) || ('slot' + slot.i)) + '.wav', dl);
+        });
+        acts.appendChild(dl);
+      }
+
+      main.appendChild(acts);
+      card.appendChild(main);
+      list.appendChild(card);
     });
-
-    rail.appendChild(list);
-
-    // Touch can swipe; a mouse needs something to click.
-    var prev = railBtn('\u2039', 'Previous slots', -1, list);
-    var next = railBtn('\u203A', 'More slots', 1, list);
-    rail.appendChild(prev);
-    rail.appendChild(next);
-    host.appendChild(rail);
-
-    function syncArrows() {
-      var max = list.scrollWidth - list.clientWidth;
-      var hidden = max < 4;                       // everything already visible
-      prev.hidden = next.hidden = hidden;
-      if (hidden) return;
-      prev.disabled = list.scrollLeft < 4;
-      next.disabled = list.scrollLeft > max - 4;
-    }
-    list.addEventListener('scroll', syncArrows);
-    // Widths are only real once the popup is laid out.
-    requestAnimationFrame(syncArrows);
-  }
-
-  function railBtn(glyph, label, dir, list) {
-    var b = el('button', 'md-rail-btn md-rail-' + (dir < 0 ? 'prev' : 'next'), glyph);
-    b.type = 'button';
-    b.setAttribute('aria-label', label);
-    b.addEventListener('click', function () {
-      var tile = list.querySelector('.md-face');
-      var step = tile ? tile.getBoundingClientRect().width + 12 : 160;
-      list.scrollBy({ left: dir * step, behavior: 'smooth' });
-    });
-    return b;
+    host.appendChild(list);
   }
 
   function renderScenes(host, key, dev, live) {

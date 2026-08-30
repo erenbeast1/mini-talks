@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.3.0)
+# Mini Devices — Mini-Kits (v2.4.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -61,9 +61,18 @@ Each card carries one of three states:
 | **Not connected** | synced before, unplugged now | read the last sync; renaming, downloads and face transfer are disabled and say why |
 | **Not linked yet** | not on this profile | the card is dashed and cannot be opened |
 
-Opening a kit gives a colour-matched popup with its own sections: **Overview**
-(stats, slot capacity, kit name), **Recordings** (numbered slots, naming, per-slot
-WAV download), **Faces** (Display-Talks only) and **Scenes** (Design-Talks only).
+Opening a kit gives a colour-matched popup with its own sections:
+
+| Kit | Sections |
+|---|---|
+| Fig-Talks | **Overview** · **Recordings** |
+| Display-Talks | **Overview** · **Slots** |
+| Design-Talks | **Overview** · **Scenes** |
+
+Display-Talks gets one **Slots** section rather than separate Recordings and Faces
+tabs: a slot holds one recording *and* one face, so each card shows the face, the
+recording name and duration, and all three actions (design face, send face,
+download audio) together.
 
 ## Admin demo mode
 

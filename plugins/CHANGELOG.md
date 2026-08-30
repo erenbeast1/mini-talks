@@ -25,6 +25,29 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.4.0
+
+**Display-Talks: Recordings and Faces merged into one Slots section.** A slot holds
+one recording *and* one face — describing them in two tabs meant matching slot
+numbers by eye. Each slot is now a single card: its face, its recording name and
+duration, and all three actions side by side. Fig-Talks keeps Recordings, and
+Design-Talks keeps Scenes; neither has per-slot faces.
+
+That also retires the sideways face rail, which is the real fix for two bugs it had:
+the right arrow went disabled while the last tile was still clipped (`scroll-snap-type:
+mandatory` with `scroll-snap-align: start` cannot settle on the true end), and the
+arrows overlapped the tiles they were meant to reveal. Stacked cards need no rail.
+
+**Fixed: face previews were cropped.** The thumbnail used `object-fit: cover` on a
+preview that is a head on empty space, so the chin was cut and the head sat low.
+It uses `contain` now, and the slot number moved out of the image instead of
+overlapping it.
+
+**Fixed: studs floated off the kit cards.** The stud PNG is transparent behind the
+studs — on the forum it always sits on a coloured brick, but here it sat on a white
+card, so the studs read as loose blocks. The strip now carries the kit colour behind
+the PNG and meets the card flush, with the top rounding on the strip.
+
 ## mini-devices 2.3.0
 
 **The public preview loads the real avatar editor.** 2.2.0 shipped a preset face
