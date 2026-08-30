@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.4.2)
+# Mini Devices — Mini-Kits (v2.5.0)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
@@ -98,13 +98,13 @@ profile, and works for logged-out visitors.
 
 ```
 [mini_kits_demo]
-[mini_kits_demo kits="B"]
-[mini_kits_demo kits="F,B" title="Try it yourself" intro="Open a kit and design a face."]
+[mini_kits_demo kits="display-talks"]
+[mini_kits_demo kits="fig-talks,display-talks" title="Try it yourself" intro="Open a kit and design a face."]
 ```
 
 | Attribute | Default | Notes |
 |---|---|---|
-| `kits` | all three | Comma-separated `F`, `B`, `D`. Anything else is ignored. |
+| `kits` | all three | Comma-separated kit names — `fig-talks`, `display-talks`, `design-talks`. The internal codes `F`, `B`, `D` also work. Unknown values are ignored. |
 | `title` | `Try a Mini-Kit` | Pass an empty string to drop the heading. |
 | `intro` | see plugin | Pass an empty string to drop the paragraph. |
 

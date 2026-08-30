@@ -44,6 +44,9 @@
 .md-btn:focus-visible{outline:3px solid var(--md-blue,#0055BF)!important;outline-offset:2px!important}
 .md-btn:disabled{opacity:.5!important;cursor:not-allowed!important;transform:none!important}
 .md-btn-sm{padding:8px 14px!important;font-size:12.5px!important;border-radius:8px!important}
+/* Match the ghost button's box exactly — border inside, no outer shadow. */
+.md-btn-sm.md-btn-primary{box-shadow:none!important;border:2px solid rgba(0,0,0,.12)!important;border-bottom:5px solid #E5B800!important}
+.md-btn-sm.md-btn-primary:hover:not(:disabled),.md-btn-sm.md-btn-primary:active:not(:disabled){transform:none!important;box-shadow:none!important;filter:brightness(1.04)!important}
 
 /* Yellow brick: dark text, hard bottom shadow that compresses on press. */
 .md-btn-primary{background:var(--md-yellow,#FFCC00)!important;color:var(--md-ink,#1D1D1B)!important;border-color:rgba(0,0,0,.1)!important;box-shadow:0 4px 0 #E5B800!important}
@@ -99,15 +102,15 @@
 
 /* Coloured frame. The 14px top padding is the band under the studs — the forum
    detail popup does the same with padding:16px 8px 8px. */
-.md-kit-brick{border-radius:16px!important;padding:14px 8px 8px!important;margin-top:-1px!important}
+.md-kit-brick{border-radius:16px!important;padding:9px 5px 13px!important;margin-top:-1px!important}
 
 /* Stud strip: two half-width PNGs, notched at the sides, like .mf-action-card. */
-.md-kit-studs{height:26px!important;background-repeat:repeat-x!important;background-position:center bottom!important;background-size:auto 26px!important;border-radius:16px 16px 0 0!important;overflow:hidden!important;flex-shrink:0!important}
-.md-kit-red    .md-kit-studs{background-image:var(--md-stud-red)!important}
+.md-kit-studs{height:26px!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,11.1111% bottom,22.2222% bottom,33.3333% bottom,44.4444% bottom,55.5556% bottom,66.6667% bottom,77.7778% bottom,88.8889% bottom,right bottom!important;background-size:10.2% auto,10.2% auto,10.2% auto,10.2% auto,10.2% auto,10.2% auto,10.2% auto,10.2% auto,10.2% auto,10.2% auto!important;border-radius:16px 16px 0 0!important;overflow:hidden!important;flex-shrink:0!important}
+.md-kit-red    .md-kit-studs{background-image:var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red),var(--md-stud-red)!important}
 .md-kit-red    .md-kit-brick{background:var(--md-red,#E52828)!important}
-.md-kit-blue   .md-kit-studs{background-image:var(--md-stud-blue)!important}
+.md-kit-blue   .md-kit-studs{background-image:var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue),var(--md-stud-blue)!important}
 .md-kit-blue   .md-kit-brick{background:var(--md-blue,#0055BF)!important}
-.md-kit-yellow .md-kit-studs{background-image:var(--md-stud-yellow)!important}
+.md-kit-yellow .md-kit-studs{background-image:var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow),var(--md-stud-yellow)!important}
 .md-kit-yellow .md-kit-brick{background:var(--md-yellow,#FFCC00)!important}
 
 .md-kit-body{display:flex!important;align-items:center!important;gap:20px!important;background:#fff!important;border:none!important;border-radius:12px!important;padding:18px 22px!important;transition:transform .15s,box-shadow .15s!important}
@@ -299,7 +302,7 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-face-thumb.has-face{border-color:var(--mf-blue,#0055BF)!important;background:#fff!important}
 /* cover with the focal point up near the head: the preview is a full figure,
    and the face is what identifies the slot. */
-.md-face-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 30%!important;display:block!important}
+.md-face-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 36%!important;display:block!important}
 .md-face-placeholder{font-size:26px!important;font-weight:900!important;color:#D5D5D5!important}
 
 /* ═══════════════════════ SCENE / CARD FOLDERS ═══════════════════════ */

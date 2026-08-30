@@ -25,6 +25,29 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.5.0
+
+**`[mini_kits_demo]` takes kit names.** `kits="display-talks"` instead of
+`kits="B"`; `fig-talks`, `display-talks` and `design-talks` all work, in any case,
+with or without the hyphen. The old codes still work.
+
+**Studs never get cut.** `repeat-x` always slices a stud wherever the strip ends,
+whichever edge it starts from. The forum's own strips place a fixed number of whole
+PNG copies at percentage stops instead (`.mf-guidelines-studs` uses 4 at 26%), so
+both edges land on a complete stud. Kit cards now place ten, keeping each stud about
+the size it is in the popup. The popup keeps `repeat-x`, which reads correctly there.
+
+**Brick frame: thinner sides and top, heavier bottom.** `9px 5px 13px` instead of
+`14px 8px 8px`.
+
+**"Send face" no longer stands taller than "Edit face".** The primary button's 4px
+hard shadow sits outside its box while the ghost's 5px bottom border sits inside, so
+the two never matched. Small primaries use the same bordered box now — every button
+in a slot row measures 36px.
+
+**Face crop nudged down** (`center 30%` → `36%`) so a little of the body shows under
+the face.
+
 ## mini-devices 2.4.2
 
 **Kit cards are real bricks now, built the way the forum already solved it.**

@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Each kit opens its own detail popup.
- * Version:     2.4.2
+ * Version:     2.5.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.4.2');
+define('MD_VER', '2.5.0');
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 
@@ -386,8 +386,11 @@ add_shortcode('connected_devices', function () {
  *  so it is safe for logged-out visitors.
  *
  *    [mini_kits_demo]
- *    [mini_kits_demo kits="B"]
- *    [mini_kits_demo kits="F,B" title="Try it" intro="Open a kit…"]
+ *    [mini_kits_demo kits="display-talks"]
+ *    [mini_kits_demo kits="fig-talks,display-talks" title="Try it" intro="Open a kit…"]
+ *
+ *  kits accepts names (fig-talks, display-talks, design-talks) or the internal
+ *  codes (F, B, D). Unknown values are ignored.
  * ------------------------------------------------------------------ */
 
 add_shortcode('mini_kits_demo', function ($atts) {
@@ -401,11 +404,17 @@ add_shortcode('mini_kits_demo', function ($atts) {
         'intro' => 'This is exactly what you see on your profile once a kit is linked. Open one, name a recording, design a face — nothing is saved.',
     ), $atts, 'mini_kits_demo');
 
-    // Only the three real kit codes are accepted.
+    // Accept kit names as well as the internal codes, so a page author can
+    // write kits="display-talks" instead of remembering that it is "B".
+    $names = array(
+        'fig-talks'     => 'F', 'figtalks'     => 'F', 'fig'     => 'F', 'f' => 'F',
+        'display-talks' => 'B', 'displaytalks' => 'B', 'display' => 'B', 'b' => 'B',
+        'design-talks'  => 'D', 'designtalks'  => 'D', 'design'  => 'D', 'd' => 'D',
+    );
     $codes = array();
-    foreach (explode(',', strtoupper($a['kits'])) as $c) {
+    foreach (explode(',', strtolower($a['kits'])) as $c) {
         $c = trim($c);
-        if (in_array($c, array('F', 'B', 'D'), true)) $codes[] = $c;
+        if (isset($names[$c]) && !in_array($names[$c], $codes, true)) $codes[] = $names[$c];
     }
 
     ob_start(); ?>
