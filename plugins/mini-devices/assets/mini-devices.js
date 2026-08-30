@@ -1315,7 +1315,11 @@
     }
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && openCode) closeKit();
+      if (e.key !== 'Escape' || !openCode) return;
+      // The face designer sits on top and closes itself on Escape; one press
+      // should not collapse the kit popup underneath it as well.
+      if (document.querySelector('.mdf-overlay')) return;
+      closeKit();
     });
 
     if (publicDemo) { setDemo(true); return; }

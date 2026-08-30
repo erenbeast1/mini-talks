@@ -159,8 +159,20 @@
     var host = document.createElement('div');
     host.className = 'mdf-editor-host';
     box.appendChild(host);
+
+    var back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'mdf-back';
+    back.setAttribute('aria-label', 'Close the face designer without saving');
+    back.innerHTML = '<span aria-hidden="true">\u2190</span> Back';
+    back.addEventListener('click', function () { close(); });
+    box.appendChild(back);
+
     overlay.appendChild(box);
     document.body.appendChild(overlay);
+
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', onKey);
 
     // --- mf_avatar_save isteklerini gecici olarak yakala ---
     var origFetch = window.fetch;
@@ -223,6 +235,7 @@
     }
 
     function close() {
+      document.removeEventListener('keydown', onKey);
       try { window.MFAvatarEditor.unmount(host); } catch (e) {}
       restore();
       overlay.remove();

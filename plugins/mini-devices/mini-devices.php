@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits shelf to the Mini-Forum profile. Kits connect over USB (WebSerial); recording stats sync to the profile and audio is downloaded as WAV. Each kit opens its own detail popup.
- * Version:     2.6.0
+ * Version:     2.6.1
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '2.6.0');
+define('MD_VER', '2.6.1');
 define('MD_URL', plugin_dir_url(__FILE__));
 define('MD_META', 'md_devices');          // usermeta anahtarı
 

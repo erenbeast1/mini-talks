@@ -25,6 +25,18 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 2.6.1
+
+**A way out of the face designer.** The editor offers only Save, Reset and Random,
+so opening it was a one-way door — the only exit was saving. A **Back** button now
+sits top right of the editor overlay, and Escape closes it too. The overlay is this
+plugin's, not Mini-Forum's, so nothing in the editor bundle changed; it already
+exposed an `onClose` callback that had no button behind it.
+
+**Fixed while testing it:** one Escape press closed the face designer *and* the kit
+popup underneath, because both listen on `document`. The kit popup now stands down
+while a face designer is open.
+
 ## mini-devices 2.6.0
 
 **The screen kit is Brick-Talks, not Display-Talks.** Renamed everywhere it is

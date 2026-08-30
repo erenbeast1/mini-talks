@@ -328,6 +328,18 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .mdf-modal{width:min(980px,100%)!important;height:min(680px,100%)!important;background:#fff!important;border:8px solid var(--mf-blue,#0055BF)!important;border-radius:18px!important;overflow:hidden!important;display:flex!important}
 .mdf-editor-host{flex:1 1 auto!important;min-width:0!important}
 
+/* Way out of the face designer. It floats over a 3D canvas, so it carries its
+   own contrast rather than relying on what is behind it. */
+.mdf-back{position:absolute!important;top:14px!important;right:14px!important;z-index:10!important;display:inline-flex!important;align-items:center!important;gap:7px!important;padding:9px 18px!important;border-radius:24px!important;border:2.5px solid #1D1D1B!important;border-bottom-width:5px!important;background:#fff!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:13px!important;font-weight:800!important;line-height:1!important;color:#1D1D1B!important;cursor:pointer!important;box-shadow:0 4px 16px rgba(0,0,0,.28)!important;transition:transform .14s,border-color .14s!important}
+.mdf-back:hover{transform:translateY(-1px)!important;border-color:var(--mf-red,#E52828)!important;color:var(--mf-red,#E52828)!important}
+.mdf-back:active{transform:translateY(2px)!important;border-bottom-width:2.5px!important}
+.mdf-back span{font-size:15px!important;line-height:1!important}
+.mdf-modal{position:relative!important}
+
+@media(max-width:560px){
+  .mdf-back{top:10px!important;right:10px!important;padding:8px 14px!important;font-size:12px!important}
+}
+
 /* ═══════════════════════ PUBLIC PREVIEW ═══════════════════════ */
 /* [mini_kits_demo] — a marketing-page shelf. Same components, softer framing:
    no caution stripe, no admin bar, an invitation rather than a warning. */

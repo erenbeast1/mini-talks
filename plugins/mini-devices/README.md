@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v2.6.0)
+# Mini Devices — Mini-Kits (v2.6.1)
 
 Adds the **Mini-Kits** shelf to the Mini-Forum profile. Kits connect over USB
 (WebSerial); recording stats sync to the profile and audio is downloaded as WAV.
