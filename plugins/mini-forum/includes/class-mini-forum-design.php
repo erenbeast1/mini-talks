@@ -38,6 +38,7 @@ class Mini_Forum_Design {
     const OPT_BLOCKS = 'mf_design_blocks';
     const OPT_CSS    = 'mf_design_css';
     const OPT_BASE   = 'mf_design_base';   // the default each override was written against
+    const OPT_BCSS   = 'mf_design_block_css';  // CSS written beside an area's HTML
 
     /** Where the custom stylesheets apply. */
     public static function css_areas() {
@@ -208,9 +209,34 @@ class Mini_Forum_Design {
             )),
 
             'join' => array('label' => 'Join Us', 'blocks' => array(
-                'join.title'         => array('Page heading', 'text', 'Join Us!'),
-                'join.area.title'    => array('Area step heading', 'html', 'Choose Your Area <span>(Select one)</span>'),
-                'join.consent.title' => array('Consent heading', 'html', 'Acknowledgment &amp; Consent'),
+                'join.title' => array('Page heading', 'text', 'Join Us!'),
+
+                'join.step1' => array('Step 1 — choosing an area', 'html',
+                    '<div class="mt-ju-step" id="ju-step1"><div class="mt-ju-num"><span style="color:#E52828">1</span></div><div class="mt-ju-card"><div class="mt-ju-card-box mt-ju-card-red"><div class="mt-ju-card-inner"><h3>Choose Your Area <span>(Select one)</span></h3><div class="mt-ju-roles"><div class="mt-ju-role" data-value="Mini-Family" data-mf-action="ju-role"><img src="{{img_family}}" alt="" /><div><strong>Mini-Families</strong><span>For families supporting a child\'s communication journey, or adults (18+) with lived experience.</span></div></div><div class="mt-ju-role" data-value="Mini-Expert" data-mf-action="ju-role"><img src="{{img_expert}}" alt="" /><div><strong>Mini-Experts</strong><span>For professionals and educators working in communication and selective mutism.</span></div></div><div class="mt-ju-role" data-value="Mini-Volunteer" data-mf-action="ju-role"><img src="{{img_volunteer}}" alt="" /><div><strong>Mini-Volunteers</strong><span>For individuals who want to support children and families in their communication journey.</span></div></div><div class="mt-ju-role" data-value="Talk-Spot" data-mf-action="ju-role"><img src="{{img_talkspot}}" alt="" /><div><strong>Talk-Spots</strong><span>For venues and organizations that want to create safe and supportive spaces for communication.</span></div></div></div></div></div></div></div>',
+                    array('img_family' => 'Mini-Families artwork', 'img_expert' => 'Mini-Experts artwork',
+                          'img_volunteer' => 'Mini-Volunteers artwork', 'img_talkspot' => 'Talk-Spots artwork'),
+                    array('id="ju-step1"'        => 'the script reveals and hides this step',
+                          'mt-ju-role'           => 'the four choices',
+                          'data-value'           => 'which area each choice stands for',
+                          'data-mf-action="ju-role"' => 'picking one opens step 2')),
+
+                'join.step2' => array('Step 2 — account details', 'html',
+                    '<div class="mt-ju-step is-hidden" id="ju-step2"><div class="mt-ju-num"><span style="color:#0055BF">2</span></div><div class="mt-ju-card"><div class="mt-ju-card-box mt-ju-card-blue"><div class="mt-ju-card-inner"><div class="mt-ju-formrow"><div class="mt-ju-formfield"><label>Full Name:</label><span class="mt-ju-sub">(Not displayed in forum)</span><input type="text" id="ju-fullname" class="bdr-red" /></div><div class="mt-ju-formfield"><label>Password:</label><span class="mt-ju-sub">(At least 8 characters)</span><input type="password" id="ju-password" class="bdr-blue" /></div><div class="mt-ju-formfield"><label>Email Address:</label><span class="mt-ju-sub">(Used for login)</span><input type="email" id="ju-email" class="bdr-green" /></div></div><div class="mt-ju-formrow"><div class="mt-ju-formfield"><label>City:</label><span class="mt-ju-sub">(Optional)</span><input type="text" id="ju-city" class="bdr-red" /></div><div class="mt-ju-formfield"><label>Country:</label><span class="mt-ju-sub">(Optional)</span><input type="text" id="ju-country" class="bdr-green" /></div><div class="mt-ju-formfield"><label>Nickname:</label><span class="mt-ju-sub">(Displayed in forum)</span><input type="text" id="ju-nickname" class="bdr-yellow" /></div></div><div id="ju-dynamic-fields"></div><div class="mt-ju-formrow"><div class="mt-ju-formfield" style="flex:1!important"><label>Additional Info:</label><span class="mt-ju-sub">(Optional)</span><textarea id="ju-extra" placeholder="Add a short note if you\'d like..."></textarea></div></div><div class="mt-ju-step-actions"><button type="button" class="mt-ju-continue mt-ju-continue-blue" data-mf-action="ju-continue">Continue</button></div></div></div></div></div>',
+                    array(),
+                    array('id="ju-step2"'   => 'the script reveals and hides this step',
+                          'id="ju-fullname"' => 'the name field', 'id="ju-password"' => 'the password field',
+                          'id="ju-email"'    => 'the email field', 'id="ju-city"' => 'the city field',
+                          'id="ju-country"'  => 'the country field', 'id="ju-nickname"' => 'the nickname field',
+                          'id="ju-extra"'    => 'the additional-info field',
+                          'id="ju-dynamic-fields"' => 'where the fields for the chosen area appear',
+                          'data-mf-action="ju-continue"' => 'opens step 3')),
+
+                'join.step3' => array('Step 3 — consent and Join', 'html',
+                    '<div class="mt-ju-step is-hidden" id="ju-step3"><div class="mt-ju-num"><span style="color:#FFCC00">3</span></div><div class="mt-ju-card"><div class="mt-ju-card-box mt-ju-card-yellow"><div class="mt-ju-card-inner"><h3>Acknowledgment &amp; Consent</h3><label class="mt-ju-consent"><input type="checkbox" id="ju-consent" /><span>I have read and accept the Mini-Community Guidelines and Terms of Participation.</span></label><a href="/mini-community/guidelines/" target="_blank" class="mt-ju-guidelines-link">View Guidelines and Terms of Participation</a><p class="mt-ju-info">Mini-Community does not provide treatment, referrals, or child-specific evaluations.<br>All shared content is based on personal experience and awareness.<br>Personal information is kept confidential and never shared without consent.</p><div style="text-align:center;padding:20px 0 12px"><button class="mt-ju-btn" type="button" data-mf-action="ju-submit"><div class="mt-ju-btn-stud"></div><div class="mt-ju-btn-topbar"></div><div class="mt-ju-btn-inner"><img class="mt-ju-btn-heart" src="{{img_heart}}" alt="" /><span class="mt-ju-btn-label">Join</span></div></button></div></div></div></div></div>',
+                    array('img_heart' => 'The heart on the Join button'),
+                    array('id="ju-step3"'  => 'the script reveals this step',
+                          'id="ju-consent"' => 'the consent checkbox, which Join requires',
+                          'data-mf-action="ju-submit"' => 'the Join button')),
             )),
         ));
     }
@@ -227,6 +253,65 @@ class Mini_Forum_Design {
             if (isset($group['blocks'][$id])) return $group['blocks'][$id];
         }
         return null;
+    }
+
+    /**
+     * What an area's HTML may contain.
+     *
+     * wp_kses_post() alone is a gamble here: whether it allows form elements has
+     * changed between WordPress versions, and a page whose <input> tags were
+     * silently dropped is a sign-up form that no longer collects anything. The
+     * list is therefore stated outright — every tag a page here needs, plus the
+     * attributes the code binds to. Scripts, iframes and on* handlers are not on
+     * it and never will be.
+     */
+    public static function allowed_html() {
+        $tags = function_exists('wp_kses_allowed_html') ? wp_kses_allowed_html('post') : array();
+
+        $common = array(
+            'class' => true, 'id' => true, 'style' => true, 'title' => true, 'role' => true,
+            'tabindex' => true, 'hidden' => true, 'lang' => true, 'dir' => true,
+            'aria-label' => true, 'aria-labelledby' => true, 'aria-hidden' => true,
+            'aria-describedby' => true, 'aria-expanded' => true,
+            // Wildcards work on modern WordPress; the two the code binds to are
+            // listed as well, so the bindings hold on an older one.
+            'data-*' => true, 'data-mf-action' => true, 'data-value' => true,
+        );
+
+        $needed = array(
+            'div' => array(), 'span' => array(), 'p' => array(), 'br' => array(), 'hr' => array(),
+            'strong' => array(), 'em' => array(), 'b' => array(), 'i' => array(), 'small' => array(),
+            'h1' => array(), 'h2' => array(), 'h3' => array(), 'h4' => array(), 'h5' => array(), 'h6' => array(),
+            'ul' => array(), 'ol' => array(), 'li' => array(), 'dl' => array(), 'dt' => array(), 'dd' => array(),
+            'section' => array(), 'article' => array(), 'aside' => array(), 'header' => array(),
+            'footer' => array(), 'nav' => array(), 'figure' => array(), 'figcaption' => array(),
+            'table' => array(), 'thead' => array(), 'tbody' => array(), 'tr' => array(),
+            'th' => array('colspan' => true, 'rowspan' => true, 'scope' => true),
+            'td' => array('colspan' => true, 'rowspan' => true),
+            'a'   => array('href' => true, 'target' => true, 'rel' => true, 'download' => true),
+            'img' => array('src' => true, 'alt' => true, 'width' => true, 'height' => true,
+                           'loading' => true, 'srcset' => true, 'sizes' => true),
+            'form' => array('action' => true, 'method' => true, 'novalidate' => true, 'autocomplete' => true),
+            'label' => array('for' => true),
+            'input' => array('type' => true, 'name' => true, 'value' => true, 'placeholder' => true,
+                             'checked' => true, 'disabled' => true, 'readonly' => true, 'required' => true,
+                             'maxlength' => true, 'minlength' => true, 'min' => true, 'max' => true,
+                             'step' => true, 'pattern' => true, 'autocomplete' => true, 'accept' => true),
+            'textarea' => array('name' => true, 'rows' => true, 'cols' => true, 'placeholder' => true,
+                                'required' => true, 'maxlength' => true),
+            'select' => array('name' => true, 'multiple' => true, 'required' => true, 'size' => true),
+            'option' => array('value' => true, 'selected' => true, 'disabled' => true),
+            'optgroup' => array('label' => true, 'disabled' => true),
+            'button' => array('type' => true, 'name' => true, 'value' => true, 'disabled' => true),
+            'fieldset' => array('disabled' => true), 'legend' => array(),
+            'details' => array('open' => true), 'summary' => array(),
+        );
+
+        foreach ($needed as $tag => $attrs) {
+            $have = isset($tags[$tag]) && is_array($tags[$tag]) ? $tags[$tag] : array();
+            $tags[$tag] = array_merge($have, $attrs, $common);
+        }
+        return apply_filters('mf_design_allowed_html', $tags);
     }
 
     /** Is this id registered at all? Lets another plugin ask before relying on it. */
@@ -259,7 +344,7 @@ class Mini_Forum_Design {
         $def = self::definition($id);
         if (!$def) return '';
         $val = self::get($id);
-        $out = $def[1] === 'text' ? esc_html($val) : wp_kses_post($val);
+        $out = $def[1] === 'text' ? esc_html($val) : wp_kses($val, self::allowed_html());
 
         $tokens = isset($def[3]) && is_array($def[3]) ? $def[3] : array();
         if (!$tokens) return $out;
@@ -310,6 +395,69 @@ class Mini_Forum_Design {
         return $base[$id] !== md5($def[2]);
     }
 
+    /**
+     * The plugin's own rules that style an area's markup.
+     *
+     * Handing someone the HTML without the CSS that dresses it is half a job:
+     * they would be rewriting a block with no idea what `.mf-hero-desc` does to
+     * it. So the rules are collected from the plugin's stylesheets by matching
+     * the classes the markup actually uses, and shown beside the box —
+     * read-only, because the place to change one is the box below, and copying
+     * the whole sheet into the database would freeze it against every update.
+     */
+    public static function css_for($id) {
+        $html = self::get($id) . ' ' . (($d = self::definition($id)) ? $d[2] : '');
+        if (!preg_match_all('/class\s*=\s*"([^"]*)"/i', $html, $m)) return '';
+
+        $classes = array();
+        foreach ($m[1] as $list) {
+            foreach (preg_split('/\s+/', trim($list)) as $c) {
+                if ($c !== '') $classes['.' . $c] = true;
+            }
+        }
+        if (!$classes) return '';
+
+        $out = '';
+        foreach (self::stylesheets() as $file) {
+            if (!file_exists($file)) continue;
+            $css = file_get_contents($file);
+            $css = preg_replace('#/\*.*?\*/#s', '', $css);          // comments out of the way
+            foreach (explode('}', $css) as $rule) {
+                $split = strpos($rule, '{');
+                if ($split === false) continue;
+                $sel = trim(substr($rule, 0, $split));
+                if ($sel === '' || $sel[0] === '@') continue;          // skip at-rule openers
+                foreach ($classes as $c => $x) {
+                    // word boundary, so .mf-hero does not drag in .mf-hero-face
+                    if (preg_match('/' . preg_quote($c, '/') . '(?![\w-])/', $sel)) {
+                        $out .= $sel . ' {' . trim(substr($rule, $split + 1)) . "}\n";
+                        break;
+                    }
+                }
+                if (strlen($out) > 24000) return $out . "\n/* … more rules follow; open the stylesheet for the rest */\n";
+            }
+        }
+        return $out;
+    }
+
+    public static function stylesheets() {
+        return apply_filters('mf_design_stylesheets', array(
+            MF_PATH . 'assets/css/mini-forum.css',
+            MF_PATH . 'assets/css/mini-forum-auth.css',
+            MF_PATH . 'assets/css/mini-forum-profile.css',
+        ));
+    }
+
+    /** CSS written next to one area's HTML. Rewriting markup usually needs a
+     *  rule or two, and sending someone to another tab to write them is how a
+     *  half-styled block ends up on the site. */
+    public static function block_css($id = null) {
+        $all = get_option(self::OPT_BCSS, array());
+        if (!is_array($all)) $all = array();
+        if ($id === null) return $all;
+        return isset($all[$id]) ? (string) $all[$id] : '';
+    }
+
     public static function css($area) {
         $all = get_option(self::OPT_CSS, array());
         return is_array($all) && isset($all[$area]) ? (string) $all[$area] : '';
@@ -348,6 +496,12 @@ class Mini_Forum_Design {
         foreach (self::active_areas() as $area) {
             $css = trim(self::css($area));
             if ($css !== '') $out .= "\n/* mini-forum: {$area} */\n" . $css;
+        }
+        // Then whatever was written beside an area's HTML. Last, so it wins over
+        // the area sheet the same way it sits closer to the markup it belongs to.
+        foreach (self::block_css() as $id => $css) {
+            $css = trim($css);
+            if ($css !== '' && self::has($id)) $out .= "\n/* mini-forum: {$id} */\n" . $css;
         }
         if ($out === '') return;
         // Stored already stripped; stripped again here so an old value saved
@@ -544,6 +698,30 @@ class Mini_Forum_Design {
                       </div>
                     <?php endif; ?>
 
+                    <?php if ($def[1] === 'html'): $bcss = self::block_css($id); ?>
+                      <details style="margin-top:8px" <?php echo $bcss !== '' ? 'open' : ''; ?>>
+                        <summary style="cursor:pointer;font-size:12px;color:#2271b1">
+                          CSS for this area<?php echo $bcss !== '' ? ' (in use)' : ''; ?>
+                        </summary>
+                        <?php $existing = self::css_for($id); ?>
+                        <?php if ($existing !== ''): ?>
+                          <p class="description" style="margin:6px 0 4px">
+                            <strong>What already styles this markup</strong> — the plugin's own rules for the
+                            classes above. Read-only: copy a rule into the box below and change it there.
+                          </p>
+                          <textarea rows="8" class="large-text code" readonly spellcheck="false"
+                                    onclick="this.select()" style="background:#f6f7f7"><?php echo esc_textarea(trim($existing)); ?></textarea>
+                        <?php endif; ?>
+                        <p class="description" style="margin:6px 0 4px">
+                          <strong>Your rules for this area.</strong> Printed after the area stylesheets, on every
+                          page this area appears on. The plugin's own rules use <code>!important</code>,
+                          so match that when overriding one.
+                        </p>
+                        <textarea name="bcss[<?php echo esc_attr($id); ?>]" rows="5" class="large-text code"
+                                  spellcheck="false" placeholder="/* e.g. .benim-hero{gap:30px!important} */"><?php echo esc_textarea($bcss); ?></textarea>
+                      </details>
+                    <?php endif; ?>
+
                     <p class="description" style="margin-top:4px">
                       <label><input type="checkbox" name="reset[<?php echo esc_attr($id); ?>]" value="1"> Reset to the plugin's default</label>
                       <?php if (!$over): ?>
@@ -569,7 +747,7 @@ class Mini_Forum_Design {
                 if (!empty($reset[$id])) { unset($out[$id], $base[$id]); continue; }
                 if (!isset($in[$id])) continue;
 
-                $val = $def[1] === 'text' ? sanitize_text_field($in[$id]) : wp_kses_post($in[$id]);
+                $val = $def[1] === 'text' ? sanitize_text_field($in[$id]) : wp_kses($in[$id], self::allowed_html());
                 // Matching the default is not a customisation; storing it would
                 // freeze this area against every future plugin update.
                 if ($val === $def[2]) { unset($out[$id]); continue; }
@@ -579,6 +757,19 @@ class Mini_Forum_Design {
         }
         update_option(self::OPT_BLOCKS, $out);
         update_option(self::OPT_BASE, $base);
+
+        // The CSS written beside each area, on the same save.
+        $css_in  = isset($_POST['bcss']) && is_array($_POST['bcss']) ? wp_unslash($_POST['bcss']) : array();
+        $css_out = self::block_css();
+        foreach (self::manifest() as $group) {
+            foreach ($group['blocks'] as $id => $def) {
+                if (!empty($reset[$id])) { unset($css_out[$id]); continue; }
+                if (!isset($css_in[$id])) continue;
+                $css = trim(str_replace(array('<', '>'), '', wp_strip_all_tags($css_in[$id])));
+                if ($css === '') unset($css_out[$id]); else $css_out[$id] = $css;
+            }
+        }
+        update_option(self::OPT_BCSS, $css_out);
     }
 
     /** The screens, and the two places a whole one can be replaced. */

@@ -18,6 +18,36 @@ The screens the script draws get their copy from `MD.text`, resolved server-side
 Every string keeps its literal as a fallback, so with Mini-Forum absent or older
 nothing is editable and everything still reads exactly as before.
 
+## mini-forum 3.10.00
+
+**Join Us is editable end to end.** All three steps — the four area cards, the
+account fields, the consent box and the Join button — are now areas of plain HTML
+rather than three headings inside fixed markup. It is the page most likely to be
+redesigned, and it was the least editable.
+
+**The sanitiser stopped being a guess.** `wp_kses_post()` decides whether form
+elements survive differently across WordPress versions, and a sign-up form whose
+`<input>` tags were silently dropped is a form that collects nothing. The allowed
+list is now stated outright — every tag these pages use, plus `class`, `id`,
+`style`, `data-*` and the ARIA attributes — with scripts, iframes and `on*`
+handlers permanently off it.
+
+**CSS sits beside the HTML it belongs to.** Rewriting markup nearly always needs a
+rule or two, and sending someone to a different tab to write them is how a
+half-styled block reaches the site. Each HTML area has its own CSS box under it,
+printed after the area stylesheets.
+
+**And the rules that already style it are shown there.** Handing over the HTML
+without the CSS that dresses it is half a job: nobody can rewrite a block without
+knowing what `.mf-hero-desc` does to it. The plugin's own rules for the classes in
+that markup are collected from its stylesheets and shown read-only above the box —
+copy one down, change it there. Read-only on purpose: copying a whole stylesheet
+into the database would freeze it against every future update.
+
+**The Join Us buttons bind on `data-mf-action`** (`ju-role`, `ju-continue`,
+`ju-submit`) like the others, so picking an area, continuing and joining keep
+working however the markup is rearranged.
+
 ## mini-forum 3.09.01
 
 **Design gets its own place in the menu.** It sat under *Mini-Events*, which is

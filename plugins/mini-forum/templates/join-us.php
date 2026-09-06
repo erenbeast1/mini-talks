@@ -10,91 +10,18 @@
     <div id="mf-join-error" class="mf-auth-error" style="max-width:700px;margin:0 auto 20px"></div>
 
     <!-- STEP 1 — Role Selection (open by default) -->
-    <div class="mt-ju-step" id="ju-step1">
-      <div class="mt-ju-num"><span style="color:#E52828">1</span></div>
-      <div class="mt-ju-card">
-        <div class="mt-ju-card-box mt-ju-card-red">
-          <div class="mt-ju-card-inner">
-            <h3><?php mf_block('join.area.title'); ?></h3>
-            <div class="mt-ju-roles">
-              <div class="mt-ju-role" data-value="Mini-Family" onclick="mfJuSelect(this)">
-                <img src="https://mini-talks.org/wp-content/uploads/2026/03/17_mini_families_3D.png" alt="" />
-                <div><strong>Mini-Families</strong><span>For families supporting a child's communication journey, or adults (18+) with lived experience.</span></div>
-              </div>
-              <div class="mt-ju-role" data-value="Mini-Expert" onclick="mfJuSelect(this)">
-                <img src="https://mini-talks.org/wp-content/uploads/2026/03/20_mini_experts_3D.png" alt="" />
-                <div><strong>Mini-Experts</strong><span>For professionals and educators working in communication and selective mutism.</span></div>
-              </div>
-              <div class="mt-ju-role" data-value="Mini-Volunteer" onclick="mfJuSelect(this)">
-                <img src="https://mini-talks.org/wp-content/uploads/2026/03/18_mini_volunteers_3D-e1772736794933.png" alt="" />
-                <div><strong>Mini-Volunteers</strong><span>For individuals who want to support children and families in their communication journey.</span></div>
-              </div>
-              <div class="mt-ju-role" data-value="Talk-Spot" onclick="mfJuSelect(this)">
-                <img src="https://mini-talks.org/wp-content/uploads/2026/03/19_talk_spots_3D.png" alt="" />
-                <div><strong>Talk-Spots</strong><span>For venues and organizations that want to create safe and supportive spaces for communication.</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <?php mf_block('join.step1', array(
+      'img_family'    => esc_url('https://mini-talks.org/wp-content/uploads/2026/03/17_mini_families_3D.png'),
+      'img_expert'    => esc_url('https://mini-talks.org/wp-content/uploads/2026/03/20_mini_experts_3D.png'),
+      'img_volunteer' => esc_url('https://mini-talks.org/wp-content/uploads/2026/03/18_mini_volunteers_3D-e1772736794933.png'),
+      'img_talkspot'  => esc_url('https://mini-talks.org/wp-content/uploads/2026/03/19_talk_spots_3D.png'),
+    )); ?>
 
     <!-- STEP 2 — Account Details (revealed after role pick) -->
-    <div class="mt-ju-step is-hidden" id="ju-step2">
-      <div class="mt-ju-num"><span style="color:#0055BF">2</span></div>
-      <div class="mt-ju-card">
-        <div class="mt-ju-card-box mt-ju-card-blue">
-          <div class="mt-ju-card-inner">
-            <div class="mt-ju-formrow">
-              <div class="mt-ju-formfield"><label>Full Name:</label><span class="mt-ju-sub">(Not displayed in forum)</span><input type="text" id="ju-fullname" class="bdr-red" /></div>
-              <div class="mt-ju-formfield"><label>Password:</label><span class="mt-ju-sub">(At least 8 characters)</span><input type="password" id="ju-password" class="bdr-blue" /></div>
-              <div class="mt-ju-formfield"><label>Email Address:</label><span class="mt-ju-sub">(Used for login)</span><input type="email" id="ju-email" class="bdr-green" /></div>
-            </div>
-            <div class="mt-ju-formrow">
-              <div class="mt-ju-formfield"><label>City:</label><span class="mt-ju-sub">(Optional)</span><input type="text" id="ju-city" class="bdr-red" /></div>
-              <div class="mt-ju-formfield"><label>Country:</label><span class="mt-ju-sub">(Optional)</span><input type="text" id="ju-country" class="bdr-green" /></div>
-              <div class="mt-ju-formfield"><label>Nickname:</label><span class="mt-ju-sub">(Displayed in forum)</span><input type="text" id="ju-nickname" class="bdr-yellow" /></div>
-            </div>
-            <div id="ju-dynamic-fields"></div>
-            <div class="mt-ju-formrow">
-              <div class="mt-ju-formfield" style="flex:1!important"><label>Additional Info:</label><span class="mt-ju-sub">(Optional)</span><textarea id="ju-extra" placeholder="Add a short note if you'd like..."></textarea></div>
-            </div>
-            <div class="mt-ju-step-actions">
-              <button type="button" class="mt-ju-continue mt-ju-continue-blue" onclick="mfJuStep2Continue()">Continue</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <?php mf_block('join.step2'); ?>
 
     <!-- STEP 3 — Consent (revealed after step 2 continue) -->
-    <div class="mt-ju-step is-hidden" id="ju-step3">
-      <div class="mt-ju-num"><span style="color:#FFCC00">3</span></div>
-      <div class="mt-ju-card">
-        <div class="mt-ju-card-box mt-ju-card-yellow">
-          <div class="mt-ju-card-inner">
-            <h3><?php mf_block('join.consent.title'); ?></h3>
-            <label class="mt-ju-consent">
-              <input type="checkbox" id="ju-consent" />
-              <span>I have read and accept the Mini-Community Guidelines and Terms of Participation.</span>
-            </label>
-            <a href="/mini-community/guidelines/" target="_blank" class="mt-ju-guidelines-link">View Guidelines and Terms of Participation</a>
-            <p class="mt-ju-info">
-              Mini-Community does not provide treatment, referrals, or child-specific evaluations.<br>
-              All shared content is based on personal experience and awareness.<br>
-              Personal information is kept confidential and never shared without consent.
-            </p>
-            <div style="text-align:center;padding:20px 0 12px">
-              <button class="mt-ju-btn" type="button" onclick="mfJuSubmit()">
-                <div class="mt-ju-btn-stud"></div>
-                <div class="mt-ju-btn-topbar"></div>
-                <div class="mt-ju-btn-inner"><img class="mt-ju-btn-heart" src="https://mini-talks.org/wp-content/uploads/2026/05/17-removebg-preview.png" alt="" /><span class="mt-ju-btn-label">Join</span></div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <?php mf_block('join.step3', array('img_heart' => esc_url('https://mini-talks.org/wp-content/uploads/2026/05/17-removebg-preview.png'))); ?>
 
   </div>
 </div>
@@ -102,6 +29,13 @@
 <script>
 (function($){
   var selectedRole='';
+
+  /* The three steps are editable HTML, and saving strips onclick, so the
+     buttons bind on data-mf-action instead. Rearrange the markup however you
+     like; keep the attribute and it still works. */
+  $(document).on('click', '[data-mf-action="ju-role"]',     function(){ window.mfJuSelect(this); });
+  $(document).on('click', '[data-mf-action="ju-continue"]', function(){ window.mfJuStep2Continue(); });
+  $(document).on('click', '[data-mf-action="ju-submit"]',   function(){ window.mfJuSubmit(); });
 
   // STEP 1 → role pick, reveal STEP 2
   window.mfJuSelect=function(el){
