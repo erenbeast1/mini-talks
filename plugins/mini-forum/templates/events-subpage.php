@@ -57,11 +57,7 @@ $accent_class = $t['accent'] ? ' '.$t['accent'] : '';
   <div class="mfe-frame-card" style="margin-top:40px;max-width:600px;margin-left:auto;margin-right:auto">
     <div class="mfe-frame-studs mfe-stud-yellow"></div>
     <div class="mfe-frame-body mfe-frame-yellow">
-      <div class="mfe-frame-inner" style="padding:36px 28px;text-align:center">
-        <h3 style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:#1D1D1B;margin:0 0 10px"><?php mf_block('events.soon.title'); ?></h3>
-        <p style="font-weight:700;font-size:14px;color:#1D1D1B;margin:0 0 20px;line-height:1.6"><?php mf_block('events.soon.body'); ?></p>
-        <a href="<?php echo esc_url($eurl); ?>" class="mfe-explore-btn mfe-btn-blue"><?php mf_block('events.soon.cta'); ?></a>
-      </div>
+      <?php mf_block('events.soon', array('events_url' => esc_url($eurl))); ?>
     </div>
   </div>
 </div>

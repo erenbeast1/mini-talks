@@ -13,38 +13,27 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
   <!-- Profile Header Frame — blue border -->
   <div class="mf-profile-header-frame">
     <div class="mf-profile-header" data-mf-current-user="1">
-      <div class="mf-avatar-col">
-        <div class="mf-avatar-lg mf-av-editable" role="button" tabindex="0" aria-label="Edit your avatar">
-          <?php echo mf_avatar_html($uid, 'lg'); ?>
-          <span class="mf-av-edit-overlay">Edit</span>
-        </div>
-        <button type="button" class="mf-av-edit-btn" aria-label="Customize your avatar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-          Customize Avatar
-        </button>
-      </div>
-      <div class="mf-profile-info">
-        <h1><?php echo esc_html($nick);?></h1>
-        <div class="mf-profile-roles">
-          <?php if(!empty($roles)): foreach($roles as $r):$l=str_replace('Mini-','',$r);$bc=$rbm[$l]??'rb-blue';?>
-          <span class="mf-role-badge <?php echo $bc;?>"><?php echo esc_html($l);?></span>
-          <?php endforeach; else: $bc=$rbm[$role]??'rb-blue';?>
-          <span class="mf-role-badge <?php echo $bc;?>"><?php echo esc_html($role);?></span>
-          <?php endif;?>
-        </div>
-        <p class="mf-profile-community"><?php mf_block('profile.community'); ?></p>
-        <div class="mf-stats-row">
-          <div class="mf-stat-box">Posts: <?php echo $pc;?></div>
-          <div class="mf-stat-box">Events: 0</div>
-          <div class="mf-stat-box" id="mf-stat-kits">Kits: 0</div>
-        </div>
-      </div>
-      <div class="mf-profile-settings">
-        <button type="button" class="mf-settings-btn" onclick="mfOpenSettings()" aria-label="Open account settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.44.63.81.76H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Settings
-        </button>
-      </div>
+      <?php
+      ob_start(); ?>
+        <?php if(!empty($roles)): foreach($roles as $r):$l=str_replace('Mini-','',$r);$bc=$rbm[$l]??'rb-blue';?>
+        <span class="mf-role-badge <?php echo $bc;?>"><?php echo esc_html($l);?></span>
+        <?php endforeach; else: $bc=$rbm[$role]??'rb-blue';?>
+        <span class="mf-role-badge <?php echo $bc;?>"><?php echo esc_html($role);?></span>
+        <?php endif;
+      $mf_badges = ob_get_clean();
+
+      $mf_stats = '<div class="mf-stat-box">Posts: ' . (int)$pc . '</div>'
+                . '<div class="mf-stat-box">Events: 0</div>'
+                . '<div class="mf-stat-box" id="mf-stat-kits">Kits: 0</div>';
+
+      mf_block('profile.header', array(
+        'avatar'        => mf_avatar_html($uid, 'lg'),
+        'edit_icon'     => MF_PENCIL_SVG,
+        'nickname'      => esc_html($nick),
+        'badges'        => $mf_badges,
+        'stats'         => $mf_stats,
+        'settings_icon' => MF_COG_SVG,
+      )); ?>
     </div>
   </div>
 

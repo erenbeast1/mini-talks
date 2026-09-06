@@ -3,16 +3,7 @@
 <?php if (!is_user_logged_in()): ?>
 <!-- ═══ GUEST LANDING PAGE ═══ -->
 <div class="mf-container">
-  <div class="mf-hero-new">
-    <div class="mf-hero-left">
-      <h1 class="mf-title-contour"><?php mf_block('forum.guest.hero.title'); ?></h1>
-      <div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>
-      <?php mf_block('forum.guest.hero.desc'); ?>
-    </div>
-    <div class="mf-hero-face">
-      <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
-    </div>
-  </div>
+  <?php mf_block('forum.guest.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
 </div>
 
 <div style="width:100%;height:1px;background:#e5e5e5;margin:10px 0 40px"></div>
@@ -43,31 +34,11 @@
 <div class="mf-container">
   <!-- Forum Access -->
   <div class="mf-guest-access">
-    <h2 class="mf-title-contour" style="text-align:center;font-size:clamp(24px,2.8vw,42px);margin-bottom:10px"><?php mf_block('forum.guest.title'); ?></h2>
-    <p class="mf-guest-access-sub"><?php mf_block('forum.guest.sub'); ?></p>
-
-    <div class="mf-guest-cards">
-      <div class="mf-guest-card">
-        <div class="mf-guest-card-studs" style="background-image:url('https://mini-talks.org/wp-content/uploads/2026/04/yeni_kirmizi_studs_4.png')"></div>
-        <div class="mf-guest-card-body" style="background:var(--mf-red)">
-          <h3><?php mf_block('forum.guest.join.title'); ?></h3>
-          <div class="mf-guest-card-inner">
-            <p><?php mf_block('forum.guest.join.body'); ?></p>
-            <a href="/mini-community/join-us/" class="mf-guest-card-btn" style="color:var(--mf-red)"><?php mf_block('forum.guest.join.cta'); ?></a>
-          </div>
-        </div>
-      </div>
-      <div class="mf-guest-card">
-        <div class="mf-guest-card-studs" style="background-image:url('https://mini-talks.org/wp-content/uploads/2026/04/yeni_mavi_studs_4.png')"></div>
-        <div class="mf-guest-card-body" style="background:var(--mf-blue)">
-          <h3><?php mf_block('forum.guest.member.title'); ?></h3>
-          <div class="mf-guest-card-inner">
-            <p><?php mf_block('forum.guest.member.body'); ?></p>
-            <button class="mf-guest-card-btn" style="color:var(--mf-blue)" onclick="mtOpenAuth('login')"><?php mf_block('forum.guest.member.cta'); ?></button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <?php mf_block('forum.guest.access', array(
+      'join_url'   => esc_url('/mini-community/join-us/'),
+      'studs_red'  => esc_url('https://mini-talks.org/wp-content/uploads/2026/04/yeni_kirmizi_studs_4.png'),
+      'studs_blue' => esc_url('https://mini-talks.org/wp-content/uploads/2026/04/yeni_mavi_studs_4.png'),
+    )); ?>
 
     <div class="mf-guest-notice">Real names are not visible in the forum. | Posts are shared using nicknames only.</div>
   </div>
@@ -76,16 +47,7 @@
 <?php else: ?>
 <!-- ═══ LOGGED-IN FORUM ═══ -->
 <div class="mf-container">
-  <div class="mf-hero-new">
-    <div class="mf-hero-left">
-      <h1 class="mf-title-contour"><?php mf_block('forum.hero.title'); ?></h1>
-      <div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>
-      <?php mf_block('forum.hero.desc'); ?>
-    </div>
-    <div class="mf-hero-face">
-      <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
-    </div>
-  </div>
+  <?php mf_block('forum.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
 
   <div class="mf-hero-center">
     <h2 class="mf-title-contour">Mini-Forum</h2>

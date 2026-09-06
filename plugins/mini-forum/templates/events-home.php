@@ -292,22 +292,7 @@ function mfe_home_render_section($args) {
 
 <!-- ═══ HERO ═══ -->
 <div class="mf-container">
-  <div class="mf-hero-new">
-    <div class="mf-hero-left">
-      <h1 class="mf-title-contour"><?php mf_block('events.hero.title'); ?></h1>
-      <div class="mf-hero-bars">
-        <span style="background:var(--mf-red)"></span>
-        <span style="background:var(--mf-yellow)"></span>
-        <span style="background:var(--mf-blue)"></span>
-        <span style="background:var(--mf-green)"></span>
-      </div>
-      <?php mf_block('events.hero.desc'); ?>
-      <p class="mf-hero-desc">Natural interactions where children and volunteers connect together.</p>
-    </div>
-    <div class="mf-hero-face">
-      <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
-    </div>
-  </div>
+  <?php mf_block('events.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
 </div>
 
 <!-- ═══ MONTHLY CALENDAR ═══ -->

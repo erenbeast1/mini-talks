@@ -11,21 +11,7 @@ $prefill_email = $cu ? $cu->user_email : '';
   <div style="display:flex;align-items:center;gap:14px;margin:30px 0 16px">
     <a href="<?php echo esc_url($eurl); ?>" class="mfe-back">‹ Mini-Events</a>
   </div>
-  <div class="mf-hero-new">
-    <div class="mf-hero-left">
-      <h1 class="mf-title-contour blue"><?php mf_block('host.hero.title'); ?></h1>
-      <div class="mf-hero-bars">
-        <span style="background:var(--mf-red)"></span>
-        <span style="background:var(--mf-yellow)"></span>
-        <span style="background:var(--mf-blue)"></span>
-        <span style="background:var(--mf-green)"></span>
-      </div>
-      <?php mf_block('host.hero.desc'); ?>
-    </div>
-    <div class="mf-hero-face">
-      <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
-    </div>
-  </div>
+  <?php mf_block('host.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
 </div>
 
 <!-- ═══ HOST FORM (yellow band, brick button, no heart) ═══ -->

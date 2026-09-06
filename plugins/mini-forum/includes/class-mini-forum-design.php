@@ -1,35 +1,43 @@
 <?php
 /**
- * Design — the site's own words and styling, editable from wp-admin.
+ * Design — the front end's HTML, editable from wp-admin.
  *
- * Three things, in order of how far they go:
+ * Every screen is cut into named areas. An area's default HTML lives in the
+ * manifest below; an admin may replace it with their own, written as plain HTML
+ * in wp-admin. Templates print an area with mf_block('id').
  *
- *   1. Blocks   Every fixed piece of copy on a screen — headings, intros,
- *               empty states, button labels — is a named block. The manifest
- *               below holds the default; an admin may replace it with their own
- *               HTML. Templates print them with mf_block('id').
+ * Dynamic content is not lost when an area is rewritten: an area declares
+ * tokens, and the template hands their values in. The admin writes
  *
- *   2. CSS      A stylesheet per area, written in wp-admin and printed after
- *               the plugin's own, so anything can be restyled without touching
- *               a file.
+ *     <h1 class="mine">{{nickname}}</h1>
  *
- *   3. Templates  mf_template() looks in the active theme first, so a whole
- *               screen can be replaced by dropping mini-forum/<name>.php into
- *               the theme, with every variable the plugin prepared still in
- *               scope.
+ * and puts {{nickname}} wherever they like, or drops it entirely. Tokens whose
+ * value is markup the plugin built — a list of posts, a row of role badges —
+ * pass through untouched; the surrounding HTML is the admin's.
+ *
+ * Updating the plugin never touches an admin's HTML: overrides live in the
+ * options table, not in the plugin's files, and rendering prefers them. When a
+ * plugin update changes an area's default, the Design page says so beside that
+ * area and offers the new default — it never applies it on its own.
  *
  * What this deliberately does NOT do is store PHP and run it. A textarea whose
  * contents get eval'd turns every admin account into a way to run code on the
- * server, and it breaks on the next plugin update. Layout and copy live here;
- * logic stays in files, where a theme can override it properly.
+ * server. Layout and copy live here; logic stays in files, where a theme or a
+ * wp-content/mini-forum-templates/ copy can replace it properly.
  */
 
 if (!defined('ABSPATH')) exit;
+
+/* The two inline icons the profile header uses. Constants so the template and
+   the manifest's default HTML cannot drift apart. */
+define('MF_PENCIL_SVG', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>');
+define('MF_COG_SVG', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.44.63.81.76H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>');
 
 class Mini_Forum_Design {
 
     const OPT_BLOCKS = 'mf_design_blocks';
     const OPT_CSS    = 'mf_design_css';
+    const OPT_BASE   = 'mf_design_base';   // the default each override was written against
 
     /** Where the custom stylesheets apply. */
     public static function css_areas() {
@@ -49,31 +57,97 @@ class Mini_Forum_Design {
      * places where markup would break the layout (a button's label, a heading
      * that is already inside its own tag).
      */
+    /**
+     * Every editable area, grouped by screen.
+     *
+     *   array(label, type, default_html, tokens)
+     *
+     * type   'html' takes markup, 'text' is printed escaped (a button label,
+     *        a heading that already sits inside its own tag).
+     * tokens name => what the template puts there. The value is inserted as-is:
+     *        the plugin built it, so it is already safe.
+     */
     public static function manifest() {
         // Filterable so another plugin can add its own screens: Mini-Devices'
         // Mini-Kits panel belongs on this page too, not on a second one.
         return apply_filters('mf_design_blocks', array(
 
-            'forum' => array('label' => 'Forum — signed out', 'blocks' => array(
-                'forum.guest.hero.title'  => array('Hero heading', 'text', 'Forum'),
-                'forum.guest.hero.desc'   => array('Hero paragraphs', 'html', '<p class="mf-hero-desc">A safe space where Mini-Community members can share their experiences and feel that they are not alone.</p>'),
-                'forum.guest.title'       => array('Access heading', 'text', 'Forum Access'),
-                'forum.guest.sub'         => array('Access paragraph', 'html', 'Forum is part of Mini-Community. To access the Forum, you must first be an approved Mini-Community member.'),
-                'forum.guest.join.title'  => array('Join card — heading', 'html', 'Not a Mini-Community<br>Member Yet'),
-                'forum.guest.join.body'   => array('Join card — paragraph', 'html', 'To access the Forum, you first need to join Mini-Community.'),
-                'forum.guest.join.cta'    => array('Join card — button', 'text', 'Join Us'),
-                'forum.guest.member.title'=> array('Sign-in card — heading', 'html', "I'm a Mini-Community<br>Member"),
-                'forum.guest.member.body' => array('Sign-in card — paragraph', 'html', 'You can sign in with your email address and password.'),
-                'forum.guest.member.cta'  => array('Sign-in card — button', 'text', 'Sign In'),
+            'forum_out' => array('label' => 'Forum — signed out', 'blocks' => array(
+                'forum.guest.hero' => array('Hero', 'html',
+                    '<div class="mf-hero-new">' .
+                      '<div class="mf-hero-left">' .
+                        '<h1 class="mf-title-contour">Forum</h1>' .
+                        '<div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>' .
+                        '<p class="mf-hero-desc">A safe space where Mini-Community members can share their experiences and feel that they are not alone.</p>' .
+                      '</div>' .
+                      '<div class="mf-hero-face"><img src="{{logo}}" alt="Mini-Talks" /></div>' .
+                    '</div>',
+                    array('logo' => 'The Mini-Talks logo URL')),
+
+                'forum.guest.access' => array('Forum Access — heading and cards', 'html',
+                    '<h2 class="mf-title-contour" style="text-align:center;font-size:clamp(24px,2.8vw,42px);margin-bottom:10px">Forum Access</h2>' .
+                    '<p class="mf-guest-access-sub">Forum is part of Mini-Community. To access the Forum, you must first be an approved Mini-Community member.</p>' .
+                    '<div class="mf-guest-cards">' .
+                      '<div class="mf-guest-card">' .
+                        '<div class="mf-guest-card-studs" style="background-image:url(\'{{studs_red}}\')"></div>' .
+                        '<div class="mf-guest-card-body" style="background:var(--mf-red)">' .
+                          '<h3>Not a Mini-Community<br>Member Yet</h3>' .
+                          '<div class="mf-guest-card-inner">' .
+                            '<p>To access the Forum, you first need to join Mini-Community.</p>' .
+                            '<a href="{{join_url}}" class="mf-guest-card-btn" style="color:var(--mf-red)">Join Us</a>' .
+                          '</div>' .
+                        '</div>' .
+                      '</div>' .
+                      '<div class="mf-guest-card">' .
+                        '<div class="mf-guest-card-studs" style="background-image:url(\'{{studs_blue}}\')"></div>' .
+                        '<div class="mf-guest-card-body" style="background:var(--mf-blue)">' .
+                          '<h3>I\'m a Mini-Community<br>Member</h3>' .
+                          '<div class="mf-guest-card-inner">' .
+                            '<p>You can sign in with your email address and password.</p>' .
+                            '<button class="mf-guest-card-btn" style="color:var(--mf-blue)" data-mf-action="login">Sign In</button>' .
+                          '</div>' .
+                        '</div>' .
+                      '</div>' .
+                    '</div>',
+                    array('join_url' => 'The Join Us page', 'studs_red' => 'Red stud strip image',
+                          'studs_blue' => 'Blue stud strip image')),
             )),
 
             'forum_in' => array('label' => 'Forum — signed in', 'blocks' => array(
-                'forum.hero.title'      => array('Hero heading', 'text', 'Mini-Forum'),
-                'forum.hero.desc'       => array('Hero paragraphs', 'html', '<p class="mf-hero-desc">Share. Connect. Support.</p><p class="mf-hero-desc">A safe space for families, experts, and volunteers.</p>'),
+                'forum.hero' => array('Hero', 'html',
+                    '<div class="mf-hero-new">' .
+                      '<div class="mf-hero-left">' .
+                        '<h1 class="mf-title-contour">Mini-Forum</h1>' .
+                        '<div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>' .
+                        '<p class="mf-hero-desc">Share. Connect. Support.</p>' .
+                        '<p class="mf-hero-desc">A safe space for families, experts, and volunteers.</p>' .
+                      '</div>' .
+                      '<div class="mf-hero-face"><img src="{{logo}}" alt="Mini-Talks" /></div>' .
+                    '</div>',
+                    array('logo' => 'The Mini-Talks logo URL')),
             )),
 
             'profile' => array('label' => 'Profile', 'blocks' => array(
-                'profile.community'     => array('Line under the name', 'html', 'Part of the Mini-Talks community'),
+                'profile.header' => array('Header — avatar, name, badges, stats', 'html',
+                    '<div class="mf-avatar-col">' .
+                      '<div class="mf-avatar-lg mf-av-editable" role="button" tabindex="0" aria-label="Edit your avatar">' .
+                        '{{avatar}}<span class="mf-av-edit-overlay">Edit</span>' .
+                      '</div>' .
+                      '<button type="button" class="mf-av-edit-btn" aria-label="Customize your avatar">{{edit_icon}} Customize Avatar</button>' .
+                    '</div>' .
+                    '<div class="mf-profile-info">' .
+                      '<h1>{{nickname}}</h1>' .
+                      '<div class="mf-profile-roles">{{badges}}</div>' .
+                      '<p class="mf-profile-community">Part of the Mini-Talks community</p>' .
+                      '<div class="mf-stats-row">{{stats}}</div>' .
+                    '</div>' .
+                    '<div class="mf-profile-settings">' .
+                      '<button type="button" class="mf-settings-btn" data-mf-action="settings" aria-label="Open account settings">{{settings_icon}} Settings</button>' .
+                    '</div>',
+                    array('avatar' => "The member's avatar", 'edit_icon' => 'Pencil icon',
+                          'nickname' => 'Their nickname', 'badges' => 'Their role badges',
+                          'stats' => 'The Posts / Events / Kits boxes', 'settings_icon' => 'Cog icon')),
+
                 'profile.posts.title'   => array('Posts heading', 'text', 'My Posts'),
                 'profile.posts.empty'   => array('Posts empty state', 'html', 'No posts yet.'),
                 'profile.kits.title'    => array('Mini-Kits heading', 'text', 'Mini-Kits'),
@@ -83,23 +157,47 @@ class Mini_Forum_Design {
             )),
 
             'events' => array('label' => 'Events', 'blocks' => array(
-                'events.hero.title'     => array('Hero heading', 'text', 'Mini-Events'),
-                'events.hero.desc'      => array('Hero paragraphs', 'html', '<p class="mf-hero-desc">Real-world meetups where the Mini-Talks experience comes to life.</p>'),
-                'events.soon.title'     => array('Empty sub-page heading', 'text', 'Coming soon'),
-                'events.soon.body'      => array('Empty sub-page paragraph', 'html', 'This page is being prepared. In the meantime, explore the Mini-Events hub.'),
-                'events.soon.cta'       => array('Empty sub-page button', 'text', 'Back to Mini-Events'),
+                'events.hero' => array('Hero', 'html',
+                    '<div class="mf-hero-new">' .
+                      '<div class="mf-hero-left">' .
+                        '<h1 class="mf-title-contour">Mini-Events</h1>' .
+                        '<div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>' .
+                        '<p class="mf-hero-desc">Real-world meetups where the Mini-Talks experience comes to life.</p>' .
+                        '<p class="mf-hero-desc">Natural interactions where children and volunteers connect together.</p>' .
+                      '</div>' .
+                      '<div class="mf-hero-face"><img src="{{logo}}" alt="Mini-Talks" /></div>' .
+                    '</div>',
+                    array('logo' => 'The Mini-Talks logo URL')),
+
+                'events.soon' => array('Empty sub-page card', 'html',
+                    '<div class="mfe-frame-inner" style="padding:36px 28px;text-align:center">' .
+                      '<h3 style="font-family:\'Montserrat\',sans-serif;font-weight:900;font-size:22px;color:#1D1D1B;margin:0 0 10px">Coming soon</h3>' .
+                      '<p style="font-weight:700;font-size:14px;color:#1D1D1B;margin:0 0 20px;line-height:1.6">This page is being prepared. In the meantime, explore the Mini-Events hub.</p>' .
+                      '<a href="{{events_url}}" class="mfe-explore-btn mfe-btn-blue">Back to Mini-Events</a>' .
+                    '</div>',
+                    array('events_url' => 'The Mini-Events hub')),
             )),
 
             'host' => array('label' => 'Host an Event', 'blocks' => array(
-                'host.hero.title'       => array('Hero heading', 'text', 'Host an Event'),
-                'host.hero.desc'        => array('Hero paragraphs', 'html', '<p class="mf-hero-desc">Want to organize a workshop, meetup or expert session?</p><p class="mf-hero-desc">Tell us a little — admin will review and get back to you.</p>'),
-                'host.form.title'       => array('Form heading', 'text', 'Host a Mini-Event'),
+                'host.hero' => array('Hero', 'html',
+                    '<div class="mf-hero-new">' .
+                      '<div class="mf-hero-left">' .
+                        '<h1 class="mf-title-contour blue">Host an Event</h1>' .
+                        '<div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>' .
+                        '<p class="mf-hero-desc">Want to organize a workshop, meetup or expert session?</p>' .
+                        '<p class="mf-hero-desc">Tell us a little — admin will review and get back to you.</p>' .
+                      '</div>' .
+                      '<div class="mf-hero-face"><img src="{{logo}}" alt="Mini-Talks" /></div>' .
+                    '</div>',
+                    array('logo' => 'The Mini-Talks logo URL')),
+
+                'host.form.title' => array('Form heading', 'text', 'Host a Mini-Event'),
             )),
 
             'join' => array('label' => 'Join Us', 'blocks' => array(
-                'join.title'            => array('Page heading', 'text', 'Join Us!'),
-                'join.area.title'       => array('Area step heading', 'html', 'Choose Your Area <span>(Select one)</span>'),
-                'join.consent.title'    => array('Consent heading', 'html', 'Acknowledgment &amp; Consent'),
+                'join.title'         => array('Page heading', 'text', 'Join Us!'),
+                'join.area.title'    => array('Area step heading', 'html', 'Choose Your Area <span>(Select one)</span>'),
+                'join.consent.title' => array('Consent heading', 'html', 'Acknowledgment &amp; Consent'),
             )),
         ));
     }
@@ -131,11 +229,52 @@ class Mini_Forum_Design {
         return array_key_exists($id, self::overrides());
     }
 
-    public static function render($id) {
+    /**
+     * The area, ready to print.
+     *
+     * The admin's HTML is run through wp_kses_post first, then the tokens are
+     * filled — in that order, so a token's value (markup the plugin built, and
+     * already safe) is never mangled by kses, while anything typed into the box
+     * still is.
+     */
+    public static function render($id, $vars = array()) {
         $def = self::definition($id);
         if (!$def) return '';
         $val = self::get($id);
-        return $def[1] === 'text' ? esc_html($val) : wp_kses_post($val);
+        $out = $def[1] === 'text' ? esc_html($val) : wp_kses_post($val);
+
+        $tokens = isset($def[3]) && is_array($def[3]) ? $def[3] : array();
+        if (!$tokens) return $out;
+
+        $find = $repl = array();
+        foreach ($tokens as $name => $note) {
+            $find[] = '{{' . $name . '}}';
+            $repl[] = isset($vars[$name]) ? $vars[$name] : '';
+        }
+        return str_replace($find, $repl, $out);
+    }
+
+    public static function tokens($id) {
+        $def = self::definition($id);
+        return $def && isset($def[3]) && is_array($def[3]) ? $def[3] : array();
+    }
+
+    /* ── keeping an admin's HTML through a plugin update ──
+       An override is stored with a hash of the default it was written against.
+       A later update that changes that default cannot touch the override — the
+       page just says the plugin's version moved on, and offers the new one. */
+
+    private static function bases() {
+        $raw = get_option(self::OPT_BASE, array());
+        return is_array($raw) ? $raw : array();
+    }
+
+    public static function default_changed($id) {
+        $def = self::definition($id);
+        if (!$def || !self::is_overridden($id)) return false;
+        $base = self::bases();
+        if (!isset($base[$id])) return false;              // written before this was tracked
+        return $base[$id] !== md5($def[2]);
     }
 
     public static function css($area) {
@@ -193,7 +332,8 @@ class Mini_Forum_Design {
     public static function page() {
         if (!current_user_can('manage_options')) return;
 
-        $tab = isset($_GET['tab']) && $_GET['tab'] === 'css' ? 'css' : 'blocks';
+        $tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'blocks';
+        if (!in_array($tab, array('blocks', 'css', 'templates'), true)) $tab = 'blocks';
         if (!empty($_POST['mf_design_nonce']) && wp_verify_nonce($_POST['mf_design_nonce'], 'mf_design')) {
             $tab === 'css' ? self::save_css() : self::save_blocks();
             echo '<div class="notice notice-success is-dismissible"><p>Saved.</p></div>';
@@ -206,12 +346,15 @@ class Mini_Forum_Design {
           <h2 class="nav-tab-wrapper">
             <a class="nav-tab <?php echo $tab === 'blocks' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base); ?>">Text &amp; HTML</a>
             <a class="nav-tab <?php echo $tab === 'css' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=css'); ?>">Custom CSS</a>
+            <a class="nav-tab <?php echo $tab === 'templates' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=templates'); ?>">Whole templates</a>
           </h2>
+          <?php if ($tab === 'templates') { self::form_templates(); } else { ?>
           <form method="post">
             <?php wp_nonce_field('mf_design', 'mf_design_nonce'); ?>
             <?php $tab === 'css' ? self::form_css() : self::form_blocks(); ?>
             <?php submit_button('Save changes'); ?>
           </form>
+          <?php } ?>
         </div>
         <?php
     }
@@ -231,21 +374,45 @@ class Mini_Forum_Design {
                 $val  = self::get($id);
                 $over = self::is_overridden($id);
                 ?>
+                <?php $tokens = self::tokens($id); $moved = self::default_changed($id); ?>
                 <tr>
-                  <th scope="row">
+                  <th scope="row" style="vertical-align:top">
                     <label for="<?php echo esc_attr($id); ?>"><?php echo wp_kses_post($def[0]); ?></label><br>
                     <code style="font-size:11px;color:#777"><?php echo esc_html($id); ?></code>
                     <span style="display:block;font-size:11px;color:#777"><?php echo $def[1] === 'html' ? 'HTML' : 'Plain text'; ?></span>
+                    <?php if ($over): ?>
+                      <span style="display:inline-block;margin-top:6px;padding:2px 7px;border-radius:9px;background:#FFF3D6;color:#8A5A00;font-size:11px;font-weight:700">Yours</span>
+                    <?php endif; ?>
                   </th>
                   <td>
+                    <?php if ($tokens): ?>
+                      <p class="description" style="margin:0 0 6px">
+                        Put these anywhere in your HTML, or leave them out:
+                        <?php foreach ($tokens as $name => $note): ?>
+                          <code style="margin-right:6px" title="<?php echo esc_attr($note); ?>">{{<?php echo esc_html($name); ?>}}</code>
+                        <?php endforeach; ?>
+                      </p>
+                    <?php endif; ?>
+
                     <textarea id="<?php echo esc_attr($id); ?>" name="blocks[<?php echo esc_attr($id); ?>]"
-                              rows="<?php echo strlen($val) > 90 ? 3 : 2; ?>" class="large-text code"><?php echo esc_textarea($val); ?></textarea>
+                              rows="<?php echo strlen($val) > 400 ? 12 : (strlen($val) > 90 ? 5 : 2); ?>"
+                              class="large-text code" spellcheck="false"><?php echo esc_textarea($val); ?></textarea>
+
+                    <?php if ($moved): ?>
+                      <div style="margin-top:8px;padding:10px 12px;border-left:4px solid #B26B00;background:#FFF8EC">
+                        <strong>The plugin's version of this changed in an update.</strong>
+                        Yours is untouched and still in use. To take the new one instead, tick Reset.
+                        <details style="margin-top:6px"><summary>Show the plugin's current default</summary>
+                          <textarea rows="6" class="large-text code" readonly onclick="this.select()"><?php echo esc_textarea($def[2]); ?></textarea>
+                        </details>
+                      </div>
+                    <?php endif; ?>
+
                     <p class="description" style="margin-top:4px">
-                      <label><input type="checkbox" name="reset[<?php echo esc_attr($id); ?>]" value="1"> Reset to default</label>
-                      <?php if ($over): ?>
-                        <span style="color:#B26B00;font-weight:600;margin-left:10px">Customised</span>
+                      <label><input type="checkbox" name="reset[<?php echo esc_attr($id); ?>]" value="1"> Reset to the plugin's default</label>
+                      <?php if (!$over): ?>
+                        <span style="color:#999;margin-left:10px">Unchanged — this follows the plugin.</span>
                       <?php endif; ?>
-                      <span style="color:#999;margin-left:10px">Default: <?php echo esc_html(wp_html_excerpt($def[2], 70, '…')); ?></span>
                     </p>
                   </td>
                 </tr>
@@ -259,19 +426,86 @@ class Mini_Forum_Design {
         $in    = isset($_POST['blocks']) && is_array($_POST['blocks']) ? wp_unslash($_POST['blocks']) : array();
         $reset = isset($_POST['reset'])  && is_array($_POST['reset'])  ? $_POST['reset'] : array();
         $out   = self::overrides();
+        $base  = self::bases();
 
         foreach (self::manifest() as $group) {
             foreach ($group['blocks'] as $id => $def) {
-                if (!empty($reset[$id])) { unset($out[$id]); continue; }
+                if (!empty($reset[$id])) { unset($out[$id], $base[$id]); continue; }
                 if (!isset($in[$id])) continue;
 
                 $val = $def[1] === 'text' ? sanitize_text_field($in[$id]) : wp_kses_post($in[$id]);
                 // Matching the default is not a customisation; storing it would
-                // freeze this copy against every future plugin update.
-                if ($val === $def[2]) unset($out[$id]); else $out[$id] = $val;
+                // freeze this area against every future plugin update.
+                if ($val === $def[2]) { unset($out[$id]); continue; }
+                $out[$id]  = $val;
+                $base[$id] = md5($def[2]);
             }
         }
         update_option(self::OPT_BLOCKS, $out);
+        update_option(self::OPT_BASE, $base);
+    }
+
+    /** The screens, and the two places a whole one can be replaced. */
+    public static function templates() {
+        return array(
+            'forum-home'          => 'Forum — landing (signed out) and home (signed in)',
+            'forum-detail'        => 'Forum — a single post with its replies',
+            'forum-create'        => 'Forum — the new post form',
+            'forum-profile'       => 'Profile',
+            'events-home'         => 'Events — the hub',
+            'events-subpage'      => 'Events — a sub-page frame',
+            'events-eventtype'    => 'Events — one event type',
+            'events-updates'      => 'Events — community updates',
+            'events-special-days' => 'Events — special days',
+            'events-host'         => 'Events — host an event',
+            'join-us'             => 'Join Us',
+            'auth-popup'          => 'Sign in / sign up popup',
+            'settings-popup'      => 'Settings popup',
+        );
+    }
+
+    private static function form_templates() {
+        $dir   = defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR . '/mini-forum-templates' : '';
+        $theme = get_stylesheet_directory() . '/mini-forum';
+        ?>
+        <p class="description" style="max-width:52em">
+          The tabs above cover the copy and the styling. To rebuild a screen's layout outright,
+          copy its template out of the plugin and edit the copy — the plugin then loads yours
+          instead, with every variable it prepared still in scope. <strong>Updating the plugin
+          never touches your copy</strong>, because it does not live in the plugin's folder.
+        </p>
+        <p class="description" style="max-width:52em">
+          Two places are searched, in this order:
+        </p>
+        <ol style="max-width:52em">
+          <li><code><?php echo esc_html($dir); ?>/&lt;name&gt;.php</code> — survives both plugin
+              updates and a change of theme. <?php echo is_dir($dir) ? '<strong>This folder exists.</strong>' : 'Create this folder to use it.'; ?></li>
+          <li><code><?php echo esc_html($theme); ?>/&lt;name&gt;.php</code> — the usual WordPress
+              route; lost if the theme is switched.</li>
+        </ol>
+        <p class="description" style="max-width:52em">
+          Delete your copy and the plugin's own template comes back. There is no editor here on
+          purpose: a template is PHP, and a box on a web page that saves and runs PHP would make
+          every admin account a way to run code on this server.
+        </p>
+
+        <table class="widefat striped" style="max-width:52em;margin-top:14px">
+          <thead><tr><th>Template</th><th>Screen</th><th>In use</th></tr></thead>
+          <tbody>
+          <?php foreach (self::templates() as $name => $label):
+              $own = $dir && file_exists($dir . '/' . $name . '.php');
+              $th  = file_exists($theme . '/' . $name . '.php');
+              $src = $own ? 'wp-content copy' : ($th ? 'theme copy' : 'plugin');
+          ?>
+            <tr>
+              <td><code><?php echo esc_html($name); ?>.php</code></td>
+              <td><?php echo esc_html($label); ?></td>
+              <td<?php echo $src === 'plugin' ? '' : ' style="font-weight:700;color:#8A5A00"'; ?>><?php echo esc_html($src); ?></td>
+            </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+        <?php
     }
 
     private static function form_css() {
@@ -312,14 +546,21 @@ Mini_Forum_Design::init();
 
 /* ── the two calls templates make ── */
 
-/** Print an editable block. */
-function mf_block($id) {
-    echo Mini_Forum_Design::render($id);
+/**
+ * Print an editable area.
+ *
+ * @param string $id   Area id from the manifest.
+ * @param array  $vars Values for the area's tokens: mf_block('profile.header',
+ *                     array('nickname' => esc_html($nick), 'avatar' => $html)).
+ *                     Escape anything that came from a user before passing it.
+ */
+function mf_block($id, $vars = array()) {
+    echo Mini_Forum_Design::render($id, $vars);
 }
 
-/** The same block as a string, for attributes and concatenation. */
-function mf_block_get($id) {
-    return Mini_Forum_Design::get($id);
+/** The same area as a string, for attributes and concatenation. */
+function mf_block_get($id, $vars = array()) {
+    return Mini_Forum_Design::render($id, $vars);
 }
 
 /**
@@ -331,7 +572,16 @@ function mf_block_get($id) {
  * plugin prepared still in scope — the proper way to redesign a whole screen.
  */
 function mf_template($name) {
-    $name  = preg_replace('/[^a-z0-9\-]/', '', $name);
+    $name = preg_replace('/[^a-z0-9\-]/', '', $name);
+
+    // wp-content/mini-forum-templates/<name>.php — outside the plugin, so an
+    // update cannot overwrite it, and outside the theme, so switching themes
+    // does not lose it.
+    if (defined('WP_CONTENT_DIR')) {
+        $content = WP_CONTENT_DIR . '/mini-forum-templates/' . $name . '.php';
+        if (file_exists($content)) return apply_filters('mf_template', $content, $name);
+    }
+
     $theme = locate_template('mini-forum/' . $name . '.php');
     $path  = $theme ? $theme : MF_PATH . 'templates/' . $name . '.php';
     return apply_filters('mf_template', $path, $name);

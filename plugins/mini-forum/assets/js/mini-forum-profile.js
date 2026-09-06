@@ -156,3 +156,24 @@
     });
   });
 })(jQuery);
+
+/* ── Design-safe bindings ──
+   Editable HTML is saved through wp_kses_post, which strips onclick. Anything
+   an admin may rewrite therefore binds by attribute instead, so a redesigned
+   button keeps working however its markup is rearranged. */
+document.addEventListener('click', function (e) {
+  var el = e.target.closest('[data-mf-action]');
+  if (!el) return;
+  var action = el.getAttribute('data-mf-action');
+
+  if (action === 'settings' && typeof window.mfOpenSettings === 'function') {
+    e.preventDefault(); window.mfOpenSettings(); return;
+  }
+  if ((action === 'login' || action === 'register') && typeof window.mtOpenAuth === 'function') {
+    e.preventDefault(); window.mtOpenAuth(action); return;
+  }
+  if (action === 'avatar') {
+    var btn = document.querySelector('.mf-av-edit-btn, .mf-av-editable');
+    if (btn && btn !== el) { e.preventDefault(); btn.click(); }
+  }
+});

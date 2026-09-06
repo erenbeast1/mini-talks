@@ -1,5 +1,40 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.08.00
+
+**Whole areas, edited as HTML.** 3.07.00 made the words editable; this makes the
+markup editable. A screen's chrome is now one area rather than a handful of strings:
+the forum's signed-out hero, its Forum Access block with both cards, the signed-in
+hero, the profile header, the events hero, the empty sub-page card, the Host an Event
+hero. Each opens in wp-admin as plain HTML — every tag, class and inline style — and
+what is saved is what renders.
+
+**Dynamic content survives a rewrite,** because an area declares tokens and the
+template hands their values in. The profile header takes `{{avatar}}`, `{{nickname}}`,
+`{{badges}}`, `{{stats}}` and the two icons; the heroes take `{{logo}}`; the empty
+sub-page takes `{{events_url}}`. Put a token where you like, or leave it out. Token
+values are inserted after sanitising, so markup the plugin built (a member's role
+badges, an inline SVG) passes through whole while anything typed into the box is
+still filtered.
+
+**Buttons keep working when their HTML is rewritten.** `wp_kses_post` strips
+`onclick`, which would have quietly broken Sign In and Settings the moment someone
+edited those areas. They bind on `data-mf-action` now — `login`, `register`,
+`settings` — through one delegated listener, so the handler survives any rearranging
+of the markup.
+
+**An update cannot overwrite someone's work.** Overrides live in the options table,
+never in the plugin's files, and rendering always prefers them. Each override also
+records a hash of the default it was written against: when an update changes that
+default, the Design page says so beside that area, shows the plugin's new version,
+and leaves the choice to a human. Nothing is applied automatically.
+
+**Whole templates** get a third tab, listing all thirteen screens and where each is
+currently loaded from. `mf_template()` now searches
+`wp-content/mini-forum-templates/<name>.php` before the theme's `mini-forum/` folder
+— outside the plugin, so an update cannot touch it, and outside the theme, so
+switching themes does not lose it.
+
 ## mini-forum 3.07.00
 
 **A Design page in wp-admin** (Mini-Events → Design), in three parts, in order of
