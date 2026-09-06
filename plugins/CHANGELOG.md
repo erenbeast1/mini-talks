@@ -18,6 +18,25 @@ The screens the script draws get their copy from `MD.text`, resolved server-side
 Every string keeps its literal as a fallback, so with Mini-Forum absent or older
 nothing is editable and everything still reads exactly as before.
 
+## mini-forum 3.13.00
+
+**48 areas — the screens are covered.** Added here: the forum's four
+"what would you like to share" cards, its filter and search row, both guidelines
+boxes, the sub-heading and the notice line; the Host an Event form; the events
+calendar, the section headings on the hub, the month headings and both month bars,
+the three call-to-action bricks, and a header for every events sub-page including
+one kind of event.
+
+**One design wherever the same thing appears.** The month heading is a single area
+used by Updates and Special Days, with a colour token — as the event card already
+was for the hub and the type pages.
+
+**What is left in the templates is scaffolding, on purpose.** The page-width
+wrapper, the popup shell, the slider's viewport and track, the tab panels: invisible
+containers the CSS and the scripts hold on to. Turning those into editable HTML
+would offer nothing to design and plenty to break — the styling that shapes them is
+on the Custom CSS tab, where changing them is safe.
+
 ## mini-forum 3.12.00
 
 **The rest of the screens, as editable HTML.** 31 areas now, across nine groups.

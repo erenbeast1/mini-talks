@@ -1331,6 +1331,9 @@ document.addEventListener('click', function (e) {
   if (!el) return;
   var action = el.getAttribute('data-mf-action');
   var id = parseInt(el.getAttribute('data-reply-id'), 10);
+  if (action === 'load-more' && typeof window.mfLoadMore === 'function') {
+    e.preventDefault(); window.mfLoadMore(); return;
+  }
   if (action === 'react' && typeof window.mfToggleReaction === 'function') {
     e.preventDefault(); window.mfToggleReaction(id, el.getAttribute('data-emoji'));
   } else if (action === 'subreply' && typeof window.mfShowSubReply === 'function') {

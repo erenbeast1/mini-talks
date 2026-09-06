@@ -32,50 +32,13 @@ function mfe_sd_short_mon($dt){ return ucfirst(strtolower(date('M', strtotime($d
   <div style="display:flex;align-items:center;gap:14px;margin:30px 0 16px">
     <a href="<?php echo esc_url($eurl); ?>" class="mfe-back">‹ Mini-Events</a>
   </div>
-  <div class="mf-hero-new">
-    <div class="mf-hero-left">
-      <h1 class="mf-title-contour">Mini-Special Days</h1>
-      <div class="mf-hero-bars">
-        <span style="background:var(--mf-red)"></span>
-        <span style="background:var(--mf-yellow)"></span>
-        <span style="background:var(--mf-blue)"></span>
-        <span style="background:var(--mf-green)"></span>
-      </div>
-      <p class="mf-hero-desc">A year-round calendar of awareness days that bring attention to children's voices, communication, and inclusion.</p>
-    </div>
-    <div class="mf-hero-face">
-      <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
-    </div>
-  </div>
+  <?php mf_block('events.specialdays.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
 </div>
 
 <!-- ═══ MONTH NAVIGATION ═══ -->
 <?php $today_month_int = (int)date('n'); $auto_month = $today_month_int; ?>
 <div class="mf-container" style="margin-top:30px">
-  <div class="mfe-sd-monthbar" data-auto-month="<?php echo (int)$auto_month; ?>">
-    <div class="mfe-sd-monthwrap">
-      <button class="mfe-sd-monthselect" type="button" id="mfe-sd-monthbtn">
-        <span class="mfe-sd-monthselect-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-        </span>
-        <span class="mfe-sd-monthbtn-label">Month Selection</span>
-      </button>
-    </div>
-    <div class="mfe-sd-monthnav">
-      <a href="#" class="mfe-sd-fl-chip mfe-sd-mode" data-mode="this">
-        <span class="mfe-sd-fl-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
-        </span>
-        From This Month
-      </a>
-      <a href="#" class="mfe-sd-fl-chip mfe-sd-mode" data-mode="first">
-        <span class="mfe-sd-fl-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7-7 7 7M12 2v20"/></svg>
-        </span>
-        From First Month
-      </a>
-    </div>
-  </div>
+  <?php mf_block('events.specialdays.monthbar', array('auto_month' => (int) $auto_month)); ?>
 </div>
 
 <!-- ═══ MONTHS LIST ═══ -->
@@ -90,21 +53,7 @@ function mfe_sd_short_mon($dt){ return ucfirst(strtolower(date('M', strtotime($d
     if ($is_empty) $section_classes .= ' mfe-sd-month-empty';
   ?>
   <section class="<?php echo esc_attr($section_classes); ?>" id="month-<?php echo $mn; ?>" data-month-num="<?php echo $mn; ?>">
-    <div class="mfe-sd-monthhead-wide">
-      <div class="mfe-sd-bars-left">
-        <span class="l1-bar-red"></span>
-        <span class="l1-bar-yellow"></span>
-        <span class="l1-bar-blue"></span>
-        <span class="l1-bar-green"></span>
-      </div>
-      <h2 class="mf-title-contour mfe-sd-monthtitle"><?php echo esc_html($mname . ' ' . date('Y')); ?></h2>
-      <div class="mfe-sd-bars-right">
-        <span class="l1-bar-red"></span>
-        <span class="l1-bar-yellow"></span>
-        <span class="l1-bar-blue"></span>
-        <span class="l1-bar-green"></span>
-      </div>
-    </div>
+    <?php mf_block('events.month.heading', array('month' => esc_html($mname . ' ' . date('Y')), 'colour' => '')); ?>
     <div class="mfe-sd-list">
       <?php if ($is_empty): ?>
         <div class="mfe-sd-empty-card">No special days for this month yet.</div>

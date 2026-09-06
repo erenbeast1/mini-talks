@@ -281,41 +281,15 @@ function mfe_render_event_card($ev, $cfg, $tp_table, $idx = 0) {
   <div style="display:flex;align-items:center;gap:14px;margin:30px 0 16px">
     <a href="<?php echo esc_url($eurl); ?>" class="mfe-back">‹ Mini-Events</a>
   </div>
-  <div class="mf-hero-new">
-    <div class="mf-hero-left">
-      <h1 class="mf-title-contour <?php echo esc_attr($cfg['hero_color']); ?>"><?php echo esc_html($cfg['title']); ?></h1>
-      <div class="mf-hero-bars">
-        <span style="background:var(--mf-red)"></span>
-        <span style="background:var(--mf-yellow)"></span>
-        <span style="background:var(--mf-blue)"></span>
-        <span style="background:var(--mf-green)"></span>
-      </div>
-      <p class="mf-hero-desc"><?php echo esc_html($cfg['sub']); ?></p>
-      <div class="mfe-connect-row">
-        <a href="<?php echo esc_url(home_url('/mini-volunteers/')); ?>" class="mfe-connect-chip mfe-connect-green">
-          <span class="mfe-connect-ico" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
-          </span>
-          Connect
-        </a>
-        <a href="<?php echo esc_url(home_url('/mini-community/')); ?>" class="mfe-connect-chip mfe-connect-blue">
-          <span class="mfe-connect-ico" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a3 3 0 0 1-3 3H8l-5 4V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/></svg>
-          </span>
-          Connect
-        </a>
-        <a href="<?php echo esc_url(home_url('/real-stories/')); ?>" class="mfe-connect-chip mfe-connect-purple">
-          <span class="mfe-connect-ico" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.5-7 10-7 10z" fill="currentColor"/></svg>
-          </span>
-          Connect
-        </a>
-      </div>
-    </div>
-    <div class="mf-hero-face">
-      <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
-    </div>
-  </div>
+  <?php mf_block('events.type.hero', array(
+    'colour'         => esc_attr($cfg['hero_color']),
+    'title'          => esc_html($cfg['title']),
+    'description'    => esc_html($cfg['sub']),
+    'volunteers_url' => esc_url(home_url('/mini-volunteers/')),
+    'community_url'  => esc_url(home_url('/mini-community/')),
+    'stories_url'    => esc_url(home_url('/real-stories/')),
+    'logo'           => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png',
+  )); ?>
 </div>
 
 <!-- ═══ WHAT HAPPENS IN A [X]? — pastel band with colored border + image-left blocks ═══ -->

@@ -42,68 +42,22 @@ function mfe_month_label_u($ym){
   <div style="display:flex;align-items:center;gap:14px;margin:30px 0 16px">
     <a href="<?php echo esc_url($eurl); ?>" class="mfe-back">‹ Mini-Events</a>
   </div>
-  <div class="mf-hero-new">
-    <div class="mf-hero-left">
-      <h1 class="mf-title-contour green">Mini-Community Updates</h1>
-      <div class="mf-hero-bars">
-        <span style="background:var(--mf-red)"></span>
-        <span style="background:var(--mf-yellow)"></span>
-        <span style="background:var(--mf-blue)"></span>
-        <span style="background:var(--mf-green)"></span>
-      </div>
-      <p class="mf-hero-desc">News, stories, and milestones from across the Mini-Talks community — families, volunteers, Talk-Spots, and experts around the world.</p>
-    </div>
-    <div class="mf-hero-face">
-      <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
-    </div>
-  </div>
+  <?php mf_block('events.updates.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
 
   <!-- Sort bar -->
   <?php if (!empty($grouped)): ?>
-  <div class="mfe-sd-monthbar" style="margin-top:30px">
-    <div class="mfe-sd-monthwrap">
-      <button class="mfe-sd-monthselect" type="button" id="mfe-upd-monthbtn">
-        <span class="mfe-sd-monthselect-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-        </span>
-        <span class="mfe-sd-monthbtn-label">Month Selection</span>
-      </button>
-    </div>
-    <div class="mfe-sd-monthnav">
-      <a href="<?php echo esc_url(add_query_arg(['view'=>'updates','sort'=>'newest'], $eurl)); ?>" class="mfe-sd-fl-chip <?php echo $sort==='DESC'?'':'mfe-sd-fl-outline'; ?>">
-        <span class="mfe-sd-fl-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7-7 7 7M12 2v20"/></svg>
-        </span>
-        From Latest
-      </a>
-      <a href="<?php echo esc_url(add_query_arg(['view'=>'updates','sort'=>'oldest'], $eurl)); ?>" class="mfe-sd-fl-chip <?php echo $sort==='ASC'?'':'mfe-sd-fl-outline'; ?>">
-        <span class="mfe-sd-fl-ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7 7 7-7M12 22V2"/></svg>
-        </span>
-        From Oldest
-      </a>
-    </div>
-  </div>
+  <?php mf_block('events.updates.monthbar', array(
+    'newest_url'   => esc_url(add_query_arg(array('view'=>'updates','sort'=>'newest'), $eurl)),
+    'newest_class' => $sort === 'DESC' ? '' : 'mfe-sd-fl-outline',
+    'oldest_url'   => esc_url(add_query_arg(array('view'=>'updates','sort'=>'oldest'), $eurl)),
+    'oldest_class' => $sort === 'ASC' ? '' : 'mfe-sd-fl-outline',
+  )); ?>
   <?php endif; ?>
 
   <?php if (!empty($grouped)): ?>
     <?php foreach ($grouped as $ym => $items): ?>
     <section class="mfe-sd-month" id="upd-month-<?php echo esc_attr($ym); ?>" style="margin-top:50px">
-      <div class="mfe-sd-monthhead-wide" style="margin:30px 0 24px">
-        <div class="mfe-sd-bars-left">
-          <span class="l1-bar-red"></span>
-          <span class="l1-bar-yellow"></span>
-          <span class="l1-bar-blue"></span>
-          <span class="l1-bar-green"></span>
-        </div>
-        <h2 class="mf-title-contour green mfe-sd-monthtitle"><?php echo esc_html(mfe_month_label_u($ym)); ?></h2>
-        <div class="mfe-sd-bars-right">
-          <span class="l1-bar-red"></span>
-          <span class="l1-bar-yellow"></span>
-          <span class="l1-bar-blue"></span>
-          <span class="l1-bar-green"></span>
-        </div>
-      </div>
+      <?php mf_block('events.month.heading', array('month' => esc_html(mfe_month_label_u($ym)), 'colour' => 'green')); ?>
       <div class="mfe-updates-fullgrid">
         <?php foreach ($items as $u):
           $day = mfe_short_day_u($u->visible_date);

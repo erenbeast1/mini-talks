@@ -153,6 +153,81 @@ class Mini_Forum_Design {
                 'host.form.title' => array('Form heading', 'text', 'Host a Mini-Event'),
             )),
 
+            'forum_more' => array('label' => 'Forum — the rest of the page', 'blocks' => array(
+                'forum.guest.guidelines' => array('Signed-out guidelines box', 'html', '@forum.guest.guidelines', array(), array()),
+                'forum.guest.notice'     => array('Signed-out notice line', 'html', '@forum.guest.notice', array(), array()),
+                'forum.hero.center'      => array('Signed-in sub-heading', 'html', '@forum.hero.center', array(), array()),
+                'forum.actions'          => array('The four "what would you like to share" cards', 'html', '@forum.actions',
+                    array('cards' => 'the four cards, one per kind of post'),
+                    array('mf-actions-grid' => 'the grid itself', '{{cards}}' => 'the cards')),
+                'forum.list.header'      => array('Filters, search and the Recent Posts row', 'html', '@forum.list.header', array(),
+                    array('mf-chip' => 'the topic filters', 'data-filter' => 'which topic each filter is',
+                          'id="mf-search"' => 'the search box',
+                          'id="mf-page-num"' => 'the page number',
+                          'id="mf-page-next"' => 'the next-page button',
+                          'data-mf-action="load-more"' => 'loading the next page')),
+                'forum.guidelines'       => array('Signed-in guidelines card', 'html', '@forum.guidelines',
+                    array('items' => 'the eight guideline lines'), array('{{items}}' => 'the guidelines')),
+            )),
+
+            'events_more' => array('label' => 'Events — the rest of the pages', 'blocks' => array(
+                'events.section.hero' => array('A section heading on the hub', 'html', '@events.section.hero',
+                    array('face_colour' => 'the circle colour', 'face_image' => 'the artwork',
+                          'title_colour' => 'the heading colour', 'title' => 'the heading',
+                          'description' => 'the sentence under it', 'see_all_url' => 'where See all goes',
+                          'see_all_colour' => 'its colour', 'see_all_label' => 'its label'), array()),
+
+                'events.calendar' => array('The calendar', 'html', '@events.calendar',
+                    array('month' => 'the month shown', 'year' => 'the year it opens on',
+                          'month_index' => 'the month it opens on', 'events_json' => "the month's events"),
+                    array('id="mfe-cal-grid"' => 'the grid the script fills',
+                          'id="mfe-cal-title"' => 'the month name it rewrites',
+                          'id="mfe-cal-prev"' => 'previous month', 'id="mfe-cal-next"' => 'next month',
+                          'data-events' => "the month's events")),
+
+                'events.month.heading' => array('A month heading, on Updates and Special Days', 'html', '@events.month.heading',
+                    array('month' => 'the month', 'colour' => 'the heading colour'), array()),
+
+                'events.updates.monthbar' => array('Updates — the sort bar', 'html', '@events.updates.monthbar',
+                    array('newest_url' => 'newest first', 'newest_class' => 'whether it is the active one',
+                          'oldest_url' => 'oldest first', 'oldest_class' => 'whether it is the active one'),
+                    array('id="mfe-upd-monthbtn"' => 'the month picker the script opens')),
+
+                'events.cta' => array('The three call-to-action bricks', 'html', '@events.cta',
+                    array('events_url' => 'Join an Event', 'host_url' => 'Host a Workshop'), array()),
+
+                'events.specialdays.monthbar' => array('Special Days — the month bar', 'html', '@events.specialdays.monthbar',
+                    array('auto_month' => 'the month it opens on'),
+                    array('data-auto-month' => 'the month it opens on',
+                          'mfe-sd-monthselect' => 'the month picker the script opens')),
+            )),
+
+            'events_heroes' => array('label' => 'Events — the sub-page headers', 'blocks' => array(
+                'events.subpage.hero'     => array('An events sub-page', 'html', '@events.subpage.hero',
+                    array('accent' => 'the heading colour', 'title' => 'the heading',
+                          'description' => 'the sentence under it', 'logo' => 'the Mini-Talks logo'), array()),
+                'events.updates.hero'     => array('Community Updates', 'html', '@events.updates.hero',
+                    array('logo' => 'the Mini-Talks logo'), array()),
+                'events.specialdays.hero' => array('Special Days', 'html', '@events.specialdays.hero',
+                    array('logo' => 'the Mini-Talks logo'), array()),
+                'events.type.hero'        => array('One kind of event', 'html', '@events.type.hero',
+                    array('colour' => 'the heading colour', 'title' => 'the heading',
+                          'description' => 'the sentence under it', 'volunteers_url' => 'Mini-Volunteers',
+                          'community_url' => 'Mini-Community', 'stories_url' => 'Real Stories',
+                          'logo' => 'the Mini-Talks logo'), array()),
+            )),
+
+            'host_form' => array('label' => 'Host an Event — the form', 'blocks' => array(
+                'host.form' => array('The form', 'html', '@host.form',
+                    array('type_cards' => 'the four kinds of event',
+                          'prefill_name' => "the member's name, when signed in",
+                          'prefill_email' => 'their email, when signed in'),
+                    array('id="mfe-host-form"' => 'the form the script submits',
+                          '{{type_cards}}' => 'the four kinds of event, with the radio each one sets',
+                          'name="full_name"' => 'name', 'name="email"' => 'email',
+                          'id="mfe-host-status"' => 'where the result is shown')),
+            )),
+
             'lists' => array('label' => 'Cards in a list', 'blocks' => array(
                 'forum.post.card' => array('A forum post, in a list', 'html', '@forum.post.card',
                     array('url' => 'link to the post', 'border_class' => 'colour class for this kind of post',

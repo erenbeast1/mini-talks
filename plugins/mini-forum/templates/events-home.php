@@ -216,26 +216,16 @@ function mfe_home_render_section($args) {
     $sid = $a['section_id'];
 ?>
 <section class="mfe-section-hero">
-  <div class="mf-container">
-    <div class="mf-hero-new">
-      <div class="mf-hero-face bg-<?php echo esc_attr($a['face_color']); ?>">
-        <img src="<?php echo esc_url($a['face_img']); ?>" alt="" />
-      </div>
-      <div class="mf-hero-left">
-        <h2 class="mf-title-contour <?php echo esc_attr($a['title_color']); ?>" style="font-size:clamp(24px,2.6vw,38px)"><?php echo esc_html($a['title']); ?></h2>
-        <div class="mf-hero-bars">
-          <span style="background:var(--mf-red)"></span>
-          <span style="background:var(--mf-yellow)"></span>
-          <span style="background:var(--mf-blue)"></span>
-          <span style="background:var(--mf-green)"></span>
-        </div>
-        <p class="mf-hero-desc"><?php echo esc_html($a['description']); ?></p>
-        <div class="mfe-section-hero-actions">
-          <a href="<?php echo esc_url($a['see_all_url']); ?>" class="mfe-see-all mfe-see-all-<?php echo esc_attr($a['see_all_color']); ?>"><?php echo esc_html($a['see_all_label']); ?></a>
-        </div>
-      </div>
-    </div>
-  </div>
+  <?php mf_block('events.section.hero', array(
+    'face_colour'    => esc_attr($a['face_color']),
+    'face_image'     => esc_url($a['face_img']),
+    'title_colour'   => esc_attr($a['title_color']),
+    'title'          => esc_html($a['title']),
+    'description'    => esc_html($a['description']),
+    'see_all_url'    => esc_url($a['see_all_url']),
+    'see_all_colour' => esc_attr($a['see_all_color']),
+    'see_all_label'  => esc_html($a['see_all_label']),
+  )); ?>
 
   <?php
   // DEBUG (HTML comment): tells us what the fetch actually returned for each section.
@@ -289,31 +279,12 @@ function mfe_home_render_section($args) {
   </defs>
 </svg>
 <div class="mf-container" style="margin-top:24px">
-  <div class="mfe-calendar-frame">
-    <div class="mfe-cal-header">
-      <button class="mfe-cal-arrow" id="mfe-cal-prev" aria-label="Previous month" type="button">
-        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M15 4L7 12L15 20" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-      </button>
-      <h2 class="mf-title-contour blue mfe-cal-title" id="mfe-cal-title"><?php echo date('F Y', strtotime($start_dt)); ?></h2>
-      <button class="mfe-cal-arrow" id="mfe-cal-next" aria-label="Next month" type="button">
-        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M9 4L17 12L9 20" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-      </button>
-    </div>
-    <div class="mfe-cal-weekdays">
-      <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-    </div>
-    <div class="mfe-cal-grid" id="mfe-cal-grid" role="grid" aria-label="Events calendar"
-         data-init-year="<?php echo $cal_year; ?>"
-         data-init-month="<?php echo $cal_month - 1; ?>"
-         data-events='<?php echo wp_json_encode($cal_payload); ?>'></div>
-    <div class="mfe-cal-legend">
-      <span><img src="https://mini-talks.org/wp-content/uploads/2026/04/Group-547.png" alt="" class="mfe-legend-img" />Workshop</span>
-      <span><img src="https://mini-talks.org/wp-content/uploads/2026/04/Group-545.png" alt="" class="mfe-legend-img" />Family Meetup</span>
-      <span><img src="https://mini-talks.org/wp-content/uploads/2026/04/Group-543.png" alt="" class="mfe-legend-img" />Expert Session</span>
-      <span><img src="https://mini-talks.org/wp-content/uploads/2026/04/Group-542.png" alt="" class="mfe-legend-img" />Update</span>
-      <span><img src="https://mini-talks.org/wp-content/uploads/2026/04/Group-546.png" alt="" class="mfe-legend-img" />Special Day</span>
-    </div>
-  </div>
+  <?php mf_block('events.calendar', array(
+    'month'       => date('F Y', strtotime($start_dt)),
+    'year'        => (int) $cal_year,
+    'month_index' => (int) $cal_month - 1,
+    'events_json' => esc_attr(wp_json_encode($cal_payload)),
+  )); ?>
 </div>
 
 <?php
@@ -476,23 +447,10 @@ mfe_home_render_section([
 
 <!-- ═══ CTA BAND ═══ -->
 <div class="mfe-cta-band">
-  <div class="mfe-cta-inner">
-    <a href="<?php echo esc_url(add_query_arg('view','workshops',$eurl));?>" class="mfe-cta-brick mfe-cta-red">
-      <span class="mfe-cta-stud" aria-hidden="true"></span>
-      <div class="mfe-cta-topbar"></div>
-      <div class="mfe-cta-white">Join an Event</div>
-    </a>
-    <a href="/mini-community/join-us/?interest=talk-spot" class="mfe-cta-brick mfe-cta-green">
-      <span class="mfe-cta-stud" aria-hidden="true"></span>
-      <div class="mfe-cta-topbar"></div>
-      <div class="mfe-cta-white">Become a Talk-Spot</div>
-    </a>
-    <a href="<?php echo esc_url(add_query_arg('view','host',$eurl));?>" class="mfe-cta-brick mfe-cta-blue">
-      <span class="mfe-cta-stud" aria-hidden="true"></span>
-      <div class="mfe-cta-topbar"></div>
-      <div class="mfe-cta-white">Host a Workshop</div>
-    </a>
-  </div>
+    <?php mf_block('events.cta', array(
+      'events_url' => esc_url(add_query_arg('view', 'workshops', $eurl)),
+      'host_url'   => esc_url(add_query_arg('view', 'host', $eurl)),
+    )); ?>
 </div>
 
 <!-- ═══ EVENT DETAIL POPUP ═══ -->

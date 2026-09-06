@@ -38,21 +38,12 @@ $accent_class = $t['accent'] ? ' '.$t['accent'] : '';
   <div style="display:flex;align-items:center;gap:14px;margin:30px 0 16px">
     <a href="<?php echo esc_url($eurl); ?>" class="mfe-back">‹ Mini-Events</a>
   </div>
-  <div class="mf-hero-new">
-    <div class="mf-hero-left">
-      <h1 class="mf-title-contour<?php echo $accent_class; ?>"><?php echo esc_html($t['title']); ?></h1>
-      <div class="mf-hero-bars">
-        <span style="background:var(--mf-red)"></span>
-        <span style="background:var(--mf-yellow)"></span>
-        <span style="background:var(--mf-blue)"></span>
-        <span style="background:var(--mf-green)"></span>
-      </div>
-      <p class="mf-hero-desc"><?php echo esc_html($t['sub']); ?></p>
-    </div>
-    <div class="mf-hero-face">
-      <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
-    </div>
-  </div>
+  <?php mf_block('events.subpage.hero', array(
+    'accent'      => $accent_class,
+    'title'       => esc_html($t['title']),
+    'description' => esc_html($t['sub']),
+    'logo'        => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png',
+  )); ?>
 
   <div class="mfe-frame-card" style="margin-top:40px;max-width:600px;margin-left:auto;margin-right:auto">
     <div class="mfe-frame-studs mfe-stud-yellow"></div>
