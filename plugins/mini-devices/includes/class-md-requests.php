@@ -35,14 +35,17 @@ class MD_Requests {
         );
     }
 
+    /** One sentence per status, shown on the card, the kit screen and in mail.
+     *  Editable on the Design page, so what a member is told can be reworded
+     *  without a release. */
     public static function status_notes() {
         return array(
-            'draft'     => 'Your design is still being personalized.',
-            'submitted' => 'Your request has been shared with the Mini-Talks team.',
-            'contacted' => 'Our team has contacted you about the next steps.',
-            'preparing' => 'Your Mini-Kit is being prepared.',
-            'ready'     => 'Your Mini-Kit is ready — connect it to your profile.',
-            'connected' => 'This Mini-Kit is now connected to your profile.',
+            'draft'     => MD_Design::t('kits.status.draft',     'Your design is still being personalized.'),
+            'submitted' => MD_Design::t('kits.status.submitted', 'Your request has been shared with the Mini-Talks team.'),
+            'contacted' => MD_Design::t('kits.status.contacted', 'Our team has contacted you about the next steps.'),
+            'preparing' => MD_Design::t('kits.status.preparing', 'Your Mini-Kit is being prepared.'),
+            'ready'     => MD_Design::t('kits.status.ready',     'Your Mini-Kit is ready — connect it to your profile.'),
+            'connected' => MD_Design::t('kits.status.connected', 'This Mini-Kit is now connected to your profile.'),
         );
     }
 

@@ -1,5 +1,34 @@
 # Mini-Talks plugins — changelog
 
+## mini-devices 3.4.0
+
+**Mini-Kits joins the Design page.** It does not open a second one: 26 areas are
+registered onto Mini-Forum's through `mf_design_blocks` — the section heading and
+its paragraph, the privacy line, each kit's name and tagline, the sentence every
+status carries, and the copy inside a kit (Explore, the three request intros,
+Connect, Figs & Slots, the note field). A Mini-Kits stylesheet joins the CSS tab and
+loads on the profile and on any page carrying a preview shortcode.
+
+Renaming a kit on that page renames it everywhere it appears — shelf card, popup
+heading, admin list, the team's mail — because `MD_Kits::all()` reads it. The status
+sentences are read by `MD_Requests::status_notes()`, so rewording *Preparing* changes
+what the member sees on the card, on the kit screen and in the email they receive.
+
+The screens the script draws get their copy from `MD.text`, resolved server-side.
+Every string keeps its literal as a fallback, so with Mini-Forum absent or older
+nothing is editable and everything still reads exactly as before.
+
+## mini-forum 3.09.00
+
+**A guide on the Design page,** open the first time and collapsible after that: what
+the page changes and what it cannot, the three tabs, what `{{tokens}}` are, what the
+"keep these" list means, why updating the plugin cannot overwrite your work, and four
+habits for working safely.
+
+`mf_design_css_areas_list` lets another plugin add its own stylesheet area, and
+`mf_block_exists()` lets one check an id before relying on it — both are what
+Mini-Devices uses to put Mini-Kits on this page.
+
 ## mini-forum 3.08.01
 
 **An area now says what the code needs from it.** Editing HTML cannot break the

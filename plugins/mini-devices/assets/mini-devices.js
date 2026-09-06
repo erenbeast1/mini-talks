@@ -131,6 +131,14 @@
 
   /* ---------------- yardimcilar ---------------- */
 
+  /* Copy the Design page can rewrite. MD.text is resolved server-side; the
+     literal here is the default, and the only thing shown if Mini-Forum's
+     Design page is not there to override it. */
+  function t(key, fallback) {
+    var all = (window.MD && MD.text) || {};
+    return typeof all[key] === 'string' && all[key] !== '' ? all[key] : fallback;
+  }
+
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -1269,12 +1277,12 @@
   /* Optional note, on every kit's request. */
   function noteField(existing) {
     var wrap = el('div', 'md-note-field');
-    var lab  = el('label', null, 'Add a note');
+    var lab  = el('label', null, t('note.label', 'Add a note'));
     lab.appendChild(el('span', 'md-note-optional', 'Optional'));
     wrap.appendChild(lab);
     var ta = el('textarea', 'md-note-input');
     ta.rows = 3;
-    ta.placeholder = 'Anything you’d like us to know?';
+    ta.placeholder = t('note.placeholder', 'Anything you’d like us to know?');
     ta.value = existing || '';
     wrap.appendChild(ta);
     wrap.input = ta;
@@ -1409,10 +1417,10 @@
 
   /* ── Explore ── the catalogue, and nothing else. */
   function renderExplore(host, kit) {
-    host.appendChild(el('h3', 'md-fig-title', 'Explore Mini-Designs'));
-    host.appendChild(el('p', 'md-section-note',
+    host.appendChild(el('h3', 'md-fig-title', t('explore.title', 'Explore Mini-Designs')));
+    host.appendChild(el('p', 'md-section-note', t('explore.intro',
       'Every scene is on show. Pick the ones you would like built \u2014 anything that cannot be ' +
-      'built right now says so, and can be picked another time.'));
+      'built right now says so, and can be picked another time.')));
     host.appendChild(designGrid(kit));
 
     var picked = pickedIds();
@@ -1682,15 +1690,17 @@
 
   function requestIntro(kit) {
     if (kit.pre === 'personalize') {
-      return 'Personalize your figure to create a Fig-Talks character that feels familiar and uniquely yours. ' +
-             'Your Fig-Talks is made with the character you design here, so this comes first.';
+      return t('request.intro.personalize',
+        'Personalize your figure to create a Fig-Talks character that feels familiar and uniquely yours. ' +
+        'Your Fig-Talks is made with the character you design here, so this comes first.');
     }
     if (kit.pre === 'catalogue') {
-      return 'These are the scenes you picked. Add anything the team should know, then send your ' +
-             'request \u2014 they will get in touch about the next steps.';
+      return t('request.intro.catalogue',
+        'These are the scenes you picked. Add anything the team should know, then send your ' +
+        'request \u2014 they will get in touch about the next steps.');
     }
-    return kit.tagline + ' Every Mini-Kit is made to order, so tell the team you would like one ' +
-           'and they will get in touch.';
+    return kit.tagline + ' ' + t('request.intro.plain',
+      'Every Mini-Kit is made to order, so tell the team you would like one and they will get in touch.');
   }
 
   var FIG_STEPS = ['Choose Your Face', 'Choose Your Hairstyle',
@@ -1744,9 +1754,9 @@
     }
 
     host.appendChild(el('h3', 'md-fig-title', 'Connect your ' + kit.name));
-    host.appendChild(el('p', 'md-section-note',
+    host.appendChild(el('p', 'md-section-note', t('connect.intro',
       'Plug the kit into this computer with its USB cable, then press Connect. Your browser ' +
-      'will ask which device to use \u2014 pick the kit, and it links itself to your profile.'));
+      'will ask which device to use \u2014 pick the kit, and it links itself to your profile.')));
 
     var ol = el('ol', 'md-fig-steps');
     ['Plug the kit in', 'Press Connect and pick the kit', 'Confirm \u2014 it is yours'].forEach(function (t, i) {
@@ -1980,7 +1990,7 @@
     var hasEditor = window.MDFaces && window.MFAvatarEditor;
 
     host.appendChild(el('p', 'md-section-note', hasEditor
-      ? 'Each slot holds one Fig and one recording. Figs are kept on your profile, so you can keep working on them while the kit is unplugged, and send them over when you plug it in.'
+      ? t('slots.intro', 'Each slot holds one Fig and one recording. Figs are kept on your profile, so you can keep working on them while the kit is unplugged, and send them over when you plug it in.')
       : 'Each slot holds one Fig and one recording. The avatar editor did not load on this page, so Figs cannot be designed here \u2014 reload, and check that Mini-Forum is active.'));
 
     var slots = dev.slots || [];

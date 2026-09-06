@@ -2,16 +2,17 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits section to the Mini-Forum profile. Members pick a Mini-Kit and request it — Mini-Designs by choosing scenes, Fig-Talks by personalising a figure — and follow it through Submitted, Contacted, Preparing, Connected. Connected kits also talk to the site over USB (WebSerial).
- * Version:     3.3.0
+ * Version:     3.4.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '3.3.0');
+define('MD_VER', '3.4.0');
 define('MD_PATH', plugin_dir_path(__FILE__));
 
+require_once MD_PATH . 'includes/class-md-design.php';
 require_once MD_PATH . 'includes/class-md-kits.php';
 require_once MD_PATH . 'includes/class-md-designs.php';
 require_once MD_PATH . 'includes/class-md-requests.php';
@@ -288,6 +289,9 @@ function md_enqueue_assets() {
             'design-talks' => 'https://mini-talks.org/wp-content/uploads/2026/03/35_mini_settings_3D-e1772742962173.png',
             'mini-designs' => '',
         )),
+        // Copy for the screens the script draws, resolved server-side so the
+        // Design page reaches inside the kit popups too.
+        'text'  => MD_Design::js_text(),
     ));
 }
 
@@ -365,8 +369,8 @@ add_shortcode('connected_devices', function () {
          data-kits="<?php echo esc_attr(wp_json_encode(MD_Requests::state(get_current_user_id()))); ?>">
 
         <header class="md-shelf-head">
-            <h3 class="md-title">Mini-Kits</h3>
-            <p class="md-sub">Choose a Mini-Kit to see what you can do with it. Request one, personalize yours, and follow where it is.</p>
+            <h3 class="md-title"><?php echo esc_html(MD_Design::t('kits.shelf.title', 'Mini-Kits')); ?></h3>
+            <p class="md-sub"><?php echo wp_kses_post(MD_Design::t('kits.shelf.sub', 'Choose a Mini-Kit to see what you can do with it. Request one, personalize yours, and follow where it is.')); ?></p>
         </header>
 
         <?php if (current_user_can('manage_options')): ?>
@@ -383,9 +387,8 @@ add_shortcode('connected_devices', function () {
 
         <div class="md-shelf" id="md-shelf"></div>
 
-        <p class="md-privacy">
-            Audio recordings stay on the kit — they are never uploaded to the site. Only recording counts and durations are saved to your profile.
-        </p>
+        <p class="md-privacy"><?php echo wp_kses_post(MD_Design::t('kits.privacy',
+            'Audio recordings stay on the kit — they are never uploaded to the site. Only recording counts and durations are saved to your profile.')); ?></p>
     </div>
     <div id="md-modal-root"></div>
     <?php

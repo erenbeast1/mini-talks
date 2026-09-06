@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.3.0)
+# Mini Devices — Mini-Kits (v3.4.0)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -135,6 +135,18 @@ second request cannot hide the first.
 
 A genuine second device — a sibling's Brick-Talks — is the team's to arrange, not a
 button. That is a conversation, and the request they already have is where it starts.
+
+## Editing the copy
+
+Mini-Kits appears on Mini-Forum's **Design** page (Mini-Events → Design) rather than
+opening a second one: the section heading, each kit's name and tagline, the sentence
+every status carries, and the copy inside a kit — Explore, the three request intros,
+Connect, Figs & Slots, the note field. There is a Mini-Kits stylesheet there too.
+
+Defaults live in `MD_Design::register()`. `MD_Design::t()` returns the admin's version
+when there is one; with Mini-Forum absent or older, every string falls back to its
+default and nothing is editable — no fatals. The screens the script draws read their
+copy from `MD.text`, resolved server-side, with the same literal as fallback.
 
 ## Where requests go
 

@@ -33,8 +33,8 @@ class MD_Kits {
     public static function all() {
         return apply_filters('md_kits', array(
             'mini-designs' => array(
-                'name'        => 'Mini-Designs',
-                'tagline'     => 'Buildable scenes for Mini-Talks.',
+                'name'        => MD_Design::t('kits.mini-designs.name', 'Mini-Designs'),
+                'tagline'     => MD_Design::t('kits.mini-designs.tagline', 'Buildable scenes for Mini-Talks.'),
                 'colour'      => 'green',
                 'pre_request' => 'catalogue',
                 'device'      => '',
@@ -42,24 +42,24 @@ class MD_Kits {
                 'cta'         => 'Choose your Mini-Designs',
             ),
             'design-talks' => array(
-                'name'        => 'Design-Talks',
-                'tagline'     => 'Turn Mini-Designs into interactive communication experiences.',
+                'name'        => MD_Design::t('kits.design-talks.name', 'Design-Talks'),
+                'tagline'     => MD_Design::t('kits.design-talks.tagline', 'Turn Mini-Designs into interactive communication experiences.'),
                 'colour'      => 'yellow',
                 'pre_request' => '',
                 'device'      => 'D',
                 'cta'         => 'Request Design-Talks',
             ),
             'brick-talks' => array(
-                'name'        => 'Brick-Talks',
-                'tagline'     => 'Bring personalized characters to life through voice and animation.',
+                'name'        => MD_Design::t('kits.brick-talks.name', 'Brick-Talks'),
+                'tagline'     => MD_Design::t('kits.brick-talks.tagline', 'Bring personalized characters to life through voice and animation.'),
                 'colour'      => 'blue',
                 'pre_request' => '',
                 'device'      => 'B',
                 'cta'         => 'Request Brick-Talks',
             ),
             'fig-talks' => array(
-                'name'        => 'Fig-Talks',
-                'tagline'     => 'A personalized figure designed to represent the child.',
+                'name'        => MD_Design::t('kits.fig-talks.name', 'Fig-Talks'),
+                'tagline'     => MD_Design::t('kits.fig-talks.tagline', 'A personalized figure designed to represent the child.'),
                 'colour'      => 'red',
                 'pre_request' => 'personalize',
                 'device'      => 'F',

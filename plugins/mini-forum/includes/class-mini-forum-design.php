@@ -41,13 +41,15 @@ class Mini_Forum_Design {
 
     /** Where the custom stylesheets apply. */
     public static function css_areas() {
-        return array(
+        // Filterable for the same reason the block manifest is: another plugin's
+        // screens want their own stylesheet, not a second Design page.
+        return apply_filters('mf_design_css_areas_list', array(
             'global'  => array('Global', 'Every Mini-Forum screen, plus the popups.'),
             'forum'   => array('Forum', 'The forum home, a post, the create form.'),
             'events'  => array('Events', 'The events hub and its sub-pages.'),
             'profile' => array('Profile', 'The member profile, including the Mini-Kits panel.'),
             'join'    => array('Join Us', 'The membership form.'),
-        );
+        ));
     }
 
     /**
@@ -227,6 +229,11 @@ class Mini_Forum_Design {
         return null;
     }
 
+    /** Is this id registered at all? Lets another plugin ask before relying on it. */
+    public static function has($id) {
+        return self::definition($id) !== null;
+    }
+
     /** The block as it should render: the admin's version, or the default. */
     public static function get($id) {
         $def = self::definition($id);
@@ -369,6 +376,7 @@ class Mini_Forum_Design {
         ?>
         <div class="wrap">
           <h1>Design</h1>
+          <?php self::guide($tab); ?>
           <h2 class="nav-tab-wrapper">
             <a class="nav-tab <?php echo $tab === 'blocks' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base); ?>">Text &amp; HTML</a>
             <a class="nav-tab <?php echo $tab === 'css' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=css'); ?>">Custom CSS</a>
@@ -382,6 +390,78 @@ class Mini_Forum_Design {
           </form>
           <?php } ?>
         </div>
+        <?php
+    }
+
+    /** A short guide, open on a first visit and remembered per user after that. */
+    private static function guide($tab) {
+        $seen = get_user_meta(get_current_user_id(), 'mf_design_guide_seen', true);
+        if (isset($_GET['guide'])) {
+            $seen = $_GET['guide'] === 'hide' ? 1 : '';
+            update_user_meta(get_current_user_id(), 'mf_design_guide_seen', $seen);
+        }
+        $base = admin_url('admin.php?page=mf-design&tab=' . $tab);
+        ?>
+        <details <?php echo $seen ? '' : 'open'; ?> style="margin:14px 0 18px;padding:14px 18px;background:#fff;border:1px solid #dcdcde;border-left:4px solid #2271b1;max-width:60em">
+          <summary style="cursor:pointer;font-weight:600;font-size:14px">How this page works</summary>
+
+          <p><strong>What it changes.</strong> How the site looks and what it says — nothing else.
+          Members, posts, events, requests and Mini-Kits are untouched by anything on this page.</p>
+
+          <h3 style="margin:16px 0 4px">The three tabs</h3>
+          <ul style="list-style:disc;margin-left:20px">
+            <li><strong>Text &amp; HTML</strong> — the words and the markup of each area. Areas marked
+                <em>HTML</em> take real markup: tags, classes, inline styles. Areas marked
+                <em>Plain text</em> are printed as written, so a tag there shows up as text.</li>
+            <li><strong>Custom CSS</strong> — styling, one stylesheet per area. Reach for this first:
+                colour, spacing and size rarely need the HTML touched at all.</li>
+            <li><strong>Whole templates</strong> — for rebuilding a screen's layout outright. It has no
+                editor, only instructions: a template is PHP, and a box on a web page that saves and
+                runs PHP would let anyone with an admin login run code on this server.</li>
+          </ul>
+
+          <h3 style="margin:16px 0 4px">{{tokens}}</h3>
+          <p>Some areas carry tokens, listed above their box. They are where the site drops in something
+          it worked out — a member's nickname, their avatar, the logo, a link. Put a token wherever you
+          want it in your HTML; leave it out and that piece is simply not shown. Type anything else in
+          double braces and it stays on screen as text, so a typo shows itself rather than breaking
+          the page.</p>
+
+          <h3 style="margin:16px 0 4px">The list of things to keep</h3>
+          <p>Where an area's box lists <em>“The code looks for these”</em>, those are hooks the software
+          uses: a button that opens the Settings popup, the row Mini-Kits writes its count into. Rewrite
+          the HTML around them as you like, but keep them, or that one behaviour stops. If you save
+          without one, this page tells you exactly which — and Reset brings it back.</p>
+
+          <h3 style="margin:16px 0 4px">What you cannot break</h3>
+          <p>Sign-ups, posting, events, requests and email all run in PHP, which this page cannot touch.
+          Saving strips <code>&lt;script&gt;</code>, <code>&lt;iframe&gt;</code> and event handlers such
+          as <code>onclick</code>, so a paste from elsewhere cannot bring code with it. The worst case is
+          a screen that looks wrong — and every area has Reset.</p>
+
+          <h3 style="margin:16px 0 4px">Updating the plugin</h3>
+          <p>Your changes live in the database, not in the plugin's files, so installing a new version
+          never overwrites them. When an update changes an area you had customised, this page says so
+          beside that area and shows the plugin's new version — it stays yours until you choose
+          otherwise.</p>
+
+          <h3 style="margin:16px 0 4px">Working safely</h3>
+          <ol style="margin-left:20px">
+            <li>Change one area, save, and look at the page in another tab.</li>
+            <li>Keep a copy of an area's HTML before a big rewrite — paste it somewhere. Reset returns
+                the <em>plugin's</em> version, not your previous one.</li>
+            <li>Check a phone width too; the site's own CSS is built for it, a hand-written block may
+                not be.</li>
+            <li>Text on this site is English and TranslatePress translates from it, so a rewrite in
+                another language will not translate as expected.</li>
+          </ol>
+
+          <p style="margin-top:14px">
+            <a href="<?php echo esc_url($base . '&guide=' . ($seen ? 'show' : 'hide')); ?>">
+              <?php echo $seen ? 'Keep this open on every visit' : 'Collapse this from now on'; ?>
+            </a>
+          </p>
+        </details>
         <?php
     }
 
@@ -609,6 +689,11 @@ function mf_block($id, $vars = array()) {
 /** The same area as a string, for attributes and concatenation. */
 function mf_block_get($id, $vars = array()) {
     return Mini_Forum_Design::render($id, $vars);
+}
+
+/** Whether an area id is registered. */
+function mf_block_exists($id) {
+    return Mini_Forum_Design::has($id);
 }
 
 /**
