@@ -39,6 +39,8 @@ class Mini_Forum_Design {
     const OPT_CSS    = 'mf_design_css';
     const OPT_BASE   = 'mf_design_base';   // the default each override was written against
     const OPT_BCSS   = 'mf_design_block_css';  // CSS written beside an area's HTML
+    const OPT_LOG    = 'mf_design_history';    // every change, with the reason given for it
+    const LOG_KEEP   = 60;                     // how many changes are kept
 
     /** Where the custom stylesheets apply. */
     public static function css_areas() {
@@ -463,6 +465,132 @@ class Mini_Forum_Design {
         return is_array($all) && isset($all[$area]) ? (string) $all[$area] : '';
     }
 
+    /* ── history ──
+       Every save is recorded with who made it, when, what changed and why. A
+       design people keep editing needs an answer to "who changed this, and what
+       did it say before" — and a way back that does not depend on remembering. */
+
+    public static function history() {
+        $log = get_option(self::OPT_LOG, array());
+        return is_array($log) ? $log : array();
+    }
+
+    /**
+     * @param array  $changes  id => array('from' => …, 'to' => …) for html and css.
+     *                         A null 'to' means the area went back to the default.
+     * @param string $reason   What the person typed into "Why this change".
+     */
+    private static function log($changes, $reason, $kind = 'edit') {
+        if (!$changes) return;
+        $user = function_exists('wp_get_current_user') ? wp_get_current_user() : null;
+        $log  = self::history();
+        array_unshift($log, array(
+            'time'    => time(),
+            'user'    => $user && $user->ID ? $user->display_name : 'unknown',
+            'reason'  => $reason,
+            'kind'    => $kind,
+            'changes' => $changes,
+        ));
+        update_option(self::OPT_LOG, array_slice($log, 0, self::LOG_KEEP));
+    }
+
+    /** Put an entry's values back, recording that as its own change. */
+    public static function restore($index, $reason = '') {
+        $log = self::history();
+        if (!isset($log[$index])) return false;
+
+        $entry   = $log[$index];
+        $blocks  = self::overrides();
+        $bcss    = self::block_css();
+        $base    = self::bases();
+        $changes = array();
+
+        foreach ($entry['changes'] as $id => $c) {
+            $was_html = isset($blocks[$id]) ? $blocks[$id] : null;
+            $was_css  = isset($bcss[$id])   ? $bcss[$id]   : null;
+
+            if (array_key_exists('to', $c)) {
+                if ($c['to'] === null) { unset($blocks[$id], $base[$id]); }
+                else { $blocks[$id] = $c['to']; $base[$id] = md5(($d = self::definition($id)) ? $d[2] : ''); }
+            }
+            if (array_key_exists('to_css', $c)) {
+                if ($c['to_css'] === null || $c['to_css'] === '') unset($bcss[$id]);
+                else $bcss[$id] = $c['to_css'];
+            }
+            $changes[$id] = array(
+                'from' => $was_html, 'to' => isset($blocks[$id]) ? $blocks[$id] : null,
+                'from_css' => $was_css, 'to_css' => isset($bcss[$id]) ? $bcss[$id] : null,
+            );
+        }
+
+        update_option(self::OPT_BLOCKS, $blocks);
+        update_option(self::OPT_BCSS, $bcss);
+        update_option(self::OPT_BASE, $base);
+        self::log($changes, $reason !== '' ? $reason : sprintf('Restored the version of %s',
+                  date_i18n('j M Y H:i', $entry['time'])), 'restore');
+        return true;
+    }
+
+    /* ── backup ── */
+
+    public static function export() {
+        return wp_json_encode(array(
+            'plugin'    => 'mini-forum',
+            'version'   => defined('MF_VERSION') ? MF_VERSION : '',
+            'exported'  => gmdate('c'),
+            'blocks'    => self::overrides(),
+            'block_css' => self::block_css(),
+            'css'       => get_option(self::OPT_CSS, array()),
+        ));
+    }
+
+    /** @return string '' on success, otherwise why it was refused. */
+    public static function import($json, $reason = '') {
+        $data = json_decode(trim($json), true);
+        if (!is_array($data) || !isset($data['blocks']) || !is_array($data['blocks'])) {
+            return 'That does not look like a Design backup.';
+        }
+
+        $blocks  = self::overrides();
+        $changes = array();
+        foreach ($data['blocks'] as $id => $val) {
+            if (!self::has($id) || !is_string($val)) continue;         // ignore what this version has no place for
+            $def = self::definition($id);
+            $val = $def[1] === 'text' ? sanitize_text_field($val) : wp_kses($val, self::allowed_html());
+            $changes[$id] = array('from' => isset($blocks[$id]) ? $blocks[$id] : null, 'to' => $val);
+        }
+        if (!$changes) return 'Nothing in that backup matches this version.';
+
+        $base = self::bases();
+        foreach ($changes as $id => $c) {
+            $blocks[$id] = $c['to'];
+            $base[$id]   = md5(self::definition($id)[2]);
+        }
+        update_option(self::OPT_BLOCKS, $blocks);
+        update_option(self::OPT_BASE, $base);
+
+        if (isset($data['block_css']) && is_array($data['block_css'])) {
+            $bcss = self::block_css();
+            foreach ($data['block_css'] as $id => $css) {
+                if (!self::has($id) || !is_string($css)) continue;
+                $bcss[$id] = trim(str_replace(array('<', '>'), '', wp_strip_all_tags($css)));
+            }
+            update_option(self::OPT_BCSS, $bcss);
+        }
+        if (isset($data['css']) && is_array($data['css'])) {
+            $out = array();
+            foreach (self::css_areas() as $key => $meta) {
+                if (!isset($data['css'][$key]) || !is_string($data['css'][$key])) continue;
+                $css = trim(str_replace(array('<', '>'), '', wp_strip_all_tags($data['css'][$key])));
+                if ($css !== '') $out[$key] = $css;
+            }
+            update_option(self::OPT_CSS, $out);
+        }
+
+        self::log($changes, $reason !== '' ? $reason : 'Restored from a backup', 'import');
+        return '';
+    }
+
     /* ── front end ── */
 
     public static function init() {
@@ -528,10 +656,22 @@ class Mini_Forum_Design {
         if (!current_user_can('manage_options')) return;
 
         $tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'blocks';
-        if (!in_array($tab, array('blocks', 'css', 'templates'), true)) $tab = 'blocks';
+        if (!in_array($tab, array('blocks', 'css', 'templates', 'history'), true)) $tab = 'blocks';
         if (!empty($_POST['mf_design_nonce']) && wp_verify_nonce($_POST['mf_design_nonce'], 'mf_design')) {
-            $tab === 'css' ? self::save_css() : self::save_blocks();
-            echo '<div class="notice notice-success is-dismissible"><p>Saved.</p></div>';
+            if ($tab === 'history') {
+                $reason = isset($_POST['mf_reason']) ? sanitize_text_field(wp_unslash($_POST['mf_reason'])) : '';
+                if (isset($_POST['restore']) && self::restore((int) $_POST['restore'], $reason)) {
+                    echo '<div class="notice notice-success is-dismissible"><p>Put back.</p></div>';
+                } elseif (!empty($_POST['mf_import'])) {
+                    $err = self::import(wp_unslash($_POST['mf_import']), $reason);
+                    echo $err === ''
+                        ? '<div class="notice notice-success is-dismissible"><p>Backup restored.</p></div>'
+                        : '<div class="notice notice-error is-dismissible"><p>' . esc_html($err) . '</p></div>';
+                }
+            } else {
+                $tab === 'css' ? self::save_css() : self::save_blocks();
+                echo '<div class="notice notice-success is-dismissible"><p>Saved.</p></div>';
+            }
         }
 
         $base = admin_url('admin.php?page=mf-design');
@@ -543,10 +683,14 @@ class Mini_Forum_Design {
             <a class="nav-tab <?php echo $tab === 'blocks' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base); ?>">Text &amp; HTML</a>
             <a class="nav-tab <?php echo $tab === 'css' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=css'); ?>">Custom CSS</a>
             <a class="nav-tab <?php echo $tab === 'templates' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=templates'); ?>">Whole templates</a>
+            <a class="nav-tab <?php echo $tab === 'history' ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url($base . '&tab=history'); ?>">History &amp; backup</a>
           </h2>
-          <?php if ($tab === 'templates') { self::form_templates(); } else { ?>
+          <?php if ($tab === 'templates') { self::form_templates(); }
+                elseif ($tab === 'history')  { self::form_history(); }
+                else { ?>
           <form method="post">
             <?php wp_nonce_field('mf_design', 'mf_design_nonce'); ?>
+            <?php self::reason_field(); ?>
             <?php $tab === 'css' ? self::form_css() : self::form_blocks(); ?>
             <?php submit_button('Save changes'); ?>
           </form>
@@ -624,6 +768,92 @@ class Mini_Forum_Design {
             </a>
           </p>
         </details>
+        <?php
+    }
+
+    private static function reason_field() {
+        ?>
+        <p style="margin:6px 0 14px">
+          <label for="mf_reason"><strong>Why this change</strong>
+            <span style="font-weight:400;color:#666">— kept with the change, so the next person knows</span>
+          </label><br>
+          <input type="text" id="mf_reason" name="mf_reason" class="large-text"
+                 placeholder="e.g. Shortened the hero text for mobile" maxlength="200">
+        </p>
+        <?php
+    }
+
+    private static function form_history() {
+        $log = self::history();
+        ?>
+        <h2 style="margin-top:18px">What has been changed</h2>
+        <p class="description" style="max-width:52em">
+          The last <?php echo (int) self::LOG_KEEP; ?> changes, newest first: who made it, when, why, and
+          what each area said before and after. <strong>Put back</strong> restores an area to what it was
+          right after that change — recorded as a change of its own, so nothing is ever lost silently.
+        </p>
+
+        <?php if (!$log): ?>
+          <p><em>No changes yet.</em></p>
+        <?php else: ?>
+          <table class="widefat striped" style="max-width:60em">
+            <thead><tr><th style="width:150px">When</th><th style="width:130px">Who</th><th>Why</th><th style="width:110px"></th></tr></thead>
+            <tbody>
+            <?php foreach ($log as $i => $e): ?>
+              <tr>
+                <td><?php echo esc_html(date_i18n('j M Y H:i', $e['time'])); ?></td>
+                <td><?php echo esc_html($e['user']); ?><br>
+                    <small style="color:#777"><?php echo esc_html($e['kind']); ?></small></td>
+                <td>
+                  <?php echo $e['reason'] !== '' ? esc_html($e['reason']) : '<em style="color:#999">no reason given</em>'; ?>
+                  <details style="margin-top:6px">
+                    <summary style="cursor:pointer;font-size:12px">
+                      <?php echo count($e['changes']); ?> area<?php echo count($e['changes']) === 1 ? '' : 's'; ?>:
+                      <?php echo esc_html(implode(', ', array_keys($e['changes']))); ?>
+                    </summary>
+                    <?php foreach ($e['changes'] as $id => $c): ?>
+                      <p style="margin:8px 0 2px"><code><?php echo esc_html($id); ?></code></p>
+                      <?php if (array_key_exists('from', $c)): ?>
+                        <p style="margin:2px 0;font-size:11px;color:#777">before</p>
+                        <textarea rows="3" class="large-text code" readonly><?php echo esc_textarea($c['from'] === null ? '(the plugin default)' : $c['from']); ?></textarea>
+                        <p style="margin:2px 0;font-size:11px;color:#777">after</p>
+                        <textarea rows="3" class="large-text code" readonly><?php echo esc_textarea($c['to'] === null ? '(the plugin default)' : $c['to']); ?></textarea>
+                      <?php endif; ?>
+                    <?php endforeach; ?>
+                  </details>
+                </td>
+                <td>
+                  <form method="post" onsubmit="return confirm('Put these areas back to how they were after this change?')">
+                    <?php wp_nonce_field('mf_design', 'mf_design_nonce'); ?>
+                    <input type="hidden" name="restore" value="<?php echo (int) $i; ?>">
+                    <input type="hidden" name="mf_reason" value="">
+                    <button type="submit" class="button button-small">Put back</button>
+                  </form>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+            </tbody>
+          </table>
+        <?php endif; ?>
+
+        <h2 style="margin-top:30px">Backup</h2>
+        <p class="description" style="max-width:52em">
+          Everything on this page — every area's HTML, the CSS beside each one, and the five area
+          stylesheets — as one block of text. Copy it somewhere safe before a big change, or to carry
+          this design to another site. Restoring reads back only the areas this version knows; anything
+          else in the file is ignored rather than half-applied.
+        </p>
+        <p><strong>Copy this out</strong></p>
+        <textarea rows="6" class="large-text code" readonly onclick="this.select()"><?php echo esc_textarea(self::export()); ?></textarea>
+
+        <form method="post" style="margin-top:18px">
+          <?php wp_nonce_field('mf_design', 'mf_design_nonce'); ?>
+          <p><strong>Paste one back in</strong></p>
+          <textarea name="mf_import" rows="6" class="large-text code" spellcheck="false"
+                    placeholder="Paste a backup here"></textarea>
+          <?php self::reason_field(); ?>
+          <?php submit_button('Restore this backup', 'secondary'); ?>
+        </form>
         <?php
     }
 
@@ -739,8 +969,10 @@ class Mini_Forum_Design {
     private static function save_blocks() {
         $in    = isset($_POST['blocks']) && is_array($_POST['blocks']) ? wp_unslash($_POST['blocks']) : array();
         $reset = isset($_POST['reset'])  && is_array($_POST['reset'])  ? $_POST['reset'] : array();
-        $out   = self::overrides();
-        $base  = self::bases();
+        $out    = self::overrides();
+        $base   = self::bases();
+        $before = $out;
+        $reason = isset($_POST['mf_reason']) ? sanitize_text_field(wp_unslash($_POST['mf_reason'])) : '';
 
         foreach (self::manifest() as $group) {
             foreach ($group['blocks'] as $id => $def) {
@@ -759,8 +991,9 @@ class Mini_Forum_Design {
         update_option(self::OPT_BASE, $base);
 
         // The CSS written beside each area, on the same save.
-        $css_in  = isset($_POST['bcss']) && is_array($_POST['bcss']) ? wp_unslash($_POST['bcss']) : array();
-        $css_out = self::block_css();
+        $css_in     = isset($_POST['bcss']) && is_array($_POST['bcss']) ? wp_unslash($_POST['bcss']) : array();
+        $css_out    = self::block_css();
+        $before_css = $css_out;
         foreach (self::manifest() as $group) {
             foreach ($group['blocks'] as $id => $def) {
                 if (!empty($reset[$id])) { unset($css_out[$id]); continue; }
@@ -770,6 +1003,21 @@ class Mini_Forum_Design {
             }
         }
         update_option(self::OPT_BCSS, $css_out);
+
+        // One entry per save, listing only what actually moved.
+        $changes = array();
+        foreach (self::manifest() as $group) {
+            foreach ($group['blocks'] as $id => $def) {
+                $was_h = isset($before[$id])  ? $before[$id]  : null;
+                $now_h = isset($out[$id])     ? $out[$id]     : null;
+                $was_c = isset($before_css[$id]) ? $before_css[$id] : null;
+                $now_c = isset($css_out[$id]) ? $css_out[$id] : null;
+                if ($was_h === $now_h && $was_c === $now_c) continue;
+                $changes[$id] = array('from' => $was_h, 'to' => $now_h,
+                                      'from_css' => $was_c, 'to_css' => $now_c);
+            }
+        }
+        self::log($changes, $reason);
     }
 
     /** The screens, and the two places a whole one can be replaced. */

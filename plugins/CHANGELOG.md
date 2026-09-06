@@ -18,6 +18,22 @@ The screens the script draws get their copy from `MD.text`, resolved server-side
 Every string keeps its literal as a fallback, so with Mini-Forum absent or older
 nothing is editable and everything still reads exactly as before.
 
+## mini-forum 3.11.00
+
+**Every change is kept, with the reason for it.** Each save takes a *Why this
+change* line and records one entry: who, when, why, which areas moved, and what
+each said before and after. A **History & backup** tab lists the last 60, newest
+first. **Put back** restores the areas one entry touched to what they said right
+after it — and is recorded as a change of its own, so nothing disappears quietly.
+An entry only ever touches the areas it changed; the rest of the design is left
+alone.
+
+**A backup you can hold.** The same tab exports everything on the page — every
+area's HTML, the CSS beside each one, the five area stylesheets — as one block of
+text to copy somewhere safe or carry to another site. Pasting one back reads only
+the areas this version knows and ignores the rest rather than half-applying it; a
+paste that is not a backup is refused with a reason.
+
 ## mini-forum 3.10.00
 
 **Join Us is editable end to end.** All three steps — the four area cards, the
