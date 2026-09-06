@@ -18,6 +18,8 @@ class Mini_Forum_Shortcodes {
      */
     public static function router($atts) {
         ob_start();
+        $slot = (isset($_GET['view']) && $_GET['view'] === 'profile') ? 'profile' : 'forum';
+        mf_block('slot.' . $slot . '.top');
 
         $view    = sanitize_text_field($_GET['view'] ?? '');
         $post_id = intval($_GET['post_id'] ?? 0);
@@ -32,6 +34,7 @@ class Mini_Forum_Shortcodes {
             include mf_template('forum-home');
         }
 
+        mf_block('slot.' . $slot . '.bottom');
         return ob_get_clean();
     }
 
@@ -47,6 +50,7 @@ class Mini_Forum_Shortcodes {
      */
     public static function events_router($atts) {
         ob_start();
+        mf_block('slot.events.top');
 
         $view = sanitize_text_field($_GET['view'] ?? '');
         $allowed_subviews = ['workshops','meetups','experts','updates','special-days','host'];
@@ -57,6 +61,7 @@ class Mini_Forum_Shortcodes {
             include mf_template('events-home');
         }
 
+        mf_block('slot.events.bottom');
         return ob_get_clean();
     }
 
@@ -65,7 +70,9 @@ class Mini_Forum_Shortcodes {
      */
     public static function join_page($atts) {
         ob_start();
+        mf_block('slot.join.top');
         include mf_template('join-us');
+        mf_block('slot.join.bottom');
         return ob_get_clean();
     }
 }

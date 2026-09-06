@@ -95,6 +95,20 @@ class Mini_Forum_Design {
         // Mini-Kits panel belongs on this page too, not on a second one.
         return apply_filters('mf_design_blocks', array(
 
+            /* Empty by default, and on purpose: somewhere to put a banner, a
+               hero, a footer or a notice on a page that has no slot for one,
+               without touching anything the plugin draws. */
+            'slots' => array('label' => 'Your own blocks — top and bottom of each page', 'blocks' => array(
+                'slot.forum.top'      => array('Forum — above everything', 'html', '', array(), array()),
+                'slot.forum.bottom'   => array('Forum — below everything', 'html', '', array(), array()),
+                'slot.profile.top'    => array('Profile — above everything', 'html', '', array(), array()),
+                'slot.profile.bottom' => array('Profile — below everything', 'html', '', array(), array()),
+                'slot.events.top'     => array('Events — above everything', 'html', '', array(), array()),
+                'slot.events.bottom'  => array('Events — below everything', 'html', '', array(), array()),
+                'slot.join.top'       => array('Join Us — above everything', 'html', '', array(), array()),
+                'slot.join.bottom'    => array('Join Us — below everything', 'html', '', array(), array()),
+            )),
+
             'forum_out' => array('label' => 'Forum — signed out', 'blocks' => array(
                 'forum.guest.hero' => array('Hero', 'html',
                     '@forum.guest.hero',
@@ -606,6 +620,69 @@ class Mini_Forum_Design {
         return $out;
     }
 
+    /**
+     * Which screen a group of areas belongs to, and where to go and look at it.
+     *
+     * "Probably the Mini-Kits screen" is not something anyone should have to
+     * guess from an id, so every group says where it appears and links there.
+     */
+    public static function group_pages() {
+        $forum  = function_exists('mf_get_forum_url')  ? mf_get_forum_url()  : home_url('/');
+        $events = function_exists('mf_get_events_url') ? mf_get_events_url() : home_url('/');
+        return apply_filters('mf_design_group_pages', array(
+            'slots'         => array('Every screen, top and bottom',  $forum),
+            'forum_out'     => array('Forum, signed out',        $forum),
+            'forum_in'      => array('Forum, signed in',         $forum),
+            'forum_more'    => array('Forum home',               $forum),
+            'create'        => array('Writing a post',           add_query_arg('view', 'create', $forum)),
+            'profile'       => array('Profile',                  add_query_arg('view', 'profile', $forum)),
+            'lists'         => array('Wherever posts and events are listed', $forum),
+            'events'        => array('Events hub',               $events),
+            'events_more'   => array('Events hub',               $events),
+            'events_heroes' => array('Events sub-pages',         add_query_arg('view', 'updates', $events)),
+            'host'          => array('Host an Event',            add_query_arg('view', 'host', $events)),
+            'host_form'     => array('Host an Event',            add_query_arg('view', 'host', $events)),
+            'join'          => array('Join Us',                  home_url('/mini-community/join-us/')),
+            'popups'        => array('Sign in, sign up and Settings — open them from any page', $forum),
+            'minikits'        => array('Profile → Mini-Kits',    add_query_arg('view', 'profile', $forum)),
+            'minikits_status' => array('Profile → Mini-Kits',    add_query_arg('view', 'profile', $forum)),
+            'minikits_screens'=> array('Profile → Mini-Kits',    add_query_arg('view', 'profile', $forum)),
+        ));
+    }
+
+    /**
+     * A rendered look at one area, for the admin page.
+     *
+     * Reading markup and picturing the result is a skill nobody should need to
+     * edit their own site's words, so each area shows itself: its HTML inside an
+     * iframe carrying the site's own stylesheets. Tokens become visible chips so
+     * it is clear where the real content lands.
+     */
+    public static function preview_srcdoc($id) {
+        $def = self::definition($id);
+        if (!$def) return '';
+
+        $html = $def[1] === 'text' ? esc_html(self::get($id)) : wp_kses(self::get($id), self::allowed_html());
+        foreach (self::tokens($id) as $name => $note) {
+            $html = str_replace('{{' . $name . '}}',
+                '<span style="display:inline-block;padding:1px 7px;border-radius:9px;background:#EEF3FF;' .
+                'border:1px dashed #9db4e8;color:#3d5aa0;font:600 11px/1.6 system-ui">' . esc_html($name) . '</span>',
+                $html);
+        }
+
+        $links = '';
+        foreach (self::stylesheets() as $file) {
+            if (!file_exists($file)) continue;
+            $links .= '<link rel="stylesheet" href="' . esc_url(MF_URL . 'assets/css/' . basename($file)) . '">';
+        }
+        $own = trim(self::block_css($id));
+
+        return '<!doctype html><html><head><meta charset="utf-8">' . $links .
+               '<style>body{margin:0;padding:14px;background:#fff;font-family:Montserrat,system-ui,sans-serif}' .
+               ($own !== '' ? str_replace(array('<', '>'), '', $own) : '') . '</style></head><body>' .
+               $html . '</body></html>';
+    }
+
     public static function stylesheets() {
         return apply_filters('mf_design_stylesheets', array(
             MF_PATH . 'assets/css/mini-forum.css',
@@ -1022,48 +1099,73 @@ class Mini_Forum_Design {
     }
 
     private static function form_blocks() {
+        $pages = self::group_pages();
         ?>
-        <p class="description" style="max-width:52em">
-          Every fixed piece of copy on the front end. Blocks marked <em>HTML</em> take markup —
-          links, <code>&lt;br&gt;</code>, a <code>&lt;span&gt;</code> to colour a word. Scripts and
-          iframes are stripped on save. Tick <strong>Reset</strong> to go back to the default.
+        <p class="description" style="max-width:56em">
+          Every area of the front end. Each one shows what it looks like, where it appears, its HTML,
+          and the CSS that styles it. Areas marked <strong>Whole section</strong> are a block of the
+          page; <strong>One line</strong> areas are a single heading or sentence. Scripts and event
+          handlers are stripped on save, and every area has a Reset.
         </p>
         <?php
         foreach (self::manifest() as $key => $group) {
-            echo '<h2>' . esc_html($group['label']) . '</h2>';
+            $where = isset($pages[$key]) ? $pages[$key] : null;
+            echo '<h2 style="margin-top:28px">' . esc_html($group['label']) . '</h2>';
+            if ($where) {
+                printf('<p class="description" style="margin:-8px 0 10px">Appears on: <strong>%s</strong> — <a href="%s" target="_blank" rel="noopener">open the page</a></p>',
+                       esc_html($where[0]), esc_url($where[1]));
+            }
             echo '<table class="form-table" role="presentation"><tbody>';
             foreach ($group['blocks'] as $id => $def) {
-                $val  = self::get($id);
-                $over = self::is_overridden($id);
+                $val    = self::get($id);
+                $over   = self::is_overridden($id);
+                $tokens = self::tokens($id);
+                $keeps  = self::keeps($id);
+                $gone   = self::missing_keeps($id);
+                $moved  = self::default_changed($id);
+                $bcss   = self::block_css($id);
+                $whole  = $def[1] === 'html' && strlen($def[2]) > 220;
                 ?>
-                <?php $tokens = self::tokens($id); $moved = self::default_changed($id); ?>
                 <tr>
-                  <th scope="row" style="vertical-align:top">
-                    <label for="<?php echo esc_attr($id); ?>"><?php echo wp_kses_post($def[0]); ?></label><br>
-                    <code style="font-size:11px;color:#777"><?php echo esc_html($id); ?></code>
-                    <span style="display:block;font-size:11px;color:#777"><?php echo $def[1] === 'html' ? 'HTML' : 'Plain text'; ?></span>
-                    <?php if ($over): ?>
-                      <span style="display:inline-block;margin-top:6px;padding:2px 7px;border-radius:9px;background:#FFF3D6;color:#8A5A00;font-size:11px;font-weight:700">Yours</span>
-                    <?php endif; ?>
+                  <th scope="row" style="vertical-align:top;width:210px">
+                    <label for="<?php echo esc_attr($id); ?>" style="font-size:14px"><?php echo wp_kses_post($def[0]); ?></label>
+                    <span style="display:block;margin-top:5px">
+                      <span style="display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:700;<?php
+                        echo $whole ? 'background:#E7F0FF;color:#204a8f' : 'background:#F0F0F0;color:#666'; ?>">
+                        <?php echo $whole ? 'Whole section' : ($def[1] === 'html' ? 'Small block' : 'One line'); ?>
+                      </span>
+                      <?php if ($over): ?>
+                        <span style="display:inline-block;margin-left:4px;padding:1px 7px;border-radius:9px;background:#FFF3D6;color:#8A5A00;font-size:11px;font-weight:700">Yours</span>
+                      <?php endif; ?>
+                    </span>
+                    <code style="display:block;margin-top:6px;font-size:11px;color:#888"><?php echo esc_html($id); ?></code>
                   </th>
                   <td>
+                    <!-- what it looks like -->
+                    <details open style="margin:0 0 10px">
+                      <summary style="cursor:pointer;font-size:12px;color:#2271b1;font-weight:600">What this looks like</summary>
+                      <iframe title="<?php echo esc_attr($def[0]); ?>" loading="lazy"
+                              style="width:100%;height:<?php echo $whole ? 260 : 90; ?>px;border:1px solid #dcdcde;border-radius:4px;background:#fff;margin-top:6px"
+                              srcdoc="<?php echo esc_attr(self::preview_srcdoc($id)); ?>"></iframe>
+                    </details>
+
                     <?php if ($tokens): ?>
                       <p class="description" style="margin:0 0 6px">
-                        Put these anywhere in your HTML, or leave them out:
+                        The site fills these in — put them where you like, or leave one out:
                         <?php foreach ($tokens as $name => $note): ?>
                           <code style="margin-right:6px" title="<?php echo esc_attr($note); ?>">{{<?php echo esc_html($name); ?>}}</code>
                         <?php endforeach; ?>
                       </p>
                     <?php endif; ?>
 
+                    <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#555">HTML</p>
                     <textarea id="<?php echo esc_attr($id); ?>" name="blocks[<?php echo esc_attr($id); ?>]"
-                              rows="<?php echo strlen($val) > 400 ? 12 : (strlen($val) > 90 ? 5 : 2); ?>"
+                              rows="<?php echo $whole ? 12 : (strlen($val) > 90 ? 5 : 2); ?>"
                               class="large-text code" spellcheck="false"><?php echo esc_textarea($val); ?></textarea>
 
-                    <?php $keeps = self::keeps($id); $gone = self::missing_keeps($id); ?>
                     <?php if ($keeps): ?>
                       <p class="description" style="margin:6px 0 0">
-                        The code looks for these — keep them and everything keeps working:
+                        Keep these — the site holds on to them:
                         <?php foreach ($keeps as $needle => $why): ?>
                           <code style="margin-right:6px;<?php echo isset($gone[$needle]) ? 'background:#FEE2E2;color:#B91C1C' : ''; ?>"
                                 title="<?php echo esc_attr($why); ?>"><?php echo esc_html($needle); ?></code>
@@ -1078,9 +1180,27 @@ class Mini_Forum_Design {
                             <li><code><?php echo esc_html($needle); ?></code> — <?php echo esc_html($why); ?>. That stops working.</li>
                           <?php endforeach; ?>
                         </ul>
-                        The rest of the page is unaffected, and Reset brings it back.
+                        Reset brings it back.
                       </div>
                     <?php endif; ?>
+
+                    <!-- CSS, on every area -->
+                    <?php $existing = self::css_for($id); ?>
+                    <details style="margin-top:10px" <?php echo $bcss !== '' ? 'open' : ''; ?>>
+                      <summary style="cursor:pointer;font-size:12px;color:#2271b1;font-weight:600">
+                        CSS<?php echo $bcss !== '' ? ' (in use)' : ''; ?>
+                      </summary>
+                      <?php if ($existing !== ''): ?>
+                        <p class="description" style="margin:6px 0 4px">
+                          <strong>What already styles this</strong> — read-only. Copy a rule down and change it below.
+                        </p>
+                        <textarea rows="7" class="large-text code" readonly spellcheck="false"
+                                  onclick="this.select()" style="background:#f6f7f7"><?php echo esc_textarea(trim($existing)); ?></textarea>
+                      <?php endif; ?>
+                      <p class="description" style="margin:6px 0 4px"><strong>Your rules for this area</strong></p>
+                      <textarea name="bcss[<?php echo esc_attr($id); ?>]" rows="5" class="large-text code"
+                                spellcheck="false" placeholder="/* e.g. .mf-hero-desc{font-size:18px!important} */"><?php echo esc_textarea($bcss); ?></textarea>
+                    </details>
 
                     <?php if ($moved): ?>
                       <div style="margin-top:8px;padding:10px 12px;border-left:4px solid #B26B00;background:#FFF8EC">
@@ -1092,35 +1212,8 @@ class Mini_Forum_Design {
                       </div>
                     <?php endif; ?>
 
-                    <?php if ($def[1] === 'html'): $bcss = self::block_css($id); ?>
-                      <details style="margin-top:8px" <?php echo $bcss !== '' ? 'open' : ''; ?>>
-                        <summary style="cursor:pointer;font-size:12px;color:#2271b1">
-                          CSS for this area<?php echo $bcss !== '' ? ' (in use)' : ''; ?>
-                        </summary>
-                        <?php $existing = self::css_for($id); ?>
-                        <?php if ($existing !== ''): ?>
-                          <p class="description" style="margin:6px 0 4px">
-                            <strong>What already styles this markup</strong> — the plugin's own rules for the
-                            classes above. Read-only: copy a rule into the box below and change it there.
-                          </p>
-                          <textarea rows="8" class="large-text code" readonly spellcheck="false"
-                                    onclick="this.select()" style="background:#f6f7f7"><?php echo esc_textarea(trim($existing)); ?></textarea>
-                        <?php endif; ?>
-                        <p class="description" style="margin:6px 0 4px">
-                          <strong>Your rules for this area.</strong> Printed after the area stylesheets, on every
-                          page this area appears on. The plugin's own rules use <code>!important</code>,
-                          so match that when overriding one.
-                        </p>
-                        <textarea name="bcss[<?php echo esc_attr($id); ?>]" rows="5" class="large-text code"
-                                  spellcheck="false" placeholder="/* e.g. .benim-hero{gap:30px!important} */"><?php echo esc_textarea($bcss); ?></textarea>
-                      </details>
-                    <?php endif; ?>
-
-                    <p class="description" style="margin-top:4px">
+                    <p class="description" style="margin-top:6px">
                       <label><input type="checkbox" name="reset[<?php echo esc_attr($id); ?>]" value="1"> Reset to the plugin's default</label>
-                      <?php if (!$over): ?>
-                        <span style="color:#999;margin-left:10px">Unchanged — this follows the plugin.</span>
-                      <?php endif; ?>
                     </p>
                   </td>
                 </tr>

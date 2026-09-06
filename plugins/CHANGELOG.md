@@ -18,6 +18,30 @@ The screens the script draws get their copy from `MD.text`, resolved server-side
 Every string keeps its literal as a fallback, so with Mini-Forum absent or older
 nothing is editable and everything still reads exactly as before.
 
+## mini-forum 3.14.00
+
+Everything here comes from watching someone try to use the page.
+
+**Every area shows itself.** "Reading markup and picturing the result" is not a
+skill anyone should need to change their own site's words. Each area now opens with
+a live view of itself, rendered in the site's own stylesheets, with `{{tokens}}`
+drawn as labelled chips so it is clear where the real content lands.
+
+**Every group says which screen it is,** and links straight to it. Nobody should
+have to guess "probably the Mini-Kits screen" from an id.
+
+**Every area has a CSS box.** Some had one and some did not — the box was only on
+the HTML areas — which read as arbitrary. A heading is worth styling too.
+
+**Whole section / Small block / One line.** Some areas are a page's whole block and
+some are a single sentence, and there was no way to tell which before opening one.
+Each now carries a badge, and a whole section opens in a taller box.
+
+**Somewhere to put your own blocks.** Join Us had no hero and no footer, so there
+was nowhere to add one. Every screen — Forum, Profile, Events, Join Us — now has an
+empty area above and below it. They render nothing until something is put in them,
+and they take HTML and CSS like any other area.
+
 ## mini-forum 3.13.00
 
 **48 areas — the screens are covered.** Added here: the forum's four
