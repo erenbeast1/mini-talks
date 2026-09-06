@@ -1,5 +1,19 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.08.01
+
+**An area now says what the code needs from it.** Editing HTML cannot break the
+plugin's logic, but it can quietly switch off a behaviour attached to the markup:
+delete the Settings button and the Settings popup has nothing to open it; delete
+`.mf-stats-row` and Mini-Devices has nowhere to put the Mini-Kit request count.
+Each area lists those hooks under its box, and if the saved HTML no longer contains
+one, the page says which behaviour stopped and that Reset brings it back. It warns
+rather than refuses — removing a button on purpose is a fair thing to want.
+
+**The avatar editor gained an attribute hook** to match the others:
+`data-mf-action="avatar"` calls `MFAvatar.open()` directly, so a rewritten profile
+header can open the editor without keeping the original classes.
+
 ## mini-forum 3.08.00
 
 **Whole areas, edited as HTML.** 3.07.00 made the words editable; this makes the

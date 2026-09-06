@@ -66,6 +66,9 @@ class Mini_Forum_Design {
      *        a heading that already sits inside its own tag).
      * tokens name => what the template puts there. The value is inserted as-is:
      *        the plugin built it, so it is already safe.
+     * keep   needle => why. A rewrite may drop these, and the page still works,
+     *        but that one behaviour stops: the Design page warns when one goes
+     *        missing rather than letting it fail quietly on the front end.
      */
     public static function manifest() {
         // Filterable so another plugin can add its own screens: Mini-Devices'
@@ -110,7 +113,8 @@ class Mini_Forum_Design {
                       '</div>' .
                     '</div>',
                     array('join_url' => 'The Join Us page', 'studs_red' => 'Red stud strip image',
-                          'studs_blue' => 'Blue stud strip image')),
+                          'studs_blue' => 'Blue stud strip image'),
+                    array('data-mf-action="login"' => 'opens the sign-in popup')),
             )),
 
             'forum_in' => array('label' => 'Forum — signed in', 'blocks' => array(
@@ -146,7 +150,14 @@ class Mini_Forum_Design {
                     '</div>',
                     array('avatar' => "The member's avatar", 'edit_icon' => 'Pencil icon',
                           'nickname' => 'Their nickname', 'badges' => 'Their role badges',
-                          'stats' => 'The Posts / Events / Kits boxes', 'settings_icon' => 'Cog icon')),
+                          'stats' => 'The Posts / Events / Kits boxes', 'settings_icon' => 'Cog icon'),
+                    array(
+                      'mf-av-editable'            => 'clicking the avatar opens the editor',
+                      'mf-av-edit-btn'            => 'the Customize Avatar button opens the editor',
+                      'data-mf-action="settings"' => 'opens the Settings popup',
+                      'mf-stats-row'              => 'Mini-Devices adds the Mini-Kit request box here',
+                      '{{stats}}'                 => 'the Posts / Events / Kits boxes, and where Mini-Kits writes its count',
+                    )),
 
                 'profile.posts.title'   => array('Posts heading', 'text', 'My Posts'),
                 'profile.posts.empty'   => array('Posts empty state', 'html', 'No posts yet.'),
@@ -252,6 +263,21 @@ class Mini_Forum_Design {
             $repl[] = isset($vars[$name]) ? $vars[$name] : '';
         }
         return str_replace($find, $repl, $out);
+    }
+
+    public static function keeps($id) {
+        $def = self::definition($id);
+        return $def && isset($def[4]) && is_array($def[4]) ? $def[4] : array();
+    }
+
+    /** Which of an area's hooks its current HTML no longer contains. */
+    public static function missing_keeps($id) {
+        $html = self::get($id);
+        $out  = array();
+        foreach (self::keeps($id) as $needle => $why) {
+            if (strpos($html, $needle) === false) $out[$needle] = $why;
+        }
+        return $out;
     }
 
     public static function tokens($id) {
@@ -397,6 +423,28 @@ class Mini_Forum_Design {
                     <textarea id="<?php echo esc_attr($id); ?>" name="blocks[<?php echo esc_attr($id); ?>]"
                               rows="<?php echo strlen($val) > 400 ? 12 : (strlen($val) > 90 ? 5 : 2); ?>"
                               class="large-text code" spellcheck="false"><?php echo esc_textarea($val); ?></textarea>
+
+                    <?php $keeps = self::keeps($id); $gone = self::missing_keeps($id); ?>
+                    <?php if ($keeps): ?>
+                      <p class="description" style="margin:6px 0 0">
+                        The code looks for these — keep them and everything keeps working:
+                        <?php foreach ($keeps as $needle => $why): ?>
+                          <code style="margin-right:6px;<?php echo isset($gone[$needle]) ? 'background:#FEE2E2;color:#B91C1C' : ''; ?>"
+                                title="<?php echo esc_attr($why); ?>"><?php echo esc_html($needle); ?></code>
+                        <?php endforeach; ?>
+                      </p>
+                    <?php endif; ?>
+                    <?php if ($gone): ?>
+                      <div style="margin-top:6px;padding:9px 12px;border-left:4px solid #B91C1C;background:#FEF2F2">
+                        <strong>Your version is missing:</strong>
+                        <ul style="margin:6px 0 0 18px;list-style:disc">
+                          <?php foreach ($gone as $needle => $why): ?>
+                            <li><code><?php echo esc_html($needle); ?></code> — <?php echo esc_html($why); ?>. That stops working.</li>
+                          <?php endforeach; ?>
+                        </ul>
+                        The rest of the page is unaffected, and Reset brings it back.
+                      </div>
+                    <?php endif; ?>
 
                     <?php if ($moved): ?>
                       <div style="margin-top:8px;padding:10px 12px;border-left:4px solid #B26B00;background:#FFF8EC">

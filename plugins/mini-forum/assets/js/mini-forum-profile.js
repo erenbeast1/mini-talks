@@ -172,8 +172,7 @@ document.addEventListener('click', function (e) {
   if ((action === 'login' || action === 'register') && typeof window.mtOpenAuth === 'function') {
     e.preventDefault(); window.mtOpenAuth(action); return;
   }
-  if (action === 'avatar') {
-    var btn = document.querySelector('.mf-av-edit-btn, .mf-av-editable');
-    if (btn && btn !== el) { e.preventDefault(); btn.click(); }
+  if (action === 'avatar' && window.MFAvatar && typeof window.MFAvatar.open === 'function') {
+    e.preventDefault(); window.MFAvatar.open();
   }
 });
