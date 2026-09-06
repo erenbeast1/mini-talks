@@ -106,9 +106,15 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
   <div class="mf-profile-panel" data-mf-panel-id="studio" hidden>
     <div class="mf-profile-section">
       <h3><?php mf_block('profile.studio.title'); ?></h3>
-      <p class="mf-empty-note"><?php mf_block('profile.studio.empty'); ?></p>
+      <?php if (Mini_Forum_Game::configured()): ?>
+        <?php echo Mini_Forum_Game::notice_html(); ?>
+        <div id="mf-game-card"><?php echo Mini_Forum_Game::card_html($uid); ?></div>
+      <?php else: ?>
+        <p class="mf-empty-note"><?php mf_block('profile.studio.empty'); ?></p>
+      <?php endif; ?>
     </div>
   </div><!-- /panel: studio -->
 </div>
 
 <?php include MF_PATH . 'templates/settings-popup.php'; ?>
+<?php if (Mini_Forum_Game::configured()) echo Mini_Forum_Game::popup_html(); ?>

@@ -28,10 +28,14 @@
 
 if (!defined('ABSPATH')) exit;
 
-/* The two inline icons the profile header uses. Constants so the template and
-   the manifest's default HTML cannot drift apart. */
+/* The inline icons the profile uses. Constants so the template and the
+   manifest's default HTML cannot drift apart. */
 define('MF_PENCIL_SVG', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>');
 define('MF_COG_SVG', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.36.44.63.81.76H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>');
+/* Game account — a controller, for the App & Studio card. */
+define('MF_GAME_SVG', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>');
+/* A tick, for the "check your inbox" step. */
+define('MF_TICK_SVG', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>');
 
 class Mini_Forum_Design {
 
@@ -147,6 +151,68 @@ class Mini_Forum_Design {
                 'profile.kits.empty'    => array('Mini-Kits empty state', 'html', 'Your Mini-Talks kits will appear here once the Mini-Devices plugin is active.'),
                 'profile.studio.title'  => array('App &amp; Studio heading', 'text', 'App & Studio'),
                 'profile.studio.empty'  => array('App &amp; Studio empty state', 'html', 'Coming soon.'),
+            )),
+
+            /* The game account card, its popup, and the e-mail that carries the
+               confirmation link. Every sentence a member reads while connecting
+               their Mini-Talks game account is here. */
+            'game' => array('label' => 'Game account — Profile → App & Studio', 'blocks' => array(
+
+                'game.connect' => array('The card, before anything is connected', 'html',
+                    '@game.connect',
+                    array('icon' => 'The controller icon'),
+                    array('data-mf-action="game-open"' => 'opens the connect popup — without a button carrying this, nobody can connect')),
+
+                'game.linked' => array('The card, once connected', 'html',
+                    '@game.linked',
+                    array('avatar' => 'The game figure, or the forum avatar when the game has none',
+                          'name' => 'The name on the game account', 'role' => 'Mini, Parent, Expert or Builder',
+                          'tagline' => 'Their game tagline, if they have one',
+                          'stats' => 'The bricks / medals / cups boxes',
+                          'email' => 'The connected address, masked', 'synced' => 'How long ago it was read'),
+                    array('data-mf-action="game-refresh"'    => 'reads the game again',
+                          'data-mf-action="game-avatar"'     => 'copies the game figure onto the forum avatar',
+                          'data-mf-action="game-disconnect"' => 'disconnects — leave it in, or nobody can undo this')),
+
+                'game.form' => array('Connect popup — asking for the address', 'html',
+                    '@game.form',
+                    array(),
+                    array('id="mf-game-email"'            => 'the address is read from this field',
+                          'data-mf-game-msg'              => 'refusals and errors are written here',
+                          'data-mf-action="game-send"'    => 'sends the confirmation link',
+                          'data-mf-action="game-close"'   => 'closes the popup')),
+
+                'game.sent' => array('Connect popup — after the link is sent', 'html',
+                    '@game.sent',
+                    array('email' => 'The address it went to', 'minutes' => 'How long the link lasts', 'tick' => 'The tick icon'),
+                    array('data-mf-game-email'          => 'the address is written into this element',
+                          'data-mf-action="game-open"'  => 'goes back to the address field')),
+
+                'game.email.subject' => array('Confirmation e-mail — subject', 'text',
+                    'Connect your Mini-Talks game account'),
+
+                'game.email' => array('Confirmation e-mail — body', 'html',
+                    '@game.email',
+                    array('game_name' => 'The name on the game account', 'nickname' => 'Their forum nickname',
+                          'site' => 'This site&rsquo;s name', 'link' => 'The confirmation link',
+                          'minutes' => 'How long the link lasts'),
+                    array('{{link}}' => 'the confirmation link — an e-mail without it connects nobody')),
+
+                'game.msg.linked'   => array('Message — connected', 'text', 'Connected. Your game account is on your profile now.'),
+                'game.msg.taken'    => array('Message — that account is on another profile', 'text', 'That game account is already connected to another Mini-Talks profile.'),
+                'game.msg.already'  => array('Message — this profile already has one', 'text', 'Your profile is already connected to a game account. Disconnect it first.'),
+                'game.msg.invalid'  => array('Message — the link no longer works', 'text', 'That link is no longer valid. Please start again.'),
+                'game.msg.bademail' => array('Message — not an address', 'text', 'That does not look like an e-mail address.'),
+                'game.msg.slow'     => array('Message — too many tries', 'text', 'That is a lot of tries. Please wait a few minutes and start again.'),
+                'game.msg.off'      => array('Message — linking is not set up', 'text', 'Game linking is not set up yet.'),
+                'game.msg.noavatar' => array('Message — no figure saved in the game', 'text', 'There is no figure saved on that game account yet.'),
+                'game.msg.avatar'   => array('Message — figure copied across', 'text', 'Your game figure is now your forum avatar.'),
+
+                'game.role.child'   => array('Role name — child account', 'text', 'Mini'),
+                'game.role.parent'  => array('Role name — parent account', 'text', 'Parent'),
+                'game.role.expert'  => array('Role name — expert account', 'text', 'Expert'),
+                'game.role.builder' => array('Role name — builder account', 'text', 'Builder'),
+                'game.role.admin'   => array('Role name — the team', 'text', 'Team'),
             )),
 
             'events' => array('label' => 'Events', 'blocks' => array(
@@ -399,14 +465,27 @@ class Mini_Forum_Design {
     private static function definition($id) {
         foreach (self::manifest() as $group) {
             if (!isset($group['blocks'][$id])) continue;
-            $def = $group['blocks'][$id];
-            // '@name' means the default lives in design/name.html
-            if (isset($def[2]) && is_string($def[2]) && strlen($def[2]) > 1 && $def[2][0] === '@') {
-                $def[2] = self::file(substr($def[2], 1));
-            }
-            return $def;
+            return self::resolve($group['blocks'][$id]);
         }
         return null;
+    }
+
+    /**
+     * '@name' in a manifest entry means the default lives in design/name.html.
+     *
+     * Anything reading a manifest entry has to come through here, not just
+     * definition(): the admin page and the save both compare an area's value
+     * against $def[2], and against the literal '@name' those comparisons are
+     * all false. That is how a file-backed section came to be labelled "One
+     * line", how saving one without touching it froze it against future
+     * updates, and how every saved section grew a permanent "the plugin's
+     * version changed" warning.
+     */
+    private static function resolve($def) {
+        if (isset($def[2]) && is_string($def[2]) && strlen($def[2]) > 1 && $def[2][0] === '@') {
+            $def[2] = self::file(substr($def[2], 1));
+        }
+        return $def;
     }
 
     /**
@@ -644,6 +723,7 @@ class Mini_Forum_Design {
             'host_form'     => array('Host an Event',            add_query_arg('view', 'host', $events)),
             'join'          => array('Join Us',                  home_url('/mini-community/join-us/')),
             'popups'        => array('Sign in, sign up and Settings — open them from any page', $forum),
+            'game'          => array('Profile → App & Studio',  add_query_arg('view', 'profile', $forum)),
             'minikits'        => array('Profile → Mini-Kits',    add_query_arg('view', 'profile', $forum)),
             'minikits_status' => array('Profile → Mini-Kits',    add_query_arg('view', 'profile', $forum)),
             'minikits_screens'=> array('Profile → Mini-Kits',    add_query_arg('view', 'profile', $forum)),
@@ -1117,6 +1197,7 @@ class Mini_Forum_Design {
             }
             echo '<table class="form-table" role="presentation"><tbody>';
             foreach ($group['blocks'] as $id => $def) {
+                $def    = self::resolve($def);
                 $val    = self::get($id);
                 $over   = self::is_overridden($id);
                 $tokens = self::tokens($id);
@@ -1233,6 +1314,7 @@ class Mini_Forum_Design {
 
         foreach (self::manifest() as $group) {
             foreach ($group['blocks'] as $id => $def) {
+                $def = self::resolve($def);
                 if (!empty($reset[$id])) { unset($out[$id], $base[$id]); continue; }
                 if (!isset($in[$id])) continue;
 

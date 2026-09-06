@@ -1,3 +1,6 @@
 __pycache__/
 *.py[cod]
 dist/
+
+# The game-side shared key — created on the server, never committed.
+game-api/forum/config.php

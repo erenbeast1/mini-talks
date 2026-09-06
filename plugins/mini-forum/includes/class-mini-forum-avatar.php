@@ -517,23 +517,110 @@ class Mini_Forum_Avatar {
     /**
      * Sanitize incoming config — only known keys, only sane types.
      */
+    /**
+     * Keep what the editor actually saves, and nothing else.
+     *
+     * The key list is the editor's own save payload, read off the bundle:
+     *
+     *   hairCategory hairColor hairTextureIndex faceSelections
+     *   activeEyeSlot activeMouthSlot activeFaceCategory
+     *   eyeModelName mouthModelName eyeColor eyebrowColor glassesColor
+     *
+     * A key missing from this list is dropped on save and gone when the editor
+     * next opens, so it has to match the payload exactly — hairCategory and the
+     * face slots used to fall off here, which reopened the editor on the
+     * default hair and the default face.
+     */
     private static function sanitize_config($config) {
         $clean = [];
-        // Strings
-        $string_keys = ['gender', 'hairType', 'eyeColor', 'eyebrowColor', 'glassesColor', 'eyeModelName', 'mouthModelName'];
+        // Strings. 'gender' and 'hairType' are older keys, still read by code
+        // that predates the current editor, so they stay.
+        $string_keys = ['gender', 'hairType', 'hairCategory', 'activeFaceCategory',
+                        'eyeColor', 'eyebrowColor', 'glassesColor', 'eyeModelName', 'mouthModelName'];
         foreach ($string_keys as $k) {
             if (isset($config[$k]) && is_string($config[$k])) {
                 $clean[$k] = sanitize_text_field($config[$k]);
             }
         }
         // Ints
-        $int_keys = ['hairColor', 'hairTextureIndex', 'eyeTextureIndex', 'glassesTextureIndex', 'mouthTextureIndex', 'facialHairTextureIndex'];
+        $int_keys = ['hairColor', 'hairTextureIndex', 'eyeTextureIndex', 'glassesTextureIndex',
+                     'mouthTextureIndex', 'facialHairTextureIndex', 'activeEyeSlot', 'activeMouthSlot'];
         foreach ($int_keys as $k) {
             if (isset($config[$k])) {
                 $clean[$k] = (int) $config[$k];
             }
         }
+        // Which model sits in each face slot — a flat map of name => index.
+        if (isset($config['faceSelections']) && is_array($config['faceSelections'])) {
+            $slots = [];
+            foreach ($config['faceSelections'] as $slot => $index) {
+                if (!is_scalar($index)) continue;
+                $slots[sanitize_text_field((string) $slot)] = (int) $index;
+            }
+            if ($slots) $clean['faceSelections'] = $slots;
+        }
         return $clean;
+    }
+
+    /**
+     * Set a member's avatar from a config the editor did not just draw.
+     *
+     * Used by Connect Profile to bring a figure across from the game: both run
+     * the same editor, so the config transfers as-is. The PNG the game rendered
+     * is copied here rather than hot-linked, so the forum keeps showing a face
+     * when the game is down, and so it is cache-busted like every other avatar.
+     *
+     * @param int    $user_id
+     * @param array  $config  The editor config, in the shape sanitize_config keeps.
+     * @param string $png_url Optional already-rendered PNG to copy.
+     * @return array|WP_Error
+     */
+    public static function apply_config($user_id, $config, $png_url = '') {
+        $user_id = (int) $user_id;
+        if ($user_id <= 0 || !is_array($config) || !$config) {
+            return new WP_Error('mf_avatar_config', __('There is nothing to copy across.', 'mini-forum'));
+        }
+
+        $clean = self::sanitize_config($config);
+        if (!$clean) {
+            return new WP_Error('mf_avatar_config', __('That figure could not be read.', 'mini-forum'));
+        }
+
+        // Keep whatever gender the account already carries, for the older render
+        // paths that still read it. Never invent one from an imported config.
+        $gender = self::get_gender($user_id);
+        if ($gender) $clean['gender'] = $gender;
+
+        $version = self::get_version($user_id) + 1;
+        $url     = '';
+
+        if ($png_url && preg_match('#^https?://#i', $png_url)) {
+            $res = wp_remote_get($png_url, ['timeout' => 15]);
+            if (!is_wp_error($res) && (int) wp_remote_retrieve_response_code($res) === 200) {
+                $bin  = wp_remote_retrieve_body($res);
+                $type = wp_remote_retrieve_header($res, 'content-type');
+                // A PNG, of a sane size, and really a PNG: the first eight bytes
+                // are the signature, so a mislabelled body cannot land in the
+                // uploads folder.
+                $is_png = strncmp($bin, "\x89PNG\r\n\x1a\n", 8) === 0;
+                if ($is_png && strlen($bin) > 100 && strlen($bin) <= 2 * 1024 * 1024
+                    && (!$type || stripos($type, 'image/') === 0)) {
+                    self::ensure_upload_dir();
+                    $dir      = self::get_upload_dir();
+                    $filename = sprintf('user_%d_v%d.png', $user_id, $version);
+                    if (@file_put_contents(trailingslashit($dir['path']) . $filename, $bin) !== false) {
+                        $url = trailingslashit($dir['url']) . $filename;
+                        self::cleanup_old_files($user_id, $filename);
+                    }
+                }
+            }
+        }
+
+        update_user_meta($user_id, self::META_CONFIG, wp_json_encode($clean));
+        update_user_meta($user_id, self::META_VERSION, $version);
+        if ($url) update_user_meta($user_id, self::META_URL, $url);
+
+        return ['config' => $clean, 'url' => $url ?: self::get_url($user_id), 'version' => $version];
     }
 
     private static function delete_avatar_files($uid) {

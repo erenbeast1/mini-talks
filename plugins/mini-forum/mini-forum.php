@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini-Forum
  * Description: A calm, safe community forum for the Mini-Talks ecosystem.
- * Version: 3.14.00
+ * Version: 3.15.00
  * Author: Mini-Talks
  * Text Domain: mini-forum
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MF_VERSION', '3.14.00');
+define('MF_VERSION', '3.15.00');
 define('MF_PATH', plugin_dir_path(__FILE__));
 define('MF_URL', plugin_dir_url(__FILE__));
 
@@ -19,6 +19,7 @@ require_once MF_PATH . 'includes/class-mini-forum-cpt.php';
 require_once MF_PATH . 'includes/class-mini-forum-ajax.php';
 require_once MF_PATH . 'includes/class-mini-forum-shortcodes.php';
 require_once MF_PATH . 'includes/class-mini-forum-avatar.php';
+require_once MF_PATH . 'includes/class-mini-forum-game.php';
 if (is_admin()) {
     require_once MF_PATH . 'includes/class-mini-forum-admin.php';
 }
@@ -557,6 +558,24 @@ add_action('wp_enqueue_scripts', function() {
     $profile_js_v  = file_exists(MF_PATH . 'assets/js/mini-forum-profile.js')   ? filemtime(MF_PATH . 'assets/js/mini-forum-profile.js')   : MF_VERSION;
     wp_enqueue_style('mf-profile-style', MF_URL . 'assets/css/mini-forum-profile.css', ['mf-style'], $profile_css_v);
     wp_enqueue_script('mf-profile-script', MF_URL . 'assets/js/mini-forum-profile.js', ['jquery', 'mf-auth-script'], $profile_js_v, true);
+
+    // Connect Profile. Only shipped once somebody has pointed the forum at a
+    // game — with nothing configured the App & Studio tab reads as it always did,
+    // and this file is never even requested.
+    if (Mini_Forum_Game::configured()) {
+        $game_js_v = file_exists(MF_PATH . 'assets/js/mini-forum-game.js') ? filemtime(MF_PATH . 'assets/js/mini-forum-game.js') : MF_VERSION;
+        wp_enqueue_script('mf-game-script', MF_URL . 'assets/js/mini-forum-game.js', ['jquery', 'mf-auth-script'], $game_js_v, true);
+        wp_localize_script('mf-game-script', 'mf_game', [
+            'url'   => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mf_nonce'),
+            'text'  => [
+                'sending' => __('Sending…', 'mini-forum'),
+                'working' => __('One moment…', 'mini-forum'),
+                'confirm' => __('Disconnect your game account from this profile?', 'mini-forum'),
+                'failed'  => __('That did not go through. Please try again.', 'mini-forum'),
+            ],
+        ]);
+    }
 });
 
 /* ── Auth Popup — on ALL pages ── */

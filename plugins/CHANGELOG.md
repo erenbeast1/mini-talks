@@ -1,5 +1,56 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.15.00
+
+**Connect Profile — the forum profile meets the game account.** Profile →
+*App & Studio* gains a card: a member types the e-mail address they sign in to
+the Mini-Talks game with, the forum mails a confirmation link to that address,
+and opening it connects the two. What they have earned in the game — bricks,
+medals, cups, their streak — then shows on their forum profile, and *Use my game
+figure* copies their game avatar across as their forum one.
+
+It is the account-verification flow the game already uses, pointed at the forum
+instead of at a login. **No game password is ever typed into WordPress**, and
+none crosses between the two systems: the proof is that they can read the inbox
+the game knows them by.
+
+The game side is four new files, in the plugin's `game-api/forum/` folder, that
+drop in as `minitalks-api/forum/`. No screen, no edit to an existing endpoint, no
+column on a table the game already writes; the one table they own is created on
+first use. They answer only a POST carrying the shared key, in a header, so a
+browser cannot reach them and the key stays out of access logs. `link-request.php`
+answers the same "not found" for an unknown address, a deactivated account and an
+unverified one, so the forum cannot be used to test who plays. Only the SHA-256 of
+a token is stored, and confirming clears it, so a link works exactly once. What
+comes back is a name, a role, the counters the game already puts on its own
+dashboard, and the avatar — never a password hash, never anybody else's address.
+
+Both halves are set up from one small page, **Mini-Talks Game**, which tests the
+connection on save and lists who has connected. With nothing configured the
+feature is invisible: App & Studio reads exactly as it did before, and the
+script is never even requested.
+
+Every sentence a member reads, and the confirmation e-mail itself, is on the
+Design page under *Game account* — 20 new areas, so the wording and the markup
+are editable like everything else, and translated by the same plugin.
+
+### Fixed along the way
+
+**The Design page mislabelled and mis-tracked every file-backed area.** A
+manifest entry whose default lives in `design/*.html` holds the marker
+`@name`; only `definition()` resolved it, while the admin page and the save
+compared an area's value against the unresolved marker. So every lifted section
+was labelled *One line* instead of *Whole section* — the inconsistent
+granularity in the review — saving one without touching it stored an override
+that froze it against future plugin updates, and every saved section grew a
+permanent, false "the plugin's version of this changed in an update" warning.
+One resolver, used everywhere a manifest entry is read, fixes all three.
+
+**The avatar save dropped half of what the editor sends.** `hairCategory`,
+`faceSelections`, `activeEyeSlot`, `activeMouthSlot` and `activeFaceCategory`
+were not on the keep list, so reopening the editor lost the hair category and
+every face-slot choice. The list now matches the editor's own save payload.
+
 ## mini-devices 3.4.0
 
 **Mini-Kits joins the Design page.** It does not open a second one: 26 areas are
