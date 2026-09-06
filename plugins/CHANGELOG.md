@@ -18,6 +18,38 @@ The screens the script draws get their copy from `MD.text`, resolved server-side
 Every string keeps its literal as a fallback, so with Mini-Forum absent or older
 nothing is editable and everything still reads exactly as before.
 
+## mini-forum 3.12.00
+
+**The rest of the screens, as editable HTML.** 31 areas now, across nine groups.
+New in this release: both popups (sign up step by step, sign in, Settings), the
+write-a-post form, the post as it appears in a list, the post on its own page, a
+reply — and the four cards that make up the events pages: an event with a photo, an
+event without one, a community update, a special day.
+
+**A card is one design, used everywhere it appears.** The events hub and the
+event-type pages drew the same card from two copies of the same markup, which had to
+be kept in step by hand. They render the same area now, so changing how an event
+looks is one edit. A reply and a reply-to-a-reply likewise share one design,
+rendered recursively.
+
+**Defaults moved out of the PHP into `design/*.html`.** A screen's markup as a PHP
+string literal is unreadable and a stray quote breaks the file; as a file it can be
+read, diffed and edited like the template it came from. 23 of them.
+
+**Inline icons are allowed, as a narrow subset** — shapes and their geometry, no
+`<use>`, no href of any kind, no `<script>`, no `<foreignObject>`. Without it every
+icon in the popups and the event cards would have been stripped the first time
+someone saved.
+
+**Every handler that lived on markup now binds by attribute.** Saving strips
+`onclick`, so sign in, sign up, role choice, password toggles, Settings, Share,
+emoji reactions and Reply would each have stopped working the moment their area was
+edited. They bind on `data-mf-action` through one delegated listener per script, and
+every area lists the attributes it must keep.
+
+**Fixed:** `forum-create.php` was missing a closing `</div>`, leaving the page
+container open. It has been closed.
+
 ## mini-forum 3.11.00
 
 **Every change is kept, with the reason for it.** Each save takes a *Why this

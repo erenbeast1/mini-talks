@@ -223,73 +223,56 @@ function mfe_render_event_card($ev, $cfg, $tp_table, $idx = 0) {
   $btn_label = $is_disabled ? ucfirst($ev->status)
              : ($current_user_joined ? 'Joined ✓' : $cfg['card_btn']);
   ?>
-  <div class="mfe-frame-card<?php echo $img ? '' : ' mfe-frame-card-noimg'; ?>">
-    <div class="mfe-frame-studs mfe-stud-<?php echo esc_attr($frame); ?>"></div>
-    <div class="mfe-frame-body mfe-frame-<?php echo esc_attr($frame); ?>">
-      <div class="mfe-frame-inner">
-        <?php if ($img): ?>
-        <div class="mfe-evcard-img mfe-evcard-img-has mfe-evcard-img-bdr-<?php echo esc_attr($frame); ?>">
-          <img src="<?php echo esc_url($img); ?>" alt="" />
-          <div class="mfe-datebox mfe-db-<?php echo esc_attr($frame); ?> mfe-db-noborder" style="position:absolute;top:12px;left:12px">
-            <span class="mfe-d-day"><?php echo mfe_evcard_short_day($ev->start_datetime); ?></span>
-            <span class="mfe-d-num"><?php echo mfe_evcard_day_num($ev->start_datetime); ?></span>
-            <span class="mfe-d-mon"><?php echo mfe_evcard_short_mon($ev->start_datetime); ?></span>
-          </div>
-        </div>
-        <?php endif; ?>
-        <div class="mfe-evcard-body">
-          <?php if (!$img): ?>
-          <div class="mfe-evcard-headerow">
-            <div class="mfe-datebox mfe-db-<?php echo esc_attr($frame); ?>">
-              <span class="mfe-d-day"><?php echo mfe_evcard_short_day($ev->start_datetime); ?></span>
-              <span class="mfe-d-num"><?php echo mfe_evcard_day_num($ev->start_datetime); ?></span>
-              <span class="mfe-d-mon"><?php echo mfe_evcard_short_mon($ev->start_datetime); ?></span>
-            </div>
-            <h3 class="mfe-evcard-title mfe-evcard-title-inline"><?php echo esc_html($ev->title); ?></h3>
-          </div>
-          <?php else: ?>
-          <h3 class="mfe-evcard-title"><?php echo esc_html($ev->title); ?></h3>
-          <?php endif; ?>
-          <div class="mfe-evcard-meta">
-            <span class="mfe-evcard-meta-item">
-              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-              <?php echo esc_html(mfe_evcard_time($ev->start_datetime)); ?>
-            </span>
-            <?php if ($ev->location_name): ?>
-            <span class="mfe-evcard-meta-item">
-              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
-              <?php echo esc_html($ev->location_name); ?>
-            </span>
-            <?php endif; ?>
-          </div>
-          <span class="mfe-evcard-sep"></span>
-          <p class="mfe-evcard-desc"><?php
-            $allowed = ['strong'=>[],'b'=>[],'em'=>[],'i'=>[],'u'=>[],'br'=>[],'span'=>['style'=>true],'a'=>['href'=>true,'target'=>true,'rel'=>true]];
-            echo wp_kses($ev->short_description ?: 'Lorem ipsum dolor sit amet consectetur. Orci a est varius nisi proin viverra quam elementum tellus. Et bibendum ac tristique tempus.', $allowed);
-          ?></p>
-          <div class="mfe-evcard-foot">
-            <div class="mfe-evcard-avatars" data-event-id="<?php echo (int)$ev->id; ?>">
-              <?php foreach ($avatars as $a): ?>
-                <span class="mfe-evcard-av" title="<?php echo esc_attr($a['name']); ?>" style="background-image:url('<?php echo esc_url($a['url']); ?>');background-size:cover;background-position:center"></span>
-              <?php endforeach; ?>
-              <?php if ($extra > 0): ?><span class="mfe-evcard-av-more">+<?php echo $extra; ?></span><?php endif; ?>
-              <span class="mfe-evcard-count"><span class="mfe-evcard-count-num"><?php echo $count; ?></span> <?php echo esc_html($cfg['count_label']); ?></span>
-            </div>
-          </div>
-          <div class="mfe-evcard-btnrow">
-            <button type="button" class="mfe-evcard-btn-details det-<?php echo esc_attr($frame); ?> mfe-detail-btn"
-                    data-event-id="<?php echo (int)$ev->id; ?>"
-                    data-event-type="<?php echo esc_attr($cfg['event_type'] === 'expert_session' ? 'expert' : $cfg['event_type']); ?>">See Details</button>
-            <button type="button" class="mfe-evcard-btn mfe-btn-<?php echo esc_attr($frame); ?> mfe-join-btn<?php echo $current_user_joined ? ' is-joined' : ''; ?>"
-                    data-event-id="<?php echo (int)$ev->id; ?>"
-                    data-default-label="<?php echo esc_attr($cfg['card_btn']); ?>"
-                    <?php echo $is_disabled ? 'disabled' : ''; ?>><?php echo esc_html($btn_label); ?></button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   <?php
+  /* The same two card designs the hub uses, so there is one place to change
+     how an event looks rather than two that must be kept in step. */
+  $clock = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  $pin   = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.5 7-12a7 7 0 1 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+
+  $meta = '<div class="mfe-evcard-meta"><span class="mfe-evcard-meta-item">' . $clock . ' ' .
+          esc_html(mfe_evcard_time($ev->start_datetime)) . '</span>';
+  if ($ev->location_name) {
+      $meta .= '<span class="mfe-evcard-meta-item">' . $pin . ' ' . esc_html($ev->location_name) . '</span>';
+  }
+  $meta .= '</div>';
+
+  $avatar_html = '';
+  foreach ($avatars as $a) {
+      $avatar_html .= '<span class="mfe-evcard-av" title="' . esc_attr($a['name']) . '" style="background-image:url(\'' .
+                      esc_url($a['url']) . '\');background-size:cover;background-position:center"></span>';
+  }
+  if ($extra > 0) $avatar_html .= '<span class="mfe-evcard-av-more">+' . (int)$extra . '</span>';
+  $avatar_html .= '<span class="mfe-evcard-count"><span class="mfe-evcard-count-num">' . (int)$count . '</span> ' .
+                  esc_html($cfg['count_label']) . '</span>';
+
+  $detail_type = $cfg['event_type'] === 'expert_session' ? 'expert' : $cfg['event_type'];
+  $buttons = '<div class="mfe-evcard-btnrow">' .
+    '<button type="button" class="mfe-evcard-btn-details det-' . esc_attr($frame) . ' mfe-detail-btn"' .
+    ' data-event-id="' . (int)$ev->id . '" data-event-type="' . esc_attr($detail_type) . '">See Details</button>' .
+    '<button type="button" class="mfe-evcard-btn mfe-btn-' . esc_attr($frame) . ' mfe-join-btn' .
+    ($current_user_joined ? ' is-joined' : '') . '" data-event-id="' . (int)$ev->id . '"' .
+    ' data-default-label="' . esc_attr($cfg['card_btn']) . '"' .
+    ($is_disabled ? ' disabled' : '') . '>' . esc_html($btn_label) . '</button></div>';
+
+  $allowed = ['strong'=>[],'b'=>[],'em'=>[],'i'=>[],'u'=>[],'br'=>[],'span'=>['style'=>true],'a'=>['href'=>true,'target'=>true,'rel'=>true]];
+  $ts = strtotime($ev->start_datetime);
+
+  mf_block($img ? 'events.event.card' : 'events.event.card.noimage', array(
+      'event_id'    => (int)$ev->id,
+      'month_key'   => esc_attr(date('Y-m', $ts)),
+      'date_key'    => esc_attr(date('Y-m-d', $ts)),
+      'is_upcoming' => (date('Y-m-d', $ts) >= date('Y-m-d', current_time('timestamp'))) ? '1' : '0',
+      'colour'      => esc_attr($frame),
+      'image'       => esc_url($img),
+      'day'         => mfe_evcard_short_day($ev->start_datetime),
+      'date'        => mfe_evcard_day_num($ev->start_datetime),
+      'month'       => mfe_evcard_short_mon($ev->start_datetime),
+      'title'       => esc_html($ev->title),
+      'meta'        => $meta,
+      'description' => wp_kses($ev->short_description ?: 'Lorem ipsum dolor sit amet consectetur. Orci a est varius nisi proin viverra quam elementum tellus. Et bibendum ac tristique tempus.', $allowed),
+      'avatars'     => $avatar_html,
+      'buttons'     => $buttons,
+  ));
 }
 ?>
 

@@ -111,31 +111,31 @@ function mfe_sd_short_mon($dt){ return ucfirst(strtolower(date('M', strtotime($d
       <?php else: foreach ($items as $d):
         $accent = in_array($d->accent_color, ['blue','red','yellow','green','orange'], true) ? $d->accent_color : 'orange';
       ?>
-      <div class="mfe-sd-row mfe-sd-row-<?php echo esc_attr($accent); ?>">
-        <div class="mfe-datebox mfe-db-<?php echo esc_attr($accent); ?>">
-          <span class="mfe-d-day"><?php echo esc_html(mfe_sd_short_day($d->day_date)); ?></span>
-          <span class="mfe-d-num"><?php echo esc_html(mfe_sd_day_num($d->day_date)); ?></span>
-          <span class="mfe-d-mon"><?php echo esc_html(mfe_sd_short_mon($d->day_date)); ?></span>
-        </div>
-        <div class="mfe-sd-content">
-          <h3><?php echo esc_html($d->title); ?></h3>
-          <div class="mfe-sd-content-desc"><?php echo wp_kses_post($d->description); ?></div>
-          <?php
-            $imgs = [];
-            if (!empty($d->images)) {
-              $decoded = json_decode($d->images, true);
-              if (is_array($decoded)) $imgs = $decoded;
-            }
-            if (!empty($imgs)):
-          ?>
-          <div class="mfe-sd-photos">
-            <?php foreach ($imgs as $img_url): ?>
-              <span class="mfe-sd-photo" style="background-image:url('<?php echo esc_url($img_url); ?>');background-size:cover;background-position:center"></span>
-            <?php endforeach; ?>
-          </div>
-          <?php endif; ?>
-        </div>
-      </div>
+      <?php
+      $mf_imgs = array();
+      if (!empty($d->images)) {
+        $decoded = json_decode($d->images, true);
+        if (is_array($decoded)) $mf_imgs = $decoded;
+      }
+      $mf_photos = '';
+      if ($mf_imgs) {
+        $mf_photos = '<div class="mfe-sd-photos">';
+        foreach ($mf_imgs as $img_url) {
+          $mf_photos .= '<span class="mfe-sd-photo" style="background-image:url(\'' . esc_url($img_url) .
+                        '\');background-size:cover;background-position:center"></span>';
+        }
+        $mf_photos .= '</div>';
+      }
+
+      mf_block('events.specialday.card', array(
+        'accent'      => esc_attr($accent),
+        'day'         => esc_html(mfe_sd_short_day($d->day_date)),
+        'date'        => esc_html(mfe_sd_day_num($d->day_date)),
+        'month'       => esc_html(mfe_sd_short_mon($d->day_date)),
+        'title'       => esc_html($d->title),
+        'description' => wp_kses_post($d->description),
+        'photos'      => $mf_photos,
+      )); ?>
       <?php endforeach; endif; ?>
     </div>
   </section>

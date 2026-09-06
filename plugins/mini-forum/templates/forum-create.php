@@ -24,62 +24,20 @@ $c = $configs[$type] ?? $configs['question'];
     <div class="mf-studs mf-studs-<?php echo $c['color']; ?>"></div>
 
     <!-- Yellow frame + white interior (smb-card style) -->
-    <div class="mf-create-frame" style="background:<?php echo $c['frame']; ?>">
-    <div class="mf-create-body">
-      <!-- Side color bars (behind card) -->
-      <div class="mf-create-sides left" style="background:#E52828"></div>
-      <div class="mf-create-sides right" style="background:#0055BF"></div>
+    <?php
+    ob_start(); foreach ($c['tags'] as $tag): ?>
+      <button type="button" class="mf-tag-chip" data-value="<?php echo esc_attr($tag); ?>">
+        <span class="chip-dot" style="background:#ccc"></span> <?php echo esc_html($tag); ?>
+      </button>
+    <?php endforeach; $mf_tags = ob_get_clean();
 
-      <input type="hidden" id="mf-create-type" value="<?php echo esc_attr($type); ?>" />
-
-      <div class="mf-field-group">
-        <label>Title</label>
-        <input type="text" id="mf-create-title" placeholder="<?php echo esc_attr($c['ph']); ?>" />
-      </div>
-
-      <div class="mf-field-group">
-        <label>What would you like to share?</label>
-        <textarea id="mf-create-content" rows="5" placeholder="<?php echo esc_attr($c['body']); ?>"></textarea>
-      </div>
-
-      <!-- Topic — dropdown/select style -->
-      <div class="mf-field-group">
-        <label>Choose a topic <span class="mf-optional">(optional)</span></label>
-        <select id="mf-create-topic" class="mf-topic-select">
-          <option value="">Select a topic...</option>
-          <option value="family">With Family</option>
-          <option value="school">At School</option>
-          <option value="social">In Social Settings</option>
-          <option value="mini-talks">Mini-Talks</option>
-        </select>
-      </div>
-
-      <!-- Emotional tags -->
-      <div class="mf-field-group">
-        <label>How would you describe this moment? <span class="mf-optional">(optional)</span></label>
-        <div class="mf-tag-chips">
-          <?php foreach($c['tags'] as $tag): ?>
-          <button type="button" class="mf-tag-chip" data-value="<?php echo esc_attr($tag); ?>">
-            <span class="chip-dot" style="background:#ccc"></span> <?php echo esc_html($tag); ?>
-          </button>
-          <?php endforeach; ?>
-        </div>
-      </div>
-
-      <!-- Safety Note -->
-      <div class="mf-safety-note-v2">
-        <div class="mf-safety-shield">🛡</div>
-        <span><strong>Safety Note:</strong> Feel free to keep things general — no need to share personal details.</span>
-      </div>
-
-      <div id="mf-create-error" class="mf-auth-error"></div>
-
-      <div class="mf-form-actions">
-        <a href="<?php echo esc_url(mf_get_forum_url()); ?>" class="mf-btn mf-btn-cancel">Cancel</a>
-        <button class="mf-btn mf-btn-blue" onclick="mfSubmitPost()">Share</button>
-      </div>
-    </div>
-
-
+    mf_block('forum.create.form', array(
+      'frame_colour'      => esc_attr($c['frame']),
+      'type'              => esc_attr($type),
+      'title_placeholder' => esc_attr($c['ph']),
+      'body_placeholder'  => esc_attr($c['body']),
+      'tags'              => $mf_tags,
+      'forum_url'         => esc_url(mf_get_forum_url()),
+    )); ?>
   </div>
 </div>

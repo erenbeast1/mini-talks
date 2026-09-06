@@ -40,22 +40,21 @@ $emojis=['❤️','👍','🤗','💡'];
   <a href="<?php echo esc_url(mf_get_forum_url());?>" class="mf-back">← Back to <strong>Mini-Forum</strong></a>
 
   <!-- Main Post Card — colored border, thick bottom, NO studs -->
-  <div class="mf-detail-card <?php echo $bc;?>">
-    <div class="mf-detail-inner">
-      <div class="mf-post-meta">
-        <span class="mf-type-badge <?php echo $bgc;?>"><?php echo esc_html($tl);?></span>
-        <?php if($ts||$tag):?><span class="mf-meta-secondary"><?php echo esc_html(implode(' · ',array_filter([$ts,$tag])));?></span><?php endif;?>
-      </div>
-      <h1><?php echo esc_html($post->post_title);?></h1>
-      <div class="mf-detail-body"><?php echo wpautop(esc_html($post->post_content));?></div>
-      <div class="mf-detail-author">
-        <?php echo mf_avatar_html($aid, 'sm'); ?>
-        <strong><?php echo esc_html($nick);?></strong>
-        <span class="mf-role-badge <?php echo $rbc;?>"><?php echo esc_html($role);?></span>
-        <span class="mf-meta-light"><?php echo $rc;?> replies · <?php echo esc_html($ta);?></span>
-      </div>
-    </div>
-  </div>
+  <?php mf_block('forum.post.detail', array(
+    'border_class' => $bc,
+    'badge_class'  => $bgc,
+    'type_label'   => esc_html($tl),
+    'meta'         => ($ts || $tag)
+        ? '<span class="mf-meta-secondary">' . esc_html(implode(' · ', array_filter(array($ts, $tag)))) . '</span>' : '',
+    'title'        => esc_html($post->post_title),
+    'body'         => wpautop(esc_html($post->post_content)),
+    'avatar'       => mf_avatar_html($aid, 'sm'),
+    'author'       => esc_html($nick),
+    'role_class'   => $rbc,
+    'role'         => esc_html($role),
+    'replies'      => (int) $rc,
+    'when'         => esc_html($ta),
+  )); ?>
 
   <!-- Replies Title -->
   <h2 class="mf-section-title mf-title-contour" style="font-size:clamp(20px,2.2vw,32px)">Replies</h2>
@@ -64,62 +63,55 @@ $emojis=['❤️','👍','🤗','💡'];
   <div class="mf-replies-frame">
     <?php if(empty($parents)):?>
     <p class="mf-no-replies">No responses yet. Be the first to share a supportive thought.</p>
-    <?php else: foreach($parents as $r):
-      $rn=mf_get_nickname($r->user_id);$rr=mf_get_user_role($r->user_id);
-      $rrc=['Family'=>'rb-blue','Expert'=>'rb-green','Volunteer'=>'rb-yellow','Talk-Spot'=>'rb-red'][$rr]??'rb-blue';
-      $r_reacts=$react_map[$r->id]??[];$r_mine=$my_reacts[$r->id]??[];
+    <?php else: foreach($parents as $r): ?>
+    <?php
+    /* One design for a reply, used for a top-level one and for each reply to
+       it — so there is a single place to change how a reply looks. */
+    if (!function_exists('mf_render_reply')) {
+      function mf_render_reply($r, $emojis, $react_map, $my_reacts, $subs_html = '') {
+        $rn  = mf_get_nickname($r->user_id);
+        $rr  = mf_get_user_role($r->user_id);
+        $rrc = ['Family'=>'rb-blue','Expert'=>'rb-green','Volunteer'=>'rb-yellow','Talk-Spot'=>'rb-red'][$rr] ?? 'rb-blue';
+        $mine_map = $my_reacts[$r->id] ?? [];
+        $counts   = $react_map[$r->id] ?? [];
+
+        $reactions = '';
+        foreach ($emojis as $em) {
+          $cnt  = $counts[$em] ?? 0;
+          $mine = isset($mine_map[$em]);
+          $reactions .= '<button class="mf-react-btn' . ($mine ? ' active' : '') . '"' .
+                        ' data-mf-action="react" data-reply-id="' . (int)$r->id . '"' .
+                        ' data-emoji="' . esc_attr($em) . '" title="' . esc_attr($em) . '">' . esc_html($em) .
+                        ($cnt ? '<span class="mf-react-count">' . (int)$cnt . '</span>' : '') . '</button>';
+        }
+        $reply_btn = is_user_logged_in()
+          ? '<button class="mf-reply-btn" data-mf-action="subreply" data-reply-id="' . (int)$r->id . '">↩ Reply</button>'
+          : '';
+
+        mf_block('forum.reply.card', array(
+          'id'           => (int)$r->id,
+          'avatar'       => mf_avatar_html($r->user_id, 'sm'),
+          'author'       => esc_html($rn),
+          'role_class'   => $rrc,
+          'role'         => esc_html($rr),
+          'when'         => mf_time_ago($r->created_at),
+          'message'      => nl2br(esc_html($r->content)),
+          'reactions'    => $reactions,
+          'reply_button' => $reply_btn,
+          'sub_replies'  => $subs_html,
+        ));
+      }
+    }
+
+    ob_start();
+    if (!empty($children[$r->id])) {
+      echo '<div class="mf-sub-replies">';
+      foreach ($children[$r->id] as $sr) { mf_render_reply($sr, $emojis, $react_map, $my_reacts); }
+      echo '</div>';
+    }
+    $mf_subs = ob_get_clean();
+    mf_render_reply($r, $emojis, $react_map, $my_reacts, $mf_subs);
     ?>
-    <div class="mf-reply-card" id="reply-<?php echo $r->id;?>">
-      <div class="mf-reply-top">
-        <div class="mf-reply-user">
-          <?php echo mf_avatar_html($r->user_id, 'sm'); ?>
-          <strong><?php echo esc_html($rn);?></strong>
-          <span class="mf-role-badge <?php echo $rrc;?>"><?php echo esc_html($rr);?></span>
-        </div>
-        <span class="mf-meta-light"><?php echo mf_time_ago($r->created_at);?></span>
-      </div>
-      <p><?php echo nl2br(esc_html($r->content));?></p>
-      <div class="mf-reactions" data-reply-id="<?php echo $r->id;?>">
-        <?php foreach($emojis as $em):$cnt=$r_reacts[$em]??0;$mine=isset($r_mine[$em]);?>
-        <button class="mf-react-btn<?php echo $mine?' active':'';?>" onclick="mfToggleReaction(<?php echo $r->id;?>,'<?php echo $em;?>')" title="<?php echo $em;?>"><?php echo $em;?><?php if($cnt):?><span class="mf-react-count"><?php echo $cnt;?></span><?php endif;?></button>
-        <?php endforeach;?>
-        <?php if(is_user_logged_in()):?>
-        <button class="mf-reply-btn" onclick="mfShowSubReply(<?php echo $r->id;?>)">↩ Reply</button>
-        <?php endif;?>
-      </div>
-      <?php if(!empty($children[$r->id])):?>
-      <div class="mf-sub-replies">
-        <?php foreach($children[$r->id] as $sr):
-          $srn=mf_get_nickname($sr->user_id);$srr=mf_get_user_role($sr->user_id);
-          $srrc=['Family'=>'rb-blue','Expert'=>'rb-green','Volunteer'=>'rb-yellow','Talk-Spot'=>'rb-red'][$srr]??'rb-blue';
-          $sr_reacts=$react_map[$sr->id]??[];$sr_mine=$my_reacts[$sr->id]??[];
-        ?>
-        <div class="mf-sub-reply-card" id="reply-<?php echo $sr->id;?>">
-          <div class="mf-reply-top">
-            <div class="mf-reply-user">
-              <?php echo mf_avatar_html($sr->user_id, 'xs'); ?>
-              <strong style="font-size:13px"><?php echo esc_html($srn);?></strong>
-              <span class="mf-role-badge <?php echo $srrc;?>" style="font-size:10px;padding:2px 8px"><?php echo esc_html($srr);?></span>
-            </div>
-            <span class="mf-meta-light" style="font-size:11px"><?php echo mf_time_ago($sr->created_at);?></span>
-          </div>
-          <p style="font-size:13px"><?php echo nl2br(esc_html($sr->content));?></p>
-          <div class="mf-reactions" data-reply-id="<?php echo $sr->id;?>">
-            <?php foreach($emojis as $em):$cnt=$sr_reacts[$em]??0;$mine=isset($sr_mine[$em]);?>
-            <button class="mf-react-btn<?php echo $mine?' active':'';?>" onclick="mfToggleReaction(<?php echo $sr->id;?>,'<?php echo $em;?>')" title="<?php echo $em;?>"><?php echo $em;?><?php if($cnt):?><span class="mf-react-count"><?php echo $cnt;?></span><?php endif;?></button>
-            <?php endforeach;?>
-          </div>
-        </div>
-        <?php endforeach;?>
-      </div>
-      <?php endif;?>
-      <?php if(is_user_logged_in()):?>
-      <div class="mf-sub-reply-input" id="sub-reply-<?php echo $r->id;?>" style="display:none">
-        <textarea placeholder="Write a reply..." rows="1"></textarea>
-        <button class="mf-btn mf-btn-blue" onclick="mfSubmitSubReply(<?php echo $post_id;?>,<?php echo $r->id;?>)">Send</button>
-      </div>
-      <?php endif;?>
-    </div>
     <?php endforeach;endif;?>
 
     <!-- Reply Input — inside the frame -->

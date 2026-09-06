@@ -172,6 +172,15 @@ document.addEventListener('click', function (e) {
   if ((action === 'login' || action === 'register') && typeof window.mtOpenAuth === 'function') {
     e.preventDefault(); window.mtOpenAuth(action); return;
   }
+  if (action === 'settings-close' && typeof window.mfCloseSettings === 'function') {
+    e.preventDefault(); window.mfCloseSettings(); return;
+  }
+  if (action === 'pwd-save' && typeof window.mfSubmitPassword === 'function') {
+    e.preventDefault(); window.mfSubmitPassword(); return;
+  }
+  if (action === 'pwd' && typeof window.mfTogglePwd === 'function') {
+    e.preventDefault(); window.mfTogglePwd(el.getAttribute('data-value'), el); return;
+  }
   if (action === 'avatar' && window.MFAvatar && typeof window.MFAvatar.open === 'function') {
     e.preventDefault(); window.MFAvatar.open();
   }

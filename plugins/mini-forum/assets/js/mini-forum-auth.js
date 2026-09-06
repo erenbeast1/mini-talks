@@ -131,3 +131,27 @@
     $(document).on('keydown','#mf-login-password',function(e){if(e.key==='Enter')mfSubmitLogin();});
   });
 })(jQuery);
+
+/* ── Design-safe bindings ──
+   The popup's markup is editable in wp-admin, and saving strips onclick, so
+   every button here binds by attribute. Rearrange the popup however you like;
+   keep data-mf-action and it still works. */
+document.addEventListener('click', function (e) {
+  var el = e.target.closest && e.target.closest('[data-mf-action]');
+  if (!el) return;
+  var map = {
+    'auth-close':        function () { window.mfCloseAuth && window.mfCloseAuth(); },
+    'auth-role':         function () { window.mfToggleRole && window.mfToggleRole(el); },
+    'auth-step2':        function () { window.mfRegStep2 && window.mfRegStep2(); },
+    'auth-step3':        function () { window.mfRegStep3 && window.mfRegStep3(); },
+    'auth-back1':        function () { window.mfBackToStep1 && window.mfBackToStep1(); },
+    'auth-back2':        function () { window.mfBackToStep2 && window.mfBackToStep2(); },
+    'auth-register':     function () { window.mfSubmitRegister && window.mfSubmitRegister(); },
+    'auth-login':        function () { window.mfSubmitLogin && window.mfSubmitLogin(); },
+    'auth-show-login':   function () { window.mfShowLogin && window.mfShowLogin(); },
+    'auth-show-register':function () { window.mfShowRegister && window.mfShowRegister(); },
+    'pwd':               function () { window.mfTogglePwd && window.mfTogglePwd(el.getAttribute('data-value'), el); }
+  };
+  var fn = map[el.getAttribute('data-mf-action')];
+  if (fn) { e.preventDefault(); fn(); }
+});

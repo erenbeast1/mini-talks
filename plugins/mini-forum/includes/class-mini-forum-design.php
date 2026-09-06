@@ -63,6 +63,21 @@ class Mini_Forum_Design {
      * that is already inside its own tag).
      */
     /**
+     * The default HTML for an area, kept as a file under design/.
+     *
+     * A screen's markup is hundreds of characters; as a PHP string literal it is
+     * unreadable and easy to break with a stray quote. As a file it can be read,
+     * diffed and edited like the template it came from. Cached per request.
+     */
+    public static function file($name) {
+        static $cache = array();
+        if (isset($cache[$name])) return $cache[$name];
+        $path = MF_PATH . 'design/' . preg_replace('/[^a-z0-9._-]/i', '', $name) . '.html';
+        $cache[$name] = file_exists($path) ? trim(file_get_contents($path)) : '';
+        return $cache[$name];
+    }
+
+    /**
      * Every editable area, grouped by screen.
      *
      *   array(label, type, default_html, tokens)
@@ -82,41 +97,11 @@ class Mini_Forum_Design {
 
             'forum_out' => array('label' => 'Forum — signed out', 'blocks' => array(
                 'forum.guest.hero' => array('Hero', 'html',
-                    '<div class="mf-hero-new">' .
-                      '<div class="mf-hero-left">' .
-                        '<h1 class="mf-title-contour">Forum</h1>' .
-                        '<div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>' .
-                        '<p class="mf-hero-desc">A safe space where Mini-Community members can share their experiences and feel that they are not alone.</p>' .
-                      '</div>' .
-                      '<div class="mf-hero-face"><img src="{{logo}}" alt="Mini-Talks" /></div>' .
-                    '</div>',
+                    '@forum.guest.hero',
                     array('logo' => 'The Mini-Talks logo URL')),
 
                 'forum.guest.access' => array('Forum Access — heading and cards', 'html',
-                    '<h2 class="mf-title-contour" style="text-align:center;font-size:clamp(24px,2.8vw,42px);margin-bottom:10px">Forum Access</h2>' .
-                    '<p class="mf-guest-access-sub">Forum is part of Mini-Community. To access the Forum, you must first be an approved Mini-Community member.</p>' .
-                    '<div class="mf-guest-cards">' .
-                      '<div class="mf-guest-card">' .
-                        '<div class="mf-guest-card-studs" style="background-image:url(\'{{studs_red}}\')"></div>' .
-                        '<div class="mf-guest-card-body" style="background:var(--mf-red)">' .
-                          '<h3>Not a Mini-Community<br>Member Yet</h3>' .
-                          '<div class="mf-guest-card-inner">' .
-                            '<p>To access the Forum, you first need to join Mini-Community.</p>' .
-                            '<a href="{{join_url}}" class="mf-guest-card-btn" style="color:var(--mf-red)">Join Us</a>' .
-                          '</div>' .
-                        '</div>' .
-                      '</div>' .
-                      '<div class="mf-guest-card">' .
-                        '<div class="mf-guest-card-studs" style="background-image:url(\'{{studs_blue}}\')"></div>' .
-                        '<div class="mf-guest-card-body" style="background:var(--mf-blue)">' .
-                          '<h3>I\'m a Mini-Community<br>Member</h3>' .
-                          '<div class="mf-guest-card-inner">' .
-                            '<p>You can sign in with your email address and password.</p>' .
-                            '<button class="mf-guest-card-btn" style="color:var(--mf-blue)" data-mf-action="login">Sign In</button>' .
-                          '</div>' .
-                        '</div>' .
-                      '</div>' .
-                    '</div>',
+                    '@forum.guest.access',
                     array('join_url' => 'The Join Us page', 'studs_red' => 'Red stud strip image',
                           'studs_blue' => 'Blue stud strip image'),
                     array('data-mf-action="login"' => 'opens the sign-in popup')),
@@ -124,35 +109,13 @@ class Mini_Forum_Design {
 
             'forum_in' => array('label' => 'Forum — signed in', 'blocks' => array(
                 'forum.hero' => array('Hero', 'html',
-                    '<div class="mf-hero-new">' .
-                      '<div class="mf-hero-left">' .
-                        '<h1 class="mf-title-contour">Mini-Forum</h1>' .
-                        '<div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>' .
-                        '<p class="mf-hero-desc">Share. Connect. Support.</p>' .
-                        '<p class="mf-hero-desc">A safe space for families, experts, and volunteers.</p>' .
-                      '</div>' .
-                      '<div class="mf-hero-face"><img src="{{logo}}" alt="Mini-Talks" /></div>' .
-                    '</div>',
+                    '@forum.hero',
                     array('logo' => 'The Mini-Talks logo URL')),
             )),
 
             'profile' => array('label' => 'Profile', 'blocks' => array(
                 'profile.header' => array('Header — avatar, name, badges, stats', 'html',
-                    '<div class="mf-avatar-col">' .
-                      '<div class="mf-avatar-lg mf-av-editable" role="button" tabindex="0" aria-label="Edit your avatar">' .
-                        '{{avatar}}<span class="mf-av-edit-overlay">Edit</span>' .
-                      '</div>' .
-                      '<button type="button" class="mf-av-edit-btn" aria-label="Customize your avatar">{{edit_icon}} Customize Avatar</button>' .
-                    '</div>' .
-                    '<div class="mf-profile-info">' .
-                      '<h1>{{nickname}}</h1>' .
-                      '<div class="mf-profile-roles">{{badges}}</div>' .
-                      '<p class="mf-profile-community">Part of the Mini-Talks community</p>' .
-                      '<div class="mf-stats-row">{{stats}}</div>' .
-                    '</div>' .
-                    '<div class="mf-profile-settings">' .
-                      '<button type="button" class="mf-settings-btn" data-mf-action="settings" aria-label="Open account settings">{{settings_icon}} Settings</button>' .
-                    '</div>',
+                    '@profile.header',
                     array('avatar' => "The member's avatar", 'edit_icon' => 'Pencil icon',
                           'nickname' => 'Their nickname', 'badges' => 'Their role badges',
                           'stats' => 'The Posts / Events / Kits boxes', 'settings_icon' => 'Cog icon'),
@@ -174,47 +137,141 @@ class Mini_Forum_Design {
 
             'events' => array('label' => 'Events', 'blocks' => array(
                 'events.hero' => array('Hero', 'html',
-                    '<div class="mf-hero-new">' .
-                      '<div class="mf-hero-left">' .
-                        '<h1 class="mf-title-contour">Mini-Events</h1>' .
-                        '<div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>' .
-                        '<p class="mf-hero-desc">Real-world meetups where the Mini-Talks experience comes to life.</p>' .
-                        '<p class="mf-hero-desc">Natural interactions where children and volunteers connect together.</p>' .
-                      '</div>' .
-                      '<div class="mf-hero-face"><img src="{{logo}}" alt="Mini-Talks" /></div>' .
-                    '</div>',
+                    '@events.hero',
                     array('logo' => 'The Mini-Talks logo URL')),
 
                 'events.soon' => array('Empty sub-page card', 'html',
-                    '<div class="mfe-frame-inner" style="padding:36px 28px;text-align:center">' .
-                      '<h3 style="font-family:\'Montserrat\',sans-serif;font-weight:900;font-size:22px;color:#1D1D1B;margin:0 0 10px">Coming soon</h3>' .
-                      '<p style="font-weight:700;font-size:14px;color:#1D1D1B;margin:0 0 20px;line-height:1.6">This page is being prepared. In the meantime, explore the Mini-Events hub.</p>' .
-                      '<a href="{{events_url}}" class="mfe-explore-btn mfe-btn-blue">Back to Mini-Events</a>' .
-                    '</div>',
+                    '@events.soon',
                     array('events_url' => 'The Mini-Events hub')),
             )),
 
             'host' => array('label' => 'Host an Event', 'blocks' => array(
                 'host.hero' => array('Hero', 'html',
-                    '<div class="mf-hero-new">' .
-                      '<div class="mf-hero-left">' .
-                        '<h1 class="mf-title-contour blue">Host an Event</h1>' .
-                        '<div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>' .
-                        '<p class="mf-hero-desc">Want to organize a workshop, meetup or expert session?</p>' .
-                        '<p class="mf-hero-desc">Tell us a little — admin will review and get back to you.</p>' .
-                      '</div>' .
-                      '<div class="mf-hero-face"><img src="{{logo}}" alt="Mini-Talks" /></div>' .
-                    '</div>',
+                    '@host.hero',
                     array('logo' => 'The Mini-Talks logo URL')),
 
                 'host.form.title' => array('Form heading', 'text', 'Host a Mini-Event'),
+            )),
+
+            'lists' => array('label' => 'Cards in a list', 'blocks' => array(
+                'forum.post.card' => array('A forum post, in a list', 'html', '@forum.post.card',
+                    array('url' => 'link to the post', 'border_class' => 'colour class for this kind of post',
+                          'badge_class' => 'colour class for the badge', 'type_label' => 'Question, Experience, …',
+                          'meta' => 'topic and tag, when there are any', 'title' => 'the title',
+                          'preview' => 'the first 30 words', 'avatar' => "the author's avatar",
+                          'author' => 'their nickname', 'role_class' => 'colour class for the role badge',
+                          'role' => 'their role', 'replies' => 'how many replies', 'when' => 'how long ago'),
+                    array('mf-post-card' => 'the card itself')),
+
+                'events.event.card' => array('An event with a photo', 'html', '@events.event.card',
+                    array('event_id' => 'the event', 'month_key' => 'used by the month filter',
+                          'date_key' => 'used by the month filter', 'is_upcoming' => 'used by the month filter',
+                          'colour' => 'the type colour', 'image' => 'the cover photo',
+                          'day' => 'Mon', 'date' => '14', 'month' => 'Sep', 'title' => 'the title',
+                          'meta' => 'time and place', 'description' => 'the short description',
+                          'avatars' => 'who has joined, and how many', 'buttons' => 'See Details and Join'),
+                    array('mfe-frame-card' => 'the card itself',
+                          'data-event-id' => 'which event this is',
+                          'data-month-key' => 'the month filter on the hub',
+                          '{{buttons}}' => 'See Details and Join',
+                          '{{avatars}}' => 'the joined members, which Join updates live')),
+
+                'events.event.card.noimage' => array('An event with no photo', 'html', '@events.event.card.noimage',
+                    array('event_id' => 'the event', 'month_key' => 'used by the month filter',
+                          'date_key' => 'used by the month filter', 'is_upcoming' => 'used by the month filter',
+                          'colour' => 'the type colour', 'day' => 'Mon', 'date' => '14', 'month' => 'Sep',
+                          'title' => 'the title', 'meta' => 'time and place', 'description' => 'the short description',
+                          'avatars' => 'who has joined, and how many', 'buttons' => 'See Details and Join'),
+                    array('mfe-frame-card' => 'the card itself',
+                          'data-event-id' => 'which event this is',
+                          '{{buttons}}' => 'See Details and Join',
+                          '{{avatars}}' => 'the joined members, which Join updates live')),
+
+                'forum.post.detail' => array('A post, on its own page', 'html', '@forum.post.detail',
+                    array('border_class' => 'colour class for this kind of post',
+                          'badge_class' => 'colour class for the badge', 'type_label' => 'Question, Experience, …',
+                          'meta' => 'topic and tag, when there are any', 'title' => 'the title',
+                          'body' => 'the post itself', 'avatar' => "the author's avatar",
+                          'author' => 'their nickname', 'role_class' => 'colour class for the role badge',
+                          'role' => 'their role', 'replies' => 'how many replies', 'when' => 'how long ago'),
+                    array('mf-detail-card' => 'the card itself')),
+
+                'forum.reply.card' => array('A reply, and a reply to a reply', 'html', '@forum.reply.card',
+                    array('id' => 'the reply', 'avatar' => "the author's avatar", 'author' => 'their nickname',
+                          'role_class' => 'colour class for the role badge', 'role' => 'their role',
+                          'when' => 'how long ago', 'message' => 'what they wrote',
+                          'reactions' => 'the emoji buttons', 'reply_button' => 'Reply, for signed-in members',
+                          'sub_replies' => 'replies to this one'),
+                    array('mf-reply-card' => 'the card itself',
+                          'id="reply-{{id}}"' => 'linking straight to a reply',
+                          'data-reply-id="{{id}}"' => 'where a new reaction is counted',
+                          '{{reactions}}' => 'the emoji buttons',
+                          '{{sub_replies}}' => 'replies to this one')),
+
+                'events.update.card' => array('A community update', 'html', '@events.update.card',
+                    array('avatar' => "the member's avatar", 'day' => 'Mon', 'date' => '14', 'month' => 'Sep',
+                          'nickname' => 'their nickname', 'message' => 'what they wrote'),
+                    array('mfe-upd-card' => 'the card itself')),
+
+                'events.specialday.card' => array('A special day', 'html', '@events.specialday.card',
+                    array('accent' => 'the accent colour', 'day' => 'Mon', 'date' => '14', 'month' => 'Sep',
+                          'title' => 'the title', 'description' => 'the description',
+                          'photos' => 'the photo strip, when there are photos'),
+                    array('mfe-sd-row' => 'the row itself')),
+            )),
+
+            'popups' => array('label' => 'Popups', 'blocks' => array(
+                'popup.auth.step1' => array('Sign up — step 1, choosing a role', 'html', '@popup.auth.step1', array(),
+                    array('id="mf-auth-step1"' => 'the script shows and hides this step',
+                          'mf-role-option' => 'the four role buttons',
+                          'data-role' => 'which role each button stands for',
+                          'data-mf-action="auth-role"' => 'picking a role',
+                          'data-mf-action="auth-step2"' => 'Continue')),
+                'popup.auth.step2' => array('Sign up — step 2, account basics', 'html', '@popup.auth.step2', array(),
+                    array('id="mf-auth-step2"' => 'the script shows and hides this step',
+                          'id="mf-reg-fullname"' => 'full name', 'id="mf-reg-nickname"' => 'nickname',
+                          'id="mf-reg-email"' => 'email',
+                          'id="mf-reg-password"' => 'password', 'id="mf-reg-password2"' => 'repeat password',
+                          'data-mf-action="auth-step3"' => 'Continue')),
+                'popup.auth.step3' => array('Sign up — step 3, details', 'html', '@popup.auth.step3', array(),
+                    array('id="mf-auth-step3"' => 'the script shows and hides this step',
+                          'data-mf-action="auth-register"' => 'Create Account')),
+                'popup.auth.login' => array('Sign in', 'html', '@popup.auth.login',
+                    array('lost_password_url' => "WordPress's own password reset"),
+                    array('id="mf-auth-login"' => 'the script shows and hides this step',
+                          'id="mf-login-email"' => 'email', 'id="mf-login-password"' => 'password',
+                          'data-mf-action="auth-login"' => 'Sign in')),
+                'popup.settings' => array('Settings', 'html', '@popup.settings',
+                    array('lost_password_url' => "WordPress's own password reset"),
+                    array('id="mf-set-current"' => 'current password', 'id="mf-set-new"' => 'new password',
+                          'id="mf-set-new2"' => 'repeat new password',
+                          'id="mf-settings-msg"' => 'where the result is shown',
+                          'id="mf-set-save"' => 'the Update password button',
+                          'data-mf-action="pwd-save"' => 'Update password')),
+            )),
+
+            'create' => array('label' => 'Forum — writing a post', 'blocks' => array(
+                'forum.create.form' => array('The form', 'html', '@forum.create.form',
+                    array('frame_colour' => 'the colour for this kind of post',
+                          'type' => 'question, experience, idea or reflection',
+                          'title_placeholder' => 'placeholder for the title',
+                          'body_placeholder' => 'placeholder for the body',
+                          'tags' => 'the tag buttons for this kind of post',
+                          'forum_url' => 'back to the forum'),
+                    array('id="mf-create-type"' => 'which kind of post this is',
+                          'id="mf-create-title"' => 'the title field',
+                          'id="mf-create-content"' => 'the body field',
+                          'id="mf-create-topic"' => 'the topic dropdown',
+                          'mf-tag-chip' => 'the tag buttons',
+                          'id="mf-create-error"' => 'where problems are shown',
+                          'data-mf-action="post-share"' => 'the Share button')),
             )),
 
             'join' => array('label' => 'Join Us', 'blocks' => array(
                 'join.title' => array('Page heading', 'text', 'Join Us!'),
 
                 'join.step1' => array('Step 1 — choosing an area', 'html',
-                    '<div class="mt-ju-step" id="ju-step1"><div class="mt-ju-num"><span style="color:#E52828">1</span></div><div class="mt-ju-card"><div class="mt-ju-card-box mt-ju-card-red"><div class="mt-ju-card-inner"><h3>Choose Your Area <span>(Select one)</span></h3><div class="mt-ju-roles"><div class="mt-ju-role" data-value="Mini-Family" data-mf-action="ju-role"><img src="{{img_family}}" alt="" /><div><strong>Mini-Families</strong><span>For families supporting a child\'s communication journey, or adults (18+) with lived experience.</span></div></div><div class="mt-ju-role" data-value="Mini-Expert" data-mf-action="ju-role"><img src="{{img_expert}}" alt="" /><div><strong>Mini-Experts</strong><span>For professionals and educators working in communication and selective mutism.</span></div></div><div class="mt-ju-role" data-value="Mini-Volunteer" data-mf-action="ju-role"><img src="{{img_volunteer}}" alt="" /><div><strong>Mini-Volunteers</strong><span>For individuals who want to support children and families in their communication journey.</span></div></div><div class="mt-ju-role" data-value="Talk-Spot" data-mf-action="ju-role"><img src="{{img_talkspot}}" alt="" /><div><strong>Talk-Spots</strong><span>For venues and organizations that want to create safe and supportive spaces for communication.</span></div></div></div></div></div></div></div>',
+                    '@join.step1',
                     array('img_family' => 'Mini-Families artwork', 'img_expert' => 'Mini-Experts artwork',
                           'img_volunteer' => 'Mini-Volunteers artwork', 'img_talkspot' => 'Talk-Spots artwork'),
                     array('id="ju-step1"'        => 'the script reveals and hides this step',
@@ -223,7 +280,7 @@ class Mini_Forum_Design {
                           'data-mf-action="ju-role"' => 'picking one opens step 2')),
 
                 'join.step2' => array('Step 2 — account details', 'html',
-                    '<div class="mt-ju-step is-hidden" id="ju-step2"><div class="mt-ju-num"><span style="color:#0055BF">2</span></div><div class="mt-ju-card"><div class="mt-ju-card-box mt-ju-card-blue"><div class="mt-ju-card-inner"><div class="mt-ju-formrow"><div class="mt-ju-formfield"><label>Full Name:</label><span class="mt-ju-sub">(Not displayed in forum)</span><input type="text" id="ju-fullname" class="bdr-red" /></div><div class="mt-ju-formfield"><label>Password:</label><span class="mt-ju-sub">(At least 8 characters)</span><input type="password" id="ju-password" class="bdr-blue" /></div><div class="mt-ju-formfield"><label>Email Address:</label><span class="mt-ju-sub">(Used for login)</span><input type="email" id="ju-email" class="bdr-green" /></div></div><div class="mt-ju-formrow"><div class="mt-ju-formfield"><label>City:</label><span class="mt-ju-sub">(Optional)</span><input type="text" id="ju-city" class="bdr-red" /></div><div class="mt-ju-formfield"><label>Country:</label><span class="mt-ju-sub">(Optional)</span><input type="text" id="ju-country" class="bdr-green" /></div><div class="mt-ju-formfield"><label>Nickname:</label><span class="mt-ju-sub">(Displayed in forum)</span><input type="text" id="ju-nickname" class="bdr-yellow" /></div></div><div id="ju-dynamic-fields"></div><div class="mt-ju-formrow"><div class="mt-ju-formfield" style="flex:1!important"><label>Additional Info:</label><span class="mt-ju-sub">(Optional)</span><textarea id="ju-extra" placeholder="Add a short note if you\'d like..."></textarea></div></div><div class="mt-ju-step-actions"><button type="button" class="mt-ju-continue mt-ju-continue-blue" data-mf-action="ju-continue">Continue</button></div></div></div></div></div>',
+                    '@join.step2',
                     array(),
                     array('id="ju-step2"'   => 'the script reveals and hides this step',
                           'id="ju-fullname"' => 'the name field', 'id="ju-password"' => 'the password field',
@@ -234,7 +291,7 @@ class Mini_Forum_Design {
                           'data-mf-action="ju-continue"' => 'opens step 3')),
 
                 'join.step3' => array('Step 3 — consent and Join', 'html',
-                    '<div class="mt-ju-step is-hidden" id="ju-step3"><div class="mt-ju-num"><span style="color:#FFCC00">3</span></div><div class="mt-ju-card"><div class="mt-ju-card-box mt-ju-card-yellow"><div class="mt-ju-card-inner"><h3>Acknowledgment &amp; Consent</h3><label class="mt-ju-consent"><input type="checkbox" id="ju-consent" /><span>I have read and accept the Mini-Community Guidelines and Terms of Participation.</span></label><a href="/mini-community/guidelines/" target="_blank" class="mt-ju-guidelines-link">View Guidelines and Terms of Participation</a><p class="mt-ju-info">Mini-Community does not provide treatment, referrals, or child-specific evaluations.<br>All shared content is based on personal experience and awareness.<br>Personal information is kept confidential and never shared without consent.</p><div style="text-align:center;padding:20px 0 12px"><button class="mt-ju-btn" type="button" data-mf-action="ju-submit"><div class="mt-ju-btn-stud"></div><div class="mt-ju-btn-topbar"></div><div class="mt-ju-btn-inner"><img class="mt-ju-btn-heart" src="{{img_heart}}" alt="" /><span class="mt-ju-btn-label">Join</span></div></button></div></div></div></div></div>',
+                    '@join.step3',
                     array('img_heart' => 'The heart on the Join button'),
                     array('id="ju-step3"'  => 'the script reveals this step',
                           'id="ju-consent"' => 'the consent checkbox, which Join requires',
@@ -252,7 +309,13 @@ class Mini_Forum_Design {
 
     private static function definition($id) {
         foreach (self::manifest() as $group) {
-            if (isset($group['blocks'][$id])) return $group['blocks'][$id];
+            if (!isset($group['blocks'][$id])) continue;
+            $def = $group['blocks'][$id];
+            // '@name' means the default lives in design/name.html
+            if (isset($def[2]) && is_string($def[2]) && strlen($def[2]) > 1 && $def[2][0] === '@') {
+                $def[2] = self::file(substr($def[2], 1));
+            }
+            return $def;
         }
         return null;
     }
@@ -307,6 +370,32 @@ class Mini_Forum_Design {
             'button' => array('type' => true, 'name' => true, 'value' => true, 'disabled' => true),
             'fieldset' => array('disabled' => true), 'legend' => array(),
             'details' => array('open' => true), 'summary' => array(),
+
+            // Inline icons, as a deliberately narrow subset: shapes and their
+            // geometry, nothing that can fetch or run anything. No <use>, no
+            // href of any kind, no <script>, no <foreignObject>.
+            'svg' => array('viewbox' => true, 'viewBox' => true, 'width' => true, 'height' => true,
+                           'fill' => true, 'stroke' => true, 'stroke-width' => true,
+                           'stroke-linecap' => true, 'stroke-linejoin' => true, 'xmlns' => true,
+                           'preserveaspectratio' => true, 'focusable' => true),
+            'path' => array('d' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true,
+                            'stroke-linecap' => true, 'stroke-linejoin' => true, 'fill-rule' => true,
+                            'clip-rule' => true, 'transform' => true, 'opacity' => true),
+            'circle' => array('cx' => true, 'cy' => true, 'r' => true, 'fill' => true, 'stroke' => true,
+                              'stroke-width' => true, 'opacity' => true, 'transform' => true),
+            'ellipse' => array('cx' => true, 'cy' => true, 'rx' => true, 'ry' => true, 'fill' => true,
+                               'stroke' => true, 'stroke-width' => true, 'transform' => true),
+            'rect' => array('x' => true, 'y' => true, 'width' => true, 'height' => true, 'rx' => true,
+                            'ry' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true,
+                            'transform' => true, 'opacity' => true),
+            'line' => array('x1' => true, 'y1' => true, 'x2' => true, 'y2' => true, 'stroke' => true,
+                            'stroke-width' => true, 'stroke-linecap' => true, 'transform' => true),
+            'polyline' => array('points' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true,
+                                'stroke-linecap' => true, 'stroke-linejoin' => true),
+            'polygon' => array('points' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true,
+                               'transform' => true),
+            'g' => array('fill' => true, 'stroke' => true, 'stroke-width' => true, 'transform' => true,
+                         'opacity' => true),
         );
 
         foreach ($needed as $tag => $attrs) {

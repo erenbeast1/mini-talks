@@ -67,26 +67,22 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
         $bgc='bg-'.(['question'=>'red','experience'=>'yellow','idea'=>'blue','reflection'=>'green'][$pt]??'red');
         $du=add_query_arg('post_id',$pid,$fu);
       ?>
-      <a href="<?php echo esc_url($du);?>" class="mf-post-card <?php echo $bc;?>">
-        <div class="mf-pc-inner">
-          <div style="flex:1">
-            <div class="mf-post-meta">
-              <span class="mf-type-badge <?php echo $bgc;?>"><?php echo mf_type_label($pt);?></span>
-              <?php if($pts2||$ptg):?><span class="mf-meta-secondary"><?php echo esc_html(implode(' · ',array_filter([$pts2,$ptg])));?></span><?php endif;?>
-            </div>
-            <div class="mf-pc-title"><?php the_title();?></div>
-            <div class="mf-pc-preview"><?php echo wp_trim_words(get_the_content(),30);?></div>
-          </div>
-          <div class="mf-pc-right">
-            <div class="mf-pc-user">
-              <?php echo mf_avatar_html($uid, 'sm'); ?>
-              <div><div class="mf-pc-user-name"><?php echo esc_html($nick);?></div><span class="mf-role-badge <?php echo $rbm[$role]??'rb-blue';?>"><?php echo esc_html($role);?></span></div>
-            </div>
-            <span class="mf-meta-light"><?php echo mf_get_reply_count($pid);?> replies · <?php echo mf_time_ago(get_the_date('Y-m-d H:i:s'));?></span>
-            <span class="mf-pc-arrow">›</span>
-          </div>
-        </div>
-      </a>
+      <?php mf_block('forum.post.card', array(
+        'url'          => esc_url($du),
+        'border_class' => $bc,
+        'badge_class'  => $bgc,
+        'type_label'   => mf_type_label($pt),
+        'meta'         => ($pts2 || $ptg)
+            ? '<span class="mf-meta-secondary">' . esc_html(implode(' · ', array_filter(array($pts2, $ptg)))) . '</span>' : '',
+        'title'        => get_the_title(),
+        'preview'      => wp_trim_words(get_the_content(), 30),
+        'avatar'       => mf_avatar_html($uid, 'sm'),
+        'author'       => esc_html($nick),
+        'role_class'   => isset($rbm[$role]) ? $rbm[$role] : 'rb-blue',
+        'role'         => esc_html($role),
+        'replies'      => mf_get_reply_count($pid),
+        'when'         => mf_time_ago(get_the_date('Y-m-d H:i:s')),
+      )); ?>
       <?php endwhile;wp_reset_postdata();?>
     </div>
     <?php else:?><p class="mf-empty-note"><?php mf_block('profile.posts.empty'); ?></p><?php endif;?>

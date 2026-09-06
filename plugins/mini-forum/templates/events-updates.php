@@ -110,29 +110,21 @@ function mfe_month_label_u($ym){
           $num = mfe_day_num_u($u->visible_date);
           $mon = mfe_short_mon_u($u->visible_date);
         ?>
-        <div class="mfe-upd-card">
-          <div class="mfe-upd-studs"></div>
-          <div class="mfe-upd-frame">
-            <div class="mfe-upd-inner">
-              <div class="mfe-datebox mfe-db-green">
-                <span class="mfe-d-day"><?php echo esc_html($day); ?></span>
-                <span class="mfe-d-num"><?php echo esc_html($num); ?></span>
-                <span class="mfe-d-mon"><?php echo esc_html($mon); ?></span>
-              </div>
-              <div class="mfe-upd-avatar">
-                <?php if (!empty($u->user_id)): ?>
-                  <?php echo mf_avatar_html((int)$u->user_id, 'md'); ?>
-                <?php else: ?>
-                  <img class="mf-av mf-av-md" src="<?php echo esc_url(Mini_Forum_Avatar::$default_avatar_url); ?>" alt="@<?php echo esc_attr($u->nickname); ?>" width="54" height="54" loading="lazy" />
-                <?php endif; ?>
-              </div>
-              <div class="mfe-upd-text">
-                <div class="mfe-upd-user">@<?php echo esc_html($u->nickname); ?></div>
-                <div class="mfe-upd-msg"><?php echo esc_html($u->message); ?></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <?php
+        ob_start();
+        if (!empty($u->user_id)) { echo mf_avatar_html((int) $u->user_id, 'md'); }
+        else { printf('<img class="mf-av mf-av-md" src="%s" alt="@%s" width="54" height="54" loading="lazy" />',
+                      esc_url(Mini_Forum_Avatar::$default_avatar_url), esc_attr($u->nickname)); }
+        $mf_av = ob_get_clean();
+
+        mf_block('events.update.card', array(
+          'avatar'   => $mf_av,
+          'day'      => esc_html($day),
+          'date'     => esc_html($num),
+          'month'    => esc_html($mon),
+          'nickname' => esc_html($u->nickname),
+          'message'  => esc_html($u->message),
+        )); ?>
         <?php endforeach; ?>
       </div>
     </section>

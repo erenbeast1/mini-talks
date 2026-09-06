@@ -1322,3 +1322,18 @@
   });
 
 })(jQuery);
+
+/* ── Design-safe bindings ──
+   Reply cards are editable HTML, and saving strips onclick, so the reaction
+   and reply buttons bind by attribute. */
+document.addEventListener('click', function (e) {
+  var el = e.target.closest && e.target.closest('[data-mf-action]');
+  if (!el) return;
+  var action = el.getAttribute('data-mf-action');
+  var id = parseInt(el.getAttribute('data-reply-id'), 10);
+  if (action === 'react' && typeof window.mfToggleReaction === 'function') {
+    e.preventDefault(); window.mfToggleReaction(id, el.getAttribute('data-emoji'));
+  } else if (action === 'subreply' && typeof window.mfShowSubReply === 'function') {
+    e.preventDefault(); window.mfShowSubReply(id);
+  }
+});
