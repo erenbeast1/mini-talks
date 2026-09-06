@@ -1,5 +1,26 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.15.02
+
+**"Save and test" only ever said "Saved."** The test ran only when both boxes
+were already filled in, and said nothing at all when they were not — so leaving
+one empty looked exactly like a successful save. The page now has a **Status**
+line that always says where things stand: which box is still empty, or that the
+game answered and accepted the key, or what went wrong and the most likely
+cause for that particular failure. It re-tests on every load, so re-checking no
+longer means saving again.
+
+Under it, **what the game actually sent back** — the URL called, the HTTP
+status, the cURL error if there was one, and the first 600 characters of the
+body. A 404 page, a redirect to a login, or a PHP warning ahead of the JSON are
+all invisible behind "the game sent back something the forum could not read";
+now they are on the screen.
+
+The shared-key box reports what is stored — its length and last six characters —
+so a paste that dropped or gained something is visible without retyping it. And
+the address box is no longer `type="url"`: that let the browser silently refuse
+to submit the form, which is the one failure with no message at all.
+
 ## mini-forum 3.15.01
 
 **"Coming soon" told the person who installed it nothing.** Before the game

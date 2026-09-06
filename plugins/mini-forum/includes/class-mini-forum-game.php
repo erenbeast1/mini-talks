@@ -101,8 +101,14 @@ class Mini_Forum_Game {
      * logs. Plain http is refused outright unless the game is on this machine:
      * the key and the token would both be readable on the wire.
      */
+    /** The raw answer to the last call, so the settings page can show it. */
+    private static $last = null;
+
+    public static function last_call() { return self::$last; }
+
     private static function call($endpoint, $body) {
         $s = self::settings();
+        self::$last = null;
         if (!self::configured()) {
             return new WP_Error('mf_game_off', __('Game linking is not set up yet.', 'mini-forum'));
         }
@@ -125,11 +131,18 @@ class Mini_Forum_Game {
         ));
 
         if (is_wp_error($res)) {
+            // Keep what WordPress said. "Could not be reached" is the right thing
+            // to show a member; whoever is setting this up needs the DNS failure,
+            // the refused connection or the certificate error by name.
+            self::$last = array('url' => $url, 'code' => 0, 'body' => '',
+                                'error' => $res->get_error_message());
             return new WP_Error('mf_game_unreachable', __('The game could not be reached. Please try again in a moment.', 'mini-forum'));
         }
 
         $code = (int) wp_remote_retrieve_response_code($res);
-        $data = json_decode(wp_remote_retrieve_body($res), true);
+        $raw  = wp_remote_retrieve_body($res);
+        $data = json_decode($raw, true);
+        self::$last = array('url' => $url, 'code' => $code, 'body' => $raw, 'error' => '');
 
         if (!is_array($data)) {
             // A 404 here almost always means the forum/ folder is not uploaded
@@ -598,13 +611,26 @@ class Mini_Forum_Game {
             $saved = true;
         }
 
-        $s    = self::settings();
+        $s = self::settings();
+
+        // Tested on every load of this page, not only right after a save. "Saved."
+        // on its own said nothing about whether the two halves can actually talk,
+        // and coming back later to check meant re-saving to find out.
         $test = null;
-        if ($saved && self::configured()) {
+        if (self::configured()) {
             // A deliberately impossible token: the answer proves the endpoint is
             // there and the key is accepted, without touching anybody's account.
             $test = self::call('link-confirm.php', array('token' => 'connection-test', 'forum_user_id' => 1));
         }
+        $last    = self::last_call();
+        $missing = array();
+        if ($s['api'] === '') $missing[] = 'the game API address';
+        if ($s['key'] === '') $missing[] = 'the shared key';
+        // Built here rather than across template lines, so the sentence reads as
+        // one sentence and cannot pick up a line break in the middle of itself.
+        $missing_line = $missing
+            ? implode(' and ', $missing) . (count($missing) > 1 ? ' are' : ' is') . ' still empty'
+            : '';
         ?>
         <div class="wrap">
           <h1>Mini-Talks Game</h1>
@@ -627,14 +653,63 @@ class Mini_Forum_Game {
           <?php if ($saved): ?>
             <div class="notice notice-success is-dismissible"><p>Saved.</p></div>
           <?php endif; ?>
-          <?php if ($test !== null): ?>
-            <?php if (is_wp_error($test) && in_array($test->get_error_code(), array('mf_game_invalid', 'mf_game_refused'), true)): ?>
-              <div class="notice notice-success"><p><strong>The game answered and accepted the key.</strong> Linking is ready.</p></div>
-            <?php elseif (is_wp_error($test)): ?>
-              <div class="notice notice-error"><p><?php echo esc_html($test->get_error_message()); ?></p></div>
-            <?php else: ?>
-              <div class="notice notice-success"><p>The game answered and accepted the key.</p></div>
-            <?php endif; ?>
+
+          <h2>Status</h2>
+          <?php if ($missing): ?>
+            <div class="notice notice-warning inline" style="margin:0 0 14px">
+              <p><strong>Not tested — <?php echo esc_html($missing_line); ?>.</strong>
+                 Both boxes below have to be filled in before the forum will call the game at all.</p>
+            </div>
+          <?php elseif ($test !== null && is_wp_error($test)
+                        && in_array($test->get_error_code(), array('mf_game_invalid', 'mf_game_expired', 'mf_game_refused'), true)): ?>
+            <div class="notice notice-success inline" style="margin:0 0 14px">
+              <p><strong>Connected.</strong> The game answered, accepted the key, and rejected the test token exactly as it should.
+                 Members can connect their accounts now.</p>
+            </div>
+          <?php elseif ($test !== null && is_wp_error($test)): ?>
+            <div class="notice notice-error inline" style="margin:0 0 14px">
+              <p><strong>Not connected.</strong> <?php echo esc_html($test->get_error_message()); ?></p>
+              <?php $c = $test->get_error_code(); ?>
+              <p style="margin-top:.4em">
+                <?php if ($c === 'mf_game_key'): ?>
+                  The key here and <code>MF_FORUM_LINK_KEY</code> in the game's
+                  <code>forum/config.php</code> are not the same string. Watch for a trailing space or a
+                  line break when pasting.
+                <?php elseif ($c === 'mf_game_bad_reply'): ?>
+                  Check that the four files really sit at
+                  <code><?php echo esc_html($s['api']); ?>/forum/</code> on the game's server, and that
+                  <code>config.php</code> is next to them.
+                <?php elseif ($c === 'mf_game_unreachable'): ?>
+                  This site's server could not open a connection to that address at all — a firewall, DNS,
+                  or a certificate the server does not trust.
+                <?php elseif ($c === 'mf_game_insecure'): ?>
+                  Use the <code>https://</code> address. The forum will not send the key over plain http.
+                <?php else: ?>
+                  The game answered, but not with anything the forum recognises.
+                <?php endif; ?>
+              </p>
+            </div>
+          <?php elseif ($test !== null): ?>
+            <div class="notice notice-success inline" style="margin:0 0 14px">
+              <p><strong>Connected.</strong> The game answered and accepted the key.</p>
+            </div>
+          <?php endif; ?>
+
+          <?php if ($last): ?>
+            <details style="margin:0 0 18px">
+              <summary style="cursor:pointer">What the game actually sent back</summary>
+              <table class="widefat striped" style="max-width:60em;margin-top:8px"><tbody>
+                <tr><th style="width:9em">Called</th><td><code><?php echo esc_html($last['url']); ?></code></td></tr>
+                <tr><th>HTTP status</th><td><code><?php echo $last['code'] ? (int) $last['code'] : '—'; ?></code></td></tr>
+                <?php if ($last['error']): ?>
+                  <tr><th>Error</th><td><code><?php echo esc_html($last['error']); ?></code></td></tr>
+                <?php endif; ?>
+                <tr><th>Body</th><td><pre style="white-space:pre-wrap;margin:0"><?php
+                  echo esc_html($last['body'] === '' ? '(empty)' : mb_substr($last['body'], 0, 600)); ?></pre></td></tr>
+              </tbody></table>
+              <p class="description">Paste this when asking for help — it says which of the two halves is
+                 not doing its part.</p>
+            </details>
           <?php endif; ?>
 
           <form method="post">
@@ -643,8 +718,10 @@ class Mini_Forum_Game {
               <tr>
                 <th scope="row"><label for="mf_game_api">Game API address</label></th>
                 <td>
-                  <input name="mf_game_api" id="mf_game_api" type="url" class="regular-text code"
-                         value="<?php echo esc_attr($s['api']); ?>"
+                  <!-- Deliberately type="text": type="url" lets the browser refuse to submit
+                       the form with no visible reason, and the address is checked here anyway. -->
+                  <input name="mf_game_api" id="mf_game_api" type="text" inputmode="url" spellcheck="false"
+                         class="regular-text code" value="<?php echo esc_attr($s['api']); ?>"
                          placeholder="https://mini-talks.org/minitalks-api">
                   <p class="description">Where <code>minitalks-api</code> lives, with no trailing slash.
                      It must be https — the forum refuses to send the key over plain http.</p>
@@ -656,11 +733,18 @@ class Mini_Forum_Game {
                   <input name="mf_game_key" id="mf_game_key" type="text" class="regular-text code"
                          value="<?php echo esc_attr($s['key']); ?>" autocomplete="off">
                   <p class="description">The same string as <code>MF_FORUM_LINK_KEY</code> in the game's
-                     <code>forum/config.php</code>. Treat it like a password.</p>
+                     <code>forum/config.php</code>. Treat it like a password.
+                     <?php if ($s['key'] !== ''): ?>
+                       <br>Stored: <strong><?php echo (int) strlen($s['key']); ?> characters</strong>,
+                       ending <code><?php echo esc_html(substr($s['key'], -6)); ?></code>.
+                     <?php else: ?>
+                       <br><strong>Nothing is stored yet.</strong>
+                     <?php endif; ?></p>
                 </td>
               </tr>
             </table>
             <?php submit_button('Save and test'); ?>
+            <p class="description" style="margin-top:-8px">The test above runs again every time this page is opened, so you can re-check without saving.</p>
           </form>
 
           <h2>Connected members</h2>
