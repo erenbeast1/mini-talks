@@ -1,5 +1,14 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.15.01
+
+**"Coming soon" told the person who installed it nothing.** Before the game
+address and the shared key are filled in, `configured()` is false and App &
+Studio falls back to its empty state — right for a member, useless for an
+administrator, who had no way to know from the profile that the feature exists
+or where to set it up. Administrators now see a setup card there, linking
+straight to Mini-Talks Game. Members still see the plain empty state.
+
 ## mini-forum 3.15.00
 
 **Connect Profile — the forum profile meets the game account.** Profile →

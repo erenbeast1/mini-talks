@@ -109,6 +109,8 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
       <?php if (Mini_Forum_Game::configured()): ?>
         <?php echo Mini_Forum_Game::notice_html(); ?>
         <div id="mf-game-card"><?php echo Mini_Forum_Game::card_html($uid); ?></div>
+      <?php elseif (($mf_hint = Mini_Forum_Game::setup_hint()) !== ''): ?>
+        <?php echo $mf_hint; ?>
       <?php else: ?>
         <p class="mf-empty-note"><?php mf_block('profile.studio.empty'); ?></p>
       <?php endif; ?>

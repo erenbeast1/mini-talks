@@ -543,6 +543,26 @@ class Mini_Forum_Game {
              . '</div></div>';
     }
 
+    /**
+     * What an administrator sees on their own profile before this is set up.
+     *
+     * Without it the App & Studio tab just reads "Coming soon", which is what a
+     * member should see but tells the person who installed the plugin nothing —
+     * not that the feature exists, not that two values are all it needs, and not
+     * where to put them. Members still get the plain empty state.
+     */
+    public static function setup_hint() {
+        if (!current_user_can('manage_options')) return '';
+        return '<div class="mf-game-card mf-game-off">'
+             . '<div class="mf-game-badge">' . MF_GAME_SVG . '</div>'
+             . '<div class="mf-game-copy"><h4>Connect Profile is not set up yet</h4>'
+             . '<p>Members will be able to connect their Mini-Talks game account here. It needs two '
+             . 'things first: the game API address, and a shared key that also goes in the game\'s '
+             . '<code>forum/config.php</code>. Only you can see this notice.</p></div>'
+             . '<div class="mf-game-actions"><a class="mf-game-btn" href="'
+             . esc_url(admin_url('admin.php?page=mf-game')) . '">Set it up</a></div></div>';
+    }
+
     /** Whatever the redirect after a confirmation link wants to say. */
     public static function notice_html() {
         if (empty($_GET['mf_game'])) return '';
