@@ -2,18 +2,19 @@
 /**
  * Plugin Name: Mini-Forum
  * Description: A calm, safe community forum for the Mini-Talks ecosystem.
- * Version: 3.06.01
+ * Version: 3.07.00
  * Author: Mini-Talks
  * Text Domain: mini-forum
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MF_VERSION', '3.06.01');
+define('MF_VERSION', '3.07.00');
 define('MF_PATH', plugin_dir_path(__FILE__));
 define('MF_URL', plugin_dir_url(__FILE__));
 
 /* ── Includes ── */
+require_once MF_PATH . 'includes/class-mini-forum-design.php';
 require_once MF_PATH . 'includes/class-mini-forum-cpt.php';
 require_once MF_PATH . 'includes/class-mini-forum-ajax.php';
 require_once MF_PATH . 'includes/class-mini-forum-shortcodes.php';

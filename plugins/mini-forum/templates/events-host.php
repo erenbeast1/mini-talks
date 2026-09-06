@@ -13,15 +13,14 @@ $prefill_email = $cu ? $cu->user_email : '';
   </div>
   <div class="mf-hero-new">
     <div class="mf-hero-left">
-      <h1 class="mf-title-contour blue">Host an Event</h1>
+      <h1 class="mf-title-contour blue"><?php mf_block('host.hero.title'); ?></h1>
       <div class="mf-hero-bars">
         <span style="background:var(--mf-red)"></span>
         <span style="background:var(--mf-yellow)"></span>
         <span style="background:var(--mf-blue)"></span>
         <span style="background:var(--mf-green)"></span>
       </div>
-      <p class="mf-hero-desc">Want to organize a workshop, meetup or expert session?</p>
-      <p class="mf-hero-desc">Tell us a little — admin will review and get back to you.</p>
+      <?php mf_block('host.hero.desc'); ?>
     </div>
     <div class="mf-hero-face">
       <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
@@ -34,7 +33,7 @@ $prefill_email = $cu ? $cu->user_email : '';
   <div class="mfe-host-inner">
 
     <div class="mfe-host-title-wrap">
-      <h2 class="mf-title-contour">Host a Mini-Event</h2>
+      <h2 class="mf-title-contour"><?php mf_block('host.form.title'); ?></h2>
     </div>
 
     <div class="mfe-host-subtitle">

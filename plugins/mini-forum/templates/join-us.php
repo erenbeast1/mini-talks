@@ -6,7 +6,7 @@
 <div class="mt-joinus">
   <div class="mt-joinus-inner">
 
-    <div class="mt-joinus-title"><h2>Join Us!</h2></div>
+    <div class="mt-joinus-title"><h2><?php mf_block('join.title'); ?></h2></div>
     <div id="mf-join-error" class="mf-auth-error" style="max-width:700px;margin:0 auto 20px"></div>
 
     <!-- STEP 1 — Role Selection (open by default) -->
@@ -15,7 +15,7 @@
       <div class="mt-ju-card">
         <div class="mt-ju-card-box mt-ju-card-red">
           <div class="mt-ju-card-inner">
-            <h3>Choose Your Area <span>(Select one)</span></h3>
+            <h3><?php mf_block('join.area.title'); ?></h3>
             <div class="mt-ju-roles">
               <div class="mt-ju-role" data-value="Mini-Family" onclick="mfJuSelect(this)">
                 <img src="https://mini-talks.org/wp-content/uploads/2026/03/17_mini_families_3D.png" alt="" />
@@ -73,7 +73,7 @@
       <div class="mt-ju-card">
         <div class="mt-ju-card-box mt-ju-card-yellow">
           <div class="mt-ju-card-inner">
-            <h3>Acknowledgment & Consent</h3>
+            <h3><?php mf_block('join.consent.title'); ?></h3>
             <label class="mt-ju-consent">
               <input type="checkbox" id="ju-consent" />
               <span>I have read and accept the Mini-Community Guidelines and Terms of Participation.</span>

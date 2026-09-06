@@ -23,13 +23,13 @@ class Mini_Forum_Shortcodes {
         $post_id = intval($_GET['post_id'] ?? 0);
 
         if ($post_id > 0) {
-            include MF_PATH . 'templates/forum-detail.php';
+            include mf_template('forum-detail');
         } elseif ($view === 'create') {
-            include MF_PATH . 'templates/forum-create.php';
+            include mf_template('forum-create');
         } elseif ($view === 'profile') {
-            include MF_PATH . 'templates/forum-profile.php';
+            include mf_template('forum-profile');
         } else {
-            include MF_PATH . 'templates/forum-home.php';
+            include mf_template('forum-home');
         }
 
         return ob_get_clean();
@@ -52,9 +52,9 @@ class Mini_Forum_Shortcodes {
         $allowed_subviews = ['workshops','meetups','experts','updates','special-days','host'];
 
         if (in_array($view, $allowed_subviews, true)) {
-            include MF_PATH . 'templates/events-subpage.php';
+            include mf_template('events-subpage');
         } else {
-            include MF_PATH . 'templates/events-home.php';
+            include mf_template('events-home');
         }
 
         return ob_get_clean();
@@ -65,7 +65,7 @@ class Mini_Forum_Shortcodes {
      */
     public static function join_page($atts) {
         ob_start();
-        include MF_PATH . 'templates/join-us.php';
+        include mf_template('join-us');
         return ob_get_clean();
     }
 }

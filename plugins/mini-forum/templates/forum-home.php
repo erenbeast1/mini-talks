@@ -5,9 +5,9 @@
 <div class="mf-container">
   <div class="mf-hero-new">
     <div class="mf-hero-left">
-      <h1 class="mf-title-contour">Forum</h1>
+      <h1 class="mf-title-contour"><?php mf_block('forum.guest.hero.title'); ?></h1>
       <div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>
-      <p class="mf-hero-desc">A safe space where Mini-Community members can share their experiences and feel that they are not alone.</p>
+      <?php mf_block('forum.guest.hero.desc'); ?>
     </div>
     <div class="mf-hero-face">
       <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />
@@ -43,27 +43,27 @@
 <div class="mf-container">
   <!-- Forum Access -->
   <div class="mf-guest-access">
-    <h2 class="mf-title-contour" style="text-align:center;font-size:clamp(24px,2.8vw,42px);margin-bottom:10px">Forum Access</h2>
-    <p class="mf-guest-access-sub">Forum is part of Mini-Community. To access the Forum, you must first be an approved Mini-Community member.</p>
+    <h2 class="mf-title-contour" style="text-align:center;font-size:clamp(24px,2.8vw,42px);margin-bottom:10px"><?php mf_block('forum.guest.title'); ?></h2>
+    <p class="mf-guest-access-sub"><?php mf_block('forum.guest.sub'); ?></p>
 
     <div class="mf-guest-cards">
       <div class="mf-guest-card">
         <div class="mf-guest-card-studs" style="background-image:url('https://mini-talks.org/wp-content/uploads/2026/04/yeni_kirmizi_studs_4.png')"></div>
         <div class="mf-guest-card-body" style="background:var(--mf-red)">
-          <h3>Not a Mini-Community<br>Member Yet</h3>
+          <h3><?php mf_block('forum.guest.join.title'); ?></h3>
           <div class="mf-guest-card-inner">
-            <p>To access the Forum, you first need to join Mini-Community.</p>
-            <a href="/mini-community/join-us/" class="mf-guest-card-btn" style="color:var(--mf-red)">Join Us</a>
+            <p><?php mf_block('forum.guest.join.body'); ?></p>
+            <a href="/mini-community/join-us/" class="mf-guest-card-btn" style="color:var(--mf-red)"><?php mf_block('forum.guest.join.cta'); ?></a>
           </div>
         </div>
       </div>
       <div class="mf-guest-card">
         <div class="mf-guest-card-studs" style="background-image:url('https://mini-talks.org/wp-content/uploads/2026/04/yeni_mavi_studs_4.png')"></div>
         <div class="mf-guest-card-body" style="background:var(--mf-blue)">
-          <h3>I'm a Mini-Community<br>Member</h3>
+          <h3><?php mf_block('forum.guest.member.title'); ?></h3>
           <div class="mf-guest-card-inner">
-            <p>You can sign in with your email address and password.</p>
-            <button class="mf-guest-card-btn" style="color:var(--mf-blue)" onclick="mtOpenAuth('login')">Sign In</button>
+            <p><?php mf_block('forum.guest.member.body'); ?></p>
+            <button class="mf-guest-card-btn" style="color:var(--mf-blue)" onclick="mtOpenAuth('login')"><?php mf_block('forum.guest.member.cta'); ?></button>
           </div>
         </div>
       </div>
@@ -78,10 +78,9 @@
 <div class="mf-container">
   <div class="mf-hero-new">
     <div class="mf-hero-left">
-      <h1 class="mf-title-contour">Mini-Forum</h1>
+      <h1 class="mf-title-contour"><?php mf_block('forum.hero.title'); ?></h1>
       <div class="mf-hero-bars"><span style="background:var(--mf-red)"></span><span style="background:var(--mf-yellow)"></span><span style="background:var(--mf-blue)"></span><span style="background:var(--mf-green)"></span></div>
-      <p class="mf-hero-desc">Share. Connect. Support.</p>
-      <p class="mf-hero-desc">A safe space for families, experts, and volunteers.</p>
+      <?php mf_block('forum.hero.desc'); ?>
     </div>
     <div class="mf-hero-face">
       <img src="https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png" alt="Mini-Talks" />

@@ -1,5 +1,38 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.07.00
+
+**A Design page in wp-admin** (Mini-Events → Design), in three parts, in order of
+how far each one goes.
+
+**Text & HTML.** Every fixed piece of copy on the front end is now a named block:
+headings, intros, empty states, card bodies, button labels — 30 of them across the
+forum (signed in and out), the profile, the events hub and its empty sub-page, Host
+an Event, and Join Us. Each is editable in place; the ones marked HTML take markup,
+so a paragraph can become two, a word can be wrapped in a `<span>`, a link can be
+added. Templates print them with `mf_block('id')`. Saving is `wp_kses_post()`, so
+scripts and iframes are stripped. Every block has a Reset, and writing the default
+back is not recorded as a customisation — so that line keeps following the plugin
+rather than freezing at today's wording.
+
+**Custom CSS,** one stylesheet per area — Global, Forum, Events, Profile, Join Us —
+printed after the plugin's own so a rule here wins, and only on the pages that area
+belongs to. Angle brackets are stripped, which CSS never needs and which is the only
+way stored CSS could escape its `<style>` element.
+
+**Template overrides.** Every screen now loads through `mf_template()`, which looks
+in the active theme first: drop `mini-forum/events-home.php` into the theme and it
+replaces the plugin's copy, with every variable the plugin prepared still in scope.
+That is the way to redesign a whole screen, and it survives plugin updates.
+
+Deliberately not built: a box that stores PHP and runs it. That turns every admin
+account into a way to execute code on the server, and it breaks on the next update.
+Copy and styling live in the database; logic stays in files, where a theme can
+replace it properly.
+
+`mf_design_blocks` lets another plugin add its own screens to the same page, so the
+Mini-Kits panel can join it rather than starting a second design screen.
+
 ## mini-forum 3.06.01
 
 **Fixed:** with a fourth box in it, the profile stats row broke every label

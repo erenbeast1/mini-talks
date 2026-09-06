@@ -32,7 +32,7 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
           <span class="mf-role-badge <?php echo $bc;?>"><?php echo esc_html($role);?></span>
           <?php endif;?>
         </div>
-        <p class="mf-profile-community">Part of the Mini-Talks community</p>
+        <p class="mf-profile-community"><?php mf_block('profile.community'); ?></p>
         <div class="mf-stats-row">
           <div class="mf-stat-box">Posts: <?php echo $pc;?></div>
           <div class="mf-stat-box">Events: 0</div>
@@ -66,7 +66,7 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
   <!-- ══ PANEL: Mini-Forum ══ -->
   <div class="mf-profile-panel" data-mf-panel-id="forum">
   <div class="mf-profile-section">
-    <h3>My Posts</h3>
+    <h3><?php mf_block('profile.posts.title'); ?></h3>
     <?php if($my_posts->have_posts()):?>
     <div class="mf-posts-list">
       <?php while($my_posts->have_posts()):$my_posts->the_post();
@@ -100,7 +100,7 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
       </a>
       <?php endwhile;wp_reset_postdata();?>
     </div>
-    <?php else:?><p class="mf-empty-note">No posts yet.</p><?php endif;?>
+    <?php else:?><p class="mf-empty-note"><?php mf_block('profile.posts.empty'); ?></p><?php endif;?>
   </div>
   </div><!-- /panel: forum -->
 
@@ -111,8 +111,8 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
       <?php do_action('mf_profile_kits_panel'); ?>
     <?php else: ?>
       <div class="mf-profile-section">
-        <h3>Mini-Kits</h3>
-        <p class="mf-empty-note">Your Mini-Talks kits will appear here once the Mini-Devices plugin is active.</p>
+        <h3><?php mf_block('profile.kits.title'); ?></h3>
+        <p class="mf-empty-note"><?php mf_block('profile.kits.empty'); ?></p>
       </div>
     <?php endif; ?>
   </div><!-- /panel: kits -->
@@ -120,8 +120,8 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
   <!-- ══ PANEL: App &amp; Studio ══ -->
   <div class="mf-profile-panel" data-mf-panel-id="studio" hidden>
     <div class="mf-profile-section">
-      <h3>App &amp; Studio</h3>
-      <p class="mf-empty-note">Coming soon.</p>
+      <h3><?php mf_block('profile.studio.title'); ?></h3>
+      <p class="mf-empty-note"><?php mf_block('profile.studio.empty'); ?></p>
     </div>
   </div><!-- /panel: studio -->
 </div>
