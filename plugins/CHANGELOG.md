@@ -18,6 +18,14 @@ The screens the script draws get their copy from `MD.text`, resolved server-side
 Every string keeps its literal as a fallback, so with Mini-Forum absent or older
 nothing is editable and everything still reads exactly as before.
 
+## mini-forum 3.09.01
+
+**Design gets its own place in the menu.** It sat under *Mini-Events*, which is
+where nobody would look for it: the page edits the forum, the profile, Join Us and
+Mini-Kits every bit as much as it edits events. It is now a top-level
+**Mini-Talks Design** item with a paintbrush icon, directly under Mini-Events —
+and it no longer depends on that menu existing to be reachable.
+
 ## mini-forum 3.09.00
 
 **A guide on the Design page,** open the first time and collapsible after that: what

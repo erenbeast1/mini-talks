@@ -357,9 +357,17 @@ class Mini_Forum_Design {
 
     /* ── admin ── */
 
+    /**
+     * Its own top-level menu, not a page under Mini-Events.
+     *
+     * This page edits the forum, the profile, Join Us and Mini-Kits as much as
+     * it edits events — nobody looking to change how the site reads would think
+     * to open Mini-Events to find it. Standing on its own also means it no
+     * longer depends on that menu existing.
+     */
     public static function menu() {
-        add_submenu_page('mfe-dashboard', 'Design', 'Design', 'manage_options',
-                         'mf-design', array(__CLASS__, 'page'));
+        add_menu_page('Mini-Talks Design', 'Mini-Talks Design', 'manage_options',
+                      'mf-design', array(__CLASS__, 'page'), 'dashicons-art', 31);
     }
 
     public static function page() {
