@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits section to the Mini-Forum profile. Members pick a Mini-Kit and request it — Mini-Designs by choosing scenes, Fig-Talks by personalising a figure — and follow it through Submitted, Contacted, Preparing, Connected. Connected kits also talk to the site over USB (WebSerial).
- * Version:     3.2.2
+ * Version:     3.3.0
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '3.2.2');
+define('MD_VER', '3.3.0');
 define('MD_PATH', plugin_dir_path(__FILE__));
 
 require_once MD_PATH . 'includes/class-md-kits.php';
@@ -340,10 +340,11 @@ function md_enqueue_avatar_editor() {
     ));
 }
 
-/** Does the current post embed [mini_kits_demo]? */
+/** Does the current post embed one of the public previews? */
 function md_page_has_preview() {
     $post = get_post();
-    $hit  = $post && has_shortcode($post->post_content, 'mini_kits_demo');
+    $hit  = $post && (has_shortcode($post->post_content, 'mini_kits_demo')
+                   || has_shortcode($post->post_content, 'fig_designer_demo'));
     // Page builders keep content outside post_content; let a theme force it.
     return (bool) apply_filters('md_page_has_preview', $hit, $post);
 }
@@ -407,8 +408,10 @@ add_shortcode('connected_devices', function () {
 
 add_shortcode('mini_kits_demo', function ($atts) {
     // Page builders can hide the shortcode from has_shortcode(); enqueue again.
+    // md_enqueue_avatar_editor() stands down if the editor is already there, so
+    // asking for it costs nothing and covers a signed-in visitor too.
     md_enqueue_assets();
-    if (!is_user_logged_in()) md_enqueue_avatar_editor();
+    md_enqueue_avatar_editor();
 
     $a = shortcode_atts(array(
         'kits'  => '',
@@ -451,6 +454,72 @@ add_shortcode('mini_kits_demo', function ($atts) {
         <div class="md-shelf" id="md-shelf"></div>
     </div>
     <div id="md-modal-root"></div>
+    <?php
+    return ob_get_clean();
+});
+
+/* ------------------------------------------------------------------ *
+ *  Shortcode:  [fig_designer_demo]
+ *  The personalization screen on its own — no shelf, no kit popup, no
+ *  request. A page drops it in, a visitor presses the button, and the same
+ *  designer a member sees opens over the page. Nothing is saved: the design
+ *  lives in the tab until it is closed.
+ *
+ *    [fig_designer_demo]
+ *    [fig_designer_demo auto="1"]
+ *    [fig_designer_demo title="Design your Mini" button="Start designing" colour="blue"]
+ *
+ *  auto="1" opens the designer as soon as the page loads.
+ * ------------------------------------------------------------------ */
+
+add_shortcode('fig_designer_demo', function ($atts) {
+    // Page builders can hide the shortcode from has_shortcode(); enqueue again.
+    // md_enqueue_avatar_editor() stands down if the editor is already there, so
+    // asking for it costs nothing and covers a signed-in visitor too.
+    md_enqueue_assets();
+    md_enqueue_avatar_editor();
+
+    $a = shortcode_atts(array(
+        'title'  => 'Create Your Fig-Talks',
+        'intro'  => 'Choose a face, a hairstyle and a hair colour. This is the designer members use — nothing here is saved.',
+        'button' => 'Open the designer',
+        'colour' => 'red',
+        'auto'   => '0',
+    ), $atts, 'fig_designer_demo');
+
+    $colour = in_array($a['colour'], array('red', 'blue', 'yellow', 'green'), true) ? $a['colour'] : 'red';
+
+    ob_start(); ?>
+    <div class="md-wrap md-preview md-figdemo"
+         data-colour="<?php echo esc_attr($colour); ?>"
+         data-title="<?php echo esc_attr($a['title']); ?>"
+         data-auto="<?php echo $a['auto'] === '1' ? '1' : '0'; ?>">
+
+        <header class="md-shelf-head">
+            <?php if ($a['title'] !== ''): ?>
+                <h3 class="md-title"><?php echo esc_html($a['title']); ?></h3>
+            <?php endif; ?>
+            <?php if ($a['intro'] !== ''): ?>
+                <p class="md-sub"><?php echo esc_html($a['intro']); ?></p>
+            <?php endif; ?>
+            <p class="md-preview-tag">Live preview</p>
+        </header>
+
+        <div class="md-figdemo-body">
+            <div class="md-fig-preview md-figdemo-preview">
+                <span class="md-face-placeholder">?</span>
+            </div>
+            <div class="md-figdemo-main">
+                <dl class="md-fig-spec md-figdemo-spec" hidden></dl>
+                <button type="button" class="md-btn md-btn-primary md-figdemo-open">
+                    <?php echo esc_html($a['button']); ?>
+                </button>
+                <p class="md-figdemo-foot">Nothing is saved. Close the page and the design is gone.</p>
+            </div>
+        </div>
+
+        <div class="md-status md-figdemo-status" hidden></div>
+    </div>
     <?php
     return ob_get_clean();
 });

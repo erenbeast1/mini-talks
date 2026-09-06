@@ -1,4 +1,4 @@
-# Mini Devices — Mini-Kits (v3.2.2)
+# Mini Devices — Mini-Kits (v3.3.0)
 
 Adds the **Mini-Kits** section to the Mini-Forum profile.
 
@@ -266,7 +266,34 @@ member's real kits.
 
 Leaving demo mode restores whatever was on the profile before.
 
-## Public preview shortcode
+## Public preview shortcodes
+
+Two, for two different jobs: the whole shelf, or just the designer.
+
+### The designer on its own — `[fig_designer_demo]`
+
+The personalization screen with nothing behind it: no shelf, no kit, no request.
+A visitor presses the button and the same designer a member uses opens over the
+page. The design lives in the tab and goes nowhere.
+
+```
+[fig_designer_demo]
+[fig_designer_demo auto="1"]
+[fig_designer_demo title="Design your Mini" button="Start designing" colour="blue"]
+```
+
+| Attribute | Default | Notes |
+|---|---|---|
+| `title` | `Create Your Fig-Talks` | Also the heading inside the designer. Empty string drops the page heading. |
+| `intro` | see plugin | Empty string drops the paragraph. |
+| `button` | `Open the designer` | Becomes *Keep designing* once there is a design. |
+| `colour` | `red` | `red`, `blue`, `yellow` or `green` — the designer's frame and studs, and the preview's border. |
+| `auto` | `0` | `1` opens the designer as soon as the page loads. |
+
+After a save the block shows the render beside the choices it was built from —
+hair, face, eye colour, brows — read out of the editor's own config.
+
+### The whole shelf — `[mini_kits_demo]`
 
 For a product or onboarding page, `[mini_kits_demo]` renders the same shelf as a
 public, always-on preview. It shows sample kits only, never reads or writes a

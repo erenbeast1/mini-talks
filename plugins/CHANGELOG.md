@@ -33,6 +33,20 @@ the JS writes. Affected the sign-in and sign-up popups too.
 `3.05.45`, so WordPress showed the wrong version and update checks compared the wrong
 number.
 
+## mini-devices 3.3.0
+
+**`[fig_designer_demo]` — the personalization screen on its own.** The existing
+preview puts the whole shelf on a page and asks a visitor to find their way into a
+kit; sometimes the designer *is* the pitch. This shortcode is one card and one
+button: press it and the same editor a member uses opens over the page, in the
+kit's own frame. `auto="1"` opens it on load. After a save the block shows the
+render beside the choices it was built from — hair, face, eye colour, brows — read
+out of the editor's config by the same reader the request uses.
+
+Nothing is saved: `MDFaces` already keeps the editor's save request in the browser,
+and this block holds the result in memory only. It works logged out — the avatar
+bundle is enqueued for the page, as it is for the shelf preview.
+
 ## mini-devices 3.2.2
 
 **Fixed: a second request looked as though it had deleted the first.** Nothing was

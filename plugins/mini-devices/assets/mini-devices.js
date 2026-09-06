@@ -2194,11 +2194,81 @@
     if (openSlug) renderPopup();
   }
 
+  /* ── the designer on its own ──
+     [fig_designer_demo] puts the personalization screen on a page with no
+     shelf, no kit and no request behind it. The design lives in the tab and
+     goes nowhere: MDFaces already keeps the editor's save to itself. */
+
+  function bootFigDemo(root) {
+    var preview = root.querySelector('.md-figdemo-preview');
+    var specEl  = root.querySelector('.md-figdemo-spec');
+    var btn     = root.querySelector('.md-figdemo-open');
+    var msgEl   = root.querySelector('.md-figdemo-status');
+    var opened  = btn ? btn.textContent.trim() : 'Open the designer';
+    var cfg = null, url = null;
+
+    function say(text, kind) {
+      if (!msgEl) return;
+      msgEl.hidden = !text;
+      msgEl.textContent = text || '';
+      msgEl.className = 'md-status md-figdemo-status' + (kind ? ' md-status-' + kind : '');
+    }
+
+    function paint() {
+      if (preview) {
+        preview.innerHTML = '';
+        if (url) {
+          var img = el('img');
+          img.src = url;
+          img.alt = 'The Fig you designed';
+          preview.appendChild(img);
+        } else {
+          preview.appendChild(el('span', 'md-face-placeholder', '?'));
+        }
+      }
+      if (specEl) {
+        specEl.innerHTML = '';
+        specEl.hidden = !cfg;
+        if (cfg) {
+          figSpecLines(cfg).forEach(function (pair) {
+            specEl.appendChild(el('dt', null, pair[0]));
+            specEl.appendChild(el('dd', null, pair[1]));
+          });
+        }
+      }
+      if (btn) btn.textContent = cfg ? 'Keep designing' : opened;
+    }
+
+    function open() {
+      if (!window.MDFaces || !window.MFAvatarEditor) {
+        say('The designer did not load on this page. Reload, and check that Mini-Forum is active.', 'err');
+        return;
+      }
+      say('');
+      window.MDFaces.designFace(cfg, function (c, img) {
+        cfg = c;
+        url = img || url;
+        paint();
+        say('That is your Fig. It stays on this page only — nothing was sent anywhere.', 'ok');
+      }, {
+        title: root.dataset.title || 'Create Your Fig-Talks',
+        subtitle: 'Face \u00b7 Hairstyle \u00b7 Hair colour',
+        color: root.dataset.colour || 'red'
+      });
+    }
+
+    if (btn) btn.addEventListener('click', open);
+    paint();
+    if (root.dataset.auto === '1') open();
+  }
+
   /* ── boot ── */
 
   var shelfEl, modalRoot;
 
   document.addEventListener('DOMContentLoaded', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('.md-figdemo'), bootFigDemo);
+
     root = document.getElementById('md-root');
     if (!root) return;
     shelfEl    = document.getElementById('md-shelf');
