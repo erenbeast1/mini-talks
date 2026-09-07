@@ -132,6 +132,9 @@ class Mini_Forum_Game {
     /** The raw answer to the last call, so the settings page can show it. */
     private static $last = null;
 
+    /** Detail panels built while the card was rendered, keyed by the button's id. */
+    private static $panels = array();
+
     public static function last_call() { return self::$last; }
 
     private static function call($endpoint, $body) {
@@ -464,13 +467,26 @@ class Mini_Forum_Game {
     public static function ajax_disconnect() {
         $uid = self::gate();
         self::disconnect($uid);
-        wp_send_json_success(array('html' => self::card_html($uid)));
+        wp_send_json_success(self::card_payload($uid));
     }
 
     public static function ajax_refresh() {
         $uid = self::gate();
         self::account($uid, true);
-        wp_send_json_success(array('html' => self::card_html($uid)));
+        wp_send_json_success(self::card_payload($uid));
+    }
+
+    /**
+     * The card and the detail panels together.
+     *
+     * They are built in one pass — rendering the card is what fills the panels —
+     * so they have to travel together, or Details would open last refresh's
+     * numbers.
+     */
+    private static function card_payload($uid) {
+        self::$panels = array();
+        $html = self::card_html($uid);
+        return array('html' => $html, 'panels' => self::panels_html());
     }
 
     public static function ajax_avatar() {
@@ -536,7 +552,11 @@ class Mini_Forum_Game {
         }
 
         if (!$rows) return '';
+        return '<div class="mf-game-stats">' . self::tiles_html($rows) . '</div>';
+    }
 
+    /** The tiles themselves, so the card and the popup draw the same ones. */
+    private static function tiles_html($rows) {
         $out = '';
         foreach ($rows as $r) {
             $out .= Mini_Forum_Design::render('game.stat', array(
@@ -545,32 +565,95 @@ class Mini_Forum_Game {
                 'value' => (int) $r[2],
             ));
         }
-        return '<div class="mf-game-stats">' . $out . '</div>';
+        return $out;
+    }
+
+    /** A row of small key/value pills — streak, where the bricks came from. */
+    private static function kv_html($title, $rows, $tone = '') {
+        $items = '';
+        foreach ($rows as $label => $value) {
+            if ($value === '' || $value === null) continue;
+            $items .= Mini_Forum_Design::render('game.kv.item', array(
+                'value' => esc_html((string) $value), 'label' => esc_html($label),
+            ));
+        }
+        if ($items === '') return '';
+        return Mini_Forum_Design::render('game.kv', array('title' => esc_html($title), 'rows' => $items));
     }
 
     /**
-     * The scenes a Mini has played, by name.
+     * The scenes a Mini has played, scene by scene and level by level.
      *
-     * "Sahne bazlı data" is what the game actually records — which scenes, for
-     * how long, how many recordings — so it goes on the card as itself rather
-     * than as one more number in a tile.
+     * The game unlocks Sound, Word, Sentence and Dialogue separately within
+     * each scene, so that is what a detail view shows — a total would throw
+     * away the only thing that says where a Mini actually is.
      */
-    private static function scenes_html($sc) {
+    private static function scenes_html($sc, $detail = null) {
         if (!is_array($sc) || empty($sc['played'])) return '';
-        $chips = '';
-        foreach ((array) (isset($sc['names']) ? $sc['names'] : array()) as $n) {
-            $chips .= '<span class="mf-game-chip">' . esc_html($n) . '</span>';
+
+        $rows = '';
+        if (is_array($detail) && $detail) {
+            foreach ($detail as $scene) {
+                $levels = '';
+                foreach ((array) (isset($scene['levels']) ? $scene['levels'] : array()) as $lv) {
+                    $levels .= Mini_Forum_Design::render('game.level', array(
+                        'state' => empty($lv['unlocked']) ? 'is-locked' : 'is-open',
+                        'name'  => esc_html($lv['name']),
+                    ));
+                }
+                $meta = array();
+                if (!empty($scene['minutes']))     $meta[] = (int) $scene['minutes'] . ' min';
+                if (!empty($scene['recordings']))  $meta[] = (int) $scene['recordings'] . ' rec';
+                if (!empty($scene['last_played'])) $meta[] = 'last ' . $scene['last_played'];
+
+                $rows .= Mini_Forum_Design::render('game.scene.row', array(
+                    'name'   => esc_html($scene['name']),
+                    'meta'   => esc_html(implode(' · ', $meta)),
+                    'levels' => $levels,
+                ));
+            }
+        } else {
+            // No level detail to hand: the scene names alone, as chips.
+            foreach ((array) (isset($sc['names']) ? $sc['names'] : array()) as $n) {
+                $rows .= '<span class="mf-game-chip">' . esc_html($n) . '</span>';
+            }
+            $rows = '<div class="mf-game-chips">' . $rows . '</div>';
         }
+
         return Mini_Forum_Design::render('game.scenes', array(
             'played'     => (int) $sc['played'],
             'total'      => (int) (isset($sc['total']) ? $sc['total'] : 0),
-            'names'      => $chips,
+            'rows'       => $rows,
             'minutes'    => (int) (isset($sc['minutes']) ? $sc['minutes'] : 0),
             'recordings' => (int) (isset($sc['recordings']) ? $sc['recordings'] : 0),
         ));
     }
 
-    /** The experts a parent has approved, by name and where they work. */
+    /**
+     * The characters a Mini has built for its scenes.
+     *
+     * Deliberately not the profile picture — the game keeps the two apart, and
+     * one Mini can have a different character per scene. They sit in the detail
+     * beside the scenes they were built for, which is what they are.
+     */
+    private static function figures_html($figures) {
+        if (!is_array($figures) || !$figures) return '';
+        $rows = '';
+        foreach ($figures as $f) {
+            if (empty($f['url'])) continue;
+            $rows .= Mini_Forum_Design::render('game.figure', array(
+                'url'   => esc_url($f['url']),
+                'scene' => esc_html(isset($f['scene']) ? $f['scene'] : ''),
+            ));
+        }
+        if ($rows === '') return '';
+        return Mini_Forum_Design::render('game.figures', array(
+            'count' => count($figures),
+            'rows'  => $rows,
+        ));
+    }
+
+    /** The experts a parent has approved: their picture if they have one. */
     private static function experts_html($experts) {
         if (!is_array($experts) || !$experts) return '';
         $rows = '';
@@ -579,13 +662,67 @@ class Mini_Forum_Game {
             foreach (array('organization', 'profession') as $k) {
                 if (!empty($e[$k])) { $where = $e[$k]; break; }
             }
+            $face = !empty($e['avatar'])
+                ? '<img src="' . esc_url($e['avatar']) . '" alt="" width="34" height="34" loading="lazy">'
+                : '<span class="mf-game-expert-initial">' . esc_html(self::initial(isset($e['name']) ? $e['name'] : '')) . '</span>';
+
             $rows .= Mini_Forum_Design::render('game.expert', array(
-                'initial' => esc_html(self::initial(isset($e['name']) ? $e['name'] : '')),
-                'name'    => esc_html(isset($e['name']) ? $e['name'] : ''),
-                'where'   => esc_html($where),
+                'face'  => $face,
+                'name'  => esc_html(isset($e['name']) ? $e['name'] : ''),
+                'where' => esc_html($where),
             ));
         }
         return Mini_Forum_Design::render('game.experts', array('rows' => $rows));
+    }
+
+    /**
+     * Everything about one Mini, for the popup.
+     *
+     * The card carries the headline — bricks, medals, cups, streak — and this
+     * carries the rest, because a card that showed all of it for a family of
+     * three was a page nobody could read.
+     */
+    private static function detail_panel($m) {
+        $tiles = self::tiles_html(array(
+            array('bricks', self::t('game.stat.bricks', 'Bricks'), isset($m['bricks']) ? $m['bricks'] : 0),
+            array('medals', self::t('game.stat.medals', 'Medals'), isset($m['medals']) ? $m['medals'] : 0),
+            array('cups',   self::t('game.stat.cups',   'Cups'),   isset($m['cups'])   ? $m['cups']   : 0),
+            array('streak', self::t('game.stat.streak', 'Day streak'), isset($m['current_streak']) ? $m['current_streak'] : 0),
+        ));
+
+        $st = isset($m['streak_detail']) ? $m['streak_detail'] : null;
+        $streak = is_array($st) ? self::kv_html(self::t('game.detail.streak', 'Streak'), array(
+            self::t('game.detail.current',  'Current')      => (int) $st['current'],
+            self::t('game.detail.longest',  'Longest')      => (int) $st['longest'],
+            self::t('game.detail.days',     'Active days')  => (int) $st['active_days'],
+            self::t('game.detail.last',     'Last active')  => $st['last_active'],
+        )) : '';
+
+        // The game names every reward it hands out; "daily_brick" is not a
+        // label, so each is turned into words before it reaches the screen.
+        $rw = isset($m['rewards']) && is_array($m['rewards']) ? $m['rewards'] : array();
+        $rows = array();
+        foreach ($rw as $type => $n) {
+            $rows[ucfirst(str_replace('_', ' ', $type))] = (int) $n;
+        }
+        $rewards = $rows ? self::kv_html(self::t('game.detail.rewards', 'Where the bricks came from'), $rows) : '';
+
+        return Mini_Forum_Design::render('game.detail.panel', array(
+            'stats'   => $tiles,
+            'streak'  => $streak,
+            'rewards' => $rewards,
+            'scenes'  => self::scenes_html(isset($m['scenes']) ? $m['scenes'] : null,
+                                           isset($m['scene_detail']) ? $m['scene_detail'] : null),
+            'figures' => self::figures_html(isset($m['figures']) ? $m['figures'] : array()),
+            'experts' => self::experts_html(isset($m['experts']) ? $m['experts'] : array()),
+        ));
+    }
+
+    /** The button that opens one Mini's detail. */
+    private static function detail_button($id, $label) {
+        return Mini_Forum_Design::render('game.detail.button', array(
+            'id' => esc_attr($id), 'label' => esc_html($label),
+        ));
     }
 
     /**
@@ -605,17 +742,12 @@ class Mini_Forum_Game {
                 ? '<img src="' . esc_url($m['avatar']) . '" alt="" width="64" height="64" loading="lazy">'
                 : '<span class="mf-game-mini-initial">' . esc_html(self::initial($m['name'])) . '</span>';
 
-            $tiles = '';
-            foreach (array(
+            $tiles = self::tiles_html(array(
                 array('bricks', self::t('game.stat.bricks', 'Bricks'), isset($m['bricks']) ? $m['bricks'] : 0),
                 array('medals', self::t('game.stat.medals', 'Medals'), isset($m['medals']) ? $m['medals'] : 0),
                 array('cups',   self::t('game.stat.cups',   'Cups'),   isset($m['cups'])   ? $m['cups']   : 0),
                 array('streak', self::t('game.stat.streak', 'Day streak'), isset($m['current_streak']) ? $m['current_streak'] : 0),
-            ) as $t) {
-                $tiles .= Mini_Forum_Design::render('game.stat', array(
-                    'tone' => 'mf-game-stat-' . $t[0], 'label' => esc_html($t[1]), 'value' => (int) $t[2],
-                ));
-            }
+            ));
 
             // The message their parent actually set beats the default tagline
             // every Mini is born with.
@@ -631,13 +763,22 @@ class Mini_Forum_Game {
                           (int) $sc['minutes'], (int) $sc['recordings'])
                 : '';
 
+            $key = 'mini-' . (int) $m['mini_id'];
+            self::$panels[$key] = array(
+                'name' => $m['name'],
+                'sub'  => trim(implode(' · ', array_filter(array(
+                            !empty($m['age_range']) ? $m['age_range'] : '', $says)))),
+                'html' => self::detail_panel($m),
+            );
+
             $rows .= Mini_Forum_Design::render('game.mini', array(
-                'avatar'  => $face,
-                'name'    => esc_html($m['name']),
-                'age'     => !empty($m['age_range']) ? esc_html($m['age_range']) : '',
-                'tagline' => esc_html($says),
-                'scenes'  => esc_html($scene_line),
-                'stats'   => $tiles,
+                'avatar'     => $face,
+                'name'       => esc_html($m['name']),
+                'age'        => !empty($m['age_range']) ? esc_html($m['age_range']) : '',
+                'tagline'    => esc_html($says),
+                'scenes'     => esc_html($scene_line),
+                'stats'      => $tiles,
+                'detail_btn' => self::detail_button($key, self::t('game.detail.open', 'Details')),
             ));
         }
 
@@ -677,15 +818,41 @@ class Mini_Forum_Game {
             if (!empty($p[$k])) { $tagline = $p[$k]; break; }
         }
 
+        // The account holder's own detail, plus one per Mini (built by minis_html
+        // as it goes), all rendered hidden into the popup below.
+        $minis_html = self::minis_html($account);
+
+        $own = array_merge($p, array(
+            'scenes'        => isset($p['scenes']) ? $p['scenes'] : null,
+            'scene_detail'  => isset($p['scene_detail']) ? $p['scene_detail'] : array(),
+            'streak_detail' => isset($p['streak_detail']) ? $p['streak_detail'] : null,
+            'rewards'       => isset($p['rewards']) ? $p['rewards'] : array(),
+            'figures'       => isset($p['figures']) ? $p['figures'] : array(),
+            'experts'       => isset($account['experts']) ? $account['experts'] : array(),
+            'bricks'        => isset($p['bricks']) ? $p['bricks'] : 0,
+            'medals'        => isset($p['medals']) ? $p['medals'] : 0,
+            'cups'          => isset($p['cups'])   ? $p['cups']   : 0,
+            'current_streak'=> isset($p['current_streak']) ? $p['current_streak'] : 0,
+        ));
+        $has_own = $role === 'child' && (!empty($own['scene_detail']) || !empty($own['figures'])
+                                         || !empty($own['rewards']) || !empty($own['streak_detail']));
+        if ($has_own) {
+            self::$panels['self'] = array(
+                'name' => isset($account['name']) ? $account['name'] : '',
+                'sub'  => $tagline,
+                'html' => self::detail_panel($own),
+            );
+        }
+
         return Mini_Forum_Design::render('game.linked', array(
             'avatar'  => $avatar,
             'name'    => esc_html(isset($account['name']) ? $account['name'] : ''),
             'tags'    => $tags,
             'tagline' => esc_html($tagline),
             'stats'   => self::stats_html($account),
-            'scenes'  => self::scenes_html(isset($p['scenes']) ? $p['scenes'] : null),
             'experts' => self::experts_html(isset($account['experts']) ? $account['experts'] : array()),
-            'minis'   => self::minis_html($account),
+            'minis'   => $minis_html,
+            'detail_btn' => $has_own ? self::detail_button('self', self::t('game.detail.open', 'Details')) : '',
             // Their own address, on their own profile — masked anyway, so a
             // shoulder or a screenshot gives nothing away.
             'email'   => esc_html(self::mask_email(isset($account['email']) ? $account['email'] : '')),
@@ -748,7 +915,27 @@ class Mini_Forum_Game {
                    'tick'    => MF_TICK_SVG,
                ))
              . Mini_Forum_Design::render('game.off')
-             . '</div></div></div></div>';
+             . Mini_Forum_Design::render('game.detail', array('name' => '', 'sub' => ''))
+             . '</div></div></div></div>'
+             . self::panels_html();
+    }
+
+    /**
+     * Every detail panel, rendered once and hidden.
+     *
+     * Server-rendered rather than fetched when a button is pressed: the data is
+     * already on the page, the markup is the same editable areas as everything
+     * else, and pressing Details on a phone with no signal still works.
+     */
+    private static function panels_html() {
+        if (!self::$panels) return '';
+        $out = '<div id="mf-game-panels" hidden>';
+        foreach (self::$panels as $key => $panel) {
+            $out .= '<div data-mf-panel-for="' . esc_attr($key) . '"'
+                  . ' data-name="' . esc_attr($panel['name']) . '"'
+                  . ' data-sub="' . esc_attr($panel['sub']) . '">' . $panel['html'] . '</div>';
+        }
+        return $out . '</div>';
     }
 
     /**
@@ -761,7 +948,8 @@ class Mini_Forum_Game {
      */
     public static function setup_hint() {
         if (!current_user_can('manage_options')) return '';
-        return '<div class="mf-game-card mf-game-off"><div class="mf-studs mf-studs-yellow"></div>'
+        return '<div class="mf-game-brickframe" style="background:var(--mf-yellow,#FFCC00)">'
+             . '<div class="mf-studs mf-studs-yellow"></div><div class="mf-game-card">'
              . '<div class="mf-game-body">'
              . '<div class="mf-game-logo"><img src="' . esc_url(self::logo()) . '" alt="" width="72" height="72"></div>'
              . '<div class="mf-game-copy"><h4>Connect Profile is not set up yet</h4>'
@@ -769,7 +957,7 @@ class Mini_Forum_Game {
              . 'things first: the game API address, and a shared key that also goes in the game\'s '
              . '<code>forum/config.php</code>. Only you can see this.</p></div>'
              . '<div class="mf-game-actions"><a class="mf-btn mf-btn-blue" href="'
-             . esc_url(admin_url('admin.php?page=mf-game')) . '">Set it up</a></div></div></div>';
+             . esc_url(admin_url('admin.php?page=mf-game')) . '">Set it up</a></div></div></div></div>';
     }
 
     private static function flash_key($uid) { return 'mf_game_flash_' . (int) $uid; }

@@ -1,5 +1,39 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.19.00
+
+**A Mini's detail moved into the popup, and it is the game's real data.**
+
+The card keeps the headline — bricks, medals, cups, streak — and a **Details**
+button opens the site's own popup with the rest. A parent's card carries one per
+Mini. Everything a card used to stack inline is in there, so a family of three
+fits on a screen again.
+
+What is in it, all from tables the game writes:
+
+- **Scene by scene, level by level.** `mini_scene_levels` unlocks Sound, Word,
+  Sentence and Dialogue separately within each scene, so each scene shows which
+  of its four are open, its minutes, its recordings and when it was last played.
+  A total would have thrown away the only thing that says where a Mini is.
+- **Streak as `streak_summary` keeps it**: current, longest, total active days,
+  last active — not just the running count.
+- **Where the bricks came from**, counted by `mini_rewards.reward_type` and
+  turned into words.
+- The characters built for each scene, and the experts.
+
+**Experts now show their own picture** when the game has one (`avatars` by
+`expert_id`), falling back to the initial.
+
+### Fixed
+
+**The studs floated, attached to nothing.** The strip art is studs with a thin
+lip; it only reads as the top of a brick when there is a brick under it. The
+card is now a coloured brick with a white card inside — the same shape as the
+popup and the Mini-Kits cards — and the studs sit on it.
+
+**"Connected." after a refresh or a disconnect.** The line is now dropped by
+every action that redraws the card, on top of being a one-shot flash server-side.
+
 ## mini-forum 3.17.01
 
 **A Mini's picture comes from the avatar editor, and nowhere else.** 3.17.00

@@ -153,6 +153,8 @@ if (!defined('MF_LINK_LIB')) {
         $out = array();
         foreach ($ids as $id) {
             $out[$id] = array('avatar' => null, 'motivation' => '', 'experts' => array(),
+                              'figures' => array(), 'scene_detail' => array(),
+                              'streak' => null, 'rewards' => array(),
                               'scenes' => array('played' => 0, 'total' => 0, 'minutes' => 0,
                                                 'recordings' => 0, 'names' => array()));
         }
@@ -172,6 +174,28 @@ if (!defined('MF_LINK_LIB')) {
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $id = (int) $r['mini_id'];
             if (isset($out[$id]) && !empty($r['avatar_url'])) $out[$id]['avatar'] = $r['avatar_url'];
+        }
+
+        /* The characters a Mini has built for its scenes. Not a profile
+           picture — the game keeps them apart and so does this — but they are
+           the most tangible thing a Mini makes, so they belong in the detail
+           beside the scenes they were built for. */
+        $stmt = $pdo->prepare("
+            SELECT c.mini_id, c.image_url, c.scene_id, s.scene_name
+            FROM customized_minis c
+            LEFT JOIN scenes s ON s.scene_id = c.scene_id
+            WHERE c.mini_id IN ({$marks}) AND c.image_url IS NOT NULL AND c.image_url <> ''
+              AND (c.is_hidden = 0 OR c.is_hidden IS NULL)
+            ORDER BY c.display_order ASC, c.id DESC
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $id = (int) $r['mini_id'];
+            if (!isset($out[$id]) || count($out[$id]['figures']) >= 12) continue;
+            $out[$id]['figures'][] = array(
+                'url'   => $r['image_url'],
+                'scene' => !empty($r['scene_name']) ? $r['scene_name'] : '',
+            );
         }
 
         /* The motivation message a parent actually set, not the default tagline
@@ -204,48 +228,122 @@ if (!defined('MF_LINK_LIB')) {
             if ($msg !== '') $out[$id]['motivation'] = $msg;
         }
 
-        /* Scene by scene. Play time and recordings add up across a scene's four
-           levels; the scene itself counts once. */
+        /* Scene by scene, level by level. The game unlocks Sound, Word, Sentence
+           and Dialogue separately per scene, and that — not a total — is what a
+           parent means by a Mini's detail. Read as rows, summed into the
+           headline afterwards, so both come from one query. */
         $total = (int) $pdo->query("SELECT COUNT(*) FROM scenes WHERE is_active = 1")->fetchColumn();
         $stmt = $pdo->prepare("
-            SELECT l.mini_id, l.scene_id, s.scene_name,
-                   SUM(l.play_time_seconds) AS secs, SUM(l.recording_count) AS recs
+            SELECT l.mini_id, l.scene_id, s.scene_name, s.scene_difficulty,
+                   lv.level_name, lv.level_order, l.is_locked,
+                   l.play_time_seconds, l.recording_count, l.last_play_date
             FROM mini_scene_levels l
             LEFT JOIN scenes s ON s.scene_id = l.scene_id
-            WHERE l.mini_id IN ({$marks}) AND l.is_locked = 0
-            GROUP BY l.mini_id, l.scene_id, s.scene_name
-            ORDER BY l.scene_id ASC
+            LEFT JOIN levels lv ON lv.level_id = l.level_id
+            WHERE l.mini_id IN ({$marks})
+            ORDER BY s.scene_order ASC, l.scene_id ASC, lv.level_order ASC
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $id  = (int) $r['mini_id'];
+            if (!isset($out[$id])) continue;
+            $sid = (int) $r['scene_id'];
+            if (!isset($out[$id]['scene_detail'][$sid])) {
+                $out[$id]['scene_detail'][$sid] = array(
+                    'scene_id'   => $sid,
+                    'name'       => !empty($r['scene_name']) ? $r['scene_name'] : ('Scene ' . $sid),
+                    'difficulty' => $r['scene_difficulty'],
+                    'levels'     => array(),
+                    'minutes'    => 0,
+                    'recordings' => 0,
+                    'last_played'=> null,
+                    'open'       => false,
+                );
+            }
+            $sc = &$out[$id]['scene_detail'][$sid];
+            $unlocked = ((int) $r['is_locked'] === 0);
+            if ($unlocked) $sc['open'] = true;
+            if (!empty($r['level_name'])) {
+                $sc['levels'][] = array('name' => $r['level_name'], 'unlocked' => $unlocked);
+            }
+            $sc['minutes']    += (int) round(((int) $r['play_time_seconds']) / 60);
+            $sc['recordings'] += (int) $r['recording_count'];
+            if (!empty($r['last_play_date'])
+                && ($sc['last_played'] === null || $r['last_play_date'] > $sc['last_played'])) {
+                $sc['last_played'] = $r['last_play_date'];
+            }
+            unset($sc);
+        }
+        foreach ($out as $id => $_) {
+            $out[$id]['scenes']['total'] = $total;
+            $kept = array();
+            foreach ($out[$id]['scene_detail'] as $sc) {
+                if (!$sc['open']) continue;                   // never opened: not a scene they played
+                $kept[] = $sc;
+                $out[$id]['scenes']['played']++;
+                $out[$id]['scenes']['minutes']    += $sc['minutes'];
+                $out[$id]['scenes']['recordings'] += $sc['recordings'];
+                if (count($out[$id]['scenes']['names']) < 12) $out[$id]['scenes']['names'][] = $sc['name'];
+            }
+            $out[$id]['scene_detail'] = $kept;
+        }
+
+        /* Streak, as the game keeps it: not just the current run but how many
+           days this Mini has been active at all, and when they last were. */
+        $stmt = $pdo->prepare("
+            SELECT mini_id, current_streak, longest_streak, total_active_days, last_active_date
+            FROM streak_summary WHERE mini_id IN ({$marks})
         ");
         $stmt->execute($ids);
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $id = (int) $r['mini_id'];
             if (!isset($out[$id])) continue;
-            $out[$id]['scenes']['played']++;
-            $out[$id]['scenes']['minutes']    += (int) round(((int) $r['secs']) / 60);
-            $out[$id]['scenes']['recordings'] += (int) $r['recs'];
-            if (!empty($r['scene_name']) && count($out[$id]['scenes']['names']) < 12) {
-                $out[$id]['scenes']['names'][] = $r['scene_name'];
-            }
+            $out[$id]['streak'] = array(
+                'current'     => (int) $r['current_streak'],
+                'longest'     => (int) $r['longest_streak'],
+                'active_days' => (int) $r['total_active_days'],
+                'last_active' => $r['last_active_date'],
+            );
         }
-        foreach ($out as $id => $_) $out[$id]['scenes']['total'] = $total;
+
+        /* Where the bricks came from. The game names every reward it hands out,
+           so a parent can see whether they came from recordings, from missions
+           or from simply turning up. */
+        $stmt = $pdo->prepare("
+            SELECT mini_id, reward_type, COUNT(*) AS n
+            FROM mini_rewards WHERE mini_id IN ({$marks})
+            GROUP BY mini_id, reward_type
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $id = (int) $r['mini_id'];
+            if (!isset($out[$id])) continue;
+            $out[$id]['rewards'][(string) $r['reward_type']] = (int) $r['n'];
+        }
 
         /* The experts a parent approved for this Mini. A name and where they
            work — never their address, and never a pending or rejected request. */
         $stmt = $pdo->prepare("
-            SELECT c.mini_id, e.full_name, e.organization, e.profession
+            SELECT c.mini_id, e.expert_id, e.full_name, e.organization, e.profession,
+                   a.avatar_url
             FROM expert_mini_connections c
             JOIN expert_profiles e ON e.expert_id = c.expert_id
+            LEFT JOIN avatars a ON a.expert_id = e.expert_id AND (a.is_active = 1 OR a.is_active IS NULL)
             WHERE c.mini_id IN ({$marks}) AND c.parent_approval_status = 'approved'
-            ORDER BY e.full_name ASC
+            ORDER BY e.full_name ASC, a.avatar_id DESC
         ");
         $stmt->execute($ids);
+        $seen_expert = array();
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
-            $id = (int) $r['mini_id'];
-            if (!isset($out[$id])) continue;
+            $id  = (int) $r['mini_id'];
+            $key = $id . ':' . (int) $r['expert_id'];
+            if (!isset($out[$id]) || isset($seen_expert[$key])) continue;   // newest avatar wins
+            $seen_expert[$key] = true;
             $out[$id]['experts'][] = array(
                 'name'         => $r['full_name'],
                 'organization' => $r['organization'],
                 'profession'   => $r['profession'],
+                'avatar'       => !empty($r['avatar_url']) ? $r['avatar_url'] : null,
             );
         }
 
@@ -297,7 +395,11 @@ if (!defined('MF_LINK_LIB')) {
                 'avatar'         => isset($e['avatar'])     ? $e['avatar']     : null,
                 'motivation'     => isset($e['motivation']) ? $e['motivation'] : '',
                 'experts'        => isset($e['experts'])    ? $e['experts']    : array(),
+                'figures'        => isset($e['figures'])    ? $e['figures']    : array(),
                 'scenes'         => isset($e['scenes'])     ? $e['scenes']     : null,
+                'scene_detail'   => isset($e['scene_detail']) ? $e['scene_detail'] : array(),
+                'streak_detail'  => isset($e['streak'])     ? $e['streak']     : null,
+                'rewards'        => isset($e['rewards'])    ? $e['rewards']    : array(),
             );
         }
         return $out;
@@ -370,6 +472,10 @@ if (!defined('MF_LINK_LIB')) {
                     $e = $extra[$mini_id];
                     $out['profile']['motivation'] = $e['motivation'];
                     $out['profile']['scenes']     = $e['scenes'];
+                    $out['profile']['figures']      = $e['figures'];
+                    $out['profile']['scene_detail'] = $e['scene_detail'];
+                    $out['profile']['streak_detail']= $e['streak'];
+                    $out['profile']['rewards']      = $e['rewards'];
                     $out['experts']               = $e['experts'];
                     if (!empty($e['avatar']) && empty($out['avatar']['url'])) {
                         $out['avatar'] = array('url' => $e['avatar'], 'config' => null, 'version' => 0);

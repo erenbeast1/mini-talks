@@ -171,8 +171,8 @@ class Mini_Forum_Design {
                           'tags' => 'The role badge, and the age band or organisation after it',
                           'tagline' => 'Their game tagline, if they have one',
                           'stats' => 'The brick / medal / cup tiles',
-                          'scenes' => 'The scenes block; empty when nothing has been played',
                           'experts' => 'The experts block; empty when there are none',
+                          'detail_btn' => 'The Details button; empty when there is nothing to show',
                           'minis' => "A parent's Minis; empty for every other role",
                           'email' => 'The connected address, masked', 'synced' => 'How long ago it was read'),
                     array('data-mf-action="game-refresh"'    => 'reads the game again',
@@ -196,12 +196,65 @@ class Mini_Forum_Design {
                           'name' => 'Their name', 'age' => 'Their age band',
                           'tagline' => 'The message their parent set for them, or their tagline',
                           'scenes' => 'Scenes played, minutes and recordings, on one line',
-                          'stats' => 'Their four counter tiles')),
+                          'stats' => 'Their four counter tiles',
+                          'detail_btn' => 'The button that opens their detail')),
+
+                'game.detail' => array('Popup — one Mini in detail', 'html',
+                    '@game.detail',
+                    array('name' => 'Whose detail it is', 'sub' => 'Their age band and message'),
+                    array('data-mf-detail-body'      => 'the detail itself is written into this element',
+                          'data-mf-detail-name'      => 'the name is written here',
+                          'data-mf-game-step="detail"' => 'marks this as the detail step of the popup')),
+
+                'game.detail.button' => array('The Details button', 'html',
+                    '@game.detail.button',
+                    array('id' => 'Which panel it opens', 'label' => 'Its wording'),
+                    array('data-mf-action="game-detail"' => 'opens the detail popup',
+                          'data-value="{{id}}"'          => 'says which Mini — without it the button opens nothing')),
+
+                'game.detail.panel' => array('Detail popup — what is inside', 'html',
+                    '@game.detail.panel',
+                    array('stats' => 'The four counter tiles', 'streak' => 'The streak pills',
+                          'rewards' => 'Where the bricks came from', 'scenes' => 'Scene by scene',
+                          'figures' => 'The characters built', 'experts' => 'The experts')),
+
+                'game.scene.row' => array('Detail — one scene', 'html',
+                    '@game.scene.row',
+                    array('name' => 'The scene', 'meta' => 'Minutes, recordings, when it was last played',
+                          'levels' => 'One chip per level')),
+
+                'game.level' => array('Detail — one level chip', 'html',
+                    '@game.level',
+                    array('state' => 'is-open or is-locked', 'name' => 'Sound, Word, Sentence or Dialogue')),
+
+                'game.kv' => array('Detail — a row of small numbers', 'html',
+                    '@game.kv',
+                    array('title' => 'What the row is', 'rows' => 'The numbers themselves')),
+
+                'game.kv.item' => array('Detail — one small number', 'html',
+                    '@game.kv.item',
+                    array('value' => 'The number', 'label' => 'What it means')),
+
+                'game.detail.open'    => array('Button — open a Mini&rsquo;s detail', 'text', 'Details'),
+                'game.detail.streak'  => array('Detail heading — streak', 'text', 'Streak'),
+                'game.detail.current' => array('Detail — current streak', 'text', 'Current'),
+                'game.detail.longest' => array('Detail — longest streak', 'text', 'Longest'),
+                'game.detail.days'    => array('Detail — active days', 'text', 'Active days'),
+                'game.detail.last'    => array('Detail — last active', 'text', 'Last active'),
+                'game.detail.rewards' => array('Detail heading — rewards', 'text', 'Where the bricks came from'),
+
+                'game.figures' => array('Characters built — the block around them', 'html',
+                    '@game.figures',
+                    array('count' => 'How many', 'rows' => 'One thumbnail each')),
+
+                'game.figure' => array('Characters built — one thumbnail', 'html',
+                    '@game.figure',
+                    array('url' => 'The picture the game rendered', 'scene' => 'The scene it was built for')),
 
                 'game.scenes' => array('Scenes played', 'html',
                     '@game.scenes',
                     array('played' => 'How many scenes they have played', 'total' => 'How many there are',
-                          'names' => 'One chip per scene', 'minutes' => 'Minutes played',
+                          'rows' => 'One row per scene, with its levels', 'minutes' => 'Minutes played',
                           'recordings' => 'How many recordings they have made')),
 
                 'game.experts' => array('Experts — the block around them', 'html',
@@ -210,8 +263,8 @@ class Mini_Forum_Design {
 
                 'game.expert' => array('Experts — one row', 'html',
                     '@game.expert',
-                    array('initial' => 'The first letter of their name', 'name' => 'Their name',
-                          'where' => 'Their organisation, or their profession')),
+                    array('face' => 'Their picture, or the first letter of their name',
+                          'name' => 'Their name', 'where' => 'Their organisation, or their profession')),
 
                 'game.form' => array('Popup — asking for the address', 'html',
                     '@game.form',

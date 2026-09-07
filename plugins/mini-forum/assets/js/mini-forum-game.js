@@ -22,6 +22,7 @@
 
   function card()    { return document.getElementById('mf-game-card'); }
   function overlay() { return document.getElementById('mf-game-overlay'); }
+  function panels()  { return document.getElementById('mf-game-panels'); }
 
   function step(which) {
     var o = overlay();
@@ -76,15 +77,26 @@
   /* The card is replaced whole after every action, so its state can never drift
      from the server's. The one-time "Connected." line is dropped at the same
      time: it answers the link that was just opened, not whatever happens next. */
-  function replaceCard(html) {
+  function replaceCard(data) {
     var c = card();
-    if (c && typeof html === 'string') c.innerHTML = html;
+    if (c && data && typeof data.html === 'string') c.innerHTML = data.html;
+    // The detail panels are built in the same pass as the card, so they travel
+    // with it; keeping the old ones would open last refresh's numbers.
+    if (data && typeof data.panels === 'string') {
+      var p = panels();
+      if (p && p.parentNode) p.parentNode.removeChild(p);
+      if (data.panels) document.body.insertAdjacentHTML('beforeend', data.panels);
+    }
     clearNotice();
   }
 
+  /* The green line answers the link that was just opened. It is gone the moment
+     anything else happens — a refresh, a disconnect, a detail — because by then
+     it is answering a question nobody asked. */
   function clearNotice() {
-    var n = document.querySelector('.mf-game-notice');
-    if (n && n.parentNode) n.parentNode.removeChild(n);
+    document.querySelectorAll('.mf-game-notice').forEach(function (n) {
+      if (n.parentNode) n.parentNode.removeChild(n);
+    });
   }
 
   /* ── send the confirmation link ── */
@@ -110,7 +122,7 @@
     if (!quiet) busy(btn, true, T.working);
     post('mf_game_refresh', {}, function (ok) {
       if (!quiet) busy(btn, false);
-      if (ok && ok.data) replaceCard(ok.data.html);
+      if (ok && ok.data) replaceCard(ok.data);
     });
   }
 
@@ -119,7 +131,7 @@
     post('mf_game_disconnect', {}, function (ok, raw) {
       busy(btn, false);
       if (!ok) { msg((raw && raw.data && raw.data.message) || T.failed, 'bad', 'data-mf-game-msg-off'); return; }
-      replaceCard(ok.data && ok.data.html);
+      replaceCard(ok.data);
       close();
     });
   }
@@ -158,7 +170,25 @@
     el.style.color = kind === 'bad' ? '#B91C1C' : '#17512C';
   }
 
+  /* One Mini's detail, moved into the popup: the card carries the headline and
+     the popup carries the rest, so a family of three still fits on a screen. */
+  function detail(btn) {
+    var key = btn && btn.getAttribute('data-value');
+    var src = key && panels() ? panels().querySelector('[data-mf-panel-for="' + key + '"]') : null;
+    var o   = overlay();
+    if (!src || !o) return;
+    var body = o.querySelector('[data-mf-detail-body]');
+    var name = o.querySelector('[data-mf-detail-name]');
+    var sub  = o.querySelector('[data-mf-detail-sub]');
+    if (body) body.innerHTML = src.innerHTML;
+    if (name) name.textContent = src.getAttribute('data-name') || '';
+    if (sub)  { sub.textContent = src.getAttribute('data-sub') || ''; sub.hidden = !sub.textContent; }
+    clearNotice();
+    open('detail');
+  }
+
   var actions = {
+    'game-detail':         function (btn) { detail(btn); },
     'game-open':           function ()    { open('form'); },
     'game-close':          function ()    { close(); },
     'game-send':           function (btn) { send(btn); },
