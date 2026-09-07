@@ -1,15 +1,22 @@
 # Mini-Talks plugins — changelog
 
-## mini-forum 3.20.00
+## mini-forum 3.21.00
 
-**Mini-Events opens on what you joined.** Above the calendar, a member now sees
-their own events first — the next one at the top, then the rest, then the last
-few they went to — the same way the forum leads with their own posts. Each row
-keeps its event type's colour, so a row here and a card further down are
-recognisably the same event, and there is an empty state for somebody who has
-not joined anything yet. Signed-out visitors see the page exactly as before.
-Three new Design areas, so the heading, the rows and the empty state are all
-editable.
+**The profile's Mini-Events tab is a tab.** It was an `<a href>` that jumped
+straight to the events hub, so a member had no way to see what they had
+actually joined. It now opens a panel of their own events — the next one at the
+top, then the rest, then the last few they went to — exactly the way the
+Mini-Forum tab lists their own posts, with a *See all Mini-Events* button
+through to the hub. Each row keeps its event type's colour, so a row here and a
+card on the hub are recognisably the same event.
+
+**"Events: 0" counts now.** That box was a hardcoded zero; it reports what the
+tab lists.
+
+Three new Design areas (`profile.events`, `.row`, `.empty`).
+
+*3.20.00 put this on the events hub instead, which was the wrong screen; the
+hub is back to what it was.*
 
 ## mini-devices 3.4.1
 

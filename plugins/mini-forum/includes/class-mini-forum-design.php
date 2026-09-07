@@ -147,6 +147,24 @@ class Mini_Forum_Design {
 
                 'profile.posts.title'   => array('Posts heading', 'text', 'My Posts'),
                 'profile.posts.empty'   => array('Posts empty state', 'html', 'No posts yet.'),
+                'profile.events' => array('Mini-Events tab — the block', 'html',
+                    '@profile.events',
+                    array('count' => 'How many they have joined', 'rows' => 'One row per event',
+                          'empty' => 'The empty state, when they have joined none',
+                          'events_url' => 'The Mini-Events hub'),
+                    array('{{rows}}' => 'the events themselves')),
+
+                'profile.events.row' => array('Mini-Events tab — one row', 'html',
+                    '@profile.events.row',
+                    array('state' => 'is-upcoming or is-past', 'url' => 'The event page',
+                          'colour' => 'red, yellow, blue or green — the type&rsquo;s colour',
+                          'day' => 'Mon, Tue…', 'date' => 'The day number', 'month' => 'Jan, Feb…',
+                          'title' => 'The event', 'meta' => 'Type, time and place',
+                          'tag' => 'Coming up, Been, or Cancelled')),
+
+                'profile.events.empty' => array('Mini-Events tab — nothing joined yet', 'html',
+                    '@profile.events.empty'),
+
                 'profile.kits.title'    => array('Mini-Kits heading', 'text', 'Mini-Kits'),
                 'profile.kits.empty'    => array('Mini-Kits empty state', 'html', 'Your Mini-Talks kits will appear here once the Mini-Devices plugin is active.'),
                 'profile.studio.title'  => array('App &amp; Studio heading', 'text', 'App & Studio'),
@@ -327,23 +345,6 @@ class Mini_Forum_Design {
                 'events.hero' => array('Hero', 'html',
                     '@events.hero',
                     array('logo' => 'The Mini-Talks logo URL')),
-
-                'events.mine' => array('What this member has joined — the block', 'html',
-                    '@events.mine',
-                    array('count' => 'How many they have joined', 'rows' => 'One row per event',
-                          'empty' => 'The empty state, when they have joined none'),
-                    array('{{rows}}' => 'the events themselves')),
-
-                'events.mine.row' => array('What this member has joined — one row', 'html',
-                    '@events.mine.row',
-                    array('state' => 'is-upcoming or is-past', 'url' => 'The event page',
-                          'colour' => 'red, yellow, blue or green — the type&rsquo;s colour',
-                          'day' => 'Mon, Tue…', 'date' => 'The day number', 'month' => 'Jan, Feb…',
-                          'title' => 'The event', 'meta' => 'Type, time and place',
-                          'tag' => 'Coming up, Been, or Cancelled')),
-
-                'events.mine.empty' => array('What this member has joined — nothing yet', 'html',
-                    '@events.mine.empty'),
 
                 'events.soon' => array('Empty sub-page card', 'html',
                     '@events.soon',

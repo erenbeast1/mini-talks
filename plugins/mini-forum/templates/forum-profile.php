@@ -6,8 +6,62 @@ $roles=get_user_meta($uid,'mf_roles',true)?:[];
 global $wpdb;$rt=$wpdb->prefix.'mf_replies';
 $pc=(int)(new WP_Query(['post_type'=>'mf_post','author'=>$uid,'posts_per_page'=>-1,'fields'=>'ids']))->found_posts;
 $rcc=(int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $rt WHERE user_id=%d",$uid));
+$fu=mf_get_forum_url();$eu=mf_get_events_url();
+/* This tab used to be a link that jumped straight to the events hub, so a
+   member had no way to see what they had actually joined. It now lists their
+   own events the way the Mini-Forum tab lists their own posts: the next one
+   first, then the rest, then the last few they went to. */
+$tev = $wpdb->prefix . 'mf_events';
+$tpa = $wpdb->prefix . 'mf_event_participants';
+
+$mfe_up = $wpdb->get_results($wpdb->prepare("
+    SELECT e.* FROM $tev e
+    JOIN $tpa p ON p.event_id = e.id
+    WHERE p.user_id = %d AND p.status = 'joined'
+      AND e.status IN ('published','completed')
+      AND DATE(e.start_datetime) >= CURDATE()
+    ORDER BY e.start_datetime ASC LIMIT 8
+", $uid));
+$mfe_past = $wpdb->get_results($wpdb->prepare("
+    SELECT e.* FROM $tev e
+    JOIN $tpa p ON p.event_id = e.id
+    WHERE p.user_id = %d AND p.status = 'joined'
+      AND e.status IN ('published','completed')
+      AND DATE(e.start_datetime) < CURDATE()
+    ORDER BY e.start_datetime DESC LIMIT 6
+", $uid));
+$mfe_mine = array_merge($mfe_up, $mfe_past);
+
+/* Each type keeps the colour it wears on the events hub, so a row here and a
+   card there are recognisably the same event. */
+$mfe_colour = array('workshop' => 'red', 'meetup' => 'yellow', 'expert_session' => 'blue',
+                    'talkspot' => 'red', 'update' => 'green', 'milestone' => 'green');
+$mfe_name   = array('workshop' => 'Workshop', 'meetup' => 'Meetup', 'expert_session' => 'Expert Session',
+                    'talkspot' => 'Talk-Spot', 'update' => 'Update', 'milestone' => 'Milestone');
+
+$mfe_rows  = '';
+$mfe_today = date('Y-m-d', current_time('timestamp'));
+foreach ($mfe_mine as $ev) {
+    $ts       = strtotime($ev->start_datetime);
+    $upcoming = date('Y-m-d', $ts) >= $mfe_today;
+    $meta     = array(isset($mfe_name[$ev->event_type]) ? $mfe_name[$ev->event_type] : 'Event',
+                      date('g:i A', $ts));
+    if (!empty($ev->location_name)) $meta[] = $ev->location_name;
+
+    $mfe_rows .= mf_block_get('profile.events.row', array(
+        'state'  => $upcoming ? 'is-upcoming' : 'is-past',
+        'url'    => esc_url(add_query_arg('event', $ev->slug, $eu)),
+        'colour' => esc_attr(isset($mfe_colour[$ev->event_type]) ? $mfe_colour[$ev->event_type] : 'yellow'),
+        'day'    => esc_html(ucfirst(strtolower(date('D', $ts)))),
+        'date'   => esc_html(date('d', $ts)),
+        'month'  => esc_html(ucfirst(strtolower(date('M', $ts)))),
+        'title'  => esc_html($ev->title),
+        'meta'   => esc_html(implode(' · ', $meta)),
+        'tag'    => esc_html($ev->status === 'cancelled' ? 'Cancelled' : ($upcoming ? 'Coming up' : 'Been')),
+    ));
+}
 $my_posts=new WP_Query(['post_type'=>'mf_post','author'=>$uid,'posts_per_page'=>3,'orderby'=>'date','order'=>'DESC']);
-$fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert'=>'rb-green','Volunteer'=>'rb-yellow','Talk-Spot'=>'rb-red'];
+$rbm=['Family'=>'rb-blue','Expert'=>'rb-green','Volunteer'=>'rb-yellow','Talk-Spot'=>'rb-red'];
 ?>
 <div class="mf-container">
   <!-- Profile Header Frame — blue border -->
@@ -23,7 +77,7 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
       $mf_badges = ob_get_clean();
 
       $mf_stats = '<div class="mf-stat-box">Posts: ' . (int)$pc . '</div>'
-                . '<div class="mf-stat-box">Events: 0</div>'
+                . '<div class="mf-stat-box">Events: ' . count($mfe_mine) . '</div>'
                 . '<div class="mf-stat-box" id="mf-stat-kits">Kits: 0</div>';
 
       mf_block('profile.header', array(
@@ -45,7 +99,7 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
     <div class="mf-profile-tabs-area" style="width:100%">
       <div class="mf-profile-tabs" role="tablist">
         <button type="button" class="mf-profile-tab tab-yellow" data-mf-panel="forum" role="tab" aria-selected="true"><span class="tab-dot" style="background:var(--mf-yellow)"></span> Mini-Forum</button>
-        <a class="mf-profile-tab tab-blue" href="<?php echo esc_url($eu);?>"><span class="tab-dot" style="background:var(--mf-blue)"></span> Mini-Events</a>
+        <button type="button" class="mf-profile-tab tab-blue" data-mf-panel="events" role="tab" aria-selected="false"><span class="tab-dot" style="background:var(--mf-blue)"></span> Mini-Events</button>
         <button type="button" class="mf-profile-tab tab-green" data-mf-panel="kits" role="tab" aria-selected="false"><span class="tab-dot" style="background:var(--mf-green)"></span> Mini-Kits</button>
         <button type="button" class="mf-profile-tab tab-red" data-mf-panel="studio" role="tab" aria-selected="false"><span class="tab-dot" style="background:var(--mf-red)"></span> App &amp; Studio</button>
       </div>
@@ -88,6 +142,16 @@ $fu=mf_get_forum_url();$eu=mf_get_events_url();$rbm=['Family'=>'rb-blue','Expert
     <?php else:?><p class="mf-empty-note"><?php mf_block('profile.posts.empty'); ?></p><?php endif;?>
   </div>
   </div><!-- /panel: forum -->
+
+  <!-- ══ PANEL: Mini-Events ══ -->
+  <div class="mf-profile-panel" data-mf-panel-id="events" hidden>
+    <?php mf_block('profile.events', array(
+      'count'      => count($mfe_mine),
+      'rows'       => $mfe_rows,
+      'empty'      => $mfe_rows === '' ? mf_block_get('profile.events.empty') : '',
+      'events_url' => esc_url($eu),
+    )); ?>
+  </div><!-- /panel: events -->
 
   <!-- ══ PANEL: Mini-Kits ══ -->
   <!-- Mini-Devices renders the kit shelf through mf_profile_kits_panel. -->
