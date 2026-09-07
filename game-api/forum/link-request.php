@@ -75,7 +75,7 @@ try {
     $stmt->execute(array(
         $user_id,
         $forum_user ?: null,
-        isset($body['forum_nickname']) ? mb_substr(trim((string) $body['forum_nickname']), 0, 190) : null,
+        isset($body['forum_nickname']) ? mf_link_cut($body['forum_nickname'], 190) : null,
         hash('sha256', $token),
         $expiry,
     ));

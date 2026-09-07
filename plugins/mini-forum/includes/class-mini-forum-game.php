@@ -44,7 +44,13 @@ class Mini_Forum_Game {
     const TRY_WINDOW = 900;
 
     /** How stale a stored snapshot may get before the profile refetches it. */
-    const SYNC_AGE = 900;
+    const SYNC_AGE = 300;
+
+    /** The Mini-Talks mark, used on the card and in the e-mail. */
+    const LOGO = 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png';
+
+    /** The stud strip at the top of the e-mail, as an image an inbox can load. */
+    const MAIL_STUDS = 'https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png';
 
     public static function init() {
         add_action('wp_ajax_mf_game_request',    array(__CLASS__, 'ajax_request'));
@@ -83,8 +89,12 @@ class Mini_Forum_Game {
         $o = get_option(self::OPT, array());
         if (!is_array($o)) $o = array();
         return array(
-            'api' => isset($o['api']) ? untrailingslashit(trim($o['api'])) : '',
-            'key' => isset($o['key']) ? trim($o['key']) : '',
+            'api'  => isset($o['api']) ? untrailingslashit(trim($o['api'])) : '',
+            'key'  => isset($o['key']) ? trim($o['key']) : '',
+            // The mark on the card and at the top of the confirmation e-mail.
+            // A setting rather than a constant so a rebrand is one field, not a
+            // plugin release.
+            'logo' => isset($o['logo']) && $o['logo'] !== '' ? $o['logo'] : self::LOGO,
         );
     }
 
@@ -92,6 +102,24 @@ class Mini_Forum_Game {
     public static function configured() {
         $s = self::settings();
         return $s['api'] !== '' && $s['key'] !== '';
+    }
+
+    /**
+     * How long ago, from a Unix timestamp.
+     *
+     * Not mf_time_ago(): that one takes a formatted local time and compares it
+     * against current_time(), which is right for a post's date and three hours
+     * wrong for a timestamp — a link connected a second ago read "3 hours ago"
+     * on a site running UTC+3.
+     */
+    public static function ago($ts) {
+        $diff = time() - (int) $ts;
+        if ($diff < 0)     $diff = 0;
+        if ($diff < 60)    return self::t('game.ago.now', 'just now');
+        if ($diff < 3600)  { $n = (int) floor($diff / 60);    return sprintf(_n('%d minute ago', '%d minutes ago', $n, 'mini-forum'), $n); }
+        if ($diff < 86400) { $n = (int) floor($diff / 3600);  return sprintf(_n('%d hour ago', '%d hours ago', $n, 'mini-forum'), $n); }
+        $n = (int) floor($diff / 86400);
+        return sprintf(_n('%d day ago', '%d days ago', $n, 'mini-forum'), $n);
     }
 
     /**
@@ -306,6 +334,8 @@ class Mini_Forum_Game {
             'site'      => esc_html($site),
             'link'      => esc_url($link),
             'minutes'   => (int) self::TTL_MINUTES,
+            'logo'      => esc_url(self::logo()),
+            'studs'     => esc_url(apply_filters('mf_game_mail_studs', self::MAIL_STUDS)),
         ));
 
         $headers = array('Content-Type: text/html; charset=UTF-8');
@@ -471,68 +501,161 @@ class Mini_Forum_Game {
     }
 
     /**
-     * The counters, as the same stat boxes the profile header already uses, so
-     * a rule written for one styles the other.
+     * The counters, as brick tiles.
+     *
+     * A tile per counter rather than the profile's grey pills: these are what
+     * the game itself celebrates, and four identical grey boxes said nothing
+     * about which was which. Each tile is the same editable area, so rewording
+     * "Bricks" or restyling one restyles all of them.
      */
-    private static function stats_html($account) {
+    private static function stats_html($account, $small = false) {
         $p    = isset($account['profile']) && is_array($account['profile']) ? $account['profile'] : array();
         $role = isset($account['role']) ? $account['role'] : '';
         $rows = array();
 
         if ($role === 'child') {
-            $rows['Bricks'] = isset($p['bricks']) ? (int) $p['bricks'] : 0;
-            $rows['Medals'] = isset($p['medals']) ? (int) $p['medals'] : 0;
-            $rows['Cups']   = isset($p['cups'])   ? (int) $p['cups']   : 0;
-            if (!empty($p['current_streak'])) $rows['Streak'] = (int) $p['current_streak'];
+            $rows[] = array('bricks', self::t('game.stat.bricks', 'Bricks'), isset($p['bricks']) ? $p['bricks'] : 0);
+            $rows[] = array('medals', self::t('game.stat.medals', 'Medals'), isset($p['medals']) ? $p['medals'] : 0);
+            $rows[] = array('cups',   self::t('game.stat.cups',   'Cups'),   isset($p['cups'])   ? $p['cups']   : 0);
+            $rows[] = array('streak', self::t('game.stat.streak', 'Day streak'), isset($p['current_streak']) ? $p['current_streak'] : 0);
         } elseif ($role === 'parent') {
-            $rows['Minis'] = isset($p['minis']) ? (int) $p['minis'] : 0;
+            $minis = isset($account['minis']) && is_array($account['minis']) ? $account['minis'] : array();
+            $rows[] = array('minis',  self::t('game.stat.minis',  'Minis'),  count($minis));
+            // A parent's own headline is the sum of what their Minis have built.
+            $sum = array('bricks' => 0, 'medals' => 0, 'cups' => 0);
+            foreach ($minis as $m) {
+                foreach ($sum as $k => $_) $sum[$k] += isset($m[$k]) ? (int) $m[$k] : 0;
+            }
+            $rows[] = array('bricks', self::t('game.stat.bricks', 'Bricks'), $sum['bricks']);
+            $rows[] = array('medals', self::t('game.stat.medals', 'Medals'), $sum['medals']);
+            $rows[] = array('cups',   self::t('game.stat.cups',   'Cups'),   $sum['cups']);
         }
 
+        if (!$rows) return '';
+
         $out = '';
-        foreach ($rows as $label => $value) {
-            $out .= '<div class="mf-stat-box">' . esc_html($label) . ': ' . (int) $value . '</div>';
+        foreach ($rows as $r) {
+            $out .= Mini_Forum_Design::render('game.stat', array(
+                'tone'  => 'mf-game-stat-' . $r[0],
+                'label' => esc_html($r[1]),
+                'value' => (int) $r[2],
+            ));
         }
-        return $out;
+        return '<div class="mf-game-stats' . ($small ? ' mf-game-stats-sm' : '') . '">' . $out . '</div>';
+    }
+
+    /**
+     * A parent's Minis: the face, the name, and what each has earned.
+     *
+     * This is the thing a parent opens the page for, so it is the body of the
+     * card and not a number in a box. Never shown for any other role, and the
+     * game only ever sends the approved ones.
+     */
+    private static function minis_html($account) {
+        $minis = isset($account['minis']) && is_array($account['minis']) ? $account['minis'] : array();
+        if (!$minis) return '';
+
+        $rows = '';
+        foreach ($minis as $m) {
+            $face = !empty($m['avatar'])
+                ? '<img src="' . esc_url($m['avatar']) . '" alt="" width="64" height="64" loading="lazy">'
+                : '<span class="mf-game-mini-initial">' . esc_html(self::initial($m['name'])) . '</span>';
+
+            $tiles = '';
+            foreach (array(
+                array('bricks', self::t('game.stat.bricks', 'Bricks'), isset($m['bricks']) ? $m['bricks'] : 0),
+                array('medals', self::t('game.stat.medals', 'Medals'), isset($m['medals']) ? $m['medals'] : 0),
+                array('cups',   self::t('game.stat.cups',   'Cups'),   isset($m['cups'])   ? $m['cups']   : 0),
+                array('streak', self::t('game.stat.streak', 'Day streak'), isset($m['current_streak']) ? $m['current_streak'] : 0),
+            ) as $t) {
+                $tiles .= Mini_Forum_Design::render('game.stat', array(
+                    'tone' => 'mf-game-stat-' . $t[0], 'label' => esc_html($t[1]), 'value' => (int) $t[2],
+                ));
+            }
+
+            $rows .= Mini_Forum_Design::render('game.mini', array(
+                'avatar'  => $face,
+                'name'    => esc_html($m['name']),
+                'age'     => !empty($m['age_range']) ? esc_html($m['age_range']) : '',
+                'tagline' => !empty($m['tagline']) ? esc_html($m['tagline']) : '',
+                'stats'   => $tiles,
+            ));
+        }
+
+        return Mini_Forum_Design::render('game.minis', array(
+            'count' => count($minis),
+            'rows'  => $rows,
+        ));
     }
 
     /** The whole App & Studio card, in whichever of its two states applies. */
     public static function card_html($uid) {
         $uid = (int) $uid;
 
-        if (!self::linked($uid)) {
-            return Mini_Forum_Design::render('game.connect', array('icon' => MF_GAME_SVG));
-        }
-
-        $account = self::account($uid);
+        $account = self::linked($uid) ? self::account($uid) : null;
         if (!$account) {
-            return Mini_Forum_Design::render('game.connect', array('icon' => MF_GAME_SVG));
+            return Mini_Forum_Design::render('game.connect', array('logo' => esc_url(self::logo())));
         }
 
-        $p       = isset($account['profile']) && is_array($account['profile']) ? $account['profile'] : array();
-        $synced  = (int) get_user_meta($uid, self::META_SYNC, true);
-        $avatar  = '';
-        if (!empty($account['avatar']['url'])) {
-            $avatar = '<img src="' . esc_url($account['avatar']['url']) . '" alt="" width="96" height="96" loading="lazy">';
-        } else {
-            $avatar = mf_avatar_html($uid, 'lg');
+        $p      = isset($account['profile']) && is_array($account['profile']) ? $account['profile'] : array();
+        $role   = isset($account['role']) ? $account['role'] : '';
+        $synced = (int) get_user_meta($uid, self::META_SYNC, true);
+
+        $avatar = !empty($account['avatar']['url'])
+            ? '<img src="' . esc_url($account['avatar']['url']) . '" alt="" width="112" height="112" loading="lazy">'
+            : mf_avatar_html($uid, 'lg');
+
+        // Role first, then whatever else identifies this account in the game:
+        // a Mini's age band, an expert's organisation, a builder's username.
+        $tags = '<span class="mf-role-badge ' . esc_attr(self::role_class($role)) . '">'
+              . esc_html(self::role_label($role)) . '</span>';
+        foreach (array('age_range', 'organization', 'username') as $k) {
+            if (!empty($p[$k])) { $tags .= '<span class="mf-game-tag">' . esc_html($p[$k]) . '</span>'; break; }
         }
 
         $tagline = '';
-        if (!empty($p['tagline']))        $tagline = $p['tagline'];
-        elseif (!empty($p['organization'])) $tagline = $p['organization'];
-        elseif (!empty($p['profession']))   $tagline = $p['profession'];
+        foreach (array('tagline', 'profession', 'organization') as $k) {
+            if (!empty($p[$k])) { $tagline = $p[$k]; break; }
+        }
 
-        // The address is the member's own, shown back to them on their own
-        // profile — masked anyway, so a shoulder or a screenshot gives nothing.
         return Mini_Forum_Design::render('game.linked', array(
             'avatar'  => $avatar,
             'name'    => esc_html(isset($account['name']) ? $account['name'] : ''),
-            'role'    => esc_html(self::role_label(isset($account['role']) ? $account['role'] : '')),
+            'tags'    => $tags,
             'tagline' => esc_html($tagline),
             'stats'   => self::stats_html($account),
+            'minis'   => self::minis_html($account),
+            // Their own address, on their own profile — masked anyway, so a
+            // shoulder or a screenshot gives nothing away.
             'email'   => esc_html(self::mask_email(isset($account['email']) ? $account['email'] : '')),
-            'synced'  => $synced ? esc_html(mf_time_ago(gmdate('Y-m-d H:i:s', $synced))) : esc_html__('just now', 'mini-forum'),
+            'synced'  => esc_html($synced ? self::ago($synced) : self::t('game.ago.now', 'just now')),
         ));
+    }
+
+    /** The mark on the card and at the top of the confirmation e-mail. */
+    public static function logo() {
+        $s = self::settings();
+        return $s['logo'];
+    }
+
+    /**
+     * The first letter of a name, for a Mini with no figure yet.
+     *
+     * mb_strtoupper is not one of the functions WordPress polyfills, so a host
+     * without mbstring would fatal here rather than show a letter.
+     */
+    private static function initial($name) {
+        $name = trim((string) $name);
+        if ($name === '') return '?';
+        $first = function_exists('mb_substr') ? mb_substr($name, 0, 1, 'UTF-8') : substr($name, 0, 1);
+        return function_exists('mb_strtoupper') ? mb_strtoupper($first, 'UTF-8') : strtoupper($first);
+    }
+
+    /** Which badge colour a game role wears, in the forum's own palette. */
+    public static function role_class($role) {
+        $map = array('child' => 'rb-yellow', 'parent' => 'rb-blue',
+                     'expert' => 'rb-green', 'builder' => 'rb-red', 'admin' => 'rb-blue');
+        return isset($map[$role]) ? $map[$role] : 'rb-blue';
     }
 
     public static function mask_email($email) {
@@ -543,17 +666,28 @@ class Mini_Forum_Game {
         return $keep . str_repeat('*', max(1, min(6, strlen($name) - 1))) . substr($email, $at);
     }
 
-    /** The popup, in both of its states. Hidden until a button opens it. */
+    /**
+     * The popup, in the shell the rest of the site uses.
+     *
+     * Same overlay, same stud strip, same red brick around a white card as Sign
+     * in and Settings — a second popup language on one page would read as a
+     * different site. Its three steps live inside it and swap with hidden, so
+     * asking, confirming and disconnecting never take the member off the page.
+     */
     public static function popup_html() {
-        return '<div class="mf-game-pop" id="mf-game-pop" hidden>'
-             . '<div class="mf-game-pop-box" role="dialog" aria-modal="true" aria-label="Connect your game account">'
-             . '<div data-mf-game-step="form">'  . Mini_Forum_Design::render('game.form') . '</div>'
-             . '<div data-mf-game-step="sent" hidden>' . Mini_Forum_Design::render('game.sent', array(
-                    'email'   => esc_html__('that address', 'mini-forum'),
-                    'minutes' => (int) self::TTL_MINUTES,
-                    'tick'    => MF_TICK_SVG,
-               )) . '</div>'
-             . '</div></div>';
+        return '<div id="mf-game-overlay" class="mf-overlay" style="display:none">'
+             . '<div class="mf-popup-wrapper">'
+             . '<div class="mf-popup-studs"></div>'
+             . '<div class="mf-popup-modal"><div class="mf-popup-inner" role="dialog" aria-modal="true">'
+             . '<button class="mf-popup-close" type="button" data-mf-action="game-close" aria-label="Close">&times;</button>'
+             . Mini_Forum_Design::render('game.form')
+             . Mini_Forum_Design::render('game.sent', array(
+                   'email'   => esc_html__('that address', 'mini-forum'),
+                   'minutes' => (int) self::TTL_MINUTES,
+                   'tick'    => MF_TICK_SVG,
+               ))
+             . Mini_Forum_Design::render('game.off')
+             . '</div></div></div></div>';
     }
 
     /**
@@ -566,14 +700,15 @@ class Mini_Forum_Game {
      */
     public static function setup_hint() {
         if (!current_user_can('manage_options')) return '';
-        return '<div class="mf-game-card mf-game-off">'
-             . '<div class="mf-game-badge">' . MF_GAME_SVG . '</div>'
+        return '<div class="mf-game-card mf-game-off"><div class="mf-studs mf-studs-yellow"></div>'
+             . '<div class="mf-game-body">'
+             . '<div class="mf-game-logo"><img src="' . esc_url(self::logo()) . '" alt="" width="72" height="72"></div>'
              . '<div class="mf-game-copy"><h4>Connect Profile is not set up yet</h4>'
              . '<p>Members will be able to connect their Mini-Talks game account here. It needs two '
              . 'things first: the game API address, and a shared key that also goes in the game\'s '
-             . '<code>forum/config.php</code>. Only you can see this notice.</p></div>'
-             . '<div class="mf-game-actions"><a class="mf-game-btn" href="'
-             . esc_url(admin_url('admin.php?page=mf-game')) . '">Set it up</a></div></div>';
+             . '<code>forum/config.php</code>. Only you can see this.</p></div>'
+             . '<div class="mf-game-actions"><a class="mf-btn mf-btn-blue" href="'
+             . esc_url(admin_url('admin.php?page=mf-game')) . '">Set it up</a></div></div></div>';
     }
 
     /** Whatever the redirect after a confirmation link wants to say. */
@@ -607,7 +742,8 @@ class Mini_Forum_Game {
         if (!empty($_POST['mf_game_nonce']) && wp_verify_nonce($_POST['mf_game_nonce'], 'mf_game')) {
             $api = isset($_POST['mf_game_api']) ? esc_url_raw(trim(wp_unslash($_POST['mf_game_api']))) : '';
             $key = isset($_POST['mf_game_key']) ? sanitize_text_field(wp_unslash($_POST['mf_game_key'])) : '';
-            update_option(self::OPT, array('api' => untrailingslashit($api), 'key' => $key));
+            $logo = isset($_POST['mf_game_logo']) ? esc_url_raw(trim(wp_unslash($_POST['mf_game_logo']))) : '';
+            update_option(self::OPT, array('api' => untrailingslashit($api), 'key' => $key, 'logo' => $logo));
             $saved = true;
         }
 
@@ -740,6 +876,17 @@ class Mini_Forum_Game {
                      <?php else: ?>
                        <br><strong>Nothing is stored yet.</strong>
                      <?php endif; ?></p>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><label for="mf_game_logo">Mini-Talks mark</label></th>
+                <td>
+                  <input name="mf_game_logo" id="mf_game_logo" type="text" inputmode="url" spellcheck="false"
+                         class="regular-text code" value="<?php echo esc_attr($s['logo']); ?>"
+                         placeholder="<?php echo esc_attr(self::LOGO); ?>">
+                  <p class="description">Shown on the card before anybody connects, and at the top of the
+                     confirmation e-mail. Leave it as it is unless the logo moves.
+                     <br><img src="<?php echo esc_url($s['logo']); ?>" alt="" style="max-height:52px;width:auto;margin-top:8px"></p>
                 </td>
               </tr>
             </table>

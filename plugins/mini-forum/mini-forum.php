@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini-Forum
  * Description: A calm, safe community forum for the Mini-Talks ecosystem.
- * Version: 3.15.02
+ * Version: 3.16.00
  * Author: Mini-Talks
  * Text Domain: mini-forum
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MF_VERSION', '3.15.02');
+define('MF_VERSION', '3.16.00');
 define('MF_PATH', plugin_dir_path(__FILE__));
 define('MF_URL', plugin_dir_url(__FILE__));
 
@@ -569,10 +569,10 @@ add_action('wp_enqueue_scripts', function() {
             'url'   => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('mf_nonce'),
             'text'  => [
-                'sending' => __('Sending…', 'mini-forum'),
-                'working' => __('One moment…', 'mini-forum'),
-                'confirm' => __('Disconnect your game account from this profile?', 'mini-forum'),
-                'failed'  => __('That did not go through. Please try again.', 'mini-forum'),
+                'sending'   => __('Sending…', 'mini-forum'),
+                'working'   => __('One moment…', 'mini-forum'),
+                'needemail' => __('Please type the e-mail address you use in the game.', 'mini-forum'),
+                'failed'    => __('That did not go through. Please try again.', 'mini-forum'),
             ],
         ]);
     }

@@ -1,5 +1,55 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.16.00
+
+**Connect Profile, redrawn in the site's own language.** The generic card and
+the generic popup are gone.
+
+The popup is now the site's LEGO shell — the same overlay, stud strip, red brick
+and white card as Sign in and Settings, opened and closed the same way, with the
+same `.mf-btn` buttons. It carries three steps: asking for the address,
+confirming the mail is sent, and **confirming a disconnect**, which used to be a
+browser `confirm()` box.
+
+The card wears a stud strip and a coloured bottom edge like every other card on
+the profile, and leads with the **Mini-Talks mark** instead of a stock game
+controller (the mark is a field on the Mini-Talks Game page, so a rebrand is one
+value). The counters became brick tiles — yellow bricks, blue medals, red cups,
+green streak — instead of four identical grey pills, and the game role wears the
+forum's own `.mf-role-badge`.
+
+**A parent now sees their Minis**: each one's figure, name, age band, tagline
+and its own four tiles, with the parent's own headline tiles summing what the
+whole family has built. The game side reads them the way the game's own
+dashboard does — both by `parent_id` and by `parent_email` — approved ones only,
+and fetches every figure in one query rather than one per Mini. A Mini with no
+figure yet gets their initial on a yellow brick, not a broken image.
+
+**The confirmation e-mail is the studded LEGO mail**, built like the game's own
+verification and password-reset mails: stud border, red brick, white card, the
+red rule under the title, the copy-this-link box, the LEGO footer — and a green
+studded brick for the button, drawn in table HTML because there is no button
+image for this one. The whole mail is a single editable area on the Design page.
+
+### Fixed
+
+**"3 hours ago" the moment you connected.** The card timed itself with
+`mf_time_ago()`, which compares a *local* time string against `current_time()`;
+handed a UTC timestamp it was out by the site's whole offset. Freshness now
+comes from a timestamp helper of its own.
+
+**"Connected." stayed after disconnecting.** That line answers the link that was
+just opened, and it lived outside the card, so replacing the card left it on
+screen — and `?mf_game=ok` in the address brought it back on every reload. The
+query is taken out of the address bar on load, and the line is dropped whenever
+the card is redrawn.
+
+**A 240-pixel hole on phones.** Stacked, a flex-basis is a height: the copy
+block kept its 240px basis and pushed the tiles down the screen.
+
+Opening the App & Studio tab now refreshes the numbers in the background, and a
+stored reading goes stale after five minutes instead of fifteen.
+
 ## mini-forum 3.15.02
 
 **"Save and test" only ever said "Saved."** The test ran only when both boxes

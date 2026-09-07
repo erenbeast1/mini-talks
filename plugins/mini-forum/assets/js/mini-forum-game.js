@@ -1,11 +1,17 @@
 /**
  * Connect Profile — the browser half.
  *
+ * The popup is the site's own LEGO shell (#mf-game-overlay), opened and closed
+ * the same way Sign in and Settings are: display flex, fade, Escape and a click
+ * on the dim close it. Its three steps — ask, sent, confirm a disconnect — swap
+ * inside it, so nothing here ever leaves the profile or falls back to a browser
+ * dialog.
+ *
  * Every button is bound by its data-mf-action, never by an onclick attribute:
- * the markup for this card lives on the Design page, where wp_kses strips
- * onclick, so a binding written into the HTML would silently stop working the
- * first time somebody edited the design. Delegated from document, so a card
- * redrawn after a refresh or a disconnect keeps working with no rebinding.
+ * this markup lives on the Design page, where wp_kses strips onclick, so a
+ * binding written into the HTML would quietly stop working the first time
+ * somebody edited the design. Delegated from document, so a card redrawn after
+ * a refresh keeps working with no rebinding.
  */
 (function ($) {
   'use strict';
@@ -14,132 +20,158 @@
 
   var T = mf_game.text || {};
 
-  function card()  { return document.getElementById('mf-game-card'); }
-  function pop()   { return document.getElementById('mf-game-pop'); }
+  function card()    { return document.getElementById('mf-game-card'); }
+  function overlay() { return document.getElementById('mf-game-overlay'); }
 
   function step(which) {
-    var p = pop();
-    if (!p) return;
-    p.querySelectorAll('[data-mf-game-step]').forEach(function (el) {
+    var o = overlay();
+    if (!o) return;
+    o.querySelectorAll('[data-mf-game-step]').forEach(function (el) {
       el.hidden = el.getAttribute('data-mf-game-step') !== which;
     });
   }
 
-  /* Refusals belong inside the popup, next to the field they are about — a
-     message printed above the page, behind an open popup, is a message nobody
-     reads. */
-  function msg(text, kind) {
-    var p = pop();
-    if (!p) return;
-    var el = p.querySelector('[data-mf-game-msg]');
+  /* A refusal belongs inside the popup, next to the field it is about — printed
+     above the page, behind an open popup, it is a message nobody reads. */
+  function msg(text, kind, where) {
+    var o = overlay();
+    if (!o) return;
+    var el = o.querySelector('[' + (where || 'data-mf-game-msg') + ']');
     if (!el) return;
     el.textContent = text || '';
     el.className = 'mf-game-msg' + (text && kind ? ' mf-game-msg-' + kind : '');
   }
 
-  function open() {
-    var p = pop();
-    if (!p) return;
-    step('form');
+  function open(which) {
+    var o = overlay();
+    if (!o) return;
+    step(which || 'form');
     msg('', '');
-    p.hidden = false;
-    document.body.classList.add('mf-game-open');
-    var field = document.getElementById('mf-game-email');
-    if (field) { field.value = field.value || ''; field.focus(); }
+    msg('', '', 'data-mf-game-msg-off');
+    $(o).css({ display: 'flex', opacity: 0 }).animate({ opacity: 1 }, 180);
+    if (!which || which === 'form') {
+      var field = document.getElementById('mf-game-email');
+      if (field) setTimeout(function () { field.focus(); }, 200);
+    }
   }
 
   function close() {
-    var p = pop();
-    if (!p) return;
-    p.hidden = true;
-    document.body.classList.remove('mf-game-open');
+    var o = overlay();
+    if (!o || o.style.display === 'none') return;
+    $(o).animate({ opacity: 0 }, 160, function () { this.style.display = 'none'; });
   }
 
   function post(action, data, done) {
     $.post(mf_game.url, $.extend({ action: action, nonce: mf_game.nonce }, data || {}))
       .done(function (res) { done(res && res.success ? res : null, res); })
-      .fail(function () { done(null, null); });
+      .fail(function (x) { done(null, x && x.responseJSON); });
+  }
+
+  function busy(btn, on, label) {
+    if (!btn) return label;
+    if (on) { btn.dataset.mfLabel = btn.textContent; btn.disabled = true; btn.textContent = label || T.working; }
+    else    { btn.disabled = false; if (btn.dataset.mfLabel) btn.textContent = btn.dataset.mfLabel; }
+  }
+
+  /* The card is replaced whole after every action, so its state can never drift
+     from the server's. The one-time "Connected." line is dropped at the same
+     time: it answers the link that was just opened, not whatever happens next. */
+  function replaceCard(html) {
+    var c = card();
+    if (c && typeof html === 'string') c.innerHTML = html;
+    clearNotice();
+  }
+
+  function clearNotice() {
+    var n = document.querySelector('.mf-game-notice');
+    if (n && n.parentNode) n.parentNode.removeChild(n);
   }
 
   /* ── send the confirmation link ── */
   function send(btn) {
     var field = document.getElementById('mf-game-email');
     var email = field ? field.value.trim() : '';
-    if (!email) { msg(T.failed || '', 'bad'); if (field) field.focus(); return; }
+    if (!email) { msg(T.needemail, 'bad'); if (field) field.focus(); return; }
 
-    var label = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = T.sending || 'Sending…'; }
+    busy(btn, true, T.sending);
     msg('', '');
 
     post('mf_game_request', { email: email }, function (ok, raw) {
-      if (btn) { btn.disabled = false; btn.textContent = label; }
-      if (!ok) {
-        msg((raw && raw.data && raw.data.message) || T.failed, 'bad');
-        return;
-      }
-      var where = pop() && pop().querySelector('[data-mf-game-email]');
+      busy(btn, false);
+      if (!ok) { msg((raw && raw.data && raw.data.message) || T.failed, 'bad'); return; }
+      var where = overlay() && overlay().querySelector('[data-mf-game-email]');
       if (where) where.textContent = email;
       step('sent');
     });
   }
 
   /* ── the card's own buttons ── */
-  function replaceCard(html) {
-    var c = card();
-    if (c && typeof html === 'string') c.innerHTML = html;
-  }
-
-  function refresh(btn) {
-    var label = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = T.working || 'One moment…'; }
+  function refresh(btn, quiet) {
+    if (!quiet) busy(btn, true, T.working);
     post('mf_game_refresh', {}, function (ok) {
-      if (btn) { btn.disabled = false; btn.textContent = label; }
+      if (!quiet) busy(btn, false);
       if (ok && ok.data) replaceCard(ok.data.html);
     });
   }
 
   function disconnect(btn) {
-    if (!window.confirm(T.confirm || 'Disconnect?')) return;
-    if (btn) btn.disabled = true;
-    post('mf_game_disconnect', {}, function (ok) {
-      if (btn) btn.disabled = false;
-      if (ok && ok.data) replaceCard(ok.data.html);
+    busy(btn, true, T.working);
+    post('mf_game_disconnect', {}, function (ok, raw) {
+      busy(btn, false);
+      if (!ok) { msg((raw && raw.data && raw.data.message) || T.failed, 'bad', 'data-mf-game-msg-off'); return; }
+      replaceCard(ok.data && ok.data.html);
+      close();
     });
   }
 
-  /* Copying the game figure across changes the avatar everywhere on the page,
-     so every <img> already drawn for this member is repointed at the new file
+  /* Copying the game figure across changes the avatar everywhere on the page, so
+     every <img> already drawn for this member is repointed at the new file
      rather than leaving the old face on screen until a reload. */
   function useGameAvatar(btn) {
-    var label = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = T.working || 'One moment…'; }
+    busy(btn, true, T.working);
     post('mf_game_avatar', {}, function (ok, raw) {
-      if (btn) { btn.disabled = false; btn.textContent = label; }
-      if (!ok) { window.alert((raw && raw.data && raw.data.message) || T.failed); return; }
+      busy(btn, false);
+      if (!ok) { flash(btn, (raw && raw.data && raw.data.message) || T.failed, 'bad'); return; }
       var url = ok.data && ok.data.avatar_url;
       if (url) {
         document.querySelectorAll('.mf-avatar img, .mf-avatar-lg img, .mf-avatar-sm img, .mf-avatar-md img')
           .forEach(function (img) { img.src = url; });
         if (window.mf_ajax && mf_ajax.user) mf_ajax.user.avatar_url = url;
       }
-      if (ok.data && ok.data.message) window.alert(ok.data.message);
+      flash(btn, (ok.data && ok.data.message) || '', 'ok');
     });
   }
 
+  /* A short line under the buttons, rather than an alert() the member has to
+     dismiss for something that already worked. */
+  function flash(btn, text, kind) {
+    if (!text) return;
+    var foot = btn && btn.closest ? btn.closest('.mf-game-foot') : null;
+    if (!foot) { window.alert(text); return; }
+    var el = foot.querySelector('.mf-game-flash');
+    if (!el) {
+      el = document.createElement('p');
+      el.className = 'mf-game-flash mf-game-fine';
+      foot.appendChild(el);
+    }
+    el.textContent = text;
+    el.style.color = kind === 'bad' ? '#B91C1C' : '#17512C';
+  }
+
   var actions = {
-    'game-open':       function ()    { open(); },
-    'game-close':      function ()    { close(); },
-    'game-send':       function (btn) { send(btn); },
-    'game-refresh':    function (btn) { refresh(btn); },
-    'game-disconnect': function (btn) { disconnect(btn); },
-    'game-avatar':     function (btn) { useGameAvatar(btn); }
+    'game-open':           function ()    { open('form'); },
+    'game-close':          function ()    { close(); },
+    'game-send':           function (btn) { send(btn); },
+    'game-refresh':        function (btn) { refresh(btn); },
+    'game-disconnect':     function ()    { open('off'); },
+    'game-disconnect-yes': function (btn) { disconnect(btn); },
+    'game-avatar':         function (btn) { useGameAvatar(btn); }
   };
 
   document.addEventListener('click', function (e) {
     var el = e.target.closest ? e.target.closest('[data-mf-action]') : null;
     if (!el) {
-      // Clicking the dimmed area around the box closes it.
-      if (e.target === pop()) close();
+      if (e.target === overlay()) close();     // the dim around the box
       return;
     }
     var fn = actions[el.getAttribute('data-mf-action')];
@@ -148,14 +180,33 @@
     fn(el);
   });
 
-  // Enter in the address field sends, the way it would in any other form.
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && pop() && !pop().hidden) { close(); return; }
-    if (e.key !== 'Enter') return;
-    if (!e.target || e.target.id !== 'mf-game-email') return;
+    var o = overlay();
+    var isOpen = o && o.style.display !== 'none';
+    if (e.key === 'Escape' && isOpen) { close(); return; }
+    if (e.key !== 'Enter' || !e.target || e.target.id !== 'mf-game-email') return;
     e.preventDefault();
-    var btn = pop() ? pop().querySelector('[data-mf-action="game-send"]') : null;
-    send(btn);
+    send(o ? o.querySelector('[data-mf-action="game-send"]') : null);
+  });
+
+  $(function () {
+    /* The confirmation carries ?mf_game=… so the page can say what happened.
+       Taken straight back out of the address bar: leaving it there makes
+       "Connected." reappear on every reload, and stay after a disconnect. */
+    if (window.history && history.replaceState && /[?&]mf_game=/.test(location.search)) {
+      var url = location.href
+        .replace(/([?&])mf_game=[^&#]*(&|$)/, function (m, a, b) { return b ? a : ''; })
+        .replace(/[?&]$/, '');
+      history.replaceState(null, '', url);
+    }
+
+    /* Opening the tab is the moment the numbers matter, so read the game again
+       then — in the background, with the card already on screen. */
+    document.addEventListener('mf:panel', function (e) {
+      if (!e.detail || e.detail.panel !== 'studio') return;
+      if (!card() || !card().querySelector('.mf-game-on')) return;
+      refresh(null, true);
+    });
   });
 
 })(jQuery);

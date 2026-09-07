@@ -118,6 +118,12 @@ if (!defined('MF_LINK_LIB')) {
         $done = true;
     }
 
+    /** A nickname, trimmed to fit the column without splitting a character. */
+    function mf_link_cut($text, $max) {
+        $text = trim((string) $text);
+        return function_exists('mb_substr') ? mb_substr($text, 0, $max, 'UTF-8') : substr($text, 0, $max);
+    }
+
     /** Which column of `avatars` holds this role's id. */
     function mf_link_avatar_column($role) {
         switch ($role) {
@@ -128,6 +134,65 @@ if (!defined('MF_LINK_LIB')) {
             case 'child':   return 'mini_id';
         }
         return null;
+    }
+
+    /**
+     * The Minis a parent looks after, with what the game already shows for each.
+     *
+     * A Mini reaches a parent two ways, and the game's own dashboard reads both:
+     * the parent created it (parent_id), or the child registered and named this
+     * parent's address (parent_email, with no parent_id yet). Only approved ones
+     * are returned — a pending or rejected request is the game's business, not
+     * something to put on a forum profile.
+     */
+    function mf_link_minis($pdo, $parent_user_id, $parent_email) {
+        $stmt = $pdo->prepare("
+            SELECT mp.mini_id, mp.mini_name, mp.age_range, mp.tagline,
+                   mp.total_bricks, mp.total_medals, mp.total_cups,
+                   mp.current_streak, mp.longest_streak
+            FROM mini_profiles mp
+            WHERE mp.parent_approval_status = 'approved'
+              AND (mp.parent_id = ? OR (mp.parent_id IS NULL AND mp.parent_email = ?))
+            ORDER BY mp.mini_name ASC
+            LIMIT 24
+        ");
+        $stmt->execute(array($parent_user_id, (string) $parent_email));
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!$rows) return array();
+
+        // One query for every figure, rather than one per Mini.
+        $ids = array();
+        foreach ($rows as $r) $ids[] = (int) $r['mini_id'];
+        $marks = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $pdo->prepare("
+            SELECT mini_id, avatar_url, version
+            FROM avatars
+            WHERE mini_id IN ({$marks}) AND (is_active = 1 OR is_active IS NULL)
+            ORDER BY avatar_id ASC
+        ");
+        $stmt->execute($ids);
+        $avatars = array();
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $a) {
+            $avatars[(int) $a['mini_id']] = $a['avatar_url'];   // later rows win: newest figure
+        }
+
+        $out = array();
+        foreach ($rows as $r) {
+            $id = (int) $r['mini_id'];
+            $out[] = array(
+                'mini_id'        => $id,
+                'name'           => $r['mini_name'],
+                'age_range'      => $r['age_range'],
+                'tagline'        => $r['tagline'],
+                'bricks'         => (int) $r['total_bricks'],
+                'medals'         => (int) $r['total_medals'],
+                'cups'           => (int) $r['total_cups'],
+                'current_streak' => (int) $r['current_streak'],
+                'longest_streak' => (int) $r['longest_streak'],
+                'avatar'         => isset($avatars[$id]) ? $avatars[$id] : null,
+            );
+        }
+        return $out;
     }
 
     /**
@@ -160,6 +225,7 @@ if (!defined('MF_LINK_LIB')) {
             'name'     => '',
             'profile'  => array(),
             'avatar'   => null,
+            'minis'    => array(),
         );
 
         // The game stores every *_id column as the user_id itself, so one
@@ -192,10 +258,8 @@ if (!defined('MF_LINK_LIB')) {
             $p = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($p) $out['name'] = $p['full_name'];
 
-            // How many Minis this parent looks after — a count, not the children.
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM mini_profiles WHERE parent_id = ?");
-            $stmt->execute(array($user_id));
-            $out['profile']['minis'] = (int) $stmt->fetchColumn();
+            $out['minis'] = mf_link_minis($pdo, $user_id, $user['email']);
+            $out['profile']['minis'] = count($out['minis']);
         } elseif ($role === 'expert') {
             $stmt = $pdo->prepare("SELECT full_name, username, organization, profession FROM expert_profiles WHERE expert_id = ? OR user_id = ? ORDER BY expert_id ASC LIMIT 1");
             $stmt->execute(array($user_id, $user_id));
