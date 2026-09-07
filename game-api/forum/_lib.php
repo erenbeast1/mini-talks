@@ -137,6 +137,131 @@ if (!defined('MF_LINK_LIB')) {
     }
 
     /**
+     * Everything the game already shows about a set of Minis, in bulk.
+     *
+     * One query per kind rather than per Mini, so a parent with a dozen children
+     * costs the same handful of round trips as a parent with one. Returns a map
+     * of mini_id => extras; a Mini with nothing recorded simply gets empty ones.
+     */
+    function mf_link_enrich($pdo, $mini_ids) {
+        $ids = array();
+        foreach ($mini_ids as $id) { $id = (int) $id; if ($id > 0) $ids[$id] = $id; }
+        if (!$ids) return array();
+        $ids   = array_values($ids);
+        $marks = implode(',', array_fill(0, count($ids), '?'));
+
+        $out = array();
+        foreach ($ids as $id) {
+            $out[$id] = array('avatar' => null, 'motivation' => '', 'experts' => array(),
+                              'scenes' => array('played' => 0, 'total' => 0, 'minutes' => 0,
+                                                'recordings' => 0, 'names' => array()));
+        }
+
+        /* The figure. The editor's saved avatar first; failing that, whatever
+           the Mini last built on a scene — that is the face the game itself
+           shows them, and going without one when a customised Mini exists is
+           what left a forum profile full of initials. */
+        $stmt = $pdo->prepare("
+            SELECT mini_id, avatar_url FROM avatars
+            WHERE mini_id IN ({$marks}) AND (is_active = 1 OR is_active IS NULL)
+            ORDER BY avatar_id ASC
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $id = (int) $r['mini_id'];
+            if (isset($out[$id]) && !empty($r['avatar_url'])) $out[$id]['avatar'] = $r['avatar_url'];
+        }
+        $stmt = $pdo->prepare("
+            SELECT mini_id, image_url FROM customized_minis
+            WHERE mini_id IN ({$marks}) AND image_url IS NOT NULL AND image_url <> ''
+              AND (is_hidden = 0 OR is_hidden IS NULL)
+            ORDER BY updated_at ASC, id ASC
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $id = (int) $r['mini_id'];
+            if (isset($out[$id]) && $out[$id]['avatar'] === null) $out[$id]['avatar'] = $r['image_url'];
+        }
+
+        /* The motivation message a parent actually set, not the default tagline
+           every Mini is born with. Newest settings row wins, a custom message
+           beats a preset, and the preset text comes from the same table the
+           game reads. */
+        $presets = array();
+        foreach ($pdo->query("SELECT preset_id, message_text FROM motivation_presets WHERE is_active = 1")
+                     ->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $presets[(int) $r['preset_id']] = $r['message_text'];
+        }
+        $stmt = $pdo->prepare("
+            SELECT mini_id, custom_message, selected_preset_ids
+            FROM motivation_settings WHERE mini_id IN ({$marks})
+            ORDER BY updated_at ASC, id ASC
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $id  = (int) $r['mini_id'];
+            if (!isset($out[$id])) continue;
+            $msg = trim((string) $r['custom_message']);
+            if ($msg === '') {
+                $chosen = json_decode((string) $r['selected_preset_ids'], true);
+                if (is_array($chosen)) {
+                    foreach ($chosen as $pid) {
+                        if (isset($presets[(int) $pid])) { $msg = $presets[(int) $pid]; break; }
+                    }
+                }
+            }
+            if ($msg !== '') $out[$id]['motivation'] = $msg;
+        }
+
+        /* Scene by scene. Play time and recordings add up across a scene's four
+           levels; the scene itself counts once. */
+        $total = (int) $pdo->query("SELECT COUNT(*) FROM scenes WHERE is_active = 1")->fetchColumn();
+        $stmt = $pdo->prepare("
+            SELECT l.mini_id, l.scene_id, s.scene_name,
+                   SUM(l.play_time_seconds) AS secs, SUM(l.recording_count) AS recs
+            FROM mini_scene_levels l
+            LEFT JOIN scenes s ON s.scene_id = l.scene_id
+            WHERE l.mini_id IN ({$marks}) AND l.is_locked = 0
+            GROUP BY l.mini_id, l.scene_id, s.scene_name
+            ORDER BY l.scene_id ASC
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $id = (int) $r['mini_id'];
+            if (!isset($out[$id])) continue;
+            $out[$id]['scenes']['played']++;
+            $out[$id]['scenes']['minutes']    += (int) round(((int) $r['secs']) / 60);
+            $out[$id]['scenes']['recordings'] += (int) $r['recs'];
+            if (!empty($r['scene_name']) && count($out[$id]['scenes']['names']) < 12) {
+                $out[$id]['scenes']['names'][] = $r['scene_name'];
+            }
+        }
+        foreach ($out as $id => $_) $out[$id]['scenes']['total'] = $total;
+
+        /* The experts a parent approved for this Mini. A name and where they
+           work — never their address, and never a pending or rejected request. */
+        $stmt = $pdo->prepare("
+            SELECT c.mini_id, e.full_name, e.organization, e.profession
+            FROM expert_mini_connections c
+            JOIN expert_profiles e ON e.expert_id = c.expert_id
+            WHERE c.mini_id IN ({$marks}) AND c.parent_approval_status = 'approved'
+            ORDER BY e.full_name ASC
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $id = (int) $r['mini_id'];
+            if (!isset($out[$id])) continue;
+            $out[$id]['experts'][] = array(
+                'name'         => $r['full_name'],
+                'organization' => $r['organization'],
+                'profession'   => $r['profession'],
+            );
+        }
+
+        return $out;
+    }
+
+    /**
      * The Minis a parent looks after, with what the game already shows for each.
      *
      * A Mini reaches a parent two ways, and the game's own dashboard reads both:
@@ -160,25 +285,14 @@ if (!defined('MF_LINK_LIB')) {
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (!$rows) return array();
 
-        // One query for every figure, rather than one per Mini.
         $ids = array();
         foreach ($rows as $r) $ids[] = (int) $r['mini_id'];
-        $marks = implode(',', array_fill(0, count($ids), '?'));
-        $stmt = $pdo->prepare("
-            SELECT mini_id, avatar_url, version
-            FROM avatars
-            WHERE mini_id IN ({$marks}) AND (is_active = 1 OR is_active IS NULL)
-            ORDER BY avatar_id ASC
-        ");
-        $stmt->execute($ids);
-        $avatars = array();
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $a) {
-            $avatars[(int) $a['mini_id']] = $a['avatar_url'];   // later rows win: newest figure
-        }
+        $extra = mf_link_enrich($pdo, $ids);
 
         $out = array();
         foreach ($rows as $r) {
             $id = (int) $r['mini_id'];
+            $e  = isset($extra[$id]) ? $extra[$id] : array();
             $out[] = array(
                 'mini_id'        => $id,
                 'name'           => $r['mini_name'],
@@ -189,7 +303,10 @@ if (!defined('MF_LINK_LIB')) {
                 'cups'           => (int) $r['total_cups'],
                 'current_streak' => (int) $r['current_streak'],
                 'longest_streak' => (int) $r['longest_streak'],
-                'avatar'         => isset($avatars[$id]) ? $avatars[$id] : null,
+                'avatar'         => isset($e['avatar'])     ? $e['avatar']     : null,
+                'motivation'     => isset($e['motivation']) ? $e['motivation'] : '',
+                'experts'        => isset($e['experts'])    ? $e['experts']    : array(),
+                'scenes'         => isset($e['scenes'])     ? $e['scenes']     : null,
             );
         }
         return $out;
@@ -226,13 +343,14 @@ if (!defined('MF_LINK_LIB')) {
             'profile'  => array(),
             'avatar'   => null,
             'minis'    => array(),
+            'experts'  => array(),
         );
 
         // The game stores every *_id column as the user_id itself, so one
         // lookup per role is enough — see the note in avatar/get.php.
         if ($role === 'child') {
             $stmt = $pdo->prepare("
-                SELECT mini_name, age_range, tagline, total_bricks, total_medals, total_cups,
+                SELECT mini_id, mini_name, age_range, tagline, total_bricks, total_medals, total_cups,
                        current_streak, longest_streak, parent_approval_status
                 FROM mini_profiles WHERE mini_id = ? OR user_id = ? ORDER BY mini_id ASC LIMIT 1
             ");
@@ -251,6 +369,21 @@ if (!defined('MF_LINK_LIB')) {
                     'longest_streak' => (int) $p['longest_streak'],
                     'approval'       => $p['parent_approval_status'],
                 );
+
+                // A Mini gets the same extras their parent sees for them: the
+                // figure the game draws, the message their parent set, the
+                // scenes they have played, and the experts they work with.
+                $mini_id = isset($p['mini_id']) ? (int) $p['mini_id'] : 0;
+                $extra   = $mini_id ? mf_link_enrich($pdo, array($mini_id)) : array();
+                if (isset($extra[$mini_id])) {
+                    $e = $extra[$mini_id];
+                    $out['profile']['motivation'] = $e['motivation'];
+                    $out['profile']['scenes']     = $e['scenes'];
+                    $out['experts']               = $e['experts'];
+                    if (!empty($e['avatar']) && empty($out['avatar']['url'])) {
+                        $out['avatar'] = array('url' => $e['avatar'], 'config' => null, 'version' => 0);
+                    }
+                }
             }
         } elseif ($role === 'parent') {
             $stmt = $pdo->prepare("SELECT full_name FROM parent_profiles WHERE parent_id = ? OR user_id = ? ORDER BY parent_id ASC LIMIT 1");
@@ -260,8 +393,20 @@ if (!defined('MF_LINK_LIB')) {
 
             $out['minis'] = mf_link_minis($pdo, $user_id, $user['email']);
             $out['profile']['minis'] = count($out['minis']);
+
+            // The experts across the whole family, once each — a parent working
+            // with the same expert for two children should see them once.
+            $seen = array();
+            foreach ($out['minis'] as $m) {
+                foreach ($m['experts'] as $e) {
+                    $key = strtolower(trim($e['name'] . '|' . $e['organization']));
+                    if (isset($seen[$key])) continue;
+                    $seen[$key] = true;
+                    $out['experts'][] = $e;
+                }
+            }
         } elseif ($role === 'expert') {
-            $stmt = $pdo->prepare("SELECT full_name, username, organization, profession FROM expert_profiles WHERE expert_id = ? OR user_id = ? ORDER BY expert_id ASC LIMIT 1");
+            $stmt = $pdo->prepare("SELECT expert_id, full_name, username, organization, profession FROM expert_profiles WHERE expert_id = ? OR user_id = ? ORDER BY expert_id ASC LIMIT 1");
             $stmt->execute(array($user_id, $user_id));
             $p = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($p) {
@@ -271,6 +416,11 @@ if (!defined('MF_LINK_LIB')) {
                     'organization' => $p['organization'],
                     'profession'   => $p['profession'],
                 );
+                // How many Minis a parent has approved them for. A count only:
+                // whose children they are is not the forum's business.
+                $stmt = $pdo->prepare("SELECT COUNT(DISTINCT mini_id) FROM expert_mini_connections WHERE expert_id = ? AND parent_approval_status = 'approved'");
+                $stmt->execute(array((int) $p['expert_id']));
+                $out['profile']['minis'] = (int) $stmt->fetchColumn();
             }
         } elseif ($role === 'builder') {
             $stmt = $pdo->prepare("SELECT full_name, username, age_range FROM builder_profiles WHERE builder_id = ? OR user_id = ? ORDER BY builder_id ASC LIMIT 1");
@@ -300,8 +450,12 @@ if (!defined('MF_LINK_LIB')) {
             $a = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($a) {
                 $config = json_decode((string) $a['avatar_data'], true);
+                // Never blank out a figure the role branch already found for a
+                // Mini who has built one but never opened the avatar editor.
+                $url = !empty($a['avatar_url']) ? $a['avatar_url']
+                     : (isset($out['avatar']['url']) ? $out['avatar']['url'] : null);
                 $out['avatar'] = array(
-                    'url'     => $a['avatar_url'],
+                    'url'     => $url,
                     'config'  => is_array($config) ? $config : null,
                     'version' => (int) $a['version'],
                 );

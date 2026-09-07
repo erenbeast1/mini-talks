@@ -190,16 +190,6 @@
   });
 
   $(function () {
-    /* The confirmation carries ?mf_game=… so the page can say what happened.
-       Taken straight back out of the address bar: leaving it there makes
-       "Connected." reappear on every reload, and stay after a disconnect. */
-    if (window.history && history.replaceState && /[?&]mf_game=/.test(location.search)) {
-      var url = location.href
-        .replace(/([?&])mf_game=[^&#]*(&|$)/, function (m, a, b) { return b ? a : ''; })
-        .replace(/[?&]$/, '');
-      history.replaceState(null, '', url);
-    }
-
     /* Opening the tab is the moment the numbers matter, so read the game again
        then — in the background, with the card already on screen. */
     document.addEventListener('mf:panel', function (e) {

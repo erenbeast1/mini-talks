@@ -361,10 +361,14 @@ class Mini_Forum_Game {
         $uid = get_current_user_id();
         $res = self::confirm($uid, $token);
 
-        // #studio so the profile opens on the tab the answer belongs to,
-        // rather than on Mini-Forum with the result hidden behind a tab.
+        // The answer is kept for one page load rather than put in the address.
+        // As ?mf_game=ok it came back on every reload and outlived a disconnect,
+        // so the profile could read "Connected." above a card offering to
+        // connect. #studio still goes in the address: that is a place, not a
+        // result, and it is what opens the right tab.
         $status = is_wp_error($res) ? $res->get_error_code() : 'ok';
-        wp_safe_redirect(add_query_arg('mf_game', $status, self::profile_url()) . '#studio');
+        set_transient(self::flash_key($uid), $status, 5 * MINUTE_IN_SECONDS);
+        wp_safe_redirect(self::profile_url() . '#studio');
         exit;
     }
 
@@ -508,7 +512,7 @@ class Mini_Forum_Game {
      * about which was which. Each tile is the same editable area, so rewording
      * "Bricks" or restyling one restyles all of them.
      */
-    private static function stats_html($account, $small = false) {
+    private static function stats_html($account) {
         $p    = isset($account['profile']) && is_array($account['profile']) ? $account['profile'] : array();
         $role = isset($account['role']) ? $account['role'] : '';
         $rows = array();
@@ -541,7 +545,47 @@ class Mini_Forum_Game {
                 'value' => (int) $r[2],
             ));
         }
-        return '<div class="mf-game-stats' . ($small ? ' mf-game-stats-sm' : '') . '">' . $out . '</div>';
+        return '<div class="mf-game-stats">' . $out . '</div>';
+    }
+
+    /**
+     * The scenes a Mini has played, by name.
+     *
+     * "Sahne bazlı data" is what the game actually records — which scenes, for
+     * how long, how many recordings — so it goes on the card as itself rather
+     * than as one more number in a tile.
+     */
+    private static function scenes_html($sc) {
+        if (!is_array($sc) || empty($sc['played'])) return '';
+        $chips = '';
+        foreach ((array) (isset($sc['names']) ? $sc['names'] : array()) as $n) {
+            $chips .= '<span class="mf-game-chip">' . esc_html($n) . '</span>';
+        }
+        return Mini_Forum_Design::render('game.scenes', array(
+            'played'     => (int) $sc['played'],
+            'total'      => (int) (isset($sc['total']) ? $sc['total'] : 0),
+            'names'      => $chips,
+            'minutes'    => (int) (isset($sc['minutes']) ? $sc['minutes'] : 0),
+            'recordings' => (int) (isset($sc['recordings']) ? $sc['recordings'] : 0),
+        ));
+    }
+
+    /** The experts a parent has approved, by name and where they work. */
+    private static function experts_html($experts) {
+        if (!is_array($experts) || !$experts) return '';
+        $rows = '';
+        foreach ($experts as $e) {
+            $where = '';
+            foreach (array('organization', 'profession') as $k) {
+                if (!empty($e[$k])) { $where = $e[$k]; break; }
+            }
+            $rows .= Mini_Forum_Design::render('game.expert', array(
+                'initial' => esc_html(self::initial(isset($e['name']) ? $e['name'] : '')),
+                'name'    => esc_html(isset($e['name']) ? $e['name'] : ''),
+                'where'   => esc_html($where),
+            ));
+        }
+        return Mini_Forum_Design::render('game.experts', array('rows' => $rows));
     }
 
     /**
@@ -573,11 +617,26 @@ class Mini_Forum_Game {
                 ));
             }
 
+            // The message their parent actually set beats the default tagline
+            // every Mini is born with.
+            $says = '';
+            foreach (array('motivation', 'tagline') as $k) {
+                if (!empty($m[$k])) { $says = $m[$k]; break; }
+            }
+
+            $sc = isset($m['scenes']) ? $m['scenes'] : null;
+            $scene_line = (is_array($sc) && !empty($sc['played']))
+                ? sprintf('%d / %d scenes · %d min · %d recordings',
+                          (int) $sc['played'], (int) $sc['total'],
+                          (int) $sc['minutes'], (int) $sc['recordings'])
+                : '';
+
             $rows .= Mini_Forum_Design::render('game.mini', array(
                 'avatar'  => $face,
                 'name'    => esc_html($m['name']),
                 'age'     => !empty($m['age_range']) ? esc_html($m['age_range']) : '',
-                'tagline' => !empty($m['tagline']) ? esc_html($m['tagline']) : '',
+                'tagline' => esc_html($says),
+                'scenes'  => esc_html($scene_line),
                 'stats'   => $tiles,
             ));
         }
@@ -614,7 +673,7 @@ class Mini_Forum_Game {
         }
 
         $tagline = '';
-        foreach (array('tagline', 'profession', 'organization') as $k) {
+        foreach (array('motivation', 'tagline', 'profession', 'organization') as $k) {
             if (!empty($p[$k])) { $tagline = $p[$k]; break; }
         }
 
@@ -624,6 +683,8 @@ class Mini_Forum_Game {
             'tags'    => $tags,
             'tagline' => esc_html($tagline),
             'stats'   => self::stats_html($account),
+            'scenes'  => self::scenes_html(isset($p['scenes']) ? $p['scenes'] : null),
+            'experts' => self::experts_html(isset($account['experts']) ? $account['experts'] : array()),
             'minis'   => self::minis_html($account),
             // Their own address, on their own profile — masked anyway, so a
             // shoulder or a screenshot gives nothing away.
@@ -711,10 +772,20 @@ class Mini_Forum_Game {
              . esc_url(admin_url('admin.php?page=mf-game')) . '">Set it up</a></div></div></div>';
     }
 
-    /** Whatever the redirect after a confirmation link wants to say. */
+    private static function flash_key($uid) { return 'mf_game_flash_' . (int) $uid; }
+
+    /**
+     * Whatever opening a confirmation link wants to say, said once.
+     *
+     * Read and thrown away in the same breath, so a reload does not repeat it
+     * and a disconnect cannot leave it standing over the wrong card.
+     */
     public static function notice_html() {
-        if (empty($_GET['mf_game'])) return '';
-        $code = sanitize_key(wp_unslash($_GET['mf_game']));
+        $uid  = get_current_user_id();
+        $code = $uid ? get_transient(self::flash_key($uid)) : '';
+        if (!$code) return '';
+        delete_transient(self::flash_key($uid));
+        $code = sanitize_key($code);
         $map  = array(
             'ok'      => array('ok',  self::t('game.msg.linked',  'Connected. Your game account is on your profile now.')),
             'taken'   => array('bad', self::t('game.msg.taken',   'That game account is already connected to another Mini-Talks profile.')),

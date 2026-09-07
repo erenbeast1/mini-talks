@@ -1,5 +1,49 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.17.00
+
+**Real game data on the card, and the stud strip done properly.**
+
+The **motivation message a parent actually set** replaces the default tagline
+every Mini is born with — read from `motivation_settings`, a typed message
+beating a chosen preset, the preset resolved through `motivation_presets` the
+same way the game resolves it. With none set, the tagline comes back.
+
+**Scenes**, because that is what the game records: which scenes have been
+played, by name, out of how many exist, with the minutes and the recordings.
+Each of a parent's Minis carries the same line in miniature.
+
+**Experts**: the ones a parent has approved for a Mini, by name and where they
+work, gathered once across the whole family. Never a pending or rejected
+request, and never their address. An expert's own account shows how many Minis
+they are approved for — a count, not whose children.
+
+**A Mini's figure now actually appears.** The card was full of initials because
+it looked only at the avatar editor's saved figure. Minis build a figure on a
+scene long before they open that editor, so `customized_minis` is read as the
+fallback — the same face the game itself shows them.
+
+### Fixed
+
+**The stud strip was a clipped tile.** `.mf-studs` repeats the strip art along
+the card, so it was cut mid-stud wherever the card happened to end. It now uses
+four placed copies at a quarter width each, the way Mini-Kits does it.
+
+**"Connected." stayed above a card offering to connect.** The previous fix took
+`?mf_game=ok` out of the address bar, but its regex missed a URL with a `#`
+fragment — and this one always has `#studio`. The result of opening a link is no
+longer in the address at all: it is a one-shot flash, read and thrown away in
+the same breath, so it cannot survive a reload or a disconnect.
+
+**Round figures.** The avatars on this site are circles; the game figure and the
+Minis' faces were squares.
+
+**Montserrat everywhere in the card**, including the headings and paragraphs the
+theme was styling with its own font.
+
+The e-mail button loses its studs — a plain green brick, like the game's own
+CHANGE PASSWORD button.
+
 ## mini-forum 3.16.00
 
 **Connect Profile, redrawn in the site's own language.** The generic card and
