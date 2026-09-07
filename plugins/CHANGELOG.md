@@ -1,5 +1,15 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.17.01
+
+**A Mini's picture comes from the avatar editor, and nowhere else.** 3.17.00
+fell back to `customized_minis` when a Mini had no saved avatar — but those are
+the characters a Mini builds *for a scene*, not their profile picture. The game
+never treats them as one either: `MiniProfile` and `MiniManage` both read
+`avatar/get.php` alone and fall back to a generic icon. The forum now reads the
+same single source, and a Mini who has not made a picture yet gets their
+initial rather than a character from a scene.
+
 ## mini-forum 3.17.00
 
 **Real game data on the card, and the stud strip done properly.**

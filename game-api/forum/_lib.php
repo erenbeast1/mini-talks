@@ -157,10 +157,12 @@ if (!defined('MF_LINK_LIB')) {
                                                 'recordings' => 0, 'names' => array()));
         }
 
-        /* The figure. The editor's saved avatar first; failing that, whatever
-           the Mini last built on a scene — that is the face the game itself
-           shows them, and going without one when a customised Mini exists is
-           what left a forum profile full of initials. */
+        /* The Mini's profile picture, and only that: the PNG the avatar editor
+           saved, exactly what avatar/get.php hands the game's own dashboard.
+           Not customized_minis — those are the characters a Mini builds for a
+           scene, a different thing that the game never shows as a profile
+           picture either. A Mini who has not made one yet has no picture, and
+           the forum draws their initial rather than somebody else's character. */
         $stmt = $pdo->prepare("
             SELECT mini_id, avatar_url FROM avatars
             WHERE mini_id IN ({$marks}) AND (is_active = 1 OR is_active IS NULL)
@@ -170,17 +172,6 @@ if (!defined('MF_LINK_LIB')) {
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $id = (int) $r['mini_id'];
             if (isset($out[$id]) && !empty($r['avatar_url'])) $out[$id]['avatar'] = $r['avatar_url'];
-        }
-        $stmt = $pdo->prepare("
-            SELECT mini_id, image_url FROM customized_minis
-            WHERE mini_id IN ({$marks}) AND image_url IS NOT NULL AND image_url <> ''
-              AND (is_hidden = 0 OR is_hidden IS NULL)
-            ORDER BY updated_at ASC, id ASC
-        ");
-        $stmt->execute($ids);
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
-            $id = (int) $r['mini_id'];
-            if (isset($out[$id]) && $out[$id]['avatar'] === null) $out[$id]['avatar'] = $r['image_url'];
         }
 
         /* The motivation message a parent actually set, not the default tagline
