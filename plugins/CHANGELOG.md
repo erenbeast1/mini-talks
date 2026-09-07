@@ -1,5 +1,27 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 3.20.00
+
+**Mini-Events opens on what you joined.** Above the calendar, a member now sees
+their own events first — the next one at the top, then the rest, then the last
+few they went to — the same way the forum leads with their own posts. Each row
+keeps its event type's colour, so a row here and a card further down are
+recognisably the same event, and there is an empty state for somebody who has
+not joined anything yet. Signed-out visitors see the page exactly as before.
+Three new Design areas, so the heading, the rows and the empty state are all
+editable.
+
+## mini-devices 3.4.1
+
+**Steps 1 and 2 looked already done.** On the Connect screen the third step
+carried a "next" style — grey and dashed — which by contrast made the first two
+read as ticked off, on a screen where nothing had happened yet. The Fig
+personalisation list had the same shape: three done, one to go, before the
+editor had even opened. Both lists now render every step the same, because they
+are instructions rather than progress. The three Connect labels joined the
+Design page while they were being touched.
+
+
 ## mini-forum 3.19.00
 
 **A Mini's detail moved into the popup, and it is the game's real data.**

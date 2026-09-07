@@ -410,10 +410,11 @@ body.admin-bar .md-overlay{padding-top:52px!important}
 .md-fig-title{margin:0 0 6px!important;font-family:var(--mf-font,'Montserrat',sans-serif)!important;font-size:18px!important;font-weight:900!important;color:#1D1D1B!important;text-align:left!important;line-height:1.25!important}
 
 .md-fig-steps{list-style:none!important;margin:0 0 18px!important;padding:0!important;display:flex!important;flex-direction:column!important;gap:8px!important}
-.md-fig-step{display:flex!important;align-items:center!important;gap:11px!important;padding:9px 12px!important;border-radius:11px!important;background:#F8F8F8!important;font-size:13.5px!important;font-weight:700!important;color:#1D1D1B!important}
-.md-fig-step-no{width:26px!important;height:26px!important;flex:none!important;display:grid!important;place-items:center!important;border-radius:7px!important;background:var(--mf-yellow,#FFCC00)!important;color:#1D1D1B!important;font-size:12.5px!important;font-weight:900!important;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)!important}
-.md-fig-step.is-next{background:#FCFCFC!important;border:2px dashed #E5E5E5!important;padding:7px 10px!important}
-.md-fig-step.is-next .md-fig-step-no{background:#E5E5E5!important;color:#999!important;box-shadow:inset 0 -3px 0 rgba(0,0,0,.07)!important}
+/* All three the same: these are instructions, and one of them styled differently
+   made the other two look completed before anything had happened. The number is
+   a step number, so it stays a numbered brick rather than anything tick-like. */
+.md-fig-step{display:flex!important;align-items:center!important;gap:11px!important;padding:9px 12px!important;border-radius:11px!important;background:#F8F8F8!important;border:2px solid #EFEFEF!important;font-size:13.5px!important;font-weight:700!important;color:#1D1D1B!important}
+.md-fig-step-no{width:26px!important;height:26px!important;flex:none!important;display:grid!important;place-items:center!important;border-radius:7px!important;background:#FFF!important;border:2px solid var(--mf-yellow,#FFCC00)!important;color:#1D1D1B!important;font-size:12.5px!important;font-weight:900!important;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06)!important}
 
 .md-fig-cta{width:100%!important}
 

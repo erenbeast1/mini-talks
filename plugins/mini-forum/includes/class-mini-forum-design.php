@@ -328,6 +328,23 @@ class Mini_Forum_Design {
                     '@events.hero',
                     array('logo' => 'The Mini-Talks logo URL')),
 
+                'events.mine' => array('What this member has joined — the block', 'html',
+                    '@events.mine',
+                    array('count' => 'How many they have joined', 'rows' => 'One row per event',
+                          'empty' => 'The empty state, when they have joined none'),
+                    array('{{rows}}' => 'the events themselves')),
+
+                'events.mine.row' => array('What this member has joined — one row', 'html',
+                    '@events.mine.row',
+                    array('state' => 'is-upcoming or is-past', 'url' => 'The event page',
+                          'colour' => 'red, yellow, blue or green — the type&rsquo;s colour',
+                          'day' => 'Mon, Tue…', 'date' => 'The day number', 'month' => 'Jan, Feb…',
+                          'title' => 'The event', 'meta' => 'Type, time and place',
+                          'tag' => 'Coming up, Been, or Cancelled')),
+
+                'events.mine.empty' => array('What this member has joined — nothing yet', 'html',
+                    '@events.mine.empty'),
+
                 'events.soon' => array('Empty sub-page card', 'html',
                     '@events.soon',
                     array('events_url' => 'The Mini-Events hub')),

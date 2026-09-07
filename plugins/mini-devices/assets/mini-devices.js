@@ -1706,10 +1706,13 @@
   var FIG_STEPS = ['Choose Your Face', 'Choose Your Hairstyle',
                    'Choose Your Hair Color', 'Review My Fig'];
 
+  /* What the editor will ask, in order — not four things three of which are
+     done. Styling the last one apart was what made the first three read as
+     already ticked off on a screen nobody had opened yet. */
   function figStepList() {
     var ol = el('ol', 'md-fig-steps');
     FIG_STEPS.forEach(function (label, i) {
-      var li = el('li', 'md-fig-step' + (i < 3 ? '' : ' is-next'));
+      var li = el('li', 'md-fig-step');
       li.appendChild(el('span', 'md-fig-step-no', String(i + 1)));
       li.appendChild(el('span', null, label));
       ol.appendChild(li);
@@ -1758,11 +1761,16 @@
       'Plug the kit into this computer with its USB cable, then press Connect. Your browser ' +
       'will ask which device to use \u2014 pick the kit, and it links itself to your profile.')));
 
+    /* Three things you are about to do, not three things you have done.
+       The last one used to carry .is-next, which by contrast made the first two
+       read as already ticked off — on a screen where nothing has happened yet. */
     var ol = el('ol', 'md-fig-steps');
-    ['Plug the kit in', 'Press Connect and pick the kit', 'Confirm \u2014 it is yours'].forEach(function (t, i) {
-      var li = el('li', 'md-fig-step' + (i === 2 ? ' is-next' : ''));
+    [t('connect.step1', 'Plug the kit in'),
+     t('connect.step2', 'Press Connect and pick the kit'),
+     t('connect.step3', 'Confirm \u2014 it is yours')].forEach(function (label, i) {
+      var li = el('li', 'md-fig-step');
       li.appendChild(el('span', 'md-fig-step-no', String(i + 1)));
-      li.appendChild(el('span', null, t));
+      li.appendChild(el('span', null, label));
       ol.appendChild(li);
     });
     host.appendChild(ol);
