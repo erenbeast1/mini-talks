@@ -1,0 +1,56 @@
+<!-- ============================================================
+     The ten links that change, and nothing else.
+
+     Safer than replacing the whole widget: find these two blocks in
+     the header you already have and swap them in. Everything outside
+     them stays exactly as it is.
+
+     The four categories and the special days are not pages of their
+     own — they are views of the page that carries [mini_events],
+     which is /mini-events/mini-calendar/. "Why Mini-Events" and
+     "Mini-Calendar" keep the addresses they already have.
+
+     The old short addresses (?view=workshops, ?view=meetups,
+     ?view=experts, ?view=updates, ?view=special-days) still work and
+     redirect to these, so links already out in the world are safe.
+     ============================================================ -->
+
+
+<!-- ── 1. DESKTOP: the <div class="mt-nav-dropdown mt-dd-green"> block
+        that holds Mini-Events — the one with id="mt-panel-6" ────────── -->
+
+<div class="mt-nav-dropdown mt-dd-green"><span class="mt-nav-brick mt-nav-green">Mini-Events</span><div class="mt-nav-dropdown-panel" id="mt-panel-6">
+<a href="/mini-events/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/24_events_news_en_da_de_3D.png" alt="" loading="lazy" /><span>Why Mini-Events</span></a>
+
+<a href="/mini-events/mini-calendar/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_calendar.png" alt="" loading="lazy" /><span>Mini-Calendar</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-volunteer-workshops" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/36_mini_workshop_3D.png" alt="" loading="lazy" /><span>Mini-Workshops</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-family-meetups" class="mt-nav-dd-item"><span class="mt-family-icon" aria-hidden="true"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_family_meetups-1.png" alt="" loading="lazy" /></span><span>Mini-Family Meetups</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-expert-sessions" class="mt-nav-dd-item mt-expert-card"><span class="mt-expert-icon" aria-hidden="true"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_expert_sessions-1.png" alt="" loading="lazy" decoding="async" /></span><span>Mini-Expert Sessions</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-community-updates" class="mt-nav-dd-item"><!-- TODO_ICON: Mini-Updates --><span class="mt-icon-placeholder" aria-hidden="true"></span><span>Mini-Updates</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-special-days" class="mt-nav-dd-item"><!-- TODO_ICON: Mini-Special Days --><span class="mt-icon-placeholder" aria-hidden="true"></span><span>Mini-Special Days</span></a>
+</div></div>
+
+
+<!-- ── 2. MOBILE: the <div class="mt-mobile-sub" id="mob-6"> block.
+        The button above it does not change. ──────────────────────────── -->
+
+<div class="mt-mobile-sub" id="mob-6">
+<a href="/mini-events/">Why Mini-Events</a>
+
+<a href="/mini-events/mini-calendar/">Mini-Calendar</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-volunteer-workshops">Mini-Workshops</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-family-meetups">Mini-Family Meetups</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-expert-sessions">Mini-Expert Sessions</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-community-updates">Mini-Updates</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-special-days">Mini-Special Days</a>
+</div>
