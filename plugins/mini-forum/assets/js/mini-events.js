@@ -272,11 +272,30 @@
     /* Read once, from both grids: the server may have put a completed event in
        either, and moving cards between them is this function's job. */
     var cards = Array.from(root.querySelectorAll('.me-card'));
-    var month = 'all', place = 'all';
+    var month = 'all', place = 'all', order = 'newest';
+
+    /* Mini-Community Updates has no places to sit in, so its two buttons set an
+       order instead. Everywhere else `order` stays on its default and this is
+       the order the server already sent. */
+    function inOrder(list) {
+      return list.slice().sort(function (a, b) {
+        var x = stamp(a), y = stamp(b);
+        return order === 'oldest' ? (x < y ? -1 : x > y ? 1 : 0)
+                                  : (x > y ? -1 : x < y ? 1 : 0);
+      });
+    }
+
+    function stamp(card) {
+      var badge = card.querySelector('.me-date-badge');
+      if (!badge) return '';
+      return badge.dataset.year + '-' +
+        String(MONTH_KEYS.indexOf(badge.dataset.month) + 1).padStart(2, '0') + '-' +
+        String(badge.dataset.day || '').padStart(2, '0');
+    }
 
     function apply() {
       var up = 0, done = 0;
-      cards.forEach(function (card) {
+      inOrder(cards).forEach(function (card) {
         var badge = card.querySelector('.me-date-badge');
         var metaEl = card.querySelector('.me-meta');
         var meta = metaEl ? metaEl.textContent : '';
@@ -335,11 +354,74 @@
       });
     });
 
+    root.querySelectorAll('[data-sort]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        order = button.dataset.sort;
+        root.querySelectorAll('[data-sort]').forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b === button));
+        });
+        apply();
+      });
+    });
+
     apply();
+  }
+
+  /* ── the month filter on Mini-Special Days ────────────────────────── */
+  function specialFilter() {
+    var toggle  = root.querySelector('#mw-month-toggle');
+    var options = root.querySelector('#mw-month-options');
+    var all     = root.querySelector('#sd-show-all');
+    var months  = Array.from(root.querySelectorAll('[data-month-section]'));
+    if (!toggle || !options || !all || !months.length) return;
+
+    var count = root.querySelector('.sd-count');
+    var whole = count ? count.textContent : '';
+
+    function close() {
+      options.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function select(value, label) {
+      months.forEach(function (section) {
+        section.hidden = value !== 'all' && section.dataset.monthSection !== value;
+      });
+      var caption = toggle.querySelector('span');
+      if (caption) caption.textContent = value === 'all' ? 'Month Selection' : label;
+      options.querySelectorAll('[data-month]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.month === value));
+      });
+      all.setAttribute('aria-pressed', String(value === 'all'));
+
+      if (count) {
+        if (value === 'all') { count.textContent = whole; return; }
+        var n = months.filter(function (s) { return !s.hidden; })
+                      .reduce(function (sum, s) { return sum + s.querySelectorAll('.sd-entry').length; }, 0);
+        count.textContent = n + (n === 1 ? ' special day · ' : ' special days · ') + label;
+      }
+      close();
+    }
+
+    toggle.addEventListener('click', function () {
+      options.hidden = !options.hidden;
+      toggle.setAttribute('aria-expanded', String(!options.hidden));
+    });
+    options.querySelectorAll('[data-month]').forEach(function (b) {
+      b.addEventListener('click', function () { select(b.dataset.month, b.textContent); toggle.focus(); });
+    });
+    all.addEventListener('click', function () { select('all', ''); });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.mw-month-wrap')) close();
+    });
+    root.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !options.hidden) { close(); toggle.focus(); }
+    });
   }
 
   calendar();
   eventDialog();
   specialDialog();
   filters();
+  specialFilter();
 })();

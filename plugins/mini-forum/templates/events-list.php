@@ -30,10 +30,9 @@ for ($i = 1; $i <= 8; $i++) {
     ));
 }
 ?>
-<main class="me-page me-workshop-page" id="me-events">
+<main class="me-page me-list-page <?php echo esc_attr($cat['page_class']); ?>" id="me-events">
 <div class="me-wrap">
-  <section class="me-section" data-kind="<?php echo esc_attr($cat['kind']); ?>"
-           style="--c:<?php echo esc_attr($cat['colour']); ?>;--pale:<?php echo esc_attr($cat['pale']); ?>">
+  <section class="me-section me-kind-<?php echo esc_attr($cat['kind']); ?>" data-kind="<?php echo esc_attr($cat['kind']); ?>">
 
     <?php mf_block('mc.list.head', array(
       'icon'        => esc_url($cat['icon']),
@@ -49,14 +48,14 @@ for ($i = 1; $i <= 8; $i++) {
       )); ?>
     <?php endif; ?>
 
-    <?php mf_block('mc.note'); ?>
+    <?php if (!empty($cat['note'])) mf_block('mc.note'); ?>
 
     <?php mf_block('mc.filters', array(
       'anchor'     => esc_attr($slug),
       'find_title' => esc_html(Mini_Forum_Design::get('mc.find.' . $slug . '.title')),
       'find_lead'  => esc_html(Mini_Forum_Design::get('mc.find.' . $slug . '.lead')),
       'months'     => Mini_Forum_Events::month_options($all),
-      'places'     => Mini_Forum_Events::place_options($all),
+      'places'     => Mini_Forum_Events::filter_buttons($all, $cat),
     )); ?>
 
     <?php mf_block('mc.list.body', array(

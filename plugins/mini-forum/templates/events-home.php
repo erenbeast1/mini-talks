@@ -48,8 +48,6 @@ $window_end   = date('Y-m-d 23:59:59', strtotime('last day of +12 months'));
 
       mf_block('mc.section', array(
           'kind'          => esc_attr($cat['kind']),
-          'colour'        => esc_attr($cat['colour']),
-          'pale'          => esc_attr($cat['pale']),
           'icon'          => esc_url($cat['icon']),
           'title'         => esc_html($cat['title']),
           'description'   => esc_html(Mini_Forum_Design::get('mc.desc.' . $cat['kind'])),
@@ -83,8 +81,6 @@ $window_end   = date('Y-m-d 23:59:59', strtotime('last day of +12 months'));
 
   mf_block('mc.section', array(
       'kind'          => esc_attr($sd['kind']),
-      'colour'        => esc_attr($sd['colour']),
-      'pale'          => esc_attr($sd['pale']),
       'icon'          => esc_url($sd['icon']),
       'title'         => esc_html($sd['title']),
       'description'   => esc_html(Mini_Forum_Design::get('mc.desc.special')),

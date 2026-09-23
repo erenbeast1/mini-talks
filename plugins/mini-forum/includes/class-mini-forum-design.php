@@ -358,8 +358,7 @@ class Mini_Forum_Design {
                 'mc.note' => array('The programme note, under the calendar', 'html', '@mc.note'),
 
                 'mc.section' => array('One category on the hub', 'html', '@mc.section',
-                    array('kind' => 'workshop, family, expert, updates or special',
-                          'colour' => 'Its colour', 'pale' => 'Its pale background',
+                    array('kind' => 'workshop, family, expert, updates or special — also picks the colour',
                           'icon' => 'The picture', 'title' => 'The heading',
                           'description' => 'The paragraph', 'see_all_url' => 'Its own page',
                           'see_all_label' => 'The button', 'cards' => 'That month&rsquo;s events'),
@@ -427,7 +426,20 @@ class Mini_Forum_Design {
                     array('value' => 'all, or 2026-10', 'on' => 'true when it is the chosen one', 'label' => 'Its wording')),
 
                 'mc.filters.place' => array('One place button', 'html', '@mc.filters.place',
-                    array('value' => 'all, or the place', 'on' => 'true when chosen', 'label' => 'Its wording')),
+                    array('value' => 'all, or the place', 'on' => 'true when chosen', 'label' => 'Its wording',
+                          'tone' => 'The colour class it wears', 'icon' => 'Its pin or screen'),
+                    array('data-location' => 'the filter reads the place from here')),
+
+                'mc.filters.sort' => array('One order button &mdash; Mini-Community Updates', 'html', '@mc.filters.sort',
+                    array('value' => 'newest or oldest', 'on' => 'true when chosen', 'label' => 'Its wording',
+                          'tone' => 'The colour class it wears'),
+                    array('data-sort' => 'the filter reads the order from here')),
+
+                'mc.filters.special' => array('Month filter &mdash; Mini-Special Days', 'html', '@mc.filters.special',
+                    array('months' => 'The month buttons', 'all_label' => 'The wording on the show-everything button'),
+                    array('id="mw-month-toggle"' => 'opens the month list',
+                          'id="mw-month-options"' => 'the months go in here',
+                          'id="sd-show-all"' => 'brings every month back')),
 
                 'mc.list.body' => array('Upcoming and past', 'html', '@mc.list.body',
                     array('upcoming_title' => 'The first heading', 'upcoming_empty' => 'When the filter matches nothing',
@@ -558,7 +570,7 @@ class Mini_Forum_Design {
                 'mc.sd.month' => array('Special days — one month', 'html', '@mc.sd.month',
                     array('index' => 'Its number', 'month' => 'The month', 'entries' => 'The days in it')),
                 'mc.sd.entry' => array('Special days — one day', 'html', '@mc.sd.entry',
-                    array('colour' => 'Its colour', 'ink' => 'Its text colour', 'iso' => 'The date, for machines',
+                    array('tone' => 'Which of the four colours, 1 to 4', 'iso' => 'The date, for machines',
                           'long_date' => 'The date, spoken', 'weekday' => 'SAT', 'day' => '24', 'mon' => 'JAN',
                           'title' => 'The day', 'story' => 'The story')),
                 'mc.sd.empty' => array('Special days — none yet', 'text', 'No special days have been added yet.'),

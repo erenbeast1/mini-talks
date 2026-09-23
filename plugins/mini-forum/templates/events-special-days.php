@@ -18,14 +18,9 @@ $days = $wpdb->get_results("
 ");
 
 /* Four colours in rotation, the way the design runs them: the year reads as a
-   sequence rather than a wall of one colour. Yellow needs a darker ink to stay
-   readable, which is the only reason the two are separate values. */
-$PALETTE = array(
-    array('#E52828', '#E52828'),
-    array('#FFCC00', '#876800'),
-    array('#0055BF', '#0055BF'),
-    array('#237841', '#237841'),
-);
+   sequence rather than a wall of one colour. The colours themselves live in the
+   stylesheet — an inline custom property does not survive wp_kses. */
+$TONES = 4;
 
 $by_month = array();
 foreach ($days as $day) {
@@ -35,18 +30,26 @@ foreach ($days as $day) {
 }
 
 $sections = '';
+$month_buttons = mf_block_get('mc.filters.month', array(
+    'value' => 'all', 'on' => 'true', 'label' => 'All Months',
+));
 $index = 0;
 $n = 0;
 foreach ($by_month as $ym => $rows) {
     $index++;
+    /* The button and the section it shows carry the same number: the script
+       matches data-month against data-month-section and hides the rest. */
+    $month_buttons .= mf_block_get('mc.filters.month', array(
+        'value' => (int) $index, 'on' => 'false',
+        'label' => esc_html(date_i18n('F Y', strtotime($ym . '-01'))),
+    ));
     $entries = '';
     foreach ($rows as $day) {
         $ts = strtotime($day->day_date);
-        list($colour, $ink) = $PALETTE[$n % count($PALETTE)];
+        $tone = ($n % $TONES) + 1;
         $n++;
         $entries .= mf_block_get('mc.sd.entry', array(
-            'colour'    => esc_attr($colour),
-            'ink'       => esc_attr($ink),
+            'tone'      => (int) $tone,
             'iso'       => esc_attr(date('Y-m-d', $ts)),
             'long_date' => esc_attr(date_i18n('l, F j, Y', $ts)),
             'weekday'   => esc_html(strtoupper(date_i18n('D', $ts))),
@@ -63,6 +66,20 @@ foreach ($by_month as $ym => $rows) {
     ));
 }
 
+/* "What will you find here?" — the same block the category pages carry, with
+   the words the manifest already holds for it. It was written and never drawn. */
+$items = '';
+for ($i = 1; $i <= 8; $i++) {
+    $title = Mini_Forum_Design::get('mc.expect.special.' . $i . '.title');
+    $text  = Mini_Forum_Design::get('mc.expect.special.' . $i . '.text');
+    if (trim(strip_tags($title)) === '') continue;
+    $items .= mf_block_get('mc.expect.item', array(
+        'bullet' => esc_url(Mini_Forum_Design::get('mc.bullet.' . (($i % 4) + 1))),
+        'title'  => esc_html($title),
+        'text'   => esc_html($text),
+    ));
+}
+
 $count = '';
 if ($days) {
     $first = strtotime($days[0]->day_date);
@@ -76,10 +93,9 @@ if ($days) {
     );
 }
 ?>
-<main class="me-page me-workshop-page" id="me-events">
+<main class="me-page me-list-page <?php echo esc_attr($sd['page_class']); ?>" id="me-events">
 <div class="me-wrap">
-  <section class="me-section" data-kind="<?php echo esc_attr($sd['kind']); ?>"
-           style="--c:<?php echo esc_attr($sd['colour']); ?>;--pale:<?php echo esc_attr($sd['pale']); ?>">
+  <section class="me-section me-kind-<?php echo esc_attr($sd['kind']); ?>" data-kind="<?php echo esc_attr($sd['kind']); ?>">
 
     <?php mf_block('mc.list.head', array(
       'icon'        => esc_url($sd['icon']),
@@ -87,8 +103,18 @@ if ($days) {
       'description' => esc_html(Mini_Forum_Design::get('mc.desc.special')),
     )); ?>
 
+    <?php if ($items !== ''): ?>
+      <?php mf_block('mc.expect', array(
+        'title' => esc_html(Mini_Forum_Design::get('mc.expect.special.title')),
+        'lead'  => esc_html(Mini_Forum_Design::get('mc.expect.special.lead')),
+        'items' => $items,
+      )); ?>
+    <?php endif; ?>
+
     <h2 class="mw-heading"><?php echo esc_html(Mini_Forum_Design::get('mc.find.special.title')); ?></h2>
     <p class="mw-lead"><?php echo esc_html(Mini_Forum_Design::get('mc.find.special.lead')); ?></p>
+
+    <?php echo Mini_Forum_Events::special_filters($month_buttons, $sd); ?>
 
     <?php if ($count !== '') mf_block('mc.sd.count', array('count' => esc_html($count))); ?>
 

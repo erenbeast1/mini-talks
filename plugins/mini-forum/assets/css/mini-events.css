@@ -275,192 +275,323 @@
 @media(max-width:600px){.me-section-head{grid-template-columns:1fr;gap:24px;text-align:left}.me-icon{width:100%;max-width:360px;margin:auto;max-height:220px}.me-icon img{max-height:170px}.me-section-head :is(h1,h2),.me-section[data-kind=family] .me-section-head :is(h1,h2){font-size:clamp(25px,7vw,34px);line-height:1.3;letter-spacing:-.03em}.me-section-head .me-color-line{width:100%;height:10px}.me-section-cta{margin-top:20px}.me-category-btn{border-radius:10px}}
 .me-hero h1,.me-section-head :is(h1,h2),.me-section[data-kind=family] .me-section-head :is(h1,h2){ font-family:Montserrat,sans-serif;font-weight:900;font-size:clamp(32px,3.5vw,52px);color:#fff; -webkit-text-stroke:3px var(--heading-color,#E52828);paint-order:stroke fill; text-shadow:3px 3px 0 var(--heading-color,#E52828),-3px -3px 0 var(--heading-color,#E52828),3px -3px 0 var(--heading-color,#E52828),-3px 3px 0 var(--heading-color,#E52828),0 3px 0 var(--heading-color,#E52828),0 -3px 0 var(--heading-color,#E52828),3px 0 0 var(--heading-color,#E52828),-3px 0 0 var(--heading-color,#E52828); margin:0 0 12px;line-height:1.1;letter-spacing:normal; }
 .me-section-head :is(h1,h2){--heading-color:var(--c)}
-.me-workshop-page .me-section{border:0;padding-top:0;margin-bottom:44px}
-.me-workshop-page .me-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 26px}
-.me-workshop-page .me-programme-note{width:100%;background:#FFF4F4;border:1px solid #F2CCCC;border-radius:14px;padding:18px 22px;margin:0 0 30px!important}
-.me-workshop-page .me-list-title{font-size:26px;font-weight:900;margin:0 0 10px;color:#1D1D1B}
-.me-workshop-page .me-list-intro{margin:0 0 30px;color:#555}
-@media(max-width:700px){.me-workshop-page .me-grid{grid-template-columns:1fr}.me-workshop-page .me-list-title{font-size:23px}}
-.me-workshop-page .me-section-head{grid-template-columns:minmax(0,58fr) minmax(0,42fr);gap:40px;padding:28px 0 12px}
-.me-workshop-page .me-section-head>.me-icon{order:2;min-height:240px}
-.me-workshop-page .me-section-head>.me-icon+div{order:1}
-.me-workshop-page .me-section-head h1{font-size:clamp(32px,3.5vw,52px)!important;font-weight:900!important;color:#fff!important;-webkit-text-stroke:3px #E52828;line-height:1.1}
-.mw-expect{padding:30px 0 36px;border-top:1px solid #eee;border-bottom:1px solid #eee;margin-bottom:32px}
-#me-events .mw-heading{font-size:clamp(23px,2.3vw,32px);font-weight:900;color:#1D1D1B;-webkit-text-stroke:0;text-shadow:none;line-height:1.25;margin:0 0 12px}
-.mw-lead{max-width:780px;line-height:1.7;margin:0 0 24px!important}
-.mw-features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.mw-feature{padding:22px;background:#FFF4F4;border:1px solid #F5DADA;border-radius:16px}
-.mw-feature span{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;background:#E52828;color:#fff;border-radius:9px;font-weight:900;margin-bottom:12px}
-.mw-feature h3{font-size:17px;font-weight:900;margin:0 0 8px}
-.mw-feature p{font-size:14px;line-height:1.65}
-.mw-flow{margin-top:22px!important;padding:18px 22px;border-left:4px solid #E52828;background:#fafafa;border-radius:0 12px 12px 0}
-.mw-filters{display:flex;gap:18px;flex-wrap:wrap;margin:24px 0 32px;padding:18px;background:#fafafa;border:1px solid #eee;border-radius:14px}
-.mw-filters label{display:flex;flex-direction:column;gap:6px;min-width:190px;font-weight:800;font-size:13px;flex:1}
-#me-events .mw-filters select{font:inherit;background:#fff;color:#1D1D1B;border:1px solid #ccc;border-radius:8px;padding:12px;width:100%}
-.mw-history{border-top:1px solid #eee;margin-top:40px;padding-top:30px}
-.mw-empty{background:#FFF4F4;border:1px solid #F2CCCC;border-radius:14px;padding:24px;text-align:center;color:#555}
-#me-events .mw-empty[hidden],#me-events .me-grid[hidden]{display:none!important}
-.mw-popup-art{margin:0 0 24px;background:#FFF4F4;border-radius:14px;padding:16px;text-align:center}
-.mw-popup-art img{width:100%;height:150px;object-fit:contain}
-.mw-popup-art figcaption{font-size:12px;color:#666;margin-top:8px}
-#me-events .mw-popup-subtitle{font-size:19px;font-weight:900;margin:0 0 14px}
-@media(max-width:800px){.mw-features{grid-template-columns:repeat(2,minmax(0,1fr))}.me-workshop-page .me-section-head{grid-template-columns:1fr}.me-workshop-page .me-section-head>.me-icon{order:2;min-height:200px;width:100%;max-width:none}.me-workshop-page .me-section-head>.me-icon+div{order:1}}
-@media(max-width:480px){.mw-features{grid-template-columns:1fr}.mw-feature{padding:18px}.mw-filters label{min-width:100%}}
-.me-workshop-page .me-section-head{grid-template-columns:minmax(0,58fr) minmax(0,42fr);align-items:center;gap:50px;margin-bottom:80px;padding:12px 0 0}
-.me-workshop-page .me-section-head>.me-icon{position:relative;order:2;background:#FFCC00;height:200px;min-height:0;align-self:center;overflow:hidden;border-radius:20px;display:flex;justify-content:center;align-items:center;width:100%}
-.me-workshop-page .me-section-head>.me-icon img{position:static!important;width:auto!important;height:75%!important;max-width:80%;object-fit:contain}
-.me-workshop-page .me-section-head>.me-icon+div{display:block;min-height:0}
-.mw-connect{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
-#me-events .mw-connect a{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:10px 18px;border:2px solid #1D1D1B;border-radius:10px;background:var(--connect);color:#fff;font-size:14px;font-weight:800;box-shadow:0 4px 0 #1D1D1B;text-decoration:none}
-.mw-connect svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.me-workshop-page .mw-expect{padding:30px;background:#FFE9E7;border:2px solid #E52828;border-radius:14px;box-shadow:0 6px 0 #E52828;margin:0 0 44px}
-.mw-expect .mw-lead{margin-bottom:26px!important;max-width:none}
-.mw-features{grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 22px}
-.mw-feature{padding:0;background:none;border:0;border-radius:0;display:flex;gap:12px;align-items:flex-start}
-.mw-feature>img{flex:0 0 40px;width:40px;height:40px;object-fit:contain;background:white;border-radius:5px;padding:4px}
-.mw-feature h3{font-size:14px;font-weight:900;line-height:1.35;margin:0 0 4px}
-.mw-feature p{font-size:13px;line-height:1.5;font-weight:600}
-@media(max-width:1000px){.mw-features{grid-template-columns:repeat(2,minmax(0,1fr))}.me-workshop-page .me-section-head{gap:30px}}
-@media(max-width:700px){.me-workshop-page .me-section-head{grid-template-columns:1fr;margin-bottom:38px}.me-workshop-page .me-section-head>.me-icon{height:190px;max-width:none}.me-workshop-page .mw-expect{padding:22px 18px}.mw-connect{gap:10px}#me-events .mw-connect a{padding:10px 12px;font-size:13px}}
-@media(max-width:430px){.mw-features{grid-template-columns:1fr;gap:20px}}
-.me-workshop-page .me-section-head>.me-icon{height:260px;background:transparent;padding:0}
-.me-workshop-page .me-section-head>.me-icon img{width:100%!important;height:100%!important;max-width:100%;max-height:100%;object-fit:contain;object-position:center}
-.me-workshop-page .me-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
-@media(max-width:900px){.me-workshop-page .me-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.me-workshop-page .me-grid{grid-template-columns:1fr;gap:34px}.me-workshop-page .me-section-head>.me-icon{height:220px}}
-.me-workshop-page .me-section-head>.me-icon{background:#FFCC00;height:240px;border-radius:20px;padding:18px 24px;overflow:hidden}
-.me-workshop-page .me-section-head>.me-icon img{width:100%!important;height:100%!important;object-fit:contain;object-position:center}
-.me-workshop-page .mw-feature>img{width:40px;height:40px;flex:0 0 40px;object-fit:contain;padding:0;background:transparent;border-radius:0}
-@media(max-width:700px){.me-workshop-page .me-section-head>.me-icon{height:200px;padding:16px 20px}}
-.me-workshop-page .mw-feature{gap:10px}
-.me-workshop-page .mw-feature>img{width:18px;height:18px;flex:0 0 18px;margin-top:1px;padding:0;object-fit:contain}
-#me-events.me-workshop-page .me-section-head>.me-icon{padding:0!important;overflow:hidden;background:#FFCC00}
+
+/* ==========================================================================
+   The list pages.
+
+   Every category page is drawn on the same shell: the same hero split, the
+   same filter row, the same two grids. The designs deliver that shell five
+   times over — once per page file — so it is written once here, against
+   .me-list-page, and only what a page does differently follows, against that
+   page's own class.
+
+   That scoping is the point. The delivered files each style #me-events on
+   their own, which is fine when a page loads one file; merged into one
+   stylesheet they overwrite each other, and the last file read wins for all
+   five — which is how every section came out blue.
+   ==========================================================================*/
+.me-list-page .me-section{border:0;padding-top:0;margin-bottom:44px}
+.me-list-page .me-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 26px}
+.me-list-page .me-programme-note{width:100%;background:#FFF4F4;border:1px solid #F2CCCC;border-radius:14px;padding:18px 22px;margin:0 0 30px!important}
+.me-list-page .me-list-title{font-size:26px;font-weight:900;margin:0 0 10px;color:#1D1D1B}
+.me-list-page .me-list-intro{margin:0 0 30px;color:#555}
+@media(max-width:700px){.me-list-page .me-grid{grid-template-columns:1fr}
+.me-list-page .me-list-title{font-size:23px}
+}
+.me-list-page .me-section-head{grid-template-columns:minmax(0,58fr) minmax(0,42fr);gap:40px;padding:28px 0 12px}
+.me-list-page .me-section-head>.me-icon{order:2;min-height:240px}
+.me-list-page .me-section-head>.me-icon+div{order:1}
+.me-list-page .me-section-head h1{font-size:clamp(32px,3.5vw,52px)!important;font-weight:900!important;color:#fff!important;-webkit-text-stroke:3px #E52828;line-height:1.1}
+.me-list-page .mw-expect{padding:30px 0 36px;border-top:1px solid #eee;border-bottom:1px solid #eee;margin-bottom:32px}
+#me-events.me-list-page .mw-heading{font-size:clamp(23px,2.3vw,32px);font-weight:900;color:#1D1D1B;-webkit-text-stroke:0;text-shadow:none;line-height:1.25;margin:0 0 12px}
+.me-list-page .mw-lead{max-width:780px;line-height:1.7;margin:0 0 24px!important}
+.me-list-page .mw-features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.me-list-page .mw-feature{padding:22px;background:#FFF4F4;border:1px solid #F5DADA;border-radius:16px}
+.me-list-page .mw-feature span{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;background:#E52828;color:#fff;border-radius:9px;font-weight:900;margin-bottom:12px}
+.me-list-page .mw-feature h3{font-size:17px;font-weight:900;margin:0 0 8px}
+.me-list-page .mw-feature p{font-size:14px;line-height:1.65}
+.me-list-page .mw-flow{margin-top:22px!important;padding:18px 22px;border-left:4px solid #E52828;background:#fafafa;border-radius:0 12px 12px 0}
+.me-list-page .mw-filters{display:flex;gap:18px;flex-wrap:wrap;margin:24px 0 32px;padding:18px;background:#fafafa;border:1px solid #eee;border-radius:14px}
+.me-list-page .mw-filters label{display:flex;flex-direction:column;gap:6px;min-width:190px;font-weight:800;font-size:13px;flex:1}
+#me-events.me-list-page .mw-filters select{font:inherit;background:#fff;color:#1D1D1B;border:1px solid #ccc;border-radius:8px;padding:12px;width:100%}
+.me-list-page .mw-history{border-top:1px solid #eee;margin-top:40px;padding-top:30px}
+.me-list-page .mw-empty{background:#FFF4F4;border:1px solid #F2CCCC;border-radius:14px;padding:24px;text-align:center;color:#555}
+#me-events.me-list-page .mw-empty[hidden],#me-events.me-list-page .me-grid[hidden]{display:none!important}
+.me-list-page .mw-popup-art{margin:0 0 24px;background:#FFF4F4;border-radius:14px;padding:16px;text-align:center}
+.me-list-page .mw-popup-art img{width:100%;height:150px;object-fit:contain}
+.me-list-page .mw-popup-art figcaption{font-size:12px;color:#666;margin-top:8px}
+#me-events.me-list-page .mw-popup-subtitle{font-size:19px;font-weight:900;margin:0 0 14px}
+@media(max-width:800px){.me-list-page .mw-features{grid-template-columns:repeat(2,minmax(0,1fr))}
+.me-list-page .me-section-head{grid-template-columns:1fr}
+.me-list-page .me-section-head>.me-icon{order:2;min-height:200px;width:100%;max-width:none}
+.me-list-page .me-section-head>.me-icon+div{order:1}
+}
+@media(max-width:480px){.me-list-page .mw-features{grid-template-columns:1fr}
+.me-list-page .mw-feature{padding:18px}
+.me-list-page .mw-filters label{min-width:100%}
+}
+.me-list-page .me-section-head{grid-template-columns:minmax(0,58fr) minmax(0,42fr);align-items:center;gap:50px;margin-bottom:80px;padding:12px 0 0}
+.me-list-page .me-section-head>.me-icon{position:relative;order:2;background:#FFCC00;height:200px;min-height:0;align-self:center;overflow:hidden;border-radius:20px;display:flex;justify-content:center;align-items:center;width:100%}
+.me-list-page .me-section-head>.me-icon img{position:static!important;width:auto!important;height:75%!important;max-width:80%;object-fit:contain}
+.me-list-page .me-section-head>.me-icon+div{display:block;min-height:0}
+.me-list-page .mw-connect{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+#me-events.me-list-page .mw-connect a{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:10px 18px;border:2px solid #1D1D1B;border-radius:10px;background:var(--connect);color:#fff;font-size:14px;font-weight:800;box-shadow:0 4px 0 #1D1D1B;text-decoration:none}
+.me-list-page .mw-connect svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.me-list-page .mw-expect{padding:30px;background:#FFE9E7;border:2px solid #E52828;border-radius:14px;box-shadow:0 6px 0 #E52828;margin:0 0 44px}
+.me-list-page .mw-expect .mw-lead{margin-bottom:26px!important;max-width:none}
+.me-list-page .mw-features{grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 22px}
+.me-list-page .mw-feature{padding:0;background:none;border:0;border-radius:0;display:flex;gap:12px;align-items:flex-start}
+.me-list-page .mw-feature>img{flex:0 0 40px;width:40px;height:40px;object-fit:contain;background:white;border-radius:5px;padding:4px}
+.me-list-page .mw-feature h3{font-size:14px;font-weight:900;line-height:1.35;margin:0 0 4px}
+.me-list-page .mw-feature p{font-size:13px;line-height:1.5;font-weight:600}
+@media(max-width:1000px){.me-list-page .mw-features{grid-template-columns:repeat(2,minmax(0,1fr))}
+.me-list-page .me-section-head{gap:30px}
+}
+@media(max-width:700px){.me-list-page .me-section-head{grid-template-columns:1fr;margin-bottom:38px}
+.me-list-page .me-section-head>.me-icon{height:190px;max-width:none}
+.me-list-page .mw-expect{padding:22px 18px}
+.me-list-page .mw-connect{gap:10px}
+#me-events.me-list-page .mw-connect a{padding:10px 12px;font-size:13px}
+}
+@media(max-width:430px){.me-list-page .mw-features{grid-template-columns:1fr;gap:20px}
+}
+.me-list-page .me-section-head>.me-icon{height:260px;background:transparent;padding:0}
+.me-list-page .me-section-head>.me-icon img{width:100%!important;height:100%!important;max-width:100%;max-height:100%;object-fit:contain;object-position:center}
+.me-list-page .me-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
+@media(max-width:900px){.me-list-page .me-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){.me-list-page .me-grid{grid-template-columns:1fr;gap:34px}
+.me-list-page .me-section-head>.me-icon{height:220px}
+}
+.me-list-page .me-section-head>.me-icon{background:#FFCC00;height:240px;border-radius:20px;padding:18px 24px;overflow:hidden}
+.me-list-page .me-section-head>.me-icon img{width:100%!important;height:100%!important;object-fit:contain;object-position:center}
+.me-list-page .mw-feature>img{width:40px;height:40px;flex:0 0 40px;object-fit:contain;padding:0;background:transparent;border-radius:0}
+@media(max-width:700px){.me-list-page .me-section-head>.me-icon{height:200px;padding:16px 20px}
+}
+.me-list-page .mw-feature{gap:10px}
+.me-list-page .mw-feature>img{width:18px;height:18px;flex:0 0 18px;margin-top:1px;padding:0;object-fit:contain}
+#me-events.me-list-page .me-section-head>.me-icon{padding:0!important;overflow:hidden;background:#FFCC00}
+
+/* ── Mini-Volunteer Workshops ─────────────────────────────── */
 #me-events.me-workshop-page .me-section-head>.me-icon img{display:block;position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;object-fit:cover!important;object-position:center!important}
-#me-events .mw-upcoming-title,#me-events .mw-past-title{font-family:Montserrat,sans-serif;font-weight:900;font-size:clamp(28px,3.5vw,48px);line-height:1.15;color:#fff;-webkit-text-stroke:3px var(--title-outline);paint-order:stroke fill;text-shadow:2px 2px 0 var(--title-outline),-2px -2px 0 var(--title-outline),2px -2px 0 var(--title-outline),-2px 2px 0 var(--title-outline);margin-bottom:30px}
-.mw-upcoming-title{--title-outline:#E52828}
-.mw-past-title{--title-outline:#1D1D1B}
-#me-events .mw-filters{background:none;border:0;border-radius:0;padding:0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin:24px 0 48px}
-.mw-month-wrap{position:relative;z-index:5}
-#me-events button.mw-filter-btn{--filter-color:#1D1D1B;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:10px 18px;background:#fff!important;color:#1D1D1B!important;border:2px solid var(--filter-color)!important;border-radius:12px;box-shadow:0 4px 0 var(--filter-color)!important;font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;line-height:1.3;text-transform:none}
-#me-events .mw-filter-btn svg{width:20px;height:20px;fill:none;stroke:var(--filter-color);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-#me-events .mw-place[aria-pressed="true"]{background:var(--filter-color)!important;color:#fff!important}
-#me-events .mw-place[data-location="İzmir"][aria-pressed="true"]{color:#1D1D1B!important}
-#me-events .mw-place[aria-pressed="true"] svg{stroke:currentColor}
-#me-events .mw-month-options{position:absolute;top:calc(100% + 12px);left:0;min-width:100%;width:250px;max-width:85vw;background:white;border:2px solid #1D1D1B;border-radius:12px;padding:10px;box-shadow:0 14px 25px #0002}
-#me-events .mw-month-options[hidden]{display:none!important}
-#me-events .mw-month-options button{display:block;width:100%;padding:12px;text-align:left;background:#fff!important;color:#1D1D1B!important;border:0!important;box-shadow:none!important;border-radius:6px;font-family:Montserrat,sans-serif;font-size:16px;font-weight:700}
-#me-events .mw-month-options button:hover,#me-events .mw-month-options button[aria-pressed="true"]{background:#F1F7FF!important}
-#me-events .mw-filter-btn::before,#me-events .mw-filter-btn::after{content:none!important}
-@media(max-width:600px){#me-events button.mw-filter-btn{font-size:14px;padding:10px 12px}#me-events .mw-filters{gap:12px;margin-bottom:36px}}
-#me-events.me-workshop-page .me-section-head h1{--heading-color:#237841;-webkit-text-stroke-color:#237841}
-#me-events .mw-expect{background:#F0F8F1;border-color:#237841;box-shadow:0 6px 0 #237841}
-#me-events .mw-empty,#me-events .mw-popup-art{background:#F0F8F1;border-color:#C8DDCB}
-#me-events .mw-upcoming-title{--title-outline:#237841}
-#me-events .mw-popup-art.mw-photo-gallery{padding:14px;background:#F0F8F1}
-#me-events .mw-photo-gallery > img{display:block;width:100%;height: min(48vh,440px);object-fit:contain;border-radius:8px}
-#me-events .mw-gallery-thumbs{display:flex;justify-content:center;gap:10px;margin-top:12px}
-#me-events .mw-gallery-thumbs button{appearance:none;display:block;flex:0 0 60px;width:60px;height:78px;padding:3px!important;border:2px solid transparent!important;border-radius:8px;background:#fff!important;box-shadow:none!important;cursor:pointer;overflow:hidden}
-#me-events .mw-gallery-thumbs button[aria-pressed="true"]{border-color:#237841!important}
-#me-events .mw-gallery-thumbs button:focus-visible{outline:3px solid #0055BF;outline-offset:3px}
-#me-events .mw-gallery-thumbs button img{display:block;width:100%;height:100%;object-fit:contain}
-#me-events .me-dialog.mw-portrait-layout{width:94%;max-width:1080px}
-#me-events .mw-portrait-layout .mw-popup-content{display:grid;grid-template-columns:minmax(0,0.85fr) minmax(0,1.15fr);gap:28px;align-items:start}
-#me-events .mw-portrait-layout .mw-popup-art{margin:0;min-width:0}
-#me-events .mw-portrait-layout .mw-popup-story{min-width:0}
-#me-events .mw-portrait-layout .mw-photo-gallery > img{height:auto;max-height:540px;aspect-ratio:9/16;object-fit:contain}
-#me-events .mw-portrait-layout .mw-popup-subtitle{margin-top:0}
-@media(max-width:700px){ #me-events .mw-portrait-layout .mw-popup-content{grid-template-columns:minmax(0,1fr);gap:22px} #me-events .mw-portrait-layout .mw-photo-gallery > img{height: min(55vh,440px);aspect-ratio:auto} }
-.me-session-page .me-section{border:0;padding-top:0;margin-bottom:44px}
-.me-session-page .me-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 26px}
-.me-session-page .me-programme-note{width:100%;background:#FFF4F4;border:1px solid #F2CCCC;border-radius:14px;padding:18px 22px;margin:0 0 30px!important}
-.me-session-page .me-list-title{font-size:26px;font-weight:900;margin:0 0 10px;color:#1D1D1B}
-.me-session-page .me-list-intro{margin:0 0 30px;color:#555}
-@media(max-width:700px){.me-session-page .me-grid{grid-template-columns:1fr}.me-session-page .me-list-title{font-size:23px}}
-.me-session-page .me-section-head{grid-template-columns:minmax(0,58fr) minmax(0,42fr);gap:40px;padding:28px 0 12px}
-.me-session-page .me-section-head>.me-icon{order:2;min-height:240px}
-.me-session-page .me-section-head>.me-icon+div{order:1}
-.me-session-page .me-section-head h1{font-size:clamp(32px,3.5vw,52px)!important;font-weight:900!important;color:#fff!important;-webkit-text-stroke:3px #E52828;line-height:1.1}
-@media(max-width:800px){.mw-features{grid-template-columns:repeat(2,minmax(0,1fr))}.me-session-page .me-section-head{grid-template-columns:1fr}.me-session-page .me-section-head>.me-icon{order:2;min-height:200px;width:100%;max-width:none}.me-session-page .me-section-head>.me-icon+div{order:1}}
-.me-session-page .me-section-head{grid-template-columns:minmax(0,58fr) minmax(0,42fr);align-items:center;gap:50px;margin-bottom:80px;padding:12px 0 0}
-.me-session-page .me-section-head>.me-icon{position:relative;order:2;background:#FFCC00;height:200px;min-height:0;align-self:center;overflow:hidden;border-radius:20px;display:flex;justify-content:center;align-items:center;width:100%}
-.me-session-page .me-section-head>.me-icon img{position:static!important;width:auto!important;height:75%!important;max-width:80%;object-fit:contain}
-.me-session-page .me-section-head>.me-icon+div{display:block;min-height:0}
-.me-session-page .mw-expect{padding:30px;background:#FFE9E7;border:2px solid #E52828;border-radius:14px;box-shadow:0 6px 0 #E52828;margin:0 0 44px}
-@media(max-width:1000px){.mw-features{grid-template-columns:repeat(2,minmax(0,1fr))}.me-session-page .me-section-head{gap:30px}}
-@media(max-width:700px){.me-session-page .me-section-head{grid-template-columns:1fr;margin-bottom:38px}.me-session-page .me-section-head>.me-icon{height:190px;max-width:none}.me-session-page .mw-expect{padding:22px 18px}.mw-connect{gap:10px}#me-events .mw-connect a{padding:10px 12px;font-size:13px}}
-.me-session-page .me-section-head>.me-icon{height:260px;background:transparent;padding:0}
-.me-session-page .me-section-head>.me-icon img{width:100%!important;height:100%!important;max-width:100%;max-height:100%;object-fit:contain;object-position:center}
-.me-session-page .me-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
-@media(max-width:900px){.me-session-page .me-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.me-session-page .me-grid{grid-template-columns:1fr;gap:34px}.me-session-page .me-section-head>.me-icon{height:220px}}
-.me-session-page .me-section-head>.me-icon{background:#FFCC00;height:240px;border-radius:20px;padding:18px 24px;overflow:hidden}
-.me-session-page .me-section-head>.me-icon img{width:100%!important;height:100%!important;object-fit:contain;object-position:center}
-.me-session-page .mw-feature>img{width:40px;height:40px;flex:0 0 40px;object-fit:contain;padding:0;background:transparent;border-radius:0}
-@media(max-width:700px){.me-session-page .me-section-head>.me-icon{height:200px;padding:16px 20px}}
-.me-session-page .mw-feature{gap:10px}
-.me-session-page .mw-feature>img{width:18px;height:18px;flex:0 0 18px;margin-top:1px;padding:0;object-fit:contain}
-#me-events.me-session-page .me-section-head>.me-icon{padding:0!important;overflow:hidden;background:#FFCC00}
-#me-events.me-session-page .me-section-head>.me-icon img{display:block;position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;object-fit:cover!important;object-position:center!important}
-#me-events.me-session-page .me-section-head h1{--heading-color:#FFCC00;-webkit-text-stroke-color:#FFCC00}
-#me-events .mw-expect{background:#FFF5D1;border-color:#FFCC00;box-shadow:0 6px 0 #FFCC00}
-#me-events .me-programme-note,#me-events .mw-empty{background:#FFFAE7;border-color:#F1DF9C}
-#me-events .mw-upcoming-title{--title-outline:#FFCC00}
-#me-events .mw-popup-art{background:#FFFAE7}
-#me-events.me-session-page .me-section-head h1{--heading-color:#0055BF;-webkit-text-stroke-color:#0055BF}
-#me-events .mw-expect{background:#F1F7FF;border-color:#0055BF;box-shadow:0 6px 0 #0055BF}
-#me-events .me-programme-note,#me-events .mw-empty{background:#F1F7FF;border-color:#C4D9F3}
-#me-events .mw-upcoming-title{--title-outline:#0055BF}
-#me-events .mw-popup-art{background:#F1F7FF}
-#me-events.me-session-page .me-section-head > .me-icon { position:relative!important; height:200px!important;min-height:0!important;max-height:200px!important; aspect-ratio:auto!important;align-self:center!important; padding:0!important;overflow:hidden!important;background:#FFCC00; }
-#me-events.me-session-page .me-section-head > .me-icon > .me-expert-hero-art { display:block!important;width:100%!important;height:100%!important; max-width:100%!important;max-height:100%!important; margin:0!important;padding:0!important;flex:1 1 auto!important; }
-@media(max-width:768px){ #me-events.me-session-page .me-section-head > .me-icon { height:160px!important;max-height:160px!important; } }
-.me-meetup-page .me-section{border:0;padding-top:0;margin-bottom:44px}
-.me-meetup-page .me-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 26px}
-.me-meetup-page .me-programme-note{width:100%;background:#FFF4F4;border:1px solid #F2CCCC;border-radius:14px;padding:18px 22px;margin:0 0 30px!important}
-.me-meetup-page .me-list-title{font-size:26px;font-weight:900;margin:0 0 10px;color:#1D1D1B}
-.me-meetup-page .me-list-intro{margin:0 0 30px;color:#555}
-@media(max-width:700px){.me-meetup-page .me-grid{grid-template-columns:1fr}.me-meetup-page .me-list-title{font-size:23px}}
-.me-meetup-page .me-section-head{grid-template-columns:minmax(0,58fr) minmax(0,42fr);gap:40px;padding:28px 0 12px}
-.me-meetup-page .me-section-head>.me-icon{order:2;min-height:240px}
-.me-meetup-page .me-section-head>.me-icon+div{order:1}
-.me-meetup-page .me-section-head h1{font-size:clamp(32px,3.5vw,52px)!important;font-weight:900!important;color:#fff!important;-webkit-text-stroke:3px #E52828;line-height:1.1}
-@media(max-width:800px){.mw-features{grid-template-columns:repeat(2,minmax(0,1fr))}.me-meetup-page .me-section-head{grid-template-columns:1fr}.me-meetup-page .me-section-head>.me-icon{order:2;min-height:200px;width:100%;max-width:none}.me-meetup-page .me-section-head>.me-icon+div{order:1}}
-.me-meetup-page .me-section-head{grid-template-columns:minmax(0,58fr) minmax(0,42fr);align-items:center;gap:50px;margin-bottom:80px;padding:12px 0 0}
-.me-meetup-page .me-section-head>.me-icon{position:relative;order:2;background:#FFCC00;height:200px;min-height:0;align-self:center;overflow:hidden;border-radius:20px;display:flex;justify-content:center;align-items:center;width:100%}
-.me-meetup-page .me-section-head>.me-icon img{position:static!important;width:auto!important;height:75%!important;max-width:80%;object-fit:contain}
-.me-meetup-page .me-section-head>.me-icon+div{display:block;min-height:0}
-.me-meetup-page .mw-expect{padding:30px;background:#FFE9E7;border:2px solid #E52828;border-radius:14px;box-shadow:0 6px 0 #E52828;margin:0 0 44px}
-@media(max-width:1000px){.mw-features{grid-template-columns:repeat(2,minmax(0,1fr))}.me-meetup-page .me-section-head{gap:30px}}
-@media(max-width:700px){.me-meetup-page .me-section-head{grid-template-columns:1fr;margin-bottom:38px}.me-meetup-page .me-section-head>.me-icon{height:190px;max-width:none}.me-meetup-page .mw-expect{padding:22px 18px}.mw-connect{gap:10px}#me-events .mw-connect a{padding:10px 12px;font-size:13px}}
-.me-meetup-page .me-section-head>.me-icon{height:260px;background:transparent;padding:0}
-.me-meetup-page .me-section-head>.me-icon img{width:100%!important;height:100%!important;max-width:100%;max-height:100%;object-fit:contain;object-position:center}
-.me-meetup-page .me-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px 24px}
-@media(max-width:900px){.me-meetup-page .me-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.me-meetup-page .me-grid{grid-template-columns:1fr;gap:34px}.me-meetup-page .me-section-head>.me-icon{height:220px}}
-.me-meetup-page .me-section-head>.me-icon{background:#FFCC00;height:240px;border-radius:20px;padding:18px 24px;overflow:hidden}
-.me-meetup-page .me-section-head>.me-icon img{width:100%!important;height:100%!important;object-fit:contain;object-position:center}
-.me-meetup-page .mw-feature>img{width:40px;height:40px;flex:0 0 40px;object-fit:contain;padding:0;background:transparent;border-radius:0}
-@media(max-width:700px){.me-meetup-page .me-section-head>.me-icon{height:200px;padding:16px 20px}}
-.me-meetup-page .mw-feature{gap:10px}
-.me-meetup-page .mw-feature>img{width:18px;height:18px;flex:0 0 18px;margin-top:1px;padding:0;object-fit:contain}
-#me-events.me-meetup-page .me-section-head>.me-icon{padding:0!important;overflow:hidden;background:#FFCC00}
+#me-events.me-workshop-page .mw-upcoming-title,#me-events.me-workshop-page .mw-past-title{font-family:Montserrat,sans-serif;font-weight:900;font-size:clamp(28px,3.5vw,48px);line-height:1.15;color:#fff;-webkit-text-stroke:3px var(--title-outline);paint-order:stroke fill;text-shadow:2px 2px 0 var(--title-outline),-2px -2px 0 var(--title-outline),2px -2px 0 var(--title-outline),-2px 2px 0 var(--title-outline);margin-bottom:30px}
+.me-workshop-page .mw-upcoming-title{--title-outline:#E52828}
+.me-workshop-page .mw-past-title{--title-outline:#1D1D1B}
+#me-events.me-workshop-page .mw-filters{background:none;border:0;border-radius:0;padding:0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin:24px 0 48px}
+.me-workshop-page .mw-month-wrap{position:relative;z-index:5}
+#me-events.me-workshop-page button.mw-filter-btn{--filter-color:#1D1D1B;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:10px 18px;background:#fff!important;color:#1D1D1B!important;border:2px solid var(--filter-color)!important;border-radius:12px;box-shadow:0 4px 0 var(--filter-color)!important;font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;line-height:1.3;text-transform:none}
+#me-events.me-workshop-page .mw-filter-btn svg{width:20px;height:20px;fill:none;stroke:var(--filter-color);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+#me-events.me-workshop-page .mw-place[aria-pressed="true"]{background:var(--filter-color)!important;color:#fff!important}
+#me-events.me-workshop-page .mw-place[data-location="İzmir"][aria-pressed="true"]{color:#1D1D1B!important}
+#me-events.me-workshop-page .mw-place[aria-pressed="true"] svg{stroke:currentColor}
+#me-events.me-workshop-page .mw-month-options{position:absolute;top:calc(100% + 12px);left:0;min-width:100%;width:250px;max-width:85vw;background:white;border:2px solid #1D1D1B;border-radius:12px;padding:10px;box-shadow:0 14px 25px #0002}
+#me-events.me-workshop-page .mw-month-options[hidden]{display:none!important}
+#me-events.me-workshop-page .mw-month-options button{display:block;width:100%;padding:12px;text-align:left;background:#fff!important;color:#1D1D1B!important;border:0!important;box-shadow:none!important;border-radius:6px;font-family:Montserrat,sans-serif;font-size:16px;font-weight:700}
+#me-events.me-workshop-page .mw-month-options button:hover,#me-events.me-workshop-page .mw-month-options button[aria-pressed="true"]{background:#F1F7FF!important}
+#me-events.me-workshop-page .mw-filter-btn::before,#me-events.me-workshop-page .mw-filter-btn::after{content:none!important}
+@media(max-width:600px){#me-events.me-workshop-page button.mw-filter-btn{font-size:14px;padding:10px 12px}
+#me-events.me-workshop-page .mw-filters{gap:12px;margin-bottom:36px}
+}
+
+/* ── Mini-Family Meetups ─────────────────────────────── */
 #me-events.me-meetup-page .me-section-head>.me-icon img{display:block;position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;object-fit:contain!important;object-position:center!important}
+#me-events.me-meetup-page .mw-upcoming-title,#me-events.me-meetup-page .mw-past-title{font-family:Montserrat,sans-serif;font-weight:900;font-size:clamp(28px,3.5vw,48px);line-height:1.15;color:#fff;-webkit-text-stroke:3px var(--title-outline);paint-order:stroke fill;text-shadow:2px 2px 0 var(--title-outline),-2px -2px 0 var(--title-outline),2px -2px 0 var(--title-outline),-2px 2px 0 var(--title-outline);margin-bottom:30px}
+.me-meetup-page .mw-upcoming-title{--title-outline:#E52828}
+.me-meetup-page .mw-past-title{--title-outline:#1D1D1B}
+#me-events.me-meetup-page .mw-filters{background:none;border:0;border-radius:0;padding:0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin:24px 0 48px}
+.me-meetup-page .mw-month-wrap{position:relative;z-index:5}
+#me-events.me-meetup-page button.mw-filter-btn{--filter-color:#1D1D1B;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:10px 18px;background:#fff!important;color:#1D1D1B!important;border:2px solid var(--filter-color)!important;border-radius:12px;box-shadow:0 4px 0 var(--filter-color)!important;font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;line-height:1.3;text-transform:none}
+#me-events.me-meetup-page .mw-filter-btn svg{width:20px;height:20px;fill:none;stroke:var(--filter-color);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+#me-events.me-meetup-page .mw-place[aria-pressed="true"]{background:var(--filter-color)!important;color:#fff!important}
+#me-events.me-meetup-page .mw-place[data-location="İzmir"][aria-pressed="true"]{color:#1D1D1B!important}
+#me-events.me-meetup-page .mw-place[aria-pressed="true"] svg{stroke:currentColor}
+#me-events.me-meetup-page .mw-month-options{position:absolute;top:calc(100% + 12px);left:0;min-width:100%;width:250px;max-width:85vw;background:white;border:2px solid #1D1D1B;border-radius:12px;padding:10px;box-shadow:0 14px 25px #0002}
+#me-events.me-meetup-page .mw-month-options[hidden]{display:none!important}
+#me-events.me-meetup-page .mw-month-options button{display:block;width:100%;padding:12px;text-align:left;background:#fff!important;color:#1D1D1B!important;border:0!important;box-shadow:none!important;border-radius:6px;font-family:Montserrat,sans-serif;font-size:16px;font-weight:700}
+#me-events.me-meetup-page .mw-month-options button:hover,#me-events.me-meetup-page .mw-month-options button[aria-pressed="true"]{background:#F1F7FF!important}
+#me-events.me-meetup-page .mw-filter-btn::before,#me-events.me-meetup-page .mw-filter-btn::after{content:none!important}
+@media(max-width:600px){#me-events.me-meetup-page button.mw-filter-btn{font-size:14px;padding:10px 12px}
+#me-events.me-meetup-page .mw-filters{gap:12px;margin-bottom:36px}
+}
 #me-events.me-meetup-page .me-section-head h1{--heading-color:#FFCC00;-webkit-text-stroke-color:#FFCC00}
-#me-events.me-workshop-page .me-section-head h1{--heading-color:#FF7417;-webkit-text-stroke-color:#FF7417}
-#me-events .mw-expect{background:#FFF3E8;border-color:#FF7417;box-shadow:0 6px 0 #FF7417}
-#me-events .me-section-head .me-icon img{object-fit:contain!important;padding:30px!important}
-#me-events .sd-month{margin:0 0 56px;scroll-margin-top:32px}
-#me-events .sd-month[hidden]{display:none!important}
-#me-events .sd-month>h2{font-size:clamp(28px,3.4vw,42px);font-weight:900;line-height:1.15;color:#fff;-webkit-text-stroke:5px #FF7417;paint-order:stroke fill;margin:0 0 26px}
-#me-events .sd-entry{display:grid;grid-template-columns:78px minmax(0,1fr);gap:24px;padding:26px;margin-bottom:24px;border:2px solid #1D1D1B;border-radius:16px;box-shadow:0 6px 0 var(--day-color);background:#fff}
-#me-events .sd-date{border:2px solid var(--day-color);border-radius:10px;overflow:hidden;text-align:center;align-self:start;font-weight:900;line-height:1.15;color:var(--day-ink);background:white}
-#me-events .sd-date span{display:block}
-#me-events .sd-weekday{background:var(--day-color);color:#fff;font-size:14px;padding:7px 3px}
-#me-events .sd-number{font-size:34px;padding:6px 2px 0}
-#me-events .sd-short-month{font-size:15px;padding:1px 3px 7px}
-#me-events .sd-copy h3{font-size:clamp(20px,2.2vw,27px);font-weight:900;line-height:1.3;margin:0 0 16px;color:#1D1D1B}
-#me-events .sd-copy p{font-size:16px;font-weight:500;line-height:1.75;margin:0 0 12px}
-#me-events .sd-copy p:last-child{margin-bottom:0;color:var(--day-ink);font-weight:800;font-style:italic}
-#me-events .mw-month-options{max-height:340px;overflow-y:auto;z-index:20}
-#me-events .sd-count{margin:0 0 30px;font-size:14px;color:#666}
-@media(max-width:600px){#me-events .sd-entry{grid-template-columns:60px minmax(0,1fr);gap:14px;padding:18px 14px}#me-events .sd-copy p{font-size:14px;line-height:1.65}#me-events .sd-number{font-size:28px}#me-events .sd-weekday{font-size:12px}}
+#me-events.me-meetup-page .mw-expect{background:#FFF5D1;border-color:#FFCC00;box-shadow:0 6px 0 #FFCC00}
+#me-events.me-meetup-page .me-programme-note,#me-events.me-meetup-page .mw-empty{background:#FFFAE7;border-color:#F1DF9C}
+#me-events.me-meetup-page .mw-upcoming-title{--title-outline:#FFCC00}
+#me-events.me-meetup-page .mw-popup-art{background:#FFFAE7}
+
+/* ── Mini-Expert Sessions ─────────────────────────────── */
+#me-events.me-session-page .me-section-head>.me-icon img{display:block;position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;object-fit:cover!important;object-position:center!important}
+#me-events.me-session-page .mw-upcoming-title,#me-events.me-session-page .mw-past-title{font-family:Montserrat,sans-serif;font-weight:900;font-size:clamp(28px,3.5vw,48px);line-height:1.15;color:#fff;-webkit-text-stroke:3px var(--title-outline);paint-order:stroke fill;text-shadow:2px 2px 0 var(--title-outline),-2px -2px 0 var(--title-outline),2px -2px 0 var(--title-outline),-2px 2px 0 var(--title-outline);margin-bottom:30px}
+.me-session-page .mw-upcoming-title{--title-outline:#E52828}
+.me-session-page .mw-past-title{--title-outline:#1D1D1B}
+#me-events.me-session-page .mw-filters{background:none;border:0;border-radius:0;padding:0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin:24px 0 48px}
+.me-session-page .mw-month-wrap{position:relative;z-index:5}
+#me-events.me-session-page button.mw-filter-btn{--filter-color:#1D1D1B;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:10px 18px;background:#fff!important;color:#1D1D1B!important;border:2px solid var(--filter-color)!important;border-radius:12px;box-shadow:0 4px 0 var(--filter-color)!important;font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;line-height:1.3;text-transform:none}
+#me-events.me-session-page .mw-filter-btn svg{width:20px;height:20px;fill:none;stroke:var(--filter-color);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+#me-events.me-session-page .mw-place[aria-pressed="true"]{background:var(--filter-color)!important;color:#fff!important}
+#me-events.me-session-page .mw-place[data-location="İzmir"][aria-pressed="true"]{color:#1D1D1B!important}
+#me-events.me-session-page .mw-place[aria-pressed="true"] svg{stroke:currentColor}
+#me-events.me-session-page .mw-month-options{position:absolute;top:calc(100% + 12px);left:0;min-width:100%;width:250px;max-width:85vw;background:white;border:2px solid #1D1D1B;border-radius:12px;padding:10px;box-shadow:0 14px 25px #0002}
+#me-events.me-session-page .mw-month-options[hidden]{display:none!important}
+#me-events.me-session-page .mw-month-options button{display:block;width:100%;padding:12px;text-align:left;background:#fff!important;color:#1D1D1B!important;border:0!important;box-shadow:none!important;border-radius:6px;font-family:Montserrat,sans-serif;font-size:16px;font-weight:700}
+#me-events.me-session-page .mw-month-options button:hover,#me-events.me-session-page .mw-month-options button[aria-pressed="true"]{background:#F1F7FF!important}
+#me-events.me-session-page .mw-filter-btn::before,#me-events.me-session-page .mw-filter-btn::after{content:none!important}
+@media(max-width:600px){#me-events.me-session-page button.mw-filter-btn{font-size:14px;padding:10px 12px}
+#me-events.me-session-page .mw-filters{gap:12px;margin-bottom:36px}
+}
+#me-events.me-session-page .me-section-head h1{--heading-color:#FFCC00;-webkit-text-stroke-color:#FFCC00}
+#me-events.me-session-page .mw-expect{background:#FFF5D1;border-color:#FFCC00;box-shadow:0 6px 0 #FFCC00}
+#me-events.me-session-page .me-programme-note,#me-events.me-session-page .mw-empty{background:#FFFAE7;border-color:#F1DF9C}
+#me-events.me-session-page .mw-upcoming-title{--title-outline:#FFCC00}
+#me-events.me-session-page .mw-popup-art{background:#FFFAE7}
+#me-events.me-session-page .me-section-head h1{--heading-color:#0055BF;-webkit-text-stroke-color:#0055BF}
+#me-events.me-session-page .mw-expect{background:#F1F7FF;border-color:#0055BF;box-shadow:0 6px 0 #0055BF}
+#me-events.me-session-page .me-programme-note,#me-events.me-session-page .mw-empty{background:#F1F7FF;border-color:#C4D9F3}
+#me-events.me-session-page .mw-upcoming-title{--title-outline:#0055BF}
+#me-events.me-session-page .mw-popup-art{background:#F1F7FF}
+#me-events.me-session-page .me-section-head > .me-icon{position:relative!important; height:200px!important;min-height:0!important;max-height:200px!important; aspect-ratio:auto!important;align-self:center!important; padding:0!important;overflow:hidden!important;background:#FFCC00;}
+#me-events.me-session-page .me-section-head > .me-icon > .me-expert-hero-art{display:block!important;width:100%!important;height:100%!important; max-width:100%!important;max-height:100%!important; margin:0!important;padding:0!important;flex:1 1 auto!important;}
+@media(max-width:768px){#me-events.me-session-page .me-section-head > .me-icon{height:160px!important;max-height:160px!important;}
+}
+
+/* ── Mini-Community Updates ─────────────────────────────── */
+#me-events.me-updates-page .me-section-head>.me-icon img{display:block;position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;object-fit:cover!important;object-position:center!important}
+#me-events.me-updates-page .mw-upcoming-title,#me-events.me-updates-page .mw-past-title{font-family:Montserrat,sans-serif;font-weight:900;font-size:clamp(28px,3.5vw,48px);line-height:1.15;color:#fff;-webkit-text-stroke:3px var(--title-outline);paint-order:stroke fill;text-shadow:2px 2px 0 var(--title-outline),-2px -2px 0 var(--title-outline),2px -2px 0 var(--title-outline),-2px 2px 0 var(--title-outline);margin-bottom:30px}
+.me-updates-page .mw-upcoming-title{--title-outline:#E52828}
+.me-updates-page .mw-past-title{--title-outline:#1D1D1B}
+#me-events.me-updates-page .mw-filters{background:none;border:0;border-radius:0;padding:0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin:24px 0 48px}
+.me-updates-page .mw-month-wrap{position:relative;z-index:5}
+#me-events.me-updates-page button.mw-filter-btn{--filter-color:#1D1D1B;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:10px 18px;background:#fff!important;color:#1D1D1B!important;border:2px solid var(--filter-color)!important;border-radius:12px;box-shadow:0 4px 0 var(--filter-color)!important;font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;line-height:1.3;text-transform:none}
+#me-events.me-updates-page .mw-filter-btn svg{width:20px;height:20px;fill:none;stroke:var(--filter-color);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+#me-events.me-updates-page .mw-place[aria-pressed="true"]{background:var(--filter-color)!important;color:#fff!important}
+#me-events.me-updates-page .mw-place[data-location="İzmir"][aria-pressed="true"]{color:#1D1D1B!important}
+#me-events.me-updates-page .mw-place[aria-pressed="true"] svg{stroke:currentColor}
+#me-events.me-updates-page .mw-month-options{position:absolute;top:calc(100% + 12px);left:0;min-width:100%;width:250px;max-width:85vw;background:white;border:2px solid #1D1D1B;border-radius:12px;padding:10px;box-shadow:0 14px 25px #0002}
+#me-events.me-updates-page .mw-month-options[hidden]{display:none!important}
+#me-events.me-updates-page .mw-month-options button{display:block;width:100%;padding:12px;text-align:left;background:#fff!important;color:#1D1D1B!important;border:0!important;box-shadow:none!important;border-radius:6px;font-family:Montserrat,sans-serif;font-size:16px;font-weight:700}
+#me-events.me-updates-page .mw-month-options button:hover,#me-events.me-updates-page .mw-month-options button[aria-pressed="true"]{background:#F1F7FF!important}
+#me-events.me-updates-page .mw-filter-btn::before,#me-events.me-updates-page .mw-filter-btn::after{content:none!important}
+@media(max-width:600px){#me-events.me-updates-page button.mw-filter-btn{font-size:14px;padding:10px 12px}
+#me-events.me-updates-page .mw-filters{gap:12px;margin-bottom:36px}
+}
+#me-events.me-updates-page .me-section-head h1{--heading-color:#237841;-webkit-text-stroke-color:#237841}
+#me-events.me-updates-page .mw-expect{background:#F0F8F1;border-color:#237841;box-shadow:0 6px 0 #237841}
+#me-events.me-updates-page .mw-empty,#me-events.me-updates-page .mw-popup-art{background:#F0F8F1;border-color:#C8DDCB}
+#me-events.me-updates-page .mw-upcoming-title{--title-outline:#237841}
+#me-events.me-updates-page .mw-popup-art.mw-photo-gallery{padding:14px;background:#F0F8F1}
+#me-events.me-updates-page .mw-photo-gallery > img{display:block;width:100%;height: min(48vh,440px);object-fit:contain;border-radius:8px}
+#me-events.me-updates-page .mw-gallery-thumbs{display:flex;justify-content:center;gap:10px;margin-top:12px}
+#me-events.me-updates-page .mw-gallery-thumbs button{appearance:none;display:block;flex:0 0 60px;width:60px;height:78px;padding:3px!important;border:2px solid transparent!important;border-radius:8px;background:#fff!important;box-shadow:none!important;cursor:pointer;overflow:hidden}
+#me-events.me-updates-page .mw-gallery-thumbs button[aria-pressed="true"]{border-color:#237841!important}
+#me-events.me-updates-page .mw-gallery-thumbs button:focus-visible{outline:3px solid #0055BF;outline-offset:3px}
+#me-events.me-updates-page .mw-gallery-thumbs button img{display:block;width:100%;height:100%;object-fit:contain}
+#me-events.me-updates-page .me-dialog.mw-portrait-layout{width:94%;max-width:1080px}
+#me-events.me-updates-page .mw-portrait-layout .mw-popup-content{display:grid;grid-template-columns:minmax(0,0.85fr) minmax(0,1.15fr);gap:28px;align-items:start}
+#me-events.me-updates-page .mw-portrait-layout .mw-popup-art{margin:0;min-width:0}
+#me-events.me-updates-page .mw-portrait-layout .mw-popup-story{min-width:0}
+#me-events.me-updates-page .mw-portrait-layout .mw-photo-gallery > img{height:auto;max-height:540px;aspect-ratio:9/16;object-fit:contain}
+#me-events.me-updates-page .mw-portrait-layout .mw-popup-subtitle{margin-top:0}
+@media(max-width:700px){#me-events.me-updates-page .mw-portrait-layout .mw-popup-content{grid-template-columns:minmax(0,1fr);gap:22px}
+#me-events.me-updates-page .mw-portrait-layout .mw-photo-gallery > img{height: min(55vh,440px);aspect-ratio:auto}
+}
+
+/* ── Mini-Special Days ─────────────────────────────── */
+#me-events.me-special-page .me-section-head>.me-icon img{display:block;position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;object-fit:cover!important;object-position:center!important}
+#me-events.me-special-page .mw-upcoming-title,#me-events.me-special-page .mw-past-title{font-family:Montserrat,sans-serif;font-weight:900;font-size:clamp(28px,3.5vw,48px);line-height:1.15;color:#fff;-webkit-text-stroke:3px var(--title-outline);paint-order:stroke fill;text-shadow:2px 2px 0 var(--title-outline),-2px -2px 0 var(--title-outline),2px -2px 0 var(--title-outline),-2px 2px 0 var(--title-outline);margin-bottom:30px}
+.me-special-page .mw-upcoming-title{--title-outline:#E52828}
+.me-special-page .mw-past-title{--title-outline:#1D1D1B}
+#me-events.me-special-page .mw-filters{background:none;border:0;border-radius:0;padding:0;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin:24px 0 48px}
+.me-special-page .mw-month-wrap{position:relative;z-index:5}
+#me-events.me-special-page button.mw-filter-btn{--filter-color:#1D1D1B;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:10px 18px;background:#fff!important;color:#1D1D1B!important;border:2px solid var(--filter-color)!important;border-radius:12px;box-shadow:0 4px 0 var(--filter-color)!important;font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;line-height:1.3;text-transform:none}
+#me-events.me-special-page .mw-filter-btn svg{width:20px;height:20px;fill:none;stroke:var(--filter-color);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+#me-events.me-special-page .mw-place[aria-pressed="true"]{background:var(--filter-color)!important;color:#fff!important}
+#me-events.me-special-page .mw-place[data-location="İzmir"][aria-pressed="true"]{color:#1D1D1B!important}
+#me-events.me-special-page .mw-place[aria-pressed="true"] svg{stroke:currentColor}
+#me-events.me-special-page .mw-month-options{position:absolute;top:calc(100% + 12px);left:0;min-width:100%;width:250px;max-width:85vw;background:white;border:2px solid #1D1D1B;border-radius:12px;padding:10px;box-shadow:0 14px 25px #0002}
+#me-events.me-special-page .mw-month-options[hidden]{display:none!important}
+#me-events.me-special-page .mw-month-options button{display:block;width:100%;padding:12px;text-align:left;background:#fff!important;color:#1D1D1B!important;border:0!important;box-shadow:none!important;border-radius:6px;font-family:Montserrat,sans-serif;font-size:16px;font-weight:700}
+#me-events.me-special-page .mw-month-options button:hover,#me-events.me-special-page .mw-month-options button[aria-pressed="true"]{background:#F1F7FF!important}
+#me-events.me-special-page .mw-filter-btn::before,#me-events.me-special-page .mw-filter-btn::after{content:none!important}
+@media(max-width:600px){#me-events.me-special-page button.mw-filter-btn{font-size:14px;padding:10px 12px}
+#me-events.me-special-page .mw-filters{gap:12px;margin-bottom:36px}
+}
+#me-events.me-special-page .me-section-head h1{--heading-color:#237841;-webkit-text-stroke-color:#237841}
+#me-events.me-special-page .mw-expect{background:#F0F8F1;border-color:#237841;box-shadow:0 6px 0 #237841}
+#me-events.me-special-page .mw-empty,#me-events.me-special-page .mw-popup-art{background:#F0F8F1;border-color:#C8DDCB}
+#me-events.me-special-page .mw-upcoming-title{--title-outline:#237841}
+#me-events.me-special-page .me-section-head h1{--heading-color:#FF7417;-webkit-text-stroke-color:#FF7417}
+#me-events.me-special-page .mw-expect{background:#FFF3E8;border-color:#FF7417;box-shadow:0 6px 0 #FF7417}
+#me-events.me-special-page .me-section-head .me-icon img{object-fit:contain!important;padding:30px!important}
+#me-events.me-special-page .sd-month{margin:0 0 56px;scroll-margin-top:32px}
+#me-events.me-special-page .sd-month[hidden]{display:none!important}
+#me-events.me-special-page .sd-month>h2{font-size:clamp(28px,3.4vw,42px);font-weight:900;line-height:1.15;color:#fff;-webkit-text-stroke:5px #FF7417;paint-order:stroke fill;margin:0 0 26px}
+#me-events.me-special-page .sd-entry{display:grid;grid-template-columns:78px minmax(0,1fr);gap:24px;padding:26px;margin-bottom:24px;border:2px solid #1D1D1B;border-radius:16px;box-shadow:0 6px 0 var(--day-color);background:#fff}
+#me-events.me-special-page .sd-date{border:2px solid var(--day-color);border-radius:10px;overflow:hidden;text-align:center;align-self:start;font-weight:900;line-height:1.15;color:var(--day-ink);background:white}
+#me-events.me-special-page .sd-date span{display:block}
+#me-events.me-special-page .sd-weekday{background:var(--day-color);color:#fff;font-size:14px;padding:7px 3px}
+#me-events.me-special-page .sd-number{font-size:34px;padding:6px 2px 0}
+#me-events.me-special-page .sd-short-month{font-size:15px;padding:1px 3px 7px}
+#me-events.me-special-page .sd-copy h3{font-size:clamp(20px,2.2vw,27px);font-weight:900;line-height:1.3;margin:0 0 16px;color:#1D1D1B}
+#me-events.me-special-page .sd-copy p{font-size:16px;font-weight:500;line-height:1.75;margin:0 0 12px}
+#me-events.me-special-page .sd-copy p:last-child{margin-bottom:0;color:var(--day-ink);font-weight:800;font-style:italic}
+#me-events.me-special-page .mw-month-options{max-height:340px;overflow-y:auto;z-index:20}
+#me-events.me-special-page .sd-count{margin:0 0 30px;font-size:14px;color:#666}
+@media(max-width:600px){#me-events.me-special-page .sd-entry{grid-template-columns:60px minmax(0,1fr);gap:14px;padding:18px 14px}
+#me-events.me-special-page .sd-copy p{font-size:14px;line-height:1.65}
+#me-events.me-special-page .sd-number{font-size:28px}
+#me-events.me-special-page .sd-weekday{font-size:12px}
+}
+
+/* ==========================================================================
+   The palette, as classes.
+
+   The designs carry these as inline custom properties — style="--c:#E52828".
+   WordPress will not pass those on: wp_kses runs safecss_filter_attr over
+   every style attribute and keeps only the properties on its own allow-list,
+   which custom properties are not on. A colour written into an editable area
+   is therefore dropped before it reaches the page, and every section fell back
+   to .me-section's own default, which is blue.
+
+   Declared here against a class, the colours are out of that filter's reach,
+   and the palette is one list rather than a value repeated through the markup.
+   ========================================================================== */
+
+.me-page .me-kind-workshop{--c:#E52828;--t:#fff;--pale:#FFF4F4}
+.me-page .me-kind-family{--c:#FFCC00;--t:#1D1D1B;--pale:#FFFAE7}
+.me-page .me-kind-expert{--c:#0055BF;--t:#fff;--pale:#F1F7FF}
+.me-page .me-kind-updates{--c:#237841;--t:#fff;--pale:#F6FCF8}
+.me-page .me-kind-special{--c:#FF7417;--t:#fff;--pale:#FFF5ED}
+/* The one colour the designs give twice: on the hub a special day sits beside
+   events and is washed a touch lighter than on its own page. */
+.me-page.me-special-page .me-kind-special{--pale:#FFF3E8}
+
+/* The calendar legend: a swatch per category, same five colours. */
+.me-page .me-legend .me-legend-workshop{--c:#E52828}
+.me-page .me-legend .me-legend-family{--c:#FFCC00}
+.me-page .me-legend .me-legend-expert{--c:#0055BF}
+.me-page .me-legend .me-legend-updates{--c:#237841}
+.me-page .me-legend .me-legend-special{--c:#FF7417}
+
+/* Special days run through four colours so a year reads as a sequence
+   rather than a wall of one colour. Tone 2 is the yellow, which needs its
+   own ink: white text on #FFCC00 is unreadable. */
+.me-page .sd-tone-1{--day-color:#E52828;--day-ink:#E52828}
+.me-page .sd-tone-2{--day-color:#FFCC00;--day-ink:#876800}
+.me-page .sd-tone-3{--day-color:#0055BF;--day-ink:#0055BF}
+.me-page .sd-tone-4{--day-color:#237841;--day-ink:#237841}
+
+/* Filter buttons. The delivered pages colour these one by one, starting on
+   the page's own colour for "all" and then cycling; the same cycle is here as
+   classes so the buttons can be built from real data.
+
+   Written long on purpose: each page sets a default --filter-color on
+   #me-events.me-<page> button.mw-filter-btn, and a shorter selector than that
+   loses to it and leaves every button the same dark grey. */
+#me-events button.mw-filter-btn.mw-tone-blue{--filter-color:#0055BF}
+#me-events button.mw-filter-btn.mw-tone-green{--filter-color:#237841}
+#me-events button.mw-filter-btn.mw-tone-yellow{--filter-color:#FFCC00}
+#me-events button.mw-filter-btn.mw-tone-red{--filter-color:#E52828}
+#me-events button.mw-filter-btn.mw-tone-ink{--filter-color:#1D1D1B}
+/* Yellow is the one that cannot carry white text. */
+#me-events button.mw-place.mw-tone-yellow[aria-pressed="true"]{color:#1D1D1B!important}
+#me-events button.mw-place.mw-tone-yellow[aria-pressed="true"] svg{stroke:#1D1D1B}

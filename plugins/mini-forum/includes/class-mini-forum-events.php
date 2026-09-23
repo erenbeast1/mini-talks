@@ -15,6 +15,11 @@ if (!defined('ABSPATH')) exit;
 
 class Mini_Forum_Events {
 
+    /* The two icons the filter buttons wear, straight from the designs: a pin
+       for somewhere you go, a screen for somewhere you join. */
+    const PIN_ICON    = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-8 7-14a7 7 0 0 0-14 0c0 6 7 14 7 14z"/><circle cx="12" cy="8" r="2"/></svg>';
+    const SCREEN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M12 17v4M8 21h8"/></svg>';
+
     /**
      * The five categories, as the design names them.
      *
@@ -22,6 +27,20 @@ class Mini_Forum_Events {
      * database's event_type, which is the array key. Both are kept because the
      * design was drawn against one and the tables were written against the
      * other, and renaming either would break something that already works.
+     *
+     * 'colour' and 'pale' are here to be read, not printed: an inline custom
+     * property does not survive wp_kses, so the colours reach the page through
+     * the .me-kind-* classes in mini-events.css. They are written down twice on
+     * purpose — a category's colour should be legible from the category table.
+     *
+     * 'note' says whether the page carries the programme note. Three of the
+     * five designs have one and two do not, and a note drawn where the design
+     * has none arrives in the wrong colour, because it is the one piece with
+     * nothing on the page to take its colour from.
+     *
+     * 'page_class' is the category's own page class. The designs give three of
+     * the five pages the same one, which in a single stylesheet means the last
+     * page read repaints the other two; each gets its own here.
      */
     public static function categories() {
         return apply_filters('mf_events_categories', array(
@@ -29,6 +48,8 @@ class Mini_Forum_Events {
                 'kind'   => 'workshop',
                 'view'   => 'mini-volunteer-workshops',
                 'title'  => 'Mini-Volunteer Workshops',
+                'page_class' => 'me-workshop-page',
+                'filter' => 'place', 'all_label' => 'All Locations', 'note' => true,
                 'colour' => '#E52828', 'pale' => '#FFF4F4',
                 'see_all' => 'See All Workshops',
                 'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/03/36_mini_workshop_3D.png',
@@ -37,7 +58,9 @@ class Mini_Forum_Events {
                 'kind'   => 'family',
                 'view'   => 'mini-family-meetups',
                 'title'  => 'Mini-Family Meetups',
-                'colour' => '#FFCC00', 'pale' => '#FFFBEB',
+                'page_class' => 'me-meetup-page',
+                'filter' => 'place', 'all_label' => 'All Locations', 'note' => true,
+                'colour' => '#FFCC00', 'pale' => '#FFFAE7',
                 'see_all' => 'See All Meetups',
                 'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/03/17_mini_families_3D.png',
             ),
@@ -45,6 +68,8 @@ class Mini_Forum_Events {
                 'kind'   => 'expert',
                 'view'   => 'mini-expert-sessions',
                 'title'  => 'Mini-Expert Sessions',
+                'page_class' => 'me-session-page',
+                'filter' => 'place', 'all_label' => 'All Sessions', 'note' => true,
                 'colour' => '#0055BF', 'pale' => '#F1F7FF',
                 'see_all' => 'See All Sessions',
                 'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/03/20_mini_experts_3D.png',
@@ -53,7 +78,9 @@ class Mini_Forum_Events {
                 'kind'   => 'updates',
                 'view'   => 'mini-community-updates',
                 'title'  => 'Mini-Community Updates',
-                'colour' => '#237841', 'pale' => '#F1F9F4',
+                'page_class' => 'me-updates-page',
+                'filter' => 'sort', 'all_label' => 'From Latest', 'note' => false,
+                'colour' => '#237841', 'pale' => '#F6FCF8',
                 'see_all' => 'See All Updates',
                 'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png',
             ),
@@ -66,7 +93,9 @@ class Mini_Forum_Events {
             'kind'   => 'special',
             'view'   => 'mini-special-days',
             'title'  => 'Mini-Special Days',
-            'colour' => '#FF7417', 'pale' => '#FFF5EC',
+            'page_class' => 'me-special-page',
+            'filter' => 'month', 'all_label' => 'All 12 Months', 'note' => false,
+            'colour' => '#FF7417', 'pale' => '#FFF5ED',
             'see_all' => 'See All Special Days',
             'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png',
         ));
@@ -215,8 +244,12 @@ class Mini_Forum_Events {
         return $out;
     }
 
-    /** The same, for places. A place with no events is not offered either. */
-    public static function place_options($rows) {
+    /**
+     * The place buttons. A place with no events is not offered, and each one
+     * wears a colour: the page's own for "all", then the design's cycle. Online
+     * is always the dark one with the screen icon, the way the designs draw it.
+     */
+    public static function place_options($rows, $cat = array()) {
         $seen = array();
         foreach ((array) $rows as $ev) {
             foreach (array('city', 'location_name', 'format_type') as $k) {
@@ -224,13 +257,60 @@ class Mini_Forum_Events {
             }
         }
         asort($seen);
-        $out = mf_block_get('mc.filters.place', array('value' => 'all', 'on' => 'true', 'label' => 'All places'));
+
+        $all = isset($cat['all_label']) ? $cat['all_label'] : 'All Locations';
+        $out = mf_block_get('mc.filters.place', array(
+            'value' => 'all', 'on' => 'true', 'tone' => 'mw-tone-blue',
+            'icon' => self::PIN_ICON, 'label' => esc_html($all),
+        ));
+
+        $cycle = array('mw-tone-yellow', 'mw-tone-red', 'mw-tone-green', 'mw-tone-ink');
+        $i = 0;
         foreach ($seen as $value) {
+            $online = in_array(strtolower($value), array('online', 'virtual', 'remote'), true);
             $out .= mf_block_get('mc.filters.place', array(
-                'value' => esc_attr($value), 'on' => 'false', 'label' => esc_html($value),
+                'value' => esc_attr($value),
+                'on'    => 'false',
+                'tone'  => $online ? 'mw-tone-ink' : $cycle[$i++ % count($cycle)],
+                'icon'  => $online ? self::SCREEN_ICON : self::PIN_ICON,
+                'label' => esc_html($value),
             ));
         }
         return $out;
+    }
+
+    /**
+     * Mini-Community Updates has no places to filter by, so the design gives it
+     * an order instead: newest first in the category's own green, oldest in the
+     * dark. The script reads data-sort, the same way it reads data-location.
+     */
+    public static function sort_options($cat = array()) {
+        $newest = isset($cat['all_label']) ? $cat['all_label'] : 'From Latest';
+        return mf_block_get('mc.filters.sort', array(
+                   'value' => 'newest', 'on' => 'true',
+                   'tone' => 'mw-tone-green', 'label' => esc_html($newest),
+               ))
+             . mf_block_get('mc.filters.sort', array(
+                   'value' => 'oldest', 'on' => 'false',
+                   'tone' => 'mw-tone-ink', 'label' => 'From Oldest',
+               ));
+    }
+
+    /** Whichever of the two a category asks for. */
+    public static function filter_buttons($rows, $cat) {
+        $which = isset($cat['filter']) ? $cat['filter'] : 'place';
+        return $which === 'sort' ? self::sort_options($cat) : self::place_options($rows, $cat);
+    }
+
+    /**
+     * Mini-Special Days is filtered by month alone — there is nowhere to go and
+     * nothing to book, only twelve months to read through.
+     */
+    public static function special_filters($months, $cat) {
+        return mf_block_get('mc.filters.special', array(
+            'months'    => $months,
+            'all_label' => esc_html(isset($cat['all_label']) ? $cat['all_label'] : 'All 12 Months'),
+        ));
     }
 
     /** The two popups, once per page. */
