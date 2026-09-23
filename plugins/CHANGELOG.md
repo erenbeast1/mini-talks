@@ -1,5 +1,44 @@
 # Mini-Talks plugins — changelog
 
+## mini-forum 4.0.0
+
+**The events section is now the Mini-Calendar, built from the delivered
+designs.** Six screens — the calendar hub and the five pages it leads to —
+rebuilt to the HTML that came with them, driven by the events already in the
+database.
+
+**The hub** opens on a month calendar whose day cells are bricks coloured by
+what is on them, with a legend and arrows. Turning the month moves the sections
+below it too, and a category with nothing that month says so. The calendar is
+drawn in the browser from the cards the server printed, so there is one source
+of truth on the page and no second request.
+
+**The five pages** — Mini-Volunteer Workshops, Mini-Family Meetups,
+Mini-Expert Sessions, Mini-Community Updates and Mini-Special Days — each carry
+their own heading, their own eight-point *What happens here*, month and place
+filters built from the events that actually exist, and separate upcoming and
+past lists. Special Days is the exception the design makes it: the whole story
+is on the page, month by month, rather than behind a button.
+
+**Two popups**, both real `<dialog>` elements opened with `showModal()`: the
+event popup with its date pill, cover picture, meta line and full copy, and the
+special-day popup. The special day's words come from wp-admin, not from a table
+inside the script.
+
+**The addresses are the page titles**: `?view=mini-volunteer-workshops` rather
+than `?view=workshops`. The old five redirect to the new ones, so a link
+somebody already shared still lands in the right place. The shortcode itself is
+unchanged, so the page can be renamed to Mini-Calendar without touching code.
+
+Everything on those screens is editable: **one stylesheet** (`mini-events.css`,
+the six designs' CSS with the rules they share stored once) and **112 Design
+areas** covering every block and every sentence.
+
+The superseded areas and templates are gone — `events-eventtype.php`,
+`events-updates.php` and sixteen `events.*` areas — so the Design page lists
+what is on the site and nothing else. Host an Event is untouched.
+
+
 ## mini-forum 3.21.00
 
 **The profile's Mini-Events tab is a tab.** It was an `<a href>` that jumped

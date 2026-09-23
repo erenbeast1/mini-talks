@@ -39,23 +39,34 @@ class Mini_Forum_Shortcodes {
     }
 
     /**
-     * Events shortcode router
-     *   /events/                        → hub (home)
-     *   /events/?view=workshops         → Mini-Workshops
-     *   /events/?view=meetups           → Mini-Families Meetups
-     *   /events/?view=experts           → Mini-Expert Sessions
-     *   /events/?view=updates           → Mini-Community Updates
-     *   /events/?view=special-days      → Special Days
-     *   /events/?view=host              → Host Event form
+     * Mini-Calendar shortcode router
+     *   /mini-calendar/                                  → the calendar
+     *   /mini-calendar/?view=mini-volunteer-workshops    → Mini-Volunteer Workshops
+     *   /mini-calendar/?view=mini-family-meetups         → Mini-Family Meetups
+     *   /mini-calendar/?view=mini-expert-sessions        → Mini-Expert Sessions
+     *   /mini-calendar/?view=mini-community-updates      → Mini-Community Updates
+     *   /mini-calendar/?view=mini-special-days           → Mini-Special Days
+     *   /mini-calendar/?view=host                        → Host an Event
+     *
+     * The page itself can be called anything — the shortcode finds its own page
+     * — so renaming it to Mini-Calendar needs no code change. Each sub-page's
+     * view is its own title, which is what somebody reads in the address bar.
      */
     public static function events_router($atts) {
+        /* The names the site shipped with still work: a link somebody shared
+           is not worth breaking over a rename. They redirect rather than serve,
+           so the address ends up the one people will see from now on. */
+        $view    = sanitize_text_field($_GET['view'] ?? '');
+        $aliases = Mini_Forum_Events::aliases();
+        if (isset($aliases[$view]) && !headers_sent()) {
+            wp_safe_redirect(Mini_Forum_Events::url($aliases[$view]), 301);
+            exit;
+        }
+
         ob_start();
         mf_block('slot.events.top');
 
-        $view = sanitize_text_field($_GET['view'] ?? '');
-        $allowed_subviews = ['workshops','meetups','experts','updates','special-days','host'];
-
-        if (in_array($view, $allowed_subviews, true)) {
+        if ($view === 'host' || isset(Mini_Forum_Events::views()[$view])) {
             include mf_template('events-subpage');
         } else {
             include mf_template('events-home');

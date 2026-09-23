@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini-Forum
  * Description: A calm, safe community forum for the Mini-Talks ecosystem.
- * Version: 3.21.00
+ * Version: 4.0.0
  * Author: Mini-Talks
  * Text Domain: mini-forum
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MF_VERSION', '3.21.00');
+define('MF_VERSION', '4.0.0');
 define('MF_PATH', plugin_dir_path(__FILE__));
 define('MF_URL', plugin_dir_url(__FILE__));
 
@@ -19,6 +19,7 @@ require_once MF_PATH . 'includes/class-mini-forum-cpt.php';
 require_once MF_PATH . 'includes/class-mini-forum-ajax.php';
 require_once MF_PATH . 'includes/class-mini-forum-shortcodes.php';
 require_once MF_PATH . 'includes/class-mini-forum-avatar.php';
+require_once MF_PATH . 'includes/class-mini-forum-events.php';
 require_once MF_PATH . 'includes/class-mini-forum-game.php';
 if (is_admin()) {
     require_once MF_PATH . 'includes/class-mini-forum-admin.php';
@@ -545,6 +546,16 @@ add_action('wp_enqueue_scripts', function() {
                 'initial_config' => Mini_Forum_Avatar::get_config($current_user_id),
             ]);
         }
+    }
+
+    /* Mini-Calendar. Its own stylesheet and script, on the events page only:
+       86KB of design has no business loading on the forum, and the script is a
+       no-op anywhere its markup is absent. */
+    if (mf_is_events_page()) {
+        $ev_css = file_exists(MF_PATH . 'assets/css/mini-events.css') ? filemtime(MF_PATH . 'assets/css/mini-events.css') : MF_VERSION;
+        $ev_js  = file_exists(MF_PATH . 'assets/js/mini-events.js')   ? filemtime(MF_PATH . 'assets/js/mini-events.js')   : MF_VERSION;
+        wp_enqueue_style('mf-events-style', MF_URL . 'assets/css/mini-events.css', ['mf-montserrat'], $ev_css);
+        wp_enqueue_script('mf-events-script', MF_URL . 'assets/js/mini-events.js', [], $ev_js, true);
     }
 
     // Forum CSS/JS only on forum pages

@@ -1,92 +1,105 @@
 <?php
+/**
+ * Mini-Special Days — the year, month by month.
+ *
+ * No cards and no popup here: on its own page a special day is read in place,
+ * so the whole story is on the page rather than behind a button. The calendar
+ * hub still shows them as cards, because there they sit beside events.
+ */
 if (!defined('ABSPATH')) exit;
-$eurl = function_exists('mf_get_events_url') ? mf_get_events_url() : get_permalink();
 
 global $wpdb;
 $tsd = $wpdb->prefix . 'mf_special_days';
+$sd  = Mini_Forum_Events::special_day();
 
 $days = $wpdb->get_results("
-  SELECT * FROM $tsd
-  WHERE status='published'
-  ORDER BY month_number ASC, day_date ASC
+    SELECT * FROM $tsd WHERE status = 'published'
+    ORDER BY day_date ASC, month_number ASC
 ");
 
-// Group by month
-$grouped = [];
-foreach ($days as $d) {
-  $grouped[(int)$d->month_number][] = $d;
+/* Four colours in rotation, the way the design runs them: the year reads as a
+   sequence rather than a wall of one colour. Yellow needs a darker ink to stay
+   readable, which is the only reason the two are separate values. */
+$PALETTE = array(
+    array('#E52828', '#E52828'),
+    array('#FFCC00', '#876800'),
+    array('#0055BF', '#0055BF'),
+    array('#237841', '#237841'),
+);
+
+$by_month = array();
+foreach ($days as $day) {
+    $ts = strtotime($day->day_date);
+    if (!$ts) continue;
+    $by_month[date('Y-m', $ts)][] = $day;
 }
 
-$month_names = [
-  1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',
-  7=>'July',8=>'August',9=>'September',10=>'October',11=>'November',12=>'December'
-];
+$sections = '';
+$index = 0;
+$n = 0;
+foreach ($by_month as $ym => $rows) {
+    $index++;
+    $entries = '';
+    foreach ($rows as $day) {
+        $ts = strtotime($day->day_date);
+        list($colour, $ink) = $PALETTE[$n % count($PALETTE)];
+        $n++;
+        $entries .= mf_block_get('mc.sd.entry', array(
+            'colour'    => esc_attr($colour),
+            'ink'       => esc_attr($ink),
+            'iso'       => esc_attr(date('Y-m-d', $ts)),
+            'long_date' => esc_attr(date_i18n('l, F j, Y', $ts)),
+            'weekday'   => esc_html(strtoupper(date_i18n('D', $ts))),
+            'day'       => esc_html(date_i18n('d', $ts)),
+            'mon'       => esc_html(strtoupper(date_i18n('M', $ts))),
+            'title'     => esc_html($day->title),
+            'story'     => Mini_Forum_Events::details($day),
+        ));
+    }
+    $sections .= mf_block_get('mc.sd.month', array(
+        'index'   => (int) $index,
+        'month'   => esc_html(date_i18n('F Y', strtotime($ym . '-01'))),
+        'entries' => $entries,
+    ));
+}
 
-function mfe_sd_short_day($dt){ return ucfirst(strtolower(date('D', strtotime($dt)))); }
-function mfe_sd_day_num($dt){ return date('d', strtotime($dt)); }
-function mfe_sd_short_mon($dt){ return ucfirst(strtolower(date('M', strtotime($dt)))); }
+$count = '';
+if ($days) {
+    $first = strtotime($days[0]->day_date);
+    $last  = strtotime($days[count($days) - 1]->day_date);
+    $count = sprintf(
+        _n('%d special day', '%d special days', count($days), 'mini-forum') . ' · %s',
+        count($days),
+        date_i18n('F', $first) === date_i18n('F', $last)
+            ? date_i18n('F Y', $first)
+            : date_i18n('F', $first) . '–' . date_i18n('F Y', $last)
+    );
+}
 ?>
+<main class="me-page me-workshop-page" id="me-events">
+<div class="me-wrap">
+  <section class="me-section" data-kind="<?php echo esc_attr($sd['kind']); ?>"
+           style="--c:<?php echo esc_attr($sd['colour']); ?>;--pale:<?php echo esc_attr($sd['pale']); ?>">
 
-<!-- ═══ HERO ═══ -->
-<div class="mf-container">
-  <div style="display:flex;align-items:center;gap:14px;margin:30px 0 16px">
-    <a href="<?php echo esc_url($eurl); ?>" class="mfe-back">‹ Mini-Events</a>
-  </div>
-  <?php mf_block('events.specialdays.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
-</div>
+    <?php mf_block('mc.list.head', array(
+      'icon'        => esc_url($sd['icon']),
+      'title'       => esc_html($sd['title']),
+      'description' => esc_html(Mini_Forum_Design::get('mc.desc.special')),
+    )); ?>
 
-<!-- ═══ MONTH NAVIGATION ═══ -->
-<?php $today_month_int = (int)date('n'); $auto_month = $today_month_int; ?>
-<div class="mf-container" style="margin-top:30px">
-  <?php mf_block('events.specialdays.monthbar', array('auto_month' => (int) $auto_month)); ?>
-</div>
+    <h2 class="mw-heading"><?php echo esc_html(Mini_Forum_Design::get('mc.find.special.title')); ?></h2>
+    <p class="mw-lead"><?php echo esc_html(Mini_Forum_Design::get('mc.find.special.lead')); ?></p>
 
-<!-- ═══ MONTHS LIST ═══ -->
-<?php $today_month = (int)date('n'); ?>
-<div class="mf-container mfe-sd-list-wrap" style="margin-top:40px">
-  <?php foreach ($month_names as $mn => $mname):
-    $items = $grouped[$mn] ?? [];
-    $is_empty = empty($items);
-    $is_past = $mn < $today_month;
-    $section_classes = 'mfe-sd-month';
-    if ($is_past) $section_classes .= ' mfe-sd-month-past';
-    if ($is_empty) $section_classes .= ' mfe-sd-month-empty';
-  ?>
-  <section class="<?php echo esc_attr($section_classes); ?>" id="month-<?php echo $mn; ?>" data-month-num="<?php echo $mn; ?>">
-    <?php mf_block('events.month.heading', array('month' => esc_html($mname . ' ' . date('Y')), 'colour' => '')); ?>
-    <div class="mfe-sd-list">
-      <?php if ($is_empty): ?>
-        <div class="mfe-sd-empty-card">No special days for this month yet.</div>
-      <?php else: foreach ($items as $d):
-        $accent = in_array($d->accent_color, ['blue','red','yellow','green','orange'], true) ? $d->accent_color : 'orange';
-      ?>
-      <?php
-      $mf_imgs = array();
-      if (!empty($d->images)) {
-        $decoded = json_decode($d->images, true);
-        if (is_array($decoded)) $mf_imgs = $decoded;
-      }
-      $mf_photos = '';
-      if ($mf_imgs) {
-        $mf_photos = '<div class="mfe-sd-photos">';
-        foreach ($mf_imgs as $img_url) {
-          $mf_photos .= '<span class="mfe-sd-photo" style="background-image:url(\'' . esc_url($img_url) .
-                        '\');background-size:cover;background-position:center"></span>';
-        }
-        $mf_photos .= '</div>';
-      }
+    <?php if ($count !== '') mf_block('mc.sd.count', array('count' => esc_html($count))); ?>
 
-      mf_block('events.specialday.card', array(
-        'accent'      => esc_attr($accent),
-        'day'         => esc_html(mfe_sd_short_day($d->day_date)),
-        'date'        => esc_html(mfe_sd_day_num($d->day_date)),
-        'month'       => esc_html(mfe_sd_short_mon($d->day_date)),
-        'title'       => esc_html($d->title),
-        'description' => wp_kses_post($d->description),
-        'photos'      => $mf_photos,
-      )); ?>
-      <?php endforeach; endif; ?>
-    </div>
+    <?php if ($sections !== ''): ?>
+      <?php echo $sections; ?>
+    <?php else: ?>
+      <p class="mw-empty"><?php echo esc_html(Mini_Forum_Design::get('mc.sd.empty')); ?></p>
+    <?php endif; ?>
+
   </section>
-  <?php endforeach; ?>
 </div>
+
+<?php echo Mini_Forum_Events::join_block($sd['title']); ?>
+</main>
