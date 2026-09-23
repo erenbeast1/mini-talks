@@ -1,0 +1,690 @@
+/*
+ * Mini-Talks site header.
+ *
+ * This used to live in a <style> tag inside the Elementor HTML widget,
+ * together with the script. A widget that carries 37KB of CSS and JS is
+ * one paste away from being lost — and it was: the widget saved short,
+ * the style tag was left unclosed, and the header disappeared from the
+ * site. Here it is a file: nothing to paste, cache-busted like the rest,
+ * and the widget is left holding only the markup.
+ *
+ * Montserrat is not imported here; the plugin already enqueues it as
+ * mf-montserrat, and this stylesheet is queued behind it.
+ */
+
+.mt-header {
+  width: 100% !important;
+  background: #FFCC00 !important;
+  font-family: 'Montserrat', sans-serif !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+.mt-header-logo {
+  text-align: center !important;
+  padding: 30px 0 20px !important;
+  position: relative !important;
+}
+
+.mt-header-logo img {
+  width: clamp(200px, 22vw, 340px) !important;
+  height: auto !important;
+  display: inline-block !important;
+}
+
+
+/* ========== AUTH BUTTON ========== */
+
+.mt-auth-wrap {
+  position: absolute !important;
+  top: 50% !important;
+  right: 24px !important;
+  transform: translateY(-50%) !important;
+  z-index: 60 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.mt-auth-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 5px 18px 5px 5px !important;
+  border-radius: 28px !important;
+  background: #fff !important;
+  border: none !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  transition: box-shadow .2s, transform .15s !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,.08) !important;
+  font-family: 'Montserrat', sans-serif !important;
+  line-height: 1 !important;
+  height: 46px !important;
+  max-width: none !important;
+}
+
+.mt-auth-pill:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,.13) !important;
+  transform: translateY(-1px) !important;
+}
+
+.mt-auth-pill:active {
+  transform: scale(.97) !important;
+}
+
+.mt-auth-pill-text {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #1a1a1a !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+}
+
+.mt-header .mt-auth-wrap .mt-auth-pill img.mt-auth-avatar-img,
+.mt-auth-pill .mt-auth-avatar-img,
+img.mt-auth-avatar-img {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  background: #FFCC00 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+
+/* Dropdown logged-in */
+
+.mt-auth-dropdown {
+  position: absolute !important;
+  top: calc(100% + 6px) !important;
+  right: 0 !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12) !important;
+  padding: 6px !important;
+  min-width: 170px !important;
+  display: none !important;
+  z-index: 200 !important;
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+.mt-auth-dropdown.open {
+  display: block !important;
+}
+
+.mt-auth-dd-item {
+  display: block !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: none !important;
+  width: 100% !important;
+  text-align: left !important;
+  font-family: 'Montserrat', sans-serif !important;
+  transition: background .15s !important;
+}
+
+.mt-auth-dd-item:hover {
+  background: #f5f5f5 !important;
+}
+
+.mt-auth-dd-divider {
+  height: 1px !important;
+  background: #eee !important;
+  margin: 4px 8px !important;
+}
+
+.mt-auth-dd-logout {
+  color: #E52828 !important;
+}
+
+
+@media(max-width:1024px) {
+
+  .mt-auth-wrap {
+    right: 72px !important;
+  }
+
+  .mt-auth-pill-text {
+    display: none !important;
+  }
+
+  .mt-auth-pill {
+    padding: 4px !important;
+    border-radius: 50% !important;
+  }
+
+}
+
+@media(max-width:480px) {
+
+  .mt-auth-wrap {
+    right: 66px !important;
+  }
+
+}
+
+
+/* ============================================
+   NAVIGATION
+============================================ */
+
+.mt-header-navwrap {
+  position: relative !important;
+  width: 100% !important;
+  padding-top: 24px !important;
+}
+
+.mt-header-studs {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 24px !important;
+  background: url('https://mini-talks.org/wp-content/uploads/2026/02/beyaz-yeni-3.png') repeat-x center bottom !important;
+  background-size: auto 24px !important;
+  z-index: 2 !important;
+}
+
+.mt-header-nav {
+  display: flex !important;
+  gap: 0 !important;
+  padding: 14px 0 !important;
+  background: #FFFFFF !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+.mt-nav-brick {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  display: block !important;
+  padding: 10px 4px !important;
+  margin: 0 4px !important;
+  border-radius: 8px !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: clamp(13px,1.3vw,20px) !important;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: opacity .2s !important;
+  border: none !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+.mt-nav-brick:hover {
+  opacity: .85 !important;
+}
+
+.mt-nav-dropdown > .mt-nav-brick {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.mt-nav-dropdown {
+  pointer-events: auto !important;
+}
+
+.mt-header-nav a.mt-nav-brick.mt-nav-red,
+.mt-header-nav span.mt-nav-brick.mt-nav-red {
+  background-color: #E52828 !important;
+  color: #fff !important;
+}
+
+.mt-header-nav a.mt-nav-brick.mt-nav-yellow,
+.mt-header-nav span.mt-nav-brick.mt-nav-yellow {
+  background-color: #FFCC00 !important;
+  color: #fff !important;
+}
+
+.mt-header-nav a.mt-nav-brick.mt-nav-blue,
+.mt-header-nav span.mt-nav-brick.mt-nav-blue {
+  background-color: #0055BF !important;
+  color: #fff !important;
+}
+
+.mt-header-nav a.mt-nav-brick.mt-nav-green,
+.mt-header-nav span.mt-nav-brick.mt-nav-green {
+  background-color: #237841 !important;
+  color: #fff !important;
+}
+
+.mt-header-nav a.mt-nav-brick:visited,
+.mt-header-nav a.mt-nav-brick:active,
+.mt-header-nav a.mt-nav-brick:focus {
+  color: #fff !important;
+}
+
+
+/* ============================================
+   DROPDOWNS
+============================================ */
+
+.mt-nav-dropdown {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  position: static !important;
+  margin: 0 4px !important;
+}
+
+.mt-nav-dropdown > .mt-nav-brick {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.mt-nav-dropdown-panel {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  background: #0055BF !important;
+  border-radius: 16px !important;
+  padding: 32px 4% !important;
+  margin-top: 0 !important;
+  display: flex !important;
+  gap: 20px !important;
+  justify-content: center !important;
+  z-index: 100 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition:
+    opacity .25s ease,
+    visibility .25s ease !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2) !important;
+  box-sizing: border-box !important;
+}
+
+.mt-nav-dropdown:hover > .mt-nav-brick {
+  border-radius: 8px 8px 0 0 !important;
+  position: relative !important;
+  z-index: 101 !important;
+}
+
+.mt-nav-dropdown:hover > .mt-nav-brick::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: -14px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 14px !important;
+  background: #0055BF !important;
+}
+
+.mt-nav-dropdown:hover .mt-nav-dropdown-panel {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.mt-nav-dd-item {
+  background: #fff !important;
+  border-radius: 12px !important;
+  padding: 24px 16px 20px !important;
+  text-align: center !important;
+  flex: 1 !important;
+  max-width: 180px !important;
+  text-decoration: none !important;
+  transition: transform .15s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.mt-nav-dd-item:hover {
+  transform: translateY(-3px) !important;
+}
+
+.mt-nav-dd-item img {
+  width: auto;
+  height: 88px !important;
+  object-fit: contain !important;
+  margin-bottom: 10px !important;
+}
+
+.mt-nav-dd-item span {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 20px !important;
+  color: #0055BF !important;
+  line-height: 1.2 !important;
+  display: block !important;
+}
+
+
+/* Dropdown colors */
+
+.mt-dd-red .mt-nav-dropdown-panel {
+  background: #E52828 !important;
+}
+
+.mt-dd-red:hover > .mt-nav-brick::after {
+  background: #E52828 !important;
+}
+
+.mt-dd-red .mt-nav-dd-item span {
+  color: #E52828 !important;
+}
+
+.mt-dd-yellow .mt-nav-dropdown-panel {
+  background: #FFCC00 !important;
+}
+
+.mt-dd-yellow:hover > .mt-nav-brick::after {
+  background: #FFCC00 !important;
+}
+
+.mt-dd-yellow .mt-nav-dd-item span {
+  color: #B38F00 !important;
+}
+
+.mt-dd-green .mt-nav-dropdown-panel {
+  background: #237841 !important;
+}
+
+.mt-dd-green:hover > .mt-nav-brick::after {
+  background: #237841 !important;
+}
+
+.mt-dd-green .mt-nav-dd-item span {
+  color: #237841 !important;
+}
+
+
+/* ============================================
+   HAMBURGER + MOBILE
+============================================ */
+
+.mt-hamburger {
+  display: none !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 16px !important;
+  transform: translateY(-50%) !important;
+  width: 48px !important;
+  height: 48px !important;
+  background: #E52828 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  z-index: 200 !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15) !important;
+}
+
+.mt-hamburger span {
+  display: block !important;
+  width: 26px !important;
+  height: 3.5px !important;
+  background: #fff !important;
+  border-radius: 3px !important;
+  transition:
+    transform .3s ease,
+    opacity .3s ease !important;
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+.mt-hamburger span:nth-child(1) {
+  top: 13px !important;
+}
+
+.mt-hamburger span:nth-child(2) {
+  top: 22px !important;
+}
+
+.mt-hamburger span:nth-child(3) {
+  top: 31px !important;
+}
+
+.mt-hamburger.active span:nth-child(1) {
+  top: 22px !important;
+  transform: translateX(-50%) rotate(45deg) !important;
+}
+
+.mt-hamburger.active span:nth-child(2) {
+  opacity: 0 !important;
+}
+
+.mt-hamburger.active span:nth-child(3) {
+  top: 22px !important;
+  transform: translateX(-50%) rotate(-45deg) !important;
+}
+
+.mt-mobile-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0,0,0,.5) !important;
+  z-index: 150 !important;
+  display: none !important;
+}
+
+.mt-mobile-menu {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 300px !important;
+  max-width: 85vw !important;
+  height: 100% !important;
+  background: #fff !important;
+  z-index: 300 !important;
+  overflow-y: auto !important;
+  box-shadow: -4px 0 20px rgba(0,0,0,.25) !important;
+  padding: 20px 0 40px !important;
+  display: none !important;
+  box-sizing: border-box !important;
+}
+
+.mt-mobile-close {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  background: #E52828 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  margin: 0 16px 20px auto !important;
+  font-family: 'Montserrat', sans-serif !important;
+  line-height: 1 !important;
+}
+
+.mt-mobile-item {
+  display: block !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  color: #fff !important;
+  text-decoration: none !important;
+  padding: 14px 20px !important;
+  border-radius: 10px !important;
+  margin: 5px 14px !important;
+  box-sizing: border-box !important;
+}
+
+.mt-mobile-toggle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  color: #fff !important;
+  text-decoration: none !important;
+  padding: 14px 20px !important;
+  border-radius: 10px !important;
+  margin: 5px 14px !important;
+  cursor: pointer !important;
+  border: none !important;
+  width: calc(100% - 28px) !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+}
+
+.mt-mob-red {
+  background-color: #E52828 !important;
+}
+
+.mt-mob-yellow {
+  background-color: #FFCC00 !important;
+}
+
+.mt-mob-blue {
+  background-color: #0055BF !important;
+}
+
+.mt-mob-green {
+  background-color: #237841 !important;
+}
+
+.mt-mobile-toggle .mt-arrow {
+  font-size: 12px !important;
+  transition: transform .25s ease !important;
+  display: inline-block !important;
+}
+
+.mt-mobile-sub {
+  overflow: hidden !important;
+  max-height: 0 !important;
+  transition: max-height .3s ease !important;
+  padding-left: 20px !important;
+}
+
+.mt-mobile-sub a {
+  display: block !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  text-decoration: none !important;
+  padding: 10px 16px !important;
+  border-left: 3px solid #DDD !important;
+  margin: 2px 0 !important;
+}
+
+@media(max-width:1024px) {
+
+  .mt-header-nav {
+    display: none !important;
+  }
+
+  .mt-hamburger {
+    display: flex !important;
+  }
+
+  .mt-header-navwrap {
+    position: relative !important;
+    min-height: 72px !important;
+  }
+
+}
+
+@media(max-width:768px) {
+
+  .mt-header-logo {
+    padding: 20px 0 14px !important;
+  }
+
+}
+
+/* Space reserved for the remaining icons. */
+.mt-nav-dd-item .mt-icon-placeholder {
+  width: 88px !important;
+  height: 88px !important;
+  flex-shrink: 0 !important;
+  margin-bottom: 10px !important;
+}
+.mt-mobile-sub:not(.mt-sub-open) { visibility: hidden !important; }
+
+/* The panel and its backdrop are opened by a class, not by an inline style:
+   both carry display:none !important, and only a rule that is itself
+   !important can beat that. */
+.mt-mobile-menu.mt-open { display: block !important; }
+.mt-mobile-overlay.mt-open { display: block !important; }
+
+/* iOS Safari puts the toolbar over the bottom of a 100% tall fixed panel,
+   so the last menu item cannot be reached. */
+@supports (height: 100dvh) {
+  .mt-mobile-menu { height: 100dvh !important; }
+  .mt-mobile-overlay { height: 100dvh !important; }
+}
+
+
+/* Display the complete cropped coffee illustration. */
+.mt-nav-dd-item .mt-family-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 88px !important;
+  flex: 0 0 88px !important;
+  overflow: hidden !important;
+  margin-bottom: 10px !important;
+}
+.mt-nav-dd-item .mt-family-icon img {
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  flex: 0 0 100% !important;
+  margin: 0 !important;
+}
+
+/* Larger expert illustration, fully visible inside its card. */
+#mt-panel-6 .mt-nav-dd-item { min-width: 0 !important; }
+#mt-panel-6 .mt-nav-dd-item > span:last-child { margin-top: auto !important; }
+#mt-panel-6 .mt-expert-card { padding: 10px 6px 20px !important; }
+#mt-panel-6 .mt-expert-card .mt-expert-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 132px !important;
+  flex: 0 0 132px !important;
+  margin: 0 0 10px !important;
+}
+#mt-panel-6 .mt-expert-card .mt-expert-icon img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  margin: 0 !important;
+  transform: none !important;
+}

@@ -464,6 +464,17 @@ add_action('wp_enqueue_scripts', function() {
     $avatar_js_v  = file_exists(MF_PATH . 'assets/js/mini-forum-avatar.js')   ? filemtime(MF_PATH . 'assets/js/mini-forum-avatar.js')   : MF_VERSION;
 
     wp_enqueue_style('mf-montserrat', 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap', [], null);
+
+    /* The site header. It used to be a <style> and a <script> inside the
+       Elementor HTML widget; a widget holding 37KB of code is one short save
+       away from an empty header, and that is how the header came to vanish.
+       Here they are files, cache-busted like everything else, and the widget
+       is left holding only the markup. */
+    $head_css_v = file_exists(MF_PATH . 'assets/css/mt-header.css') ? filemtime(MF_PATH . 'assets/css/mt-header.css') : MF_VERSION;
+    $head_js_v  = file_exists(MF_PATH . 'assets/js/mt-header.js')   ? filemtime(MF_PATH . 'assets/js/mt-header.js')   : MF_VERSION;
+    wp_enqueue_style('mt-header-style', MF_URL . 'assets/css/mt-header.css', ['mf-montserrat'], $head_css_v);
+    wp_enqueue_script('mt-header-script', MF_URL . 'assets/js/mt-header.js', [], $head_js_v, true);
+
     wp_enqueue_style('mf-auth-style', MF_URL . 'assets/css/mini-forum-auth.css', ['mf-montserrat'], $auth_css_v);
     wp_enqueue_style('mf-avatar-style', MF_URL . 'assets/css/mini-forum-avatar.css', ['mf-auth-style'], $avatar_css_v);
     wp_enqueue_script('mf-auth-script', MF_URL . 'assets/js/mini-forum-auth.js', ['jquery'], $auth_js_v, true);
