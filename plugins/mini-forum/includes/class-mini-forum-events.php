@@ -174,12 +174,54 @@ class Mini_Forum_Events {
         $raw = isset($ev->description) ? trim((string) $ev->description) : '';
         if ($raw === '' && isset($ev->short_description)) $raw = trim((string) $ev->short_description);
         if ($raw === '') return '';
+
+        /* The column holds both kinds of description. Someone typing into the
+           admin form leaves plain text with blank lines between paragraphs;
+           someone pasting from an editor leaves HTML. Escaping the second kind
+           printed the tags on the page, which is what people were reading. */
+        $out = self::is_html($raw)
+            ? self::rich($raw)
+            : self::plain($raw);
+
+        return apply_filters('mf_events_details', $out, $raw, $ev);
+    }
+
+    /** Plain text: a blank line starts a paragraph, a single newline breaks. */
+    private static function plain($raw) {
         $out = '';
         foreach (preg_split('/\n\s*\n|\r\n\r\n/', $raw) as $para) {
             $para = trim($para);
             if ($para !== '') $out .= '<p>' . nl2br(esc_html($para)) . '</p>';
         }
         return $out;
+    }
+
+    /**
+     * HTML from an editor, cleaned up.
+     *
+     * wp_kses_post is what WordPress trusts for post content, so scripts and
+     * event handlers go. What it keeps and we do not want is the styling the
+     * editor left behind — a font size, black on white, a justification — which
+     * would fight the popup it lands in. The popup has its own typography, and
+     * on this site the design wins, so those attributes are dropped with it.
+     */
+    private static function rich($html) {
+        $allowed = wp_kses_allowed_html('post');
+        foreach ($allowed as $tag => $attrs) {
+            unset($allowed[$tag]['style'], $allowed[$tag]['align'], $allowed[$tag]['bgcolor']);
+        }
+        $out = trim(wp_kses($html, $allowed));
+
+        /* A paste is often one long run of text with no block around it. */
+        if ($out !== '' && !preg_match('/^\s*<(p|div|ul|ol|h[1-6]|blockquote|figure|table)\b/i', $out)) {
+            $out = wpautop($out);
+        }
+        return $out;
+    }
+
+    /** Is there a tag in here, or only the text someone typed? */
+    private static function is_html($raw) {
+        return (bool) preg_match('/<(p|br|div|ul|ol|li|h[1-6]|strong|b|em|i|a|span|blockquote|figure|img|table)\b[^>]*>/i', $raw);
     }
 
     /** One event card, in the design's own markup. */

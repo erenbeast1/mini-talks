@@ -1,0 +1,1233 @@
+<!-- ============================================
+     MINI-TALKS HEADER
+     Elementor > HTML Widget içine yapıştır
+============================================ -->
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap');
+
+.mt-header {
+  width: 100% !important;
+  background: #FFCC00 !important;
+  font-family: 'Montserrat', sans-serif !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+.mt-header-logo {
+  text-align: center !important;
+  padding: 30px 0 20px !important;
+  position: relative !important;
+}
+
+.mt-header-logo img {
+  width: clamp(200px, 22vw, 340px) !important;
+  height: auto !important;
+  display: inline-block !important;
+}
+
+
+/* ========== AUTH BUTTON ========== */
+
+.mt-auth-wrap {
+  position: absolute !important;
+  top: 50% !important;
+  right: 24px !important;
+  transform: translateY(-50%) !important;
+  z-index: 60 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.mt-auth-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 5px 18px 5px 5px !important;
+  border-radius: 28px !important;
+  background: #fff !important;
+  border: none !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+  transition: box-shadow .2s, transform .15s !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,.08) !important;
+  font-family: 'Montserrat', sans-serif !important;
+  line-height: 1 !important;
+  height: 46px !important;
+  max-width: none !important;
+}
+
+.mt-auth-pill:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,.13) !important;
+  transform: translateY(-1px) !important;
+}
+
+.mt-auth-pill:active {
+  transform: scale(.97) !important;
+}
+
+.mt-auth-pill-text {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #1a1a1a !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+}
+
+.mt-header .mt-auth-wrap .mt-auth-pill img.mt-auth-avatar-img,
+.mt-auth-pill .mt-auth-avatar-img,
+img.mt-auth-avatar-img {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  background: #FFCC00 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+
+/* Dropdown logged-in */
+
+.mt-auth-dropdown {
+  position: absolute !important;
+  top: calc(100% + 6px) !important;
+  right: 0 !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12) !important;
+  padding: 6px !important;
+  min-width: 170px !important;
+  display: none !important;
+  z-index: 200 !important;
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+.mt-auth-dropdown.open {
+  display: block !important;
+}
+
+.mt-auth-dd-item {
+  display: block !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: none !important;
+  width: 100% !important;
+  text-align: left !important;
+  font-family: 'Montserrat', sans-serif !important;
+  transition: background .15s !important;
+}
+
+.mt-auth-dd-item:hover {
+  background: #f5f5f5 !important;
+}
+
+.mt-auth-dd-divider {
+  height: 1px !important;
+  background: #eee !important;
+  margin: 4px 8px !important;
+}
+
+.mt-auth-dd-logout {
+  color: #E52828 !important;
+}
+
+
+@media(max-width:1024px) {
+
+  .mt-auth-wrap {
+    right: 72px !important;
+  }
+
+  .mt-auth-pill-text {
+    display: none !important;
+  }
+
+  .mt-auth-pill {
+    padding: 4px !important;
+    border-radius: 50% !important;
+  }
+
+}
+
+@media(max-width:480px) {
+
+  .mt-auth-wrap {
+    right: 66px !important;
+  }
+
+}
+
+
+/* ============================================
+   NAVIGATION
+============================================ */
+
+.mt-header-navwrap {
+  position: relative !important;
+  width: 100% !important;
+  padding-top: 24px !important;
+}
+
+.mt-header-studs {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 24px !important;
+  background: url('https://mini-talks.org/wp-content/uploads/2026/02/beyaz-yeni-3.png') repeat-x center bottom !important;
+  background-size: auto 24px !important;
+  z-index: 2 !important;
+}
+
+.mt-header-nav {
+  display: flex !important;
+  gap: 0 !important;
+  padding: 14px 0 !important;
+  background: #FFFFFF !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+.mt-nav-brick {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  display: block !important;
+  padding: 10px 4px !important;
+  margin: 0 4px !important;
+  border-radius: 8px !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: clamp(13px,1.3vw,20px) !important;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: opacity .2s !important;
+  border: none !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+.mt-nav-brick:hover {
+  opacity: .85 !important;
+}
+
+.mt-nav-dropdown > .mt-nav-brick {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.mt-nav-dropdown {
+  pointer-events: auto !important;
+}
+
+.mt-header-nav a.mt-nav-brick.mt-nav-red,
+.mt-header-nav span.mt-nav-brick.mt-nav-red {
+  background-color: #E52828 !important;
+  color: #fff !important;
+}
+
+.mt-header-nav a.mt-nav-brick.mt-nav-yellow,
+.mt-header-nav span.mt-nav-brick.mt-nav-yellow {
+  background-color: #FFCC00 !important;
+  color: #fff !important;
+}
+
+.mt-header-nav a.mt-nav-brick.mt-nav-blue,
+.mt-header-nav span.mt-nav-brick.mt-nav-blue {
+  background-color: #0055BF !important;
+  color: #fff !important;
+}
+
+.mt-header-nav a.mt-nav-brick.mt-nav-green,
+.mt-header-nav span.mt-nav-brick.mt-nav-green {
+  background-color: #237841 !important;
+  color: #fff !important;
+}
+
+.mt-header-nav a.mt-nav-brick:visited,
+.mt-header-nav a.mt-nav-brick:active,
+.mt-header-nav a.mt-nav-brick:focus {
+  color: #fff !important;
+}
+
+
+/* ============================================
+   DROPDOWNS
+============================================ */
+
+.mt-nav-dropdown {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  position: static !important;
+  margin: 0 4px !important;
+}
+
+.mt-nav-dropdown > .mt-nav-brick {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.mt-nav-dropdown-panel {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  background: #0055BF !important;
+  border-radius: 16px !important;
+  padding: 32px 4% !important;
+  margin-top: 0 !important;
+  display: flex !important;
+  gap: 20px !important;
+  justify-content: center !important;
+  z-index: 100 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition:
+    opacity .25s ease,
+    visibility .25s ease !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2) !important;
+  box-sizing: border-box !important;
+}
+
+.mt-nav-dropdown:hover > .mt-nav-brick {
+  border-radius: 8px 8px 0 0 !important;
+  position: relative !important;
+  z-index: 101 !important;
+}
+
+.mt-nav-dropdown:hover > .mt-nav-brick::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: -14px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 14px !important;
+  background: #0055BF !important;
+}
+
+.mt-nav-dropdown:hover .mt-nav-dropdown-panel {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.mt-nav-dd-item {
+  background: #fff !important;
+  border-radius: 12px !important;
+  padding: 24px 16px 20px !important;
+  text-align: center !important;
+  flex: 1 !important;
+  max-width: 180px !important;
+  text-decoration: none !important;
+  transition: transform .15s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.mt-nav-dd-item:hover {
+  transform: translateY(-3px) !important;
+}
+
+.mt-nav-dd-item img {
+  width: auto;
+  height: 88px !important;
+  object-fit: contain !important;
+  margin-bottom: 10px !important;
+}
+
+.mt-nav-dd-item span {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 20px !important;
+  color: #0055BF !important;
+  line-height: 1.2 !important;
+  display: block !important;
+}
+
+
+/* Dropdown colors */
+
+.mt-dd-red .mt-nav-dropdown-panel {
+  background: #E52828 !important;
+}
+
+.mt-dd-red:hover > .mt-nav-brick::after {
+  background: #E52828 !important;
+}
+
+.mt-dd-red .mt-nav-dd-item span {
+  color: #E52828 !important;
+}
+
+.mt-dd-yellow .mt-nav-dropdown-panel {
+  background: #FFCC00 !important;
+}
+
+.mt-dd-yellow:hover > .mt-nav-brick::after {
+  background: #FFCC00 !important;
+}
+
+.mt-dd-yellow .mt-nav-dd-item span {
+  color: #B38F00 !important;
+}
+
+.mt-dd-green .mt-nav-dropdown-panel {
+  background: #237841 !important;
+}
+
+.mt-dd-green:hover > .mt-nav-brick::after {
+  background: #237841 !important;
+}
+
+.mt-dd-green .mt-nav-dd-item span {
+  color: #237841 !important;
+}
+
+
+/* ============================================
+   HAMBURGER + MOBILE
+============================================ */
+
+.mt-hamburger {
+  display: none !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 16px !important;
+  transform: translateY(-50%) !important;
+  width: 48px !important;
+  height: 48px !important;
+  background: #E52828 !important;
+  border: none !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  z-index: 200 !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15) !important;
+}
+
+.mt-hamburger span {
+  display: block !important;
+  width: 26px !important;
+  height: 3.5px !important;
+  background: #fff !important;
+  border-radius: 3px !important;
+  transition:
+    transform .3s ease,
+    opacity .3s ease !important;
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+.mt-hamburger span:nth-child(1) {
+  top: 13px !important;
+}
+
+.mt-hamburger span:nth-child(2) {
+  top: 22px !important;
+}
+
+.mt-hamburger span:nth-child(3) {
+  top: 31px !important;
+}
+
+.mt-hamburger.active span:nth-child(1) {
+  top: 22px !important;
+  transform: translateX(-50%) rotate(45deg) !important;
+}
+
+.mt-hamburger.active span:nth-child(2) {
+  opacity: 0 !important;
+}
+
+.mt-hamburger.active span:nth-child(3) {
+  top: 22px !important;
+  transform: translateX(-50%) rotate(-45deg) !important;
+}
+
+.mt-mobile-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0,0,0,.5) !important;
+  z-index: 150 !important;
+  display: none !important;
+}
+
+.mt-mobile-menu {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 300px !important;
+  max-width: 85vw !important;
+  height: 100% !important;
+  background: #fff !important;
+  z-index: 300 !important;
+  overflow-y: auto !important;
+  box-shadow: -4px 0 20px rgba(0,0,0,.25) !important;
+  padding: 20px 0 40px !important;
+  display: none !important;
+  box-sizing: border-box !important;
+}
+
+.mt-mobile-close {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  background: #E52828 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  margin: 0 16px 20px auto !important;
+  font-family: 'Montserrat', sans-serif !important;
+  line-height: 1 !important;
+}
+
+.mt-mobile-item {
+  display: block !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  color: #fff !important;
+  text-decoration: none !important;
+  padding: 14px 20px !important;
+  border-radius: 10px !important;
+  margin: 5px 14px !important;
+  box-sizing: border-box !important;
+}
+
+.mt-mobile-toggle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  color: #fff !important;
+  text-decoration: none !important;
+  padding: 14px 20px !important;
+  border-radius: 10px !important;
+  margin: 5px 14px !important;
+  cursor: pointer !important;
+  border: none !important;
+  width: calc(100% - 28px) !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+}
+
+.mt-mob-red {
+  background-color: #E52828 !important;
+}
+
+.mt-mob-yellow {
+  background-color: #FFCC00 !important;
+}
+
+.mt-mob-blue {
+  background-color: #0055BF !important;
+}
+
+.mt-mob-green {
+  background-color: #237841 !important;
+}
+
+.mt-mobile-toggle .mt-arrow {
+  font-size: 12px !important;
+  transition: transform .25s ease !important;
+  display: inline-block !important;
+}
+
+.mt-mobile-sub {
+  overflow: hidden !important;
+  max-height: 0 !important;
+  transition: max-height .3s ease !important;
+  padding-left: 20px !important;
+}
+
+.mt-mobile-sub a {
+  display: block !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  text-decoration: none !important;
+  padding: 10px 16px !important;
+  border-left: 3px solid #DDD !important;
+  margin: 2px 0 !important;
+}
+
+@media(max-width:1024px) {
+
+  .mt-header-nav {
+    display: none !important;
+  }
+
+  .mt-hamburger {
+    display: flex !important;
+  }
+
+  .mt-header-navwrap {
+    position: relative !important;
+    min-height: 72px !important;
+  }
+
+}
+
+@media(max-width:768px) {
+
+  .mt-header-logo {
+    padding: 20px 0 14px !important;
+  }
+
+}
+
+/* Space reserved for the remaining icons. */
+.mt-nav-dd-item .mt-icon-placeholder {
+  width: 88px !important;
+  height: 88px !important;
+  flex-shrink: 0 !important;
+  margin-bottom: 10px !important;
+}
+.mt-mobile-sub:not(.mt-sub-open) { visibility: hidden !important; }
+
+/* The panel and its backdrop are opened by a class, not by an inline style:
+   both carry display:none !important, and only a rule that is itself
+   !important can beat that. */
+.mt-mobile-menu.mt-open { display: block !important; }
+.mt-mobile-overlay.mt-open { display: block !important; }
+
+/* iOS Safari puts the toolbar over the bottom of a 100% tall fixed panel,
+   so the last menu item cannot be reached. */
+@supports (height: 100dvh) {
+  .mt-mobile-menu { height: 100dvh !important; }
+  .mt-mobile-overlay { height: 100dvh !important; }
+}
+
+
+/* Display the complete cropped coffee illustration. */
+.mt-nav-dd-item .mt-family-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 88px !important;
+  flex: 0 0 88px !important;
+  overflow: hidden !important;
+  margin-bottom: 10px !important;
+}
+.mt-nav-dd-item .mt-family-icon img {
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  flex: 0 0 100% !important;
+  margin: 0 !important;
+}
+
+/* Larger expert illustration, fully visible inside its card. */
+#mt-panel-6 .mt-nav-dd-item { min-width: 0 !important; }
+#mt-panel-6 .mt-nav-dd-item > span:last-child { margin-top: auto !important; }
+#mt-panel-6 .mt-expert-card { padding: 10px 6px 20px !important; }
+#mt-panel-6 .mt-expert-card .mt-expert-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 132px !important;
+  flex: 0 0 132px !important;
+  margin: 0 0 10px !important;
+}
+#mt-panel-6 .mt-expert-card .mt-expert-icon img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+
+</style>
+
+
+<div class="mt-header">
+
+  <div class="mt-header-logo">
+
+    <img
+      src="https://mini-talks.org/wp-content/uploads/2025/12/Minitalks_logo.png"
+      alt="Mini-Talks"
+    />
+
+    <div class="mt-auth-wrap"></div>
+
+
+  </div>
+
+
+  <div class="mt-header-navwrap">
+
+    <div class="mt-header-studs"></div>
+
+    <button
+      class="mt-hamburger"
+     
+      type="button" aria-label="Menu" aria-expanded="false"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+
+
+
+    <!-- ============================================
+         DESKTOP NAV
+    ============================================= -->
+
+<nav class="mt-header-nav" aria-label="Main navigation">
+<a href="/" class="mt-nav-brick mt-nav-red">Home</a>
+<div class="mt-nav-dropdown mt-dd-yellow"><span class="mt-nav-brick mt-nav-yellow">About Us</span><div class="mt-nav-dropdown-panel" id="mt-panel-0">
+<a href="/our-story/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/02_about_us_3D.png" alt="" loading="lazy" /><span>Our Story</span></a>
+<a href="/how-mini-talks-began/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/29-how_mini_talks_began_3D.png" alt="" loading="lazy" /><span>How Mini-Talks Began</span></a>
+<a href="/open-letter/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/30_open_letter_en_3D.png" alt="" loading="lazy" /><span>Open Letter</span></a>
+</div></div>
+<div class="mt-nav-dropdown mt-dd-blue"><span class="mt-nav-brick mt-nav-blue">Mini-Talks</span><div class="mt-nav-dropdown-panel" id="mt-panel-1">
+<a href="/what-it-is/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2025/07/cropped-PHOTO-2025-07-03-23-29-23-Photoroom.png" alt="" loading="lazy" /><span>What It Is</span></a>
+<a href="/who-its-for/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/38_selective_mutism_3D.png" alt="" loading="lazy" /><span>Who It’s For</span></a>
+<a href="/how-we-keep-going/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/34_financial_sustainability_3D.png" alt="" loading="lazy" /><span>How We Keep Going</span></a>
+<a href="/our-impact/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/25_impact_3D.png" alt="" loading="lazy" /><span>Our Impact</span></a>
+<a href="/share-and-follow-us/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/28_follow_us_3D.png" alt="" loading="lazy" /><span>Share &amp; Follow Us</span></a>
+</div></div>
+<div class="mt-nav-dropdown mt-dd-green"><span class="mt-nav-brick mt-nav-green">Mini-Library</span><div class="mt-nav-dropdown-panel" id="mt-panel-2">
+<a href="/mini-library/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_library_3D.png" alt="" loading="lazy" /><span>Why Mini-Library</span></a>
+
+<a href="/mini-library/books-for-children/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/05_books_for_kids_en_3D.png" alt="" loading="lazy" /><span>Books for Children</span></a>
+
+<a href="/mini-library/books-for-adults/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/05.2_books_for_adults_en_3D.png" alt="" loading="lazy" /><span>Books for Adults</span></a>
+
+<a href="/mini-library/podcasts-and-videos/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/06_podcasts_3D.png" alt="" loading="lazy" /><span>Podcasts &amp; Videos</span></a>
+
+<a href="/mini-library/research-articles/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/07_research_articles_3D.png" alt="" loading="lazy" /><span>Research Articles</span></a>
+
+<a href="/mini-library/social-media-accounts/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/27_social_media_accounts_3D.png" alt="" loading="lazy" /><span>Social Media Accounts</span></a>
+
+<a href="/mini-library/websites/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/08_websites_3D.png" alt="" loading="lazy" /><span>Websites</span></a>
+</div></div>
+<div class="mt-nav-dropdown mt-dd-red"><span class="mt-nav-brick mt-nav-red">Studio &amp; App</span><div class="mt-nav-dropdown-panel" id="mt-panel-3">
+
+<a href="/studio-and-app/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/studio-app.png" alt="" loading="lazy" /><span>Why Studio &amp; App</span></a>
+<a href="/studio-and-app/mini-talks-studio/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2025/12/laptop.png" alt="" loading="lazy" /><span>Mini-Talks Studio</span></a>
+<a href="/studio-and-app/mini-talks-app/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/phone.png" alt="" loading="lazy" /><span>Mini-Talks App</span></a>
+<a href="/studio-and-app/how-to-access/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/32_how_to_reach_3D.png" alt="" loading="lazy" /><span>How to Access</span></a>
+</div></div>
+<div class="mt-nav-dropdown mt-dd-yellow"><span class="mt-nav-brick mt-nav-yellow">Mini-Kits</span><div class="mt-nav-dropdown-panel" id="mt-panel-4">
+<a href="/mini-kits/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_icon.png" alt="" loading="lazy" /><span>Why Mini-Kits</span></a>
+
+<a href="/mini-kits/mini-core/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_core_icon.png" alt="" loading="lazy" /><span>Mini-Core</span></a>
+<a href="/mini-kits/mini-designs/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_designs_icon.png" alt="" loading="lazy" /><span>Mini-Designs</span></a>
+<a href="/mini-kits/design-talks/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/design_talks_icon.png" alt="" loading="lazy" /><span>Design-Talks</span></a>
+<a href="/mini-kits/brick-talks/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/brick_talks_icon.png" alt="" loading="lazy" /><span>Brick-Talks</span></a>
+<a href="/mini-kits/fig-talks/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/fig_talks_icon.png" alt="" loading="lazy" /><span>Fig-Talks</span></a>
+</div></div>
+<div class="mt-nav-dropdown mt-dd-blue"><span class="mt-nav-brick mt-nav-blue">Mini-Community</span><div class="mt-nav-dropdown-panel" id="mt-panel-5">
+<a href="/mini-community/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/16_community_3D.png" alt="" loading="lazy" /><span>Why Mini-Community</span></a>
+<a href="/mini-community/mini-families/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/17_mini_families_3D.png" alt="" loading="lazy" /><span>Mini-Families</span></a>
+<a href="/mini-community/mini-volunteers/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/18_mini_volunteers_3D-e1772736794933.png" alt="" loading="lazy" /><span>Mini-Volunteers</span></a>
+<a href="/mini-community/talk-spots/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/19_talk_spots_3D.png" alt="" loading="lazy" /><span>Talk-Spots</span></a>
+<a href="/mini-community/mini-experts/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/20_mini_experts_3D.png" alt="" loading="lazy" /><span>Mini-Experts</span></a>
+<a href="/mini-community/mini-forum/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/33_forum_3D.png" alt="" loading="lazy" /><span>Mini-Forum</span></a>
+<a href="/mini-community/real-stories/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/21_forum_real_stories_en_3D.png" alt="" loading="lazy" /><span>Real Stories</span></a>
+<a href="/mini-community/join-us/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/22_join_us_en_3D.png" alt="" loading="lazy" /><span>Join Us</span></a>
+</div></div>
+<div class="mt-nav-dropdown mt-dd-green"><span class="mt-nav-brick mt-nav-green">Mini-Events</span><div class="mt-nav-dropdown-panel" id="mt-panel-6">
+<a href="/mini-events/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/24_events_news_en_da_de_3D.png" alt="" loading="lazy" /><span>Why Mini-Events</span></a>
+
+<a href="/mini-events/mini-calendar/" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_calendar.png" alt="" loading="lazy" /><span>Mini-Calendar</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-volunteer-workshops" class="mt-nav-dd-item"><img src="https://mini-talks.org/wp-content/uploads/2026/03/36_mini_workshop_3D.png" alt="" loading="lazy" /><span>Mini-Workshops</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-family-meetups" class="mt-nav-dd-item"><span class="mt-family-icon" aria-hidden="true"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_family_meetups-1.png" alt="" loading="lazy" /></span><span>Mini-Family Meetups</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-expert-sessions" class="mt-nav-dd-item mt-expert-card"><span class="mt-expert-icon" aria-hidden="true"><img src="https://mini-talks.org/wp-content/uploads/2026/09/mini_expert_sessions-1.png" alt="" loading="lazy" decoding="async" /></span><span>Mini-Expert Sessions</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-community-updates" class="mt-nav-dd-item"><!-- TODO_ICON: Mini-Updates --><span class="mt-icon-placeholder" aria-hidden="true"></span><span>Mini-Updates</span></a>
+
+<a href="/mini-events/mini-calendar/?view=mini-special-days" class="mt-nav-dd-item"><!-- TODO_ICON: Mini-Special Days --><span class="mt-icon-placeholder" aria-hidden="true"></span><span>Mini-Special Days</span></a>
+</div></div>
+</nav>
+<div class="mt-mobile-overlay"></div><nav class="mt-mobile-menu" aria-label="Mobile navigation"><button type="button" class="mt-mobile-close" aria-label="Close menu">✕</button><a href="/" class="mt-mobile-item mt-mob-red">Home</a>
+<button type="button" class="mt-mobile-toggle mt-mob-yellow" data-target="mob-0" aria-controls="mob-0" aria-expanded="false">About Us<span class="mt-arrow" aria-hidden="true">▶</span></button><div class="mt-mobile-sub" id="mob-0">
+<a href="/our-story/">Our Story</a>
+<a href="/how-mini-talks-began/">How Mini-Talks Began</a>
+<a href="/open-letter/">Open Letter</a>
+</div>
+<button type="button" class="mt-mobile-toggle mt-mob-blue" data-target="mob-1" aria-controls="mob-1" aria-expanded="false">Mini-Talks<span class="mt-arrow" aria-hidden="true">▶</span></button><div class="mt-mobile-sub" id="mob-1">
+<a href="/what-it-is/">What It Is</a>
+<a href="/who-its-for/">Who It’s For</a>
+<a href="/how-we-keep-going/">How We Keep Going</a>
+<a href="/our-impact/">Our Impact</a>
+<a href="/share-and-follow-us/">Share &amp; Follow Us</a>
+</div>
+<button type="button" class="mt-mobile-toggle mt-mob-green" data-target="mob-2" aria-controls="mob-2" aria-expanded="false">Mini-Library<span class="mt-arrow" aria-hidden="true">▶</span></button><div class="mt-mobile-sub" id="mob-2">
+<a href="/mini-library/">Why Mini-Library</a>
+
+<a href="/mini-library/books-for-children/">Books for Children</a>
+
+<a href="/mini-library/books-for-adults/">Books for Adults</a>
+
+<a href="/mini-library/podcasts-and-videos/">Podcasts &amp; Videos</a>
+
+<a href="/mini-library/research-articles/">Research Articles</a>
+
+<a href="/mini-library/social-media-accounts/">Social Media Accounts</a>
+
+<a href="/mini-library/websites/">Websites</a>
+</div>
+<button type="button" class="mt-mobile-toggle mt-mob-red" data-target="mob-3" aria-controls="mob-3" aria-expanded="false">Studio &amp; App<span class="mt-arrow" aria-hidden="true">▶</span></button><div class="mt-mobile-sub" id="mob-3">
+
+<a href="/studio-and-app/">Why Studio &amp; App</a>
+<a href="/studio-and-app/mini-talks-studio/">Mini-Talks Studio</a>
+<a href="/studio-and-app/mini-talks-app/">Mini-Talks App</a>
+<a href="/studio-and-app/how-to-access/">How to Access</a>
+</div>
+<button type="button" class="mt-mobile-toggle mt-mob-yellow" data-target="mob-4" aria-controls="mob-4" aria-expanded="false">Mini-Kits<span class="mt-arrow" aria-hidden="true">▶</span></button><div class="mt-mobile-sub" id="mob-4">
+<a href="/mini-kits/">Why Mini-Kits</a>
+
+<a href="/mini-kits/mini-core/">Mini-Core</a>
+<a href="/mini-kits/mini-designs/">Mini-Designs</a>
+<a href="/mini-kits/design-talks/">Design-Talks</a>
+<a href="/mini-kits/brick-talks/">Brick-Talks</a>
+<a href="/mini-kits/fig-talks/">Fig-Talks</a>
+</div>
+<button type="button" class="mt-mobile-toggle mt-mob-blue" data-target="mob-5" aria-controls="mob-5" aria-expanded="false">Mini-Community<span class="mt-arrow" aria-hidden="true">▶</span></button><div class="mt-mobile-sub" id="mob-5">
+<a href="/mini-community/">Why Mini-Community</a>
+<a href="/mini-community/mini-families/">Mini-Families</a>
+<a href="/mini-community/mini-volunteers/">Mini-Volunteers</a>
+<a href="/mini-community/talk-spots/">Talk-Spots</a>
+<a href="/mini-community/mini-experts/">Mini-Experts</a>
+<a href="/mini-community/mini-forum/">Mini-Forum</a>
+<a href="/mini-community/real-stories/">Real Stories</a>
+<a href="/mini-community/join-us/">Join Us</a>
+</div>
+<button type="button" class="mt-mobile-toggle mt-mob-green" data-target="mob-6" aria-controls="mob-6" aria-expanded="false">Mini-Events<span class="mt-arrow" aria-hidden="true">▶</span></button><div class="mt-mobile-sub" id="mob-6">
+<a href="/mini-events/">Why Mini-Events</a>
+
+<a href="/mini-events/mini-calendar/">Mini-Calendar</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-volunteer-workshops">Mini-Workshops</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-family-meetups">Mini-Family Meetups</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-expert-sessions">Mini-Expert Sessions</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-community-updates">Mini-Updates</a>
+
+<a href="/mini-events/mini-calendar/?view=mini-special-days">Mini-Special Days</a>
+</div>
+</nav>
+  </div>
+
+</div>
+
+
+<script>
+(function(){
+
+  var DEFAULT_AVATAR =
+    'https://mini-talks.org/wp-content/uploads/2026/04/7476b5816f4628ed55648a07eca5eb231b3fe5a4.png';
+
+
+  /* Every copy of the header, not the first one an id lookup finds. A site
+     can carry two — a sticky one, or a separate mobile one — and only one of
+     them is the one somebody is looking at. */
+  function renderAuth(){
+
+    var wraps = document.querySelectorAll('.mt-auth-wrap');
+    if(!wraps.length) return;
+
+    var loggedIn =
+      typeof mf_ajax !== 'undefined' &&
+      mf_ajax.is_logged_in == 1 &&
+      mf_ajax.user;
+
+    var html;
+
+    if(loggedIn){
+
+      var u = mf_ajax.user;
+
+      var img =
+        (
+          u.avatar_url ||
+          mf_ajax.default_avatar ||
+          DEFAULT_AVATAR
+        );
+
+      html =
+
+        '<div class="mt-auth-box" style="position:relative">' +
+
+          '<button type="button" class="mt-auth-pill">' +
+
+            '<img class="mt-auth-avatar-img" src="' +
+            img +
+            '" alt="" onerror="this.src=\'' +
+            DEFAULT_AVATAR +
+            '\'" />' +
+
+            '<span class="mt-auth-pill-text">' +
+            u.nickname +
+            '</span>' +
+
+          '</button>' +
+
+          '<div class="mt-auth-dropdown">' +
+
+            '<a href="' +
+            mf_ajax.profile_url +
+            '" class="mt-auth-dd-item">My Profile</a>' +
+
+            '<a href="/mini-community/mini-forum/" class="mt-auth-dd-item">Mini-Forum</a>' +
+
+            '<div class="mt-auth-dd-divider"></div>' +
+
+            '<a href="' +
+            mf_ajax.forum_url.replace(/\/$/, '') +
+            '/?logout=1" class="mt-auth-dd-item mt-auth-dd-logout">Log Out</a>' +
+
+          '</div>' +
+
+        '</div>';
+
+    }
+
+    else {
+
+      var defImg =
+        (
+          typeof mf_ajax !== 'undefined' &&
+          mf_ajax.default_avatar
+        )
+        ?
+        mf_ajax.default_avatar
+        :
+        DEFAULT_AVATAR;
+
+      html =
+
+        '<button type="button" class="mt-auth-pill mt-auth-signin">' +
+
+          '<img class="mt-auth-avatar-img" src="' +
+          defImg +
+          '" alt="" onerror="this.src=\'' +
+          DEFAULT_AVATAR +
+          '\'" />' +
+
+          '<span class="mt-auth-pill-text">' +
+          'Sign in / up' +
+          '</span>' +
+
+        '</button>';
+
+    }
+
+    wraps.forEach(function(w){
+      if(w.getAttribute('data-mt-state') === (loggedIn ? 'in' : 'out')) return;
+      w.setAttribute('data-mt-state', loggedIn ? 'in' : 'out');
+      w.innerHTML = html;
+    });
+
+  }
+
+
+  if(
+    document.readyState === 'loading'
+  ){
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      renderAuth
+    );
+
+  }
+
+  else {
+
+    renderAuth();
+
+  }
+
+
+  setTimeout(
+    renderAuth,
+    500
+  );
+
+
+  /* ============================================
+     HAMBURGER MENU
+
+     Everything below is delegated from the document and scoped to the
+     .mt-header the tap happened in, rather than bound to elements looked
+     up by id when this file runs. Three reasons, all of them things that
+     happen inside Elementor:
+
+       - A header can end up on the page more than once — a sticky copy, a
+         separate mobile header. getElementById finds the first one, which
+         may not be the one on screen, and then the visible button is
+         wired to nothing. This is the one that makes a hamburger look
+         dead.
+       - The widget's markup is not always in the document when its script
+         runs; Elementor moves and re-renders it.
+       - ids have to be unique and these are not, once there are two.
+
+     Delegation sidesteps all three: there is nothing to look up in
+     advance, and a second copy works exactly as well as the first.
+  ============================================= */
+
+  var OPEN = 'mt-open';
+
+  function headerOf(el){
+    return el ? el.closest('.mt-header') : null;
+  }
+
+  function partsOf(header){
+    if(!header) return null;
+    return {
+      burger : header.querySelector('.mt-hamburger'),
+      menu   : header.querySelector('.mt-mobile-menu'),
+      overlay: header.querySelector('.mt-mobile-overlay')
+    };
+  }
+
+  var previousOverflow = '';
+
+  function isOpen(header){
+    var m = header && header.querySelector('.mt-mobile-menu');
+    return !!m && m.classList.contains(OPEN);
+  }
+
+  function openMenu(header){
+
+    var q = partsOf(header);
+    if(!q || !q.menu || !q.overlay || !q.burger) return;
+
+    previousOverflow = document.body.style.overflow;
+
+    q.menu.classList.add(OPEN);
+    q.overlay.classList.add(OPEN);
+    q.burger.classList.add('active');
+    q.burger.setAttribute('aria-expanded','true');
+
+    document.body.style.overflow = 'hidden';
+
+    var close = header.querySelector('.mt-mobile-close');
+    if(close) setTimeout(function(){ close.focus(); }, 0);
+
+  }
+
+  function closeMenu(header){
+
+    var q = partsOf(header);
+    if(!q || !q.menu || !q.overlay || !q.burger) return;
+
+    q.menu.classList.remove(OPEN);
+    q.overlay.classList.remove(OPEN);
+    q.burger.classList.remove('active');
+    q.burger.setAttribute('aria-expanded','false');
+
+    document.body.style.overflow = previousOverflow;
+    q.burger.focus();
+
+    header.querySelectorAll('.mt-mobile-sub').forEach(function(sub){
+      sub.style.setProperty('max-height','0','important');
+      sub.classList.remove('mt-sub-open');
+    });
+
+    header.querySelectorAll('.mt-mobile-toggle').forEach(function(b){
+      b.setAttribute('aria-expanded','false');
+      var a = b.querySelector('.mt-arrow');
+      if(a) a.style.transform = 'rotate(0deg)';
+    });
+
+  }
+
+
+  /* Only the first copy of this script wires the document up. The handlers
+     below are delegated and find their own header, so one set serves every
+     copy — and two sets would undo each other: each tap would open the menu
+     and then close it again, which is a hamburger that looks broken. */
+  if(window.mtHeaderWired) return;
+  window.mtHeaderWired = true;
+
+
+  document.addEventListener('click', function(e){
+
+    if(!e.target || !e.target.closest) return;
+
+
+    /* the account pill, and its menu */
+    var pill = e.target.closest('.mt-auth-pill');
+    if(pill){
+      if(pill.classList.contains('mt-auth-signin')){
+        if(typeof mtOpenAuth === 'function') mtOpenAuth();
+        else window.location.href = '/mini-community/join-us/';
+        return;
+      }
+      var box = pill.closest('.mt-auth-box');
+      var dd  = box && box.querySelector('.mt-auth-dropdown');
+      document.querySelectorAll('.mt-auth-dropdown').forEach(function(d){
+        if(d !== dd) d.classList.remove('open');
+      });
+      if(dd) dd.classList.toggle('open');
+      return;
+    }
+
+    if(!e.target.closest('.mt-auth-dropdown')){
+      document.querySelectorAll('.mt-auth-dropdown.open').forEach(function(d){
+        d.classList.remove('open');
+      });
+    }
+
+
+    /* the hamburger */
+    var burger = e.target.closest('.mt-hamburger');
+    if(burger){
+      e.preventDefault();
+      var h = headerOf(burger);
+      if(isOpen(h)) closeMenu(h); else openMenu(h);
+      return;
+    }
+
+
+    /* the X, and the backdrop behind the panel */
+    var shut = e.target.closest('.mt-mobile-close, .mt-mobile-overlay');
+    if(shut){
+      e.preventDefault();
+      closeMenu(headerOf(shut));
+      return;
+    }
+
+
+    /* a section in the mobile menu */
+    var toggle = e.target.closest('.mt-mobile-toggle');
+    if(toggle){
+
+      e.preventDefault();
+
+      var header = headerOf(toggle);
+      if(!header) return;
+
+      var panel = header.querySelector('#' + toggle.getAttribute('data-target'))
+               || document.getElementById(toggle.getAttribute('data-target'));
+      if(!panel) return;
+
+      var wasOpen = panel.classList.contains('mt-sub-open');
+
+      header.querySelectorAll('.mt-mobile-sub').forEach(function(sub){
+        sub.style.setProperty('max-height','0','important');
+        sub.classList.remove('mt-sub-open');
+      });
+
+      header.querySelectorAll('.mt-mobile-toggle').forEach(function(b){
+        b.setAttribute('aria-expanded','false');
+        var a = b.querySelector('.mt-arrow');
+        if(a) a.style.transform = 'rotate(0deg)';
+      });
+
+      if(!wasOpen){
+        panel.classList.add('mt-sub-open');
+        panel.style.setProperty('max-height', panel.scrollHeight + 'px', 'important');
+        toggle.setAttribute('aria-expanded','true');
+        var arrow = toggle.querySelector('.mt-arrow');
+        if(arrow) arrow.style.transform = 'rotate(90deg)';
+      }
+
+      return;
+    }
+
+  });
+
+
+  document.addEventListener('keydown', function(e){
+
+    if(e.key === 'Escape'){
+      document.querySelectorAll('.mt-header').forEach(function(h){
+        if(isOpen(h)) closeMenu(h);
+      });
+      document.querySelectorAll('.mt-auth-dropdown.open').forEach(function(d){
+        d.classList.remove('open');
+      });
+    }
+
+    if(e.key === 'Tab'){
+
+      var header = null;
+      document.querySelectorAll('.mt-header').forEach(function(h){
+        if(isOpen(h)) header = h;
+      });
+      if(!header) return;
+
+      var menu = header.querySelector('.mt-mobile-menu');
+      var focusables = Array.prototype.slice
+        .call(menu.querySelectorAll('button, a[href]'))
+        .filter(function(el){ return getComputedStyle(el).visibility !== 'hidden'; });
+      if(!focusables.length) return;
+
+      var first = focusables[0], last = focusables[focusables.length - 1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+
+    }
+
+  });
+
+
+  window.addEventListener('resize', function(){
+    if(window.innerWidth <= 1024) return;
+    document.querySelectorAll('.mt-header').forEach(function(h){
+      if(isOpen(h)) closeMenu(h);
+    });
+  });
+
+})();
+</script>
