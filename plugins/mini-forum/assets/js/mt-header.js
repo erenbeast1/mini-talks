@@ -243,6 +243,15 @@
     /* the account pill, and its menu */
     var pill = e.target.closest('.mt-auth-pill');
     if(pill){
+
+      /* Only the pill this script drew. A header that still carries its own
+         copy of the script draws a different one — no .mt-auth-box around it,
+         an onclick on the button instead — and drives it itself. Both would
+         then run on the same click: the page's own handler opens the menu and
+         this one, finding no menu of its own, closes everything. Which is a
+         profile photo that does nothing. */
+      if(!pill.classList.contains('mt-auth-signin') && !pill.closest('.mt-auth-box')) return;
+
       if(pill.classList.contains('mt-auth-signin')){
         if(typeof mtOpenAuth === 'function') mtOpenAuth();
         else window.location.href = '/mini-community/join-us/';

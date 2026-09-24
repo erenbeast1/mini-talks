@@ -75,6 +75,13 @@ run the same eight down every page — yellow, blue, red, green, then blue,
 yellow, green, red, the pairs swapped so the two rows do not read as one
 repeat. The four colours stay editable as `mc.bullet.1` to `.4`.
 
+**The profile photo's menu opens again when both headers are on the page.**
+With the plugin installed and the widget still holding the old header, two
+scripts drew and drove the account pill at once: the widget's own handler
+opened the menu and the plugin's, finding no menu it had drawn, closed
+everything on the same click. The plugin's now stands down for a pill it did
+not draw, so either header works on its own and so does the pair.
+
 **The site header no longer lives in the Elementor widget.** Its stylesheet and
 script ship with the plugin as `mt-header.css` and `mt-header.js`; the widget
 holds markup. A widget carrying 37KB of code is one short save away from an
