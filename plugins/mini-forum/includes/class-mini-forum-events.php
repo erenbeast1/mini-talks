@@ -339,6 +339,24 @@ class Mini_Forum_Events {
     }
 
     /**
+     * The brick beside each point of "What happens here".
+     *
+     * The designs run the same eight down every page: yellow, blue, red, green
+     * across the first row, then blue, yellow, green, red across the second —
+     * the pairs swapped, so the two rows do not read as one repeat. It is not a
+     * cycle, which is what it had been drawn as, and a cycle put a different
+     * brick against every point.
+     *
+     * The colours themselves are mc.bullet.1 to .4 and can be changed; this is
+     * the order they are used in.
+     */
+    public static function bullet($i) {
+        $order = apply_filters('mf_events_bullet_order', array(1, 2, 3, 4, 2, 1, 4, 3));
+        $n = $order[($i - 1) % count($order)];
+        return Mini_Forum_Design::get('mc.bullet.' . $n);
+    }
+
+    /**
      * The picture at the top of a page, as its own editable block.
      *
      * Mini-Expert Sessions uses the cropping one: the design's picture has a

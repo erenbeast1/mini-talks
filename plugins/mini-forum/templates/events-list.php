@@ -24,7 +24,7 @@ for ($i = 1; $i <= 8; $i++) {
     $text  = Mini_Forum_Design::get('mc.expect.' . $slug . '.' . $i . '.text');
     if (trim(strip_tags($title)) === '') continue;
     $items .= mf_block_get('mc.expect.item', array(
-        'bullet' => esc_url(Mini_Forum_Design::get('mc.bullet.' . (($i % 4) + 1))),
+        'bullet' => esc_url(Mini_Forum_Events::bullet($i)),
         'title'  => esc_html($title),
         'text'   => esc_html($text),
     ));

@@ -69,6 +69,12 @@ title and paragraph are Design areas — `mc.head.<name>.image`, `.title` and
 moved from the design's `<svg><image href>`, which the design layer will not
 carry, into the stylesheet.
 
+**The bricks beside the points read in the designs' order.** They had been
+drawn as a cycle, which put a different brick against every point; the designs
+run the same eight down every page — yellow, blue, red, green, then blue,
+yellow, green, red, the pairs swapped so the two rows do not read as one
+repeat. The four colours stay editable as `mc.bullet.1` to `.4`.
+
 **The site header no longer lives in the Elementor widget.** Its stylesheet and
 script ship with the plugin as `mt-header.css` and `mt-header.js`; the widget
 holds markup. A widget carrying 37KB of code is one short save away from an
