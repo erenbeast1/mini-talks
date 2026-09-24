@@ -97,11 +97,7 @@ if ($days) {
 <div class="me-wrap">
   <section class="me-section me-kind-<?php echo esc_attr($sd['kind']); ?>" data-kind="<?php echo esc_attr($sd['kind']); ?>">
 
-    <?php mf_block('mc.list.head', array(
-      'icon'        => esc_url($sd['icon']),
-      'title'       => esc_html($sd['title']),
-      'description' => esc_html(Mini_Forum_Design::get('mc.desc.special')),
-    )); ?>
+    <?php echo Mini_Forum_Events::head('special'); ?>
 
     <?php if ($items !== ''): ?>
       <?php mf_block('mc.expect', array(

@@ -48,8 +48,8 @@ $window_end   = date('Y-m-d 23:59:59', strtotime('last day of +12 months'));
 
       mf_block('mc.section', array(
           'kind'          => esc_attr($cat['kind']),
-          'icon'          => esc_url($cat['icon']),
-          'title'         => esc_html($cat['title']),
+          'icon'          => esc_url(Mini_Forum_Design::get('mc.section.' . $cat['kind'] . '.image')),
+          'title'         => esc_html(Mini_Forum_Design::get('mc.section.' . $cat['kind'] . '.title')),
           'description'   => esc_html(Mini_Forum_Design::get('mc.desc.' . $cat['kind'])),
           'see_all_url'   => esc_url(Mini_Forum_Events::url($cat['view'])),
           'see_all_label' => esc_html($cat['see_all']),
@@ -81,8 +81,8 @@ $window_end   = date('Y-m-d 23:59:59', strtotime('last day of +12 months'));
 
   mf_block('mc.section', array(
       'kind'          => esc_attr($sd['kind']),
-      'icon'          => esc_url($sd['icon']),
-      'title'         => esc_html($sd['title']),
+      'icon'          => esc_url(Mini_Forum_Design::get('mc.section.special.image')),
+      'title'         => esc_html(Mini_Forum_Design::get('mc.section.special.title')),
       'description'   => esc_html(Mini_Forum_Design::get('mc.desc.special')),
       'see_all_url'   => esc_url(Mini_Forum_Events::url($sd['view'])),
       'see_all_label' => esc_html($sd['see_all']),

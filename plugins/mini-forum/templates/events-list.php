@@ -34,11 +34,7 @@ for ($i = 1; $i <= 8; $i++) {
 <div class="me-wrap">
   <section class="me-section me-kind-<?php echo esc_attr($cat['kind']); ?>" data-kind="<?php echo esc_attr($cat['kind']); ?>">
 
-    <?php mf_block('mc.list.head', array(
-      'icon'        => esc_url($cat['icon']),
-      'title'       => esc_html($cat['title']),
-      'description' => esc_html(Mini_Forum_Design::get('mc.desc.' . $slug)),
-    )); ?>
+    <?php echo Mini_Forum_Events::head($slug); ?>
 
     <?php if ($items !== ''): ?>
       <?php mf_block('mc.expect', array(

@@ -38,6 +38,44 @@ The superseded areas and templates are gone — `events-eventtype.php`,
 `events-updates.php` and sixteen `events.*` areas — so the Design page lists
 what is on the site and nothing else. Host an Event is untouched.
 
+**Every section wears its own colour again.** Two things had made the whole
+section blue. The designs carry a category's colour as an inline custom
+property, `style="--c:#E52828"`, and WordPress drops those: `wp_kses` keeps
+only the CSS properties on its own list and custom properties are not on it.
+And the six stylesheets each style `#me-events` on their own, which is fine
+when a page loads one of them but not when all six are merged — three of the
+five pages were even given the same body class, so the last file read decided
+the colour for all of them. The colours are classes now, and the stylesheet is
+rebuilt with each page's rules under its own class.
+
+**The pieces of those designs that carry a colour and had been left out** are
+in: the filter buttons with their pin and screen icons, Mini-Community Updates'
+*From Latest / From Oldest* order, Mini-Special Days' month filter and its
+*All 12 Months* button and its *What will you find here?* block. The programme
+note is no longer drawn on the two pages whose designs have none.
+
+**A description pasted in from an editor reads as a description.** The column
+holds both plain text typed into the admin form and HTML pasted from an editor,
+and escaping the second kind printed `<p style=…>` on the page. They are told
+apart now; the HTML goes through `wp_kses_post` minus `style`, `align` and
+`bgcolor`, because a paste's own typography fights the popup it lands in.
+
+**The page headings are editable, and show what the designs show.** Each of the
+five pages was drawing the wrong picture; they are the ones from the delivered
+HTML now, and the titles break over two lines the way they are drawn. Picture,
+title and paragraph are Design areas — `mc.head.<name>.image`, `.title` and
+`mc.desc.<name>` — and so are the small picture and heading on the hub,
+`mc.section.<name>.image` and `.title`. Mini-Expert Sessions keeps its crop,
+moved from the design's `<svg><image href>`, which the design layer will not
+carry, into the stylesheet.
+
+**The site header no longer lives in the Elementor widget.** Its stylesheet and
+script ship with the plugin as `mt-header.css` and `mt-header.js`; the widget
+holds markup. A widget carrying 37KB of code is one short save away from an
+empty header, which is how the header came to disappear. The script also
+survives a header that is on the page twice — a sticky copy, a separate mobile
+header — which is what had left the hamburger doing nothing on a phone.
+
 
 ## mini-forum 3.21.00
 

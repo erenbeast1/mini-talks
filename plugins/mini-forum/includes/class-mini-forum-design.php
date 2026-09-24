@@ -392,6 +392,57 @@ class Mini_Forum_Design {
                     array('me-special-description' => 'the story is written here',
                           'me-special-close' => 'closes it')),
 
+
+                /* The heading of each page: its picture and its wording. The
+                   pictures are the ones the designs use, and the titles break
+                   over two lines the way they are drawn, which is why they take
+                   markup rather than plain text. The paragraph under them is
+                   mc.desc.<name>, just below. */
+                'mc.head.workshop.title' => array('Mini-Volunteer Workshops &mdash; the heading', 'html',
+                    'Mini-Volunteer<br>Workshops'),
+                'mc.head.workshop.image' => array('Mini-Volunteer Workshops &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/03/36_mini_workshop_3D.png'),
+                'mc.head.family.title' => array('Mini-Family Meetups &mdash; the heading', 'html',
+                    'Mini-Family<br>Meetups'),
+                'mc.head.family.image' => array('Mini-Family Meetups &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_family_meetups-1.png'),
+                'mc.head.expert.title' => array('Mini-Expert Sessions &mdash; the heading', 'html',
+                    'Mini-Expert<br>Sessions'),
+                'mc.head.expert.image' => array('Mini-Expert Sessions &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_expert_sessions-1.png'),
+                'mc.head.updates.title' => array('Mini-Community Updates &mdash; the heading', 'html',
+                    'Mini-Community<br>Updates'),
+                'mc.head.updates.image' => array('Mini-Community Updates &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/03/16_community_3D.png'),
+                'mc.head.special.title' => array('Mini-Special Days &mdash; the heading', 'html',
+                    'Mini-Special<br>Days'),
+                'mc.head.special.image' => array('Mini-Special Days &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
+
+                /* The same two on the Mini-Calendar hub, where every section is
+                   drawn small and beside the others; the designs give them all
+                   the Mini-Talks logo there. */
+                'mc.section.workshop.title' => array('Hub &mdash; Mini-Volunteer Workshops heading', 'text',
+                    'Mini-Volunteer Workshops'),
+                'mc.section.workshop.image' => array('Hub &mdash; Mini-Volunteer Workshops picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
+                'mc.section.family.title' => array('Hub &mdash; Mini-Family Meetups heading', 'text',
+                    'Mini-Family Meetups'),
+                'mc.section.family.image' => array('Hub &mdash; Mini-Family Meetups picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
+                'mc.section.expert.title' => array('Hub &mdash; Mini-Expert Sessions heading', 'text',
+                    'Mini-Expert Sessions'),
+                'mc.section.expert.image' => array('Hub &mdash; Mini-Expert Sessions picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
+                'mc.section.updates.title' => array('Hub &mdash; Mini-Community Updates heading', 'text',
+                    'Mini-Community Updates'),
+                'mc.section.updates.image' => array('Hub &mdash; Mini-Community Updates picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
+                'mc.section.special.title' => array('Hub &mdash; Mini-Special Days heading', 'text',
+                    'Mini-Special Days'),
+                'mc.section.special.image' => array('Hub &mdash; Mini-Special Days picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
+
                 'mc.desc.workshop' => array('Mini-Volunteer Workshops — the paragraph', 'text',
                     'Guided play sessions at Talk-Spots or online, where children spend pressure-free time with Mini-Volunteers. Mini-Kits and the App & Studio may join the play, while families stay quietly nearby.'),
                 'mc.desc.family' => array('Mini-Family Meetups — the paragraph', 'text',
@@ -407,7 +458,15 @@ class Mini_Forum_Design {
             'calendar_pages' => array('label' => 'Mini-Calendar — the five pages', 'blocks' => array(
 
                 'mc.list.head' => array('Page heading', 'html', '@mc.list.head',
-                    array('icon' => 'The picture', 'title' => 'The page title', 'description' => 'The paragraph')),
+                    array('art' => 'The picture', 'title' => 'The page title', 'description' => 'The paragraph')),
+
+                'mc.head.art' => array('Page heading &mdash; the picture', 'html', '@mc.head.art',
+                    array('image' => 'Its address', 'alt' => 'What it shows, for a screen reader')),
+
+                'mc.head.art.crop' => array('Page heading &mdash; the cropped picture', 'html', '@mc.head.art.crop',
+                    array('image' => 'Its address', 'alt' => 'What it shows, for a screen reader'),
+                    array('me-expert-hero-art' => 'the crop lives on this class, in the stylesheet')),
+
 
                 'mc.expect' => array('What happens here — the block', 'html', '@mc.expect',
                     array('title' => 'The heading', 'lead' => 'The line under it', 'items' => 'The points'),

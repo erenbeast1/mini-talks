@@ -616,3 +616,37 @@
 .me-detail-copy table{width:100%;border-collapse:collapse;margin:0 0 14px;font-size:15px}
 .me-detail-copy :is(th,td){border:1px solid #e5e5e5;padding:8px 10px;text-align:left}
 .me-detail-copy :is(p,li):last-child{margin-bottom:0}
+
+/* ==========================================================================
+   The cropped picture in the Mini-Expert Sessions heading.
+
+   The design delivers it as an <svg> with an <image href> and a viewBox that
+   crops 254,106 1475x1369 out of a 2000x1700 picture. The design layer will
+   not carry that: its SVG allow-list has no <image> and no href of any kind,
+   on purpose, because an href inside an SVG can fetch whatever it likes.
+
+   So the crop is here instead and the picture stays a plain <img> anyone can
+   swap. The numbers are that viewBox: the image is scaled 2000/1475 wide and
+   1700/1369 tall and pulled back by 254/1475 and 106/1369, inside a box of
+   the crop's own shape, which is preserveAspectRatio="xMidYMid meet".
+   ========================================================================== */
+
+/* Written as long as the page's own rules, which force the art to fill the
+   box and the picture to cover it — both right for a plain picture, both
+   wrong for one that is carrying its own crop. */
+#me-events.me-session-page .me-section-head > .me-icon > .me-expert-hero-art{
+  display:block!important;position:relative!important;
+  height:100%!important;width:auto!important;
+  max-width:100%!important;max-height:100%!important;
+  aspect-ratio:1475 / 1369!important;
+  margin:0 auto!important;padding:0!important;
+  flex:0 0 auto!important;overflow:hidden!important;
+}
+#me-events.me-session-page .me-section-head > .me-icon > .me-expert-hero-art > img{
+  display:block!important;position:absolute!important;
+  top:-7.743%!important;left:-17.220%!important;right:auto!important;bottom:auto!important;
+  width:135.593%!important;height:124.178%!important;
+  max-width:none!important;max-height:none!important;
+  margin:0!important;padding:0!important;
+  object-fit:fill!important;object-position:center!important;
+}

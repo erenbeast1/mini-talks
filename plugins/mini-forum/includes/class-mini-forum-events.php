@@ -38,6 +38,11 @@ class Mini_Forum_Events {
      * has none arrives in the wrong colour, because it is the one piece with
      * nothing on the page to take its colour from.
      *
+     * There is no picture here. Every picture on these screens is a design
+     * area — mc.head.<name>.image for a page's own heading, mc.section.<name>
+     * .image for the small one on the hub — so it can be changed from the
+     * panel rather than from this file.
+     *
      * 'page_class' is the category's own page class. The designs give three of
      * the five pages the same one, which in a single stylesheet means the last
      * page read repaints the other two; each gets its own here.
@@ -52,7 +57,6 @@ class Mini_Forum_Events {
                 'filter' => 'place', 'all_label' => 'All Locations', 'note' => true,
                 'colour' => '#E52828', 'pale' => '#FFF4F4',
                 'see_all' => 'See All Workshops',
-                'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/03/36_mini_workshop_3D.png',
             ),
             'meetup' => array(
                 'kind'   => 'family',
@@ -62,7 +66,6 @@ class Mini_Forum_Events {
                 'filter' => 'place', 'all_label' => 'All Locations', 'note' => true,
                 'colour' => '#FFCC00', 'pale' => '#FFFAE7',
                 'see_all' => 'See All Meetups',
-                'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/03/17_mini_families_3D.png',
             ),
             'expert_session' => array(
                 'kind'   => 'expert',
@@ -72,7 +75,6 @@ class Mini_Forum_Events {
                 'filter' => 'place', 'all_label' => 'All Sessions', 'note' => true,
                 'colour' => '#0055BF', 'pale' => '#F1F7FF',
                 'see_all' => 'See All Sessions',
-                'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/03/20_mini_experts_3D.png',
             ),
             'update' => array(
                 'kind'   => 'updates',
@@ -82,7 +84,6 @@ class Mini_Forum_Events {
                 'filter' => 'sort', 'all_label' => 'From Latest', 'note' => false,
                 'colour' => '#237841', 'pale' => '#F6FCF8',
                 'see_all' => 'See All Updates',
-                'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png',
             ),
         ));
     }
@@ -97,7 +98,6 @@ class Mini_Forum_Events {
             'filter' => 'month', 'all_label' => 'All 12 Months', 'note' => false,
             'colour' => '#FF7417', 'pale' => '#FFF5ED',
             'see_all' => 'See All Special Days',
-            'icon'   => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png',
         ));
     }
 
@@ -336,6 +336,35 @@ class Mini_Forum_Events {
                    'value' => 'oldest', 'on' => 'false',
                    'tone' => 'mw-tone-ink', 'label' => 'From Oldest',
                ));
+    }
+
+    /**
+     * The picture at the top of a page, as its own editable block.
+     *
+     * Mini-Expert Sessions uses the cropping one: the design's picture has a
+     * lot of room around the art, and the crop is CSS rather than the design's
+     * own <svg><image href>, which the design layer will not carry. Swap that
+     * block for the plain one if the picture is ever replaced with a tight crop.
+     */
+    public static function head_art($kind) {
+        $block = $kind === 'expert' ? 'mc.head.art.crop' : 'mc.head.art';
+        return mf_block_get($block, array(
+            'image' => esc_url(Mini_Forum_Design::get('mc.head.' . $kind . '.image')),
+            /* The heading breaks over two lines; a screen reader should hear
+               the words apart, not "Mini-VolunteerWorkshops". */
+            'alt'   => esc_attr(trim(preg_replace('/\s+/', ' ',
+                           wp_strip_all_tags(str_replace(array('<br>', '<br/>', '<br />'), ' ',
+                               Mini_Forum_Design::get('mc.head.' . $kind . '.title')))))),
+        ));
+    }
+
+    /** The whole heading: picture, title and paragraph, all three editable. */
+    public static function head($kind) {
+        return mf_block_get('mc.list.head', array(
+            'art'         => self::head_art($kind),
+            'title'       => Mini_Forum_Design::render('mc.head.' . $kind . '.title'),
+            'description' => esc_html(Mini_Forum_Design::get('mc.desc.' . $kind)),
+        ));
     }
 
     /** Whichever of the two a category asks for. */
