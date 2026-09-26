@@ -393,32 +393,6 @@ class Mini_Forum_Design {
                           'me-special-close' => 'closes it')),
 
 
-                /* The heading of each page: its picture and its wording. The
-                   pictures are the ones the designs use, and the titles break
-                   over two lines the way they are drawn, which is why they take
-                   markup rather than plain text. The paragraph under them is
-                   mc.desc.<name>, just below. */
-                'mc.head.workshop.title' => array('Mini-Volunteer Workshops &mdash; the heading', 'html',
-                    'Mini-Volunteer<br>Workshops'),
-                'mc.head.workshop.image' => array('Mini-Volunteer Workshops &mdash; the heading picture', 'text',
-                    'https://mini-talks.org/wp-content/uploads/2026/03/36_mini_workshop_3D.png'),
-                'mc.head.family.title' => array('Mini-Family Meetups &mdash; the heading', 'html',
-                    'Mini-Family<br>Meetups'),
-                'mc.head.family.image' => array('Mini-Family Meetups &mdash; the heading picture', 'text',
-                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_family_meetups-1.png'),
-                'mc.head.expert.title' => array('Mini-Expert Sessions &mdash; the heading', 'html',
-                    'Mini-Expert<br>Sessions'),
-                'mc.head.expert.image' => array('Mini-Expert Sessions &mdash; the heading picture', 'text',
-                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_expert_sessions-1.png'),
-                'mc.head.updates.title' => array('Mini-Community Updates &mdash; the heading', 'html',
-                    'Mini-Community<br>Updates'),
-                'mc.head.updates.image' => array('Mini-Community Updates &mdash; the heading picture', 'text',
-                    'https://mini-talks.org/wp-content/uploads/2026/03/16_community_3D.png'),
-                'mc.head.special.title' => array('Mini-Special Days &mdash; the heading', 'html',
-                    'Mini-Special<br>Days'),
-                'mc.head.special.image' => array('Mini-Special Days &mdash; the heading picture', 'text',
-                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
-
                 /* The same two on the Mini-Calendar hub, where every section is
                    drawn small and beside the others; the designs give them all
                    the Mini-Talks logo there. */
@@ -442,20 +416,50 @@ class Mini_Forum_Design {
                     'Mini-Special Days'),
                 'mc.section.special.image' => array('Hub &mdash; Mini-Special Days picture', 'text',
                     'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
-
-                'mc.desc.workshop' => array('Mini-Volunteer Workshops — the paragraph', 'text',
-                    'Guided play sessions at Talk-Spots or online, where children spend pressure-free time with Mini-Volunteers. Mini-Kits and the App & Studio may join the play, while families stay quietly nearby.'),
-                'mc.desc.family' => array('Mini-Family Meetups — the paragraph', 'text',
-                    'Family gatherings at Talk-Spots or online — with or without children — where families find peer support, share experiences, and know they are not alone.'),
-                'mc.desc.expert' => array('Mini-Expert Sessions — the paragraph', 'text',
-                    'Online sessions where clinicians, educators, and researchers share knowledge with the Mini-Talks community. Explore one topic at a time, listen at your own pace, and bring questions about the session’s subject.'),
-                'mc.desc.updates' => array('Mini-Community Updates — the paragraph', 'text',
-                    'News, stories, and milestones from across the Mini-Talks community — families, volunteers, Talk-Spots, and experts around the world.'),
-                'mc.desc.special' => array('Mini-Special Days — the paragraph', 'text',
-                    'A year-round calendar of awareness days that bring attention to children\'s voices, communication, and inclusion.'),
             )),
 
             'calendar_pages' => array('label' => 'Mini-Calendar — the five pages', 'blocks' => array(
+
+                /* The heading of each page: its picture, its wording and the
+                   paragraph under it, the three of them together because that is
+                   how somebody changes a page heading.
+
+                   The pictures are the ones the designs use, and the titles break
+                   over two lines the way they are drawn, which is why they take
+                   markup rather than plain text. The paragraph is also what the
+                   hub prints under that category, so it is the one sentence for
+                   both screens. The small picture and heading on the hub are
+                   mc.section.<name>.* , under Mini-Calendar — the hub. */
+                'mc.head.workshop.title' => array('Mini-Volunteer Workshops &mdash; the heading', 'html',
+                    'Mini-Volunteer<br>Workshops'),
+                'mc.head.workshop.image' => array('Mini-Volunteer Workshops &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/03/36_mini_workshop_3D.png'),
+                'mc.head.family.title' => array('Mini-Family Meetups &mdash; the heading', 'html',
+                    'Mini-Family<br>Meetups'),
+                'mc.head.family.image' => array('Mini-Family Meetups &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_family_meetups-1.png'),
+                'mc.head.expert.title' => array('Mini-Expert Sessions &mdash; the heading', 'html',
+                    'Mini-Expert<br>Sessions'),
+                'mc.head.expert.image' => array('Mini-Expert Sessions &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_expert_sessions-1.png'),
+                'mc.head.updates.title' => array('Mini-Community Updates &mdash; the heading', 'html',
+                    'Mini-Community<br>Updates'),
+                'mc.head.updates.image' => array('Mini-Community Updates &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/03/16_community_3D.png'),
+                'mc.head.special.title' => array('Mini-Special Days &mdash; the heading', 'html',
+                    'Mini-Special<br>Days'),
+                'mc.head.special.image' => array('Mini-Special Days &mdash; the heading picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
+                'mc.desc.workshop' => array('Mini-Volunteer Workshops &mdash; the paragraph (page and hub)', 'text',
+                    'Guided play sessions at Talk-Spots or online, where children spend pressure-free time with Mini-Volunteers. Mini-Kits and the App & Studio may join the play, while families stay quietly nearby.'),
+                'mc.desc.family' => array('Mini-Family Meetups &mdash; the paragraph (page and hub)', 'text',
+                    'Family gatherings at Talk-Spots or online — with or without children — where families find peer support, share experiences, and know they are not alone.'),
+                'mc.desc.expert' => array('Mini-Expert Sessions &mdash; the paragraph (page and hub)', 'text',
+                    'Online sessions where clinicians, educators, and researchers share knowledge with the Mini-Talks community. Explore one topic at a time, listen at your own pace, and bring questions about the session’s subject.'),
+                'mc.desc.updates' => array('Mini-Community Updates &mdash; the paragraph (page and hub)', 'text',
+                    'News, stories, and milestones from across the Mini-Talks community — families, volunteers, Talk-Spots, and experts around the world.'),
+                'mc.desc.special' => array('Mini-Special Days &mdash; the paragraph (page and hub)', 'text',
+                    'A year-round calendar of awareness days that bring attention to children\'s voices, communication, and inclusion.'),
 
                 'mc.list.head' => array('Page heading', 'html', '@mc.list.head',
                     array('art' => 'The picture', 'title' => 'The page title', 'description' => 'The paragraph')),
