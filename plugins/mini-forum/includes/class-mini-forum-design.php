@@ -1697,6 +1697,34 @@ class Mini_Forum_Design {
         }
     }
 
+    /**
+     * What a 'text' area keeps of what was typed into it.
+     *
+     * sanitize_text_field throws tags away, which is right until somebody
+     * pastes what the media library or an editor handed them — a whole
+     * <img src="…"> — into a field that wants an address. Stripping that
+     * leaves nothing behind: the page says "Saved", the field is blank, and
+     * the picture has quietly gone. Somebody doing that twice concludes the
+     * panel does not work.
+     *
+     * So when the field is an address — the default it shipped with is one —
+     * or when stripping would have emptied it, the address inside is what is
+     * kept. A field of ordinary words is untouched.
+     */
+    private static function plain($raw, $default = '') {
+        $raw = (string) $raw;
+        $out = sanitize_text_field($raw);
+        $wants_url = (bool) preg_match('#^https?://#i', (string) $default);
+
+        if ($wants_url || $out === '') {
+            if (preg_match('/\b(?:src|href)\s*=\s*["\']([^"\']+)["\']/i', $raw, $m))
+                return esc_url_raw(trim($m[1]));
+            if (preg_match('#https?://[^\s"\'<>]+#i', $raw, $m))
+                return esc_url_raw(trim($m[0]));
+        }
+        return $out;
+    }
+
     private static function save_blocks() {
         $in    = isset($_POST['blocks']) && is_array($_POST['blocks']) ? wp_unslash($_POST['blocks']) : array();
         $reset = isset($_POST['reset'])  && is_array($_POST['reset'])  ? $_POST['reset'] : array();
@@ -1711,7 +1739,7 @@ class Mini_Forum_Design {
                 if (!empty($reset[$id])) { unset($out[$id], $base[$id]); continue; }
                 if (!isset($in[$id])) continue;
 
-                $val = $def[1] === 'text' ? sanitize_text_field($in[$id]) : wp_kses($in[$id], self::allowed_html());
+                $val = $def[1] === 'text' ? self::plain($in[$id], $def[2]) : wp_kses($in[$id], self::allowed_html());
                 // Matching the default is not a customisation; storing it would
                 // freeze this area against every future plugin update.
                 if ($val === $def[2]) { unset($out[$id]); continue; }

@@ -69,6 +69,15 @@ title and paragraph are Design areas — `mc.head.<name>.image`, `.title` and
 moved from the design's `<svg><image href>`, which the design layer will not
 carry, into the stylesheet.
 
+**A picture pasted in as an `<img>` tag no longer vanishes.** A field that
+wants an address was stripping the tags off whatever was pasted, and what the
+media library and the editor hand you is a whole `<img src="…">`. Stripping
+that left nothing: the page said *Saved*, the field was blank, and the picture
+was gone — twice over, that reads as a panel that does not work. The address
+inside is now what is kept, whether it arrives as a tag, a link around a
+picture, a figure, or a sentence with an address in it. A field of ordinary
+words is untouched.
+
 **Every word and picture on these screens is now an area.** The Mini-Calendar
 hub's own heading, its two lines and its picture were written into the
 template, so the one screen the panel is named after could not be edited from
