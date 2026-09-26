@@ -11,7 +11,7 @@ $prefill_email = $cu ? $cu->user_email : '';
   <div style="display:flex;align-items:center;gap:14px;margin:30px 0 16px">
     <a href="<?php echo esc_url($eurl); ?>" class="mfe-back">‹ Mini-Events</a>
   </div>
-  <?php mf_block('host.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
+  <?php mf_block('host.hero', array('logo' => esc_url(Mini_Forum_Design::get('host.logo')))); ?>
 </div>
 
 <!-- ═══ HOST FORM (yellow band, brick button, no heart) ═══ -->

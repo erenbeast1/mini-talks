@@ -396,6 +396,24 @@ class Mini_Forum_Design {
                 /* The same two on the Mini-Calendar hub, where every section is
                    drawn small and beside the others; the designs give them all
                    the Mini-Talks logo there. */
+                /* The hub's own heading. It was written into the template, so
+                   the one screen the panel is named after could not be edited
+                   from it. */
+                'mc.hero.title' => array('Hub &mdash; the heading', 'text', 'Mini-Calendar'),
+                'mc.hero.lead' => array('Hub &mdash; the line under it', 'text',
+                    'Explore all Mini-Talks events for the selected month in one calendar.'),
+                'mc.hero.body' => array('Hub &mdash; the paragraph', 'text',
+                    'Browse workshops, family meetups, expert sessions, community updates, and special days. Use the arrows to explore other months.'),
+                'mc.hero.art' => array('Hub &mdash; the picture beside it', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_calendar.png'),
+
+                /* The button at the foot of each section on the hub. */
+                'mc.seeall.workshop' => array('Hub &mdash; Workshops button', 'text', 'See All Workshops'),
+                'mc.seeall.family' => array('Hub &mdash; Meetups button', 'text', 'See All Meetups'),
+                'mc.seeall.expert' => array('Hub &mdash; Sessions button', 'text', 'See All Sessions'),
+                'mc.seeall.updates' => array('Hub &mdash; Updates button', 'text', 'See All Updates'),
+                'mc.seeall.special' => array('Hub &mdash; Special Days button', 'text', 'See All Special Days'),
+
                 'mc.section.workshop.title' => array('Hub &mdash; Mini-Volunteer Workshops heading', 'text',
                     'Mini-Volunteer Workshops'),
                 'mc.section.workshop.image' => array('Hub &mdash; Mini-Volunteer Workshops picture', 'text',
@@ -638,6 +656,16 @@ class Mini_Forum_Design {
                           'title' => 'The day', 'story' => 'The story')),
                 'mc.sd.empty' => array('Special days — none yet', 'text', 'No special days have been added yet.'),
 
+                /* The wording on the filter buttons. The place and month names
+                   come from the events themselves; these are the fixed ones. */
+                'mc.filters.allmonths' => array('Filters &mdash; the show-every-month button', 'text', 'All Months'),
+                'mc.filters.oldest' => array('Filters &mdash; the oldest-first button, Updates', 'text', 'From Oldest'),
+                'mc.all.workshop' => array('Filters &mdash; Workshops, the show-everything button', 'text', 'All Locations'),
+                'mc.all.family' => array('Filters &mdash; Meetups, the show-everything button', 'text', 'All Locations'),
+                'mc.all.expert' => array('Filters &mdash; Sessions, the show-everything button', 'text', 'All Sessions'),
+                'mc.all.updates' => array('Filters &mdash; Updates, the newest-first button', 'text', 'From Latest'),
+                'mc.all.special' => array('Filters &mdash; Special Days, the show-everything button', 'text', 'All 12 Months'),
+
                 'mc.bullet.1' => array('Brick 1, beside a point', 'text',
                     'https://mini-talks.org/wp-content/uploads/2026/08/mini-talks-bullet-yellow.png'),
                 'mc.bullet.2' => array('Brick 2, beside a point', 'text',
@@ -649,6 +677,8 @@ class Mini_Forum_Design {
             )),
 
             'host' => array('label' => 'Host an Event', 'blocks' => array(
+                'host.logo' => array('The picture at the top', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
                 'host.hero' => array('Hero', 'html',
                     '@host.hero',
                     array('logo' => 'The Mini-Talks logo URL')),

@@ -31,7 +31,8 @@ foreach ($days as $day) {
 
 $sections = '';
 $month_buttons = mf_block_get('mc.filters.month', array(
-    'value' => 'all', 'on' => 'true', 'label' => 'All Months',
+    'value' => 'all', 'on' => 'true',
+    'label' => esc_html(Mini_Forum_Design::get('mc.filters.allmonths')),
 ));
 $index = 0;
 $n = 0;

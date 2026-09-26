@@ -69,6 +69,14 @@ title and paragraph are Design areas — `mc.head.<name>.image`, `.title` and
 moved from the design's `<svg><image href>`, which the design layer will not
 carry, into the stylesheet.
 
+**Every word and picture on these screens is now an area.** The Mini-Calendar
+hub's own heading, its two lines and its picture were written into the
+template, so the one screen the panel is named after could not be edited from
+it; the same was true of the *See All* buttons, the filters' own wording and
+the picture on Host an Event. They are areas now, and a check looks for the
+shape of that mistake — a sentence handed to a block from a template — rather
+than waiting for somebody to find the next one.
+
 **The bricks beside the points read in the designs' order.** They had been
 drawn as a cycle, which put a different brick against every point; the designs
 run the same eight down every page — yellow, blue, red, green, then blue,

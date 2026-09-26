@@ -24,10 +24,10 @@ $window_end   = date('Y-m-d 23:59:59', strtotime('last day of +12 months'));
 <div class="me-wrap">
 
   <?php mf_block('mc.hero', array(
-    'title' => 'Mini-Calendar',
-    'lead'  => 'Explore all Mini-Talks events for the selected month in one calendar.',
-    'body'  => 'Browse workshops, family meetups, expert sessions, community updates, and special days. Use the arrows to explore other months.',
-    'art'   => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_calendar.png',
+    'title' => esc_html(Mini_Forum_Design::get('mc.hero.title')),
+    'lead'  => esc_html(Mini_Forum_Design::get('mc.hero.lead')),
+    'body'  => esc_html(Mini_Forum_Design::get('mc.hero.body')),
+    'art'   => esc_url(Mini_Forum_Design::get('mc.hero.art')),
   )); ?>
 
   <?php mf_block('mc.calendar', array(
@@ -52,7 +52,7 @@ $window_end   = date('Y-m-d 23:59:59', strtotime('last day of +12 months'));
           'title'         => esc_html(Mini_Forum_Design::get('mc.section.' . $cat['kind'] . '.title')),
           'description'   => esc_html(Mini_Forum_Design::get('mc.desc.' . $cat['kind'])),
           'see_all_url'   => esc_url(Mini_Forum_Events::url($cat['view'])),
-          'see_all_label' => esc_html($cat['see_all']),
+          'see_all_label' => esc_html(Mini_Forum_Design::get('mc.seeall.' . $cat['kind'])),
           'cards'         => Mini_Forum_Events::cards($rows),
       ));
   }
@@ -85,7 +85,7 @@ $window_end   = date('Y-m-d 23:59:59', strtotime('last day of +12 months'));
       'title'         => esc_html(Mini_Forum_Design::get('mc.section.special.title')),
       'description'   => esc_html(Mini_Forum_Design::get('mc.desc.special')),
       'see_all_url'   => esc_url(Mini_Forum_Events::url($sd['view'])),
-      'see_all_label' => esc_html($sd['see_all']),
+      'see_all_label' => esc_html(Mini_Forum_Design::get('mc.seeall.special')),
       'cards'         => $sd_cards,
   ));
   ?>

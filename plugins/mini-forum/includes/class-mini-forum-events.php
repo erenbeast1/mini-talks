@@ -38,8 +38,8 @@ class Mini_Forum_Events {
      * has none arrives in the wrong colour, because it is the one piece with
      * nothing on the page to take its colour from.
      *
-     * There is no picture here. Every picture on these screens is a design
-     * area — mc.head.<name>.image for a page's own heading, mc.section.<name>
+     * There is no picture here, and no wording that reaches the page. Every
+     * picture and every sentence on these screens is a design area — mc.head.<name>.image for a page's own heading, mc.section.<name>
      * .image for the small one on the hub — so it can be changed from the
      * panel rather than from this file.
      *
@@ -54,36 +54,32 @@ class Mini_Forum_Events {
                 'view'   => 'mini-volunteer-workshops',
                 'title'  => 'Mini-Volunteer Workshops',
                 'page_class' => 'me-workshop-page',
-                'filter' => 'place', 'all_label' => 'All Locations', 'note' => true,
+                'filter' => 'place', 'note' => true,
                 'colour' => '#E52828', 'pale' => '#FFF4F4',
-                'see_all' => 'See All Workshops',
             ),
             'meetup' => array(
                 'kind'   => 'family',
                 'view'   => 'mini-family-meetups',
                 'title'  => 'Mini-Family Meetups',
                 'page_class' => 'me-meetup-page',
-                'filter' => 'place', 'all_label' => 'All Locations', 'note' => true,
+                'filter' => 'place', 'note' => true,
                 'colour' => '#FFCC00', 'pale' => '#FFFAE7',
-                'see_all' => 'See All Meetups',
             ),
             'expert_session' => array(
                 'kind'   => 'expert',
                 'view'   => 'mini-expert-sessions',
                 'title'  => 'Mini-Expert Sessions',
                 'page_class' => 'me-session-page',
-                'filter' => 'place', 'all_label' => 'All Sessions', 'note' => true,
+                'filter' => 'place', 'note' => true,
                 'colour' => '#0055BF', 'pale' => '#F1F7FF',
-                'see_all' => 'See All Sessions',
             ),
             'update' => array(
                 'kind'   => 'updates',
                 'view'   => 'mini-community-updates',
                 'title'  => 'Mini-Community Updates',
                 'page_class' => 'me-updates-page',
-                'filter' => 'sort', 'all_label' => 'From Latest', 'note' => false,
+                'filter' => 'sort', 'note' => false,
                 'colour' => '#237841', 'pale' => '#F6FCF8',
-                'see_all' => 'See All Updates',
             ),
         ));
     }
@@ -95,9 +91,8 @@ class Mini_Forum_Events {
             'view'   => 'mini-special-days',
             'title'  => 'Mini-Special Days',
             'page_class' => 'me-special-page',
-            'filter' => 'month', 'all_label' => 'All 12 Months', 'note' => false,
+            'filter' => 'month', 'note' => false,
             'colour' => '#FF7417', 'pale' => '#FFF5ED',
-            'see_all' => 'See All Special Days',
         ));
     }
 
@@ -277,7 +272,10 @@ class Mini_Forum_Events {
             $seen[date('Y-m', $ts)] = date_i18n('F Y', $ts);
         }
         ksort($seen);
-        $out = mf_block_get('mc.filters.month', array('value' => 'all', 'on' => 'true', 'label' => 'All months'));
+        $out = mf_block_get('mc.filters.month', array(
+            'value' => 'all', 'on' => 'true',
+            'label' => esc_html(Mini_Forum_Design::get('mc.filters.allmonths')),
+        ));
         foreach ($seen as $value => $label) {
             $out .= mf_block_get('mc.filters.month', array(
                 'value' => esc_attr($value), 'on' => 'false', 'label' => esc_html($label),
@@ -300,7 +298,7 @@ class Mini_Forum_Events {
         }
         asort($seen);
 
-        $all = isset($cat['all_label']) ? $cat['all_label'] : 'All Locations';
+        $all = Mini_Forum_Design::get('mc.all.' . (isset($cat['kind']) ? $cat['kind'] : 'workshop'));
         $out = mf_block_get('mc.filters.place', array(
             'value' => 'all', 'on' => 'true', 'tone' => 'mw-tone-blue',
             'icon' => self::PIN_ICON, 'label' => esc_html($all),
@@ -327,14 +325,14 @@ class Mini_Forum_Events {
      * dark. The script reads data-sort, the same way it reads data-location.
      */
     public static function sort_options($cat = array()) {
-        $newest = isset($cat['all_label']) ? $cat['all_label'] : 'From Latest';
+        $newest = Mini_Forum_Design::get('mc.all.updates');
         return mf_block_get('mc.filters.sort', array(
                    'value' => 'newest', 'on' => 'true',
                    'tone' => 'mw-tone-green', 'label' => esc_html($newest),
                ))
              . mf_block_get('mc.filters.sort', array(
                    'value' => 'oldest', 'on' => 'false',
-                   'tone' => 'mw-tone-ink', 'label' => 'From Oldest',
+                   'tone' => 'mw-tone-ink', 'label' => esc_html(Mini_Forum_Design::get('mc.filters.oldest')),
                ));
     }
 
@@ -398,7 +396,7 @@ class Mini_Forum_Events {
     public static function special_filters($months, $cat) {
         return mf_block_get('mc.filters.special', array(
             'months'    => $months,
-            'all_label' => esc_html(isset($cat['all_label']) ? $cat['all_label'] : 'All 12 Months'),
+            'all_label' => esc_html(Mini_Forum_Design::get('mc.all.special')),
         ));
     }
 
