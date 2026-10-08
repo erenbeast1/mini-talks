@@ -123,6 +123,7 @@
 
   var port = null, reader = null, writer = null;
   var lineBuf = '';
+  var lastRx = '';           // cihazdan gelen son satir (hata mesajinda gosterilir)
   var waiters = [];          // {test, resolve, reject, timer}
   var state = {};            // sunucudan gelen cihaz verisi
   var faces = {};            // md_faces: { devUid: { slot: {config,url,name} } }
@@ -241,6 +242,7 @@
   }
 
   function dispatch(line) {
+    if (line && line.charAt(0) !== '#') lastRx = line;   // teshis icin son cevap
     for (var i = 0; i < waiters.length; i++) {
       if (waiters[i].test(line)) {
         var w = waiters.splice(i, 1)[0];
@@ -304,6 +306,7 @@
     navigator.serial.requestPort()
       .then(function (p) {
         port = p;
+        lastRx = '';
         return port.open({ baudRate: 115200 });
       })
       .then(function () {
@@ -338,14 +341,21 @@
                 '(or any other app talking to the kit) and try again.';
         } else if (msg.indexOf('No port selected') >= 0 || msg.indexOf('cancel') >= 0) {
           msg = 'No kit selected.';
+        } else if (msg === 'The kit did not respond' && lastRx) {
+          // Cihaz konusuyor ama beklenen alanlar yok -> firmware protokol uyumsuzlugu
+          msg = 'The kit answered, but not in the format this site expects ' +
+                '(firmware protocol mismatch). Last reply: ' +
+                (lastRx.length > 160 ? lastRx.slice(0, 160) + '…' : lastRx);
         } else if (msg === 'The kit did not respond') {
           msg = 'The kit did not respond. Press the RST button on the board once and try again. ' +
                 'If it keeps happening, unplug and replug the cable — make sure it is a data cable, not charge-only.';
         } else {
           msg = 'Could not connect: ' + msg;
         }
-        setStatus(msg, 'err');
+        // Once kapat, sonra yaz: disconnect() popup'i yeniden ciziyor ve
+        // once yazilan hata mesaji siliniyordu (popup basa donmus gibi gorunuyordu).
         disconnect();
+        setStatus(msg, 'err');
       });
   }
 
@@ -1052,8 +1062,25 @@
         ? 'Preview — try anything; nothing is saved.'
         : 'Demo mode — sample data. Everything here is interactive, and nothing is saved.'));
     } else if (dev && !live) {
-      inner.appendChild(el('p', 'md-pop-banner',
-        'Not connected — showing the last sync. Plug the kit in to download audio, rename recordings or send Figs.'));
+      var bn = el('div', 'md-pop-banner');
+      bn.appendChild(el('span', null,
+        'Not connected — showing the last sync. Plug the kit in and press Connect to download audio, rename recordings or send Figs.'));
+      var cb = connectButton('Connect');
+      cb.className = 'md-btn md-btn-primary md-btn-sm';
+      cb.style.marginLeft = '10px';
+      bn.appendChild(cb);
+      inner.appendChild(bn);
+    } else if (dev && live) {
+      /* The other half of that strip. Connect had no opposite: once the
+         browser held the kit's port, the only ways out were closing the tab
+         or Remove from profile, which is a different thing entirely — that
+         unlinks the kit, this just lets go of it. Same place, same shape, so
+         whichever state you are in the way out is where you last saw it. */
+      var on = el('div', 'md-pop-banner md-pop-banner-live');
+      on.appendChild(el('span', null,
+        'Connected — this kit is plugged in and everything under Manage is live.'));
+      on.appendChild(disconnectButton());
+      inner.appendChild(on);
     }
 
     var secs = kitSections(kit);
@@ -1061,7 +1088,7 @@
     var nav = el('nav', 'md-pop-nav');
     secs.forEach(function (sec) {
       var lock  = sectionLocked(kit, sec);
-      var label = (sec === 'connect' && key) ? 'Connected \u2713' : sectionLabel(sec);
+      var label = (sec === 'connect' && key) ? (live ? 'Connected \u2713' : 'Linked \u2713') : sectionLabel(sec);
       var b = el('button', 'md-pop-navbtn' + (sec === openSection ? ' is-on' : '') + (lock ? ' is-locked' : ''),
                  label);
       b.type = 'button';
@@ -1737,18 +1764,62 @@
      Pairing happens over the kit's USB cable: the kit sends its own id, and the
      site binds that id to this profile. That is the pairing route, and the only
      one \u2014 the kit is in the child's hands, and the cable is what they have. */
+  /* 3.4.3 — WebSerial neden yok? Guvenli olmayan (http) adres ile desteklenmeyen
+     tarayiciyi ayirt eder; ikisi icin de dogru cozumu soyler. */
+  function serialBlockReason() {
+    if (navigator.serial || demo) return '';
+    if (!window.isSecureContext) {
+      return 'This page is not opened over a secure (https://) address, so the browser blocks USB. ' +
+             'Open the site with https:// and try again.';
+    }
+    return 'This browser cannot talk to the kit. Use Chrome or Edge on a computer ' +
+           '\u2014 phones, Safari and in-app browsers cannot reach the kit.';
+  }
+
+  /* 3.4.3 — bagli (profile kayitli) kit icin yeniden USB oturumu acan dugme.
+     Onceden kit profile baglandiktan sonra sayfada Connect dugmesi kalmiyordu. */
+  /* Lets go of the kit without touching the profile: the port is released,
+     the shelf drops back to the last sync, and Connect brings it back. */
+  function disconnectButton() {
+    var b = el('button', 'md-btn md-btn-ghost md-btn-sm', 'Disconnect');
+    b.type = 'button';
+    b.style.marginLeft = '10px';
+    b.title = 'Release the kit. It stays on your profile.';
+    b.addEventListener('click', function () {
+      disconnect();
+      render();
+      if (openSlug) renderPopup();
+      setStatus('Disconnected. The kit is still on your profile — press Connect to use it again.', 'ok');
+    });
+    return b;
+  }
+
+  function connectButton(label) {
+    var b = el('button', 'md-btn md-btn-primary md-fig-cta', label);
+    b.type = 'button';
+    var why = serialBlockReason();
+    if (why) { b.disabled = true; b.title = why; }
+    b.addEventListener('click', function () { connect(); });
+    return b;
+  }
+
   function renderConnect(host, kit, key, dev, live) {
     if (key) {
       host.appendChild(el('h3', 'md-fig-title', (dev.label || kit.name) + ' is connected.'));
       host.appendChild(el('p', 'md-section-note', live
         ? 'The kit is plugged in right now, so everything under Manage is live.'
-        : 'Linked to your profile. Plug it in when you want to download audio or send Figs.'));
+        : 'Linked to your profile. To download audio or send Figs, plug it in and press Connect at the top.'));
       var facts = el('div', 'md-connect-facts');
       if (dev.uid) facts.appendChild(fact(dev.uid, 'Device ID'));
       if (dev.fw)  facts.appendChild(fact(dev.fw, 'Firmware'));
       facts.appendChild(fact(fmtDate(dev.connected_at || dev.last_sync), 'Connected'));
       host.appendChild(facts);
 
+      // 3.4.4: baglanma dugmesi yalniz ustteki "Not connected" seridinde (tek yer)
+      if (!live) {
+        var why0 = serialBlockReason();
+        if (why0) host.appendChild(el('p', 'md-fig-foot', why0));
+      }
       var go = el('button', 'md-btn md-btn-primary md-fig-cta', 'Manage ' + kit.name);
       go.type = 'button';
       go.addEventListener('click', function () { gotoSection('manage'); });
@@ -1775,19 +1846,9 @@
     });
     host.appendChild(ol);
 
-    var b = el('button', 'md-btn md-btn-primary md-fig-cta', 'Connect ' + kit.name);
-    b.type = 'button';
-    if (!navigator.serial && !demo) {
-      b.disabled = true;
-      b.title = 'This browser cannot talk to the kit. Use Chrome or Edge on a computer.';
-    }
-    b.addEventListener('click', function () { connect(); });
-    host.appendChild(b);
-
-    if (!navigator.serial && !demo) {
-      host.appendChild(el('p', 'md-fig-foot',
-        'Connecting needs Chrome or Edge on a computer \u2014 phones and Safari cannot reach the kit yet.'));
-    }
+    host.appendChild(connectButton('Connect ' + kit.name));
+    var why = serialBlockReason();
+    if (why) host.appendChild(el('p', 'md-fig-foot', why));
   }
 
   /* ── Manage ── one home for everything a connected kit can do. */
@@ -2103,10 +2164,20 @@
     host.appendChild(list);
   }
 
+  /* 3.4.5 — RFID sahne adlari. Kartlara 1, 2 ... etiketi yazilir (cihazda
+     "W 1"), cihaz klasoru scene_1 olur; burada okunur ada cevrilir.
+     Sayfa MD.sceneNames ile genisletebilir. */
+  var SCENE_NAMES = Object.assign({ '1': 'Classroom', '2': 'Coffee Shop' },
+                                  (window.MD && MD.sceneNames) || {});
+  function sceneTitle(mode) {
+    var id = String(mode || '').replace(/^scene_/, '');
+    return SCENE_NAMES[id] ? SCENE_NAMES[id] + ' (Scene ' + id + ')' : 'Scene ' + id;
+  }
+
   function renderScenes(host, key, dev, live) {
     (dev.scenes || []).forEach(function (sc) {
       var isDefault = sc.mode === 'default';
-      var label = isDefault ? 'No scene (default)' : sc.mode.replace(/^scene_/, 'Scene ');
+      var label = isDefault ? 'No scene (default)' : sceneTitle(sc.mode);
 
       var folder = el('section', 'md-folder');
       var fh = el('div', 'md-folder-head');
@@ -2122,7 +2193,7 @@
         row.appendChild(el('span', 'md-slot-lvl', (LEVELS[sl.l - 1] || '') + ' · Mini ' + sl.m));
         row.appendChild(el('span', 'md-slot-len', sl.len_ms ? fmtDur(sl.len_ms) : 'empty'));
 
-        var stem = (isDefault ? 'Default' : sc.mode.replace(/^scene_/, 'Scene ')) + ' - L' + sl.l + ' M' + sl.m;
+        var stem = (isDefault ? 'Default' : (SCENE_NAMES[sc.mode.replace(/^scene_/, '')] || sc.mode.replace(/^scene_/, 'Scene '))) + ' - L' + sl.l + ' M' + sl.m;
 
         // Demo first, Download last, so the primary action holds the same
         // right-hand position on every row.

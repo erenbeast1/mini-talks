@@ -1,5 +1,37 @@
 # Mini-Talks plugins — changelog
 
+## mini-devices 3.4.6
+
+**Disconnect.** Connect had no opposite: once the browser held a kit's port the
+only ways out were closing the tab or *Remove from profile*, which is a
+different thing entirely — that unlinks the kit, this just lets go of it. The
+popup already carried an amber strip when a kit was not connected, with Connect
+in it; there is now a green one when it is, with Disconnect in it. Same place,
+same shape, so whichever state you are in, the way out is where you last saw it.
+It shows only while a kit is actually plugged in, so Mini-Designs, which has no
+hardware, never offers it. Nothing else in 3.4.5 was touched.
+
+## mini-forum 4.0.1
+
+**The pictures that were missing or wrong.** The Mini-Calendar hub drew a
+picture that is no longer there, Join Us drew two, the signed-out forum had an
+empty grey frame where one belongs, and the guidelines had eight blank squares
+where the bricks go. They are the pictures Elif sent, and the guidelines bricks
+run yellow, red, blue, green in the order she sent them.
+
+**Mini-Forum was its own subtitle.** The heading sat above a second copy of
+itself; the line under it stays, the repeat is gone.
+
+**No template holds an address any more.** Every picture on the forum, Join Us,
+Host an Event and the events screens is an area, which is what made a wrong one
+a plugin release rather than an edit. A check walks every screen signed in and
+signed out and fails on a picture with nowhere to point, on a `{{token}}` left
+behind, and on an address written into a template.
+
+**The harnesses live in the repository now**, under `tests/`, after a recycled
+container took the previous ones with it. `sh tests/run.sh` runs the lot.
+
+
 ## mini-forum 4.0.0
 
 **The events section is now the Mini-Calendar, built from the delivered

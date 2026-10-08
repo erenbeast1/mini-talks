@@ -6,6 +6,9 @@ html.mf-active{overflow-x:hidden!important}
   --mf-font:'Montserrat',sans-serif;
   --stud-red:url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-kirmizi.png');
   --stud-yellow:url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-sari.png');
+  /* The guidelines brick has its own, so changing it does not move the
+     yellow studs the profile draws. */
+  --stud-guidelines:url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-sari-4.png');
   --stud-blue:url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-mavi.png');
   --stud-green:url('https://mini-talks.org/wp-content/uploads/2026/02/yeni-3-yesil.png');
   --stud-white:url('https://mini-talks.org/wp-content/uploads/2026/02/beyaz-yeni-3.png');
@@ -117,7 +120,7 @@ html.mf-active{overflow-x:hidden!important}
 
 /* ═══ GUIDELINES — yellow brick with studs ═══ */
 .mf-guidelines-card{display:flex!important;flex-direction:column!important;margin-top:48px!important;overflow:hidden!important}
-.mf-guidelines-studs{display:block!important;width:92%!important;margin-left:auto!important;margin-right:auto!important;height:30px!important;background-image:var(--stud-yellow),var(--stud-yellow),var(--stud-yellow),var(--stud-yellow)!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,33% bottom,66% bottom,right bottom!important;background-size:26% auto,26% auto,26% auto,26% auto!important;margin-bottom:-1px!important;position:relative!important;z-index:2!important}
+.mf-guidelines-studs{display:block!important;width:92%!important;margin-left:auto!important;margin-right:auto!important;height:30px!important;background-image:var(--stud-guidelines),var(--stud-guidelines),var(--stud-guidelines),var(--stud-guidelines)!important;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat!important;background-position:left bottom,33% bottom,66% bottom,right bottom!important;background-size:26% auto,26% auto,26% auto,26% auto!important;margin-bottom:-1px!important;position:relative!important;z-index:2!important}
 .mf-guidelines-body{background:var(--mf-yellow)!important;border-radius:0 0 14px 14px!important;padding:24px 28px!important}
 .mf-guidelines-frame{background-color:var(--mf-yellow)!important;padding:0!important;padding-bottom:12px!important;border-radius:16px!important}
 .mf-guidelines-frame .mf-guidelines-body{border-radius:0!important;background:transparent!important}

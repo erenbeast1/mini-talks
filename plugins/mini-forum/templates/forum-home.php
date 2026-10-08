@@ -3,14 +3,14 @@
 <?php if (!is_user_logged_in()): ?>
 <!-- ═══ GUEST LANDING PAGE ═══ -->
 <div class="mf-container">
-  <?php mf_block('forum.guest.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
+  <?php mf_block('forum.guest.hero', array('logo' => esc_url(Mini_Forum_Design::get('forum.logo')))); ?>
 </div>
 
 <div style="width:100%;height:1px;background:#e5e5e5;margin:10px 0 40px"></div>
 
 <div class="mf-container">
   <!-- Guidelines section (title removed, grey box + text + color bars kept) -->
-  <?php mf_block('forum.guest.guidelines'); ?>
+  <?php mf_block('forum.guest.guidelines', array('art' => esc_url(Mini_Forum_Design::get('forum.guest.art')))); ?>
 </div>
 
 <div style="width:100%;height:1px;background:#e5e5e5;margin:30px 0 40px"></div>
@@ -19,9 +19,9 @@
   <!-- Forum Access -->
   <div class="mf-guest-access">
     <?php mf_block('forum.guest.access', array(
-      'join_url'   => esc_url('/mini-community/join-us/'),
-      'studs_red'  => esc_url('https://mini-talks.org/wp-content/uploads/2026/04/yeni_kirmizi_studs_4.png'),
-      'studs_blue' => esc_url('https://mini-talks.org/wp-content/uploads/2026/04/yeni_mavi_studs_4.png'),
+      'join_url'   => esc_url(Mini_Forum_Design::get('forum.join.url')),
+      'studs_red'  => esc_url(Mini_Forum_Design::get('forum.access.studs.red')),
+      'studs_blue' => esc_url(Mini_Forum_Design::get('forum.access.studs.blue')),
     )); ?>
 
     <?php mf_block('forum.guest.notice'); ?>
@@ -31,7 +31,7 @@
 <?php else: ?>
 <!-- ═══ LOGGED-IN FORUM ═══ -->
 <div class="mf-container">
-  <?php mf_block('forum.hero', array('logo' => 'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png')); ?>
+  <?php mf_block('forum.hero', array('logo' => esc_url(Mini_Forum_Design::get('forum.logo')))); ?>
 
   <?php mf_block('forum.hero.center'); ?>
 
@@ -56,11 +56,18 @@
 
   <?php
   $mf_items = '';
+  $mf_n = 0;
   foreach (array('Share in a general and comfortable way','Avoid names or personal identifiers',
                  'Focus on experiences, not advice-giving','Be kind, patient, and respectful',
                  'Avoid comparing children or progress','This is not a space for medical advice',
                  'Reflect before applying shared suggestions','Keep posts positive and non-overwhelming') as $g) {
-    $mf_items .= '<div class="mf-guideline-item"><div class="mf-guideline-icon"></div>' . esc_html($g) . '</div>';
+    /* A brick beside each line, the four colours in the order they were
+       drawn. They were blank squares: the icon had a size and a background
+       and never a picture. */
+    $mf_items .= mf_block_get('forum.guideline.item', array(
+        'bullet' => esc_url(Mini_Forum_Design::get('forum.bullet.' . (($mf_n++ % 4) + 1))),
+        'text'   => esc_html($g),
+    ));
   }
   mf_block('forum.guidelines', array('items' => $mf_items)); ?>
 </div>

@@ -11,17 +11,17 @@
 
     <!-- STEP 1 — Role Selection (open by default) -->
     <?php mf_block('join.step1', array(
-      'img_family'    => esc_url('https://mini-talks.org/wp-content/uploads/2026/03/17_mini_families_3D.png'),
-      'img_expert'    => esc_url('https://mini-talks.org/wp-content/uploads/2026/03/20_mini_experts_3D.png'),
-      'img_volunteer' => esc_url('https://mini-talks.org/wp-content/uploads/2026/03/18_mini_volunteers_3D-e1772736794933.png'),
-      'img_talkspot'  => esc_url('https://mini-talks.org/wp-content/uploads/2026/03/19_talk_spots_3D.png'),
+      'img_family'    => esc_url(Mini_Forum_Design::get('join.art.family')),
+      'img_expert'    => esc_url(Mini_Forum_Design::get('join.art.expert')),
+      'img_volunteer' => esc_url(Mini_Forum_Design::get('join.art.volunteer')),
+      'img_talkspot'  => esc_url(Mini_Forum_Design::get('join.art.talkspot')),
     )); ?>
 
     <!-- STEP 2 — Account Details (revealed after role pick) -->
     <?php mf_block('join.step2'); ?>
 
     <!-- STEP 3 — Consent (revealed after step 2 continue) -->
-    <?php mf_block('join.step3', array('img_heart' => esc_url('https://mini-talks.org/wp-content/uploads/2026/05/17-removebg-preview.png'))); ?>
+    <?php mf_block('join.step3', array('img_heart' => esc_url(Mini_Forum_Design::get('join.art.heart')))); ?>
 
   </div>
 </div>
@@ -121,7 +121,7 @@
           $('#ju-step1,#ju-step2').slideUp(250);
           $('#ju-step3 .mt-ju-card-inner').html(
             '<div class="mt-ju-success-card">' +
-              '<img src="https://mini-talks.org/wp-content/uploads/2026/05/17-removebg-preview.png" alt="" class="mt-ju-success-icon" />' +
+              '<img src="<?php echo esc_js(Mini_Forum_Design::get('join.art.heart')); ?>" alt="" class="mt-ju-success-icon" />' +
               '<h3>Thanks for joining Mini-Talks!</h3>' +
               '<p>Your application is now in <strong>pending review</strong>. ' +
               'We have sent a confirmation email to <strong>' + email + '</strong>.</p>' +

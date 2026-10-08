@@ -598,3 +598,8 @@ body.admin-bar .mdf-overlay{padding-top:52px!important}
   .md-btn,.md-kit-body,.md-pop-navbtn,.md-capacity-bar span{transition:none!important}
   .md-btn:hover,.md-btn:active,.md-pop-navbtn:hover{transform:none!important}
 }
+
+/* The connected half of the kit popup's status strip. The not-connected one is
+   amber, because it is telling you something is missing; this one is green,
+   because nothing is. Same shape, same place. */
+.md-pop-banner-live{background:#F0F8F1!important;border-left-color:var(--mf-green,#237841)!important;color:#1B5E2A!important}

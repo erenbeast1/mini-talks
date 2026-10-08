@@ -405,7 +405,7 @@ class Mini_Forum_Design {
                 'mc.hero.body' => array('Hub &mdash; the paragraph', 'text',
                     'Browse workshops, family meetups, expert sessions, community updates, and special days. Use the arrows to explore other months.'),
                 'mc.hero.art' => array('Hub &mdash; the picture beside it', 'text',
-                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_calendar.png'),
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_events_mini_calendar.png'),
 
                 /* The button at the foot of each section on the hub. */
                 'mc.seeall.workshop' => array('Hub &mdash; Workshops button', 'text', 'See All Workshops'),
@@ -687,7 +687,25 @@ class Mini_Forum_Design {
             )),
 
             'forum_more' => array('label' => 'Forum — the rest of the page', 'blocks' => array(
-                'forum.guest.guidelines' => array('Signed-out guidelines box', 'html', '@forum.guest.guidelines', array(), array()),
+                /* The pictures the forum draws. They were written into the
+                   templates, which is why a wrong one could only be fixed by
+                   shipping a plugin. */
+                'forum.logo' => array('The Mini-Talks picture in the hero', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/minitalks-logo-2.png'),
+                'forum.join.url' => array('Where Join Us lives', 'text', '/mini-community/join-us/'),
+                'forum.access.studs.red' => array('Signed-out &mdash; the red studs', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/yeni_kirmizi_studs_4.png'),
+                'forum.access.studs.blue' => array('Signed-out &mdash; the blue studs', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/04/yeni_mavi_studs_4.png'),
+                'forum.guest.art' => array('Signed-out &mdash; the picture beside the guidelines', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_community_forum.png'),
+                'forum.bullet.1' => array('Guidelines brick 1', 'text', 'https://mini-talks.org/wp-content/uploads/2026/08/mini-talks-bullet-yellow.png'),
+                'forum.bullet.2' => array('Guidelines brick 2', 'text', 'https://mini-talks.org/wp-content/uploads/2026/08/mini-talks-bullet-red.png'),
+                'forum.bullet.3' => array('Guidelines brick 3', 'text', 'https://mini-talks.org/wp-content/uploads/2026/08/mini-talks-bullet-blue.png'),
+                'forum.bullet.4' => array('Guidelines brick 4', 'text', 'https://mini-talks.org/wp-content/uploads/2026/08/mini-talks-bullet-green.png'),
+
+                'forum.guest.guidelines' => array('Signed-out guidelines box', 'html', '@forum.guest.guidelines',
+                    array('art' => 'The picture beside the lines'), array()),
                 'forum.guest.notice'     => array('Signed-out notice line', 'html', '@forum.guest.notice', array(), array()),
                 'forum.hero.center'      => array('Signed-in sub-heading', 'html', '@forum.hero.center', array(), array()),
                 'forum.actions'          => array('The four "what would you like to share" cards', 'html', '@forum.actions',
@@ -701,6 +719,8 @@ class Mini_Forum_Design {
                           'data-mf-action="load-more"' => 'loading the next page')),
                 'forum.guidelines'       => array('Signed-in guidelines card', 'html', '@forum.guidelines',
                     array('items' => 'the eight guideline lines'), array('{{items}}' => 'the guidelines')),
+                'forum.guideline.item'   => array('One guideline line', 'html', '@forum.guideline.item',
+                    array('bullet' => 'Its brick', 'text' => 'The line')),
             )),
 
 
@@ -798,6 +818,17 @@ class Mini_Forum_Design {
 
             'join' => array('label' => 'Join Us', 'blocks' => array(
                 'join.title' => array('Page heading', 'text', 'Join Us!'),
+
+                'join.art.heart' => array('Join Us &mdash; the picture on the last step', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/05/17-removebg-preview.png'),
+                'join.art.family' => array('Join Us &mdash; Mini-Families picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_community_mini_families.png'),
+                'join.art.expert' => array('Join Us &mdash; Mini-Experts picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/03/20_mini_experts_3D.png'),
+                'join.art.volunteer' => array('Join Us &mdash; Mini-Volunteers picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/09/mini_community_mini_volunteers.png'),
+                'join.art.talkspot' => array('Join Us &mdash; Talk-Spots picture', 'text',
+                    'https://mini-talks.org/wp-content/uploads/2026/03/19_talk_spots_3D.png'),
 
                 'join.step1' => array('Step 1 — choosing an area', 'html',
                     '@join.step1',
