@@ -154,4 +154,25 @@ $kits = isset($groups['minikits']['blocks']) ? $groups['minikits']['blocks'] : a
 foreach (array('mini-designs','design-talks','brick-talks','fig-talks') as $slug)
     ok(isset($kits['kits.' . $slug . '.image']), "the panel has a field for the $slug picture");
 
+echo "\n── the parts of the kits nobody asked me to touch ──\n";
+/* Work from other sessions lives in these files. A change here would be one
+   nobody asked for, so the check is that they are exactly as they arrived. */
+$dev = dirname(__DIR__) . '/plugins/mini-devices/';
+$js  = file_get_contents($dev . 'assets/mini-devices.js');
+
+ok(strpos($js, "SCENE_NAMES = Object.assign({ '1': 'Classroom', '2': 'Coffee Shop' }") !== false,
+   'the RFID card still reads scene 1 as Classroom');
+ok(strpos($js, "SCENE_NAMES[id] ? SCENE_NAMES[id] + ' (Scene ' + id + ')'") !== false,
+   'and names the rest the same way');
+ok(strpos($js, '(window.MD && MD.sceneNames)') !== false,
+   'with the page still able to add more');
+
+$faces = file_get_contents($dev . 'assets/mini-devices-faces.js');
+foreach (array('mouthIdle', 'mouths', 'mouthBox') as $piece)
+    ok(strpos($faces, $piece) !== false, "the face pack still carries $piece to the kit");
+
+$designs = file_get_contents($dev . 'includes/class-md-designs.php');
+ok(strpos($designs, "'Classroom', 'Coffee Shop', 'Supermarket'") !== false,
+   'and the server still knows the scene list');
+
 done();
