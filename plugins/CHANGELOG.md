@@ -26,6 +26,12 @@ same shape, so whichever state you are in, the way out is where you last saw it.
 It shows only while a kit is actually plugged in, so Mini-Designs, which has no
 hardware, never offers it. Nothing else in 3.4.5 was touched.
 
+## mini-forum 4.0.3
+
+Your avatar editor from 4.0.2, with the picture work below on top of it. The
+two never touched the same file: 4.0.2 changed the editor and nothing else,
+and none of the picture work went near it.
+
 ## mini-forum 4.0.1
 
 **The pictures that were missing or wrong.** The Mini-Calendar hub drew a

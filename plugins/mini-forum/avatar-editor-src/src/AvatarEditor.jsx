@@ -31,6 +31,47 @@ import {
 } from './HairModels.jsx';
 import { generateFaceItemsByCategory, FACE_CATEGORIES, FACE_CATEGORY_LABELS, FACE_CATEGORY_PARTS } from './FaceModel.jsx';
 
+// ─── v3.06: eski formatli config gocu ──────────────────────────────────────
+// Eski editor config'i model adlarini dogrudan tutuyordu (eyeModelName,
+// mouthModelName, hairTextureIndex; faceSelections/hairCategory YOK). Yeni editor
+// yalniz faceSelections okudugu icin eski profil acilinca gozluk/agiz/goz
+// varsayilana dusuyor, kaydedilince de o bozuk hal yaziliyordu.
+const EYE_SLOT_LIST   = ['eyes', 'lashes', 'glasses', 'lashes-glasses'];
+const MOUTH_SLOT_LIST = ['mouth', 'lips', 'beard'];
+
+function findFaceSelection(modelName, cats) {
+  if (!modelName) return null;
+  for (const cat of cats) {
+    const list = generateFaceItemsByCategory(cat) || [];
+    const idx = list.findIndex((it) => it && it.modelName === modelName);
+    if (idx > 0) return { cat, idx };
+  }
+  return null;
+}
+
+export function migrateLegacyConfig(cfg) {
+  if (!cfg || typeof cfg !== 'object') return {};
+  const out = { ...cfg };
+  const hasSel = out.faceSelections && typeof out.faceSelections === 'object' &&
+                 Object.keys(out.faceSelections).length > 0;
+  if (!hasSel) {
+    const fs = {};
+    const e = findFaceSelection(cfg.eyeModelName, EYE_SLOT_LIST);
+    const m = findFaceSelection(cfg.mouthModelName, MOUTH_SLOT_LIST);
+    if (e) { fs[e.cat] = e.idx; out.activeEyeSlot = e.cat; }
+    if (m) { fs[m.cat] = m.idx; out.activeMouthSlot = m.cat; }
+    out.faceSelections = fs;
+    if (cfg.eyeModelName && !e)   console.warn('[AvatarEditor] eski goz modeli eslenemedi:', cfg.eyeModelName);
+    if (cfg.mouthModelName && !m) console.warn('[AvatarEditor] eski agiz modeli eslenemedi:', cfg.mouthModelName);
+  }
+  if (!out.hairCategory && typeof out.hairTextureIndex === 'number') {
+    const hit = getAllHairItems().find((h) => h && h.textureIndex === out.hairTextureIndex &&
+                                              h.category && h.type !== 'bald');
+    if (hit) out.hairCategory = hit.category;
+  }
+  return out;
+}
+
 // ─── Color palettes (same as game) ─────────────────────────────────────────
 const HAIR_COLORS = [
   '#4D1F00', '#834400', '#E7CA63', '#000000', '#A8A8A8', '#F4F4F4', '#CC4422',
@@ -220,7 +261,7 @@ const AvatarEditor = ({
   role = 'Family',
 }) => {
   // Initial state — restored from saved config or defaults
-  const initial = initialConfig || {};
+  const initial = useMemo(() => migrateLegacyConfig(initialConfig || {}), []); // eslint-disable-line react-hooks/exhaustive-deps
   // Hair category: 'short', 'medium', 'long', 'tied', 'curly', 'fun', 'bun'
   // The 'Bald' option is just a sentinel at the top of every category — not a
   // category of its own.

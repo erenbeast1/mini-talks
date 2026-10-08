@@ -357,6 +357,30 @@ async function exportFace(config, options) {
     });
     console.log('[exportFace] kafa mesh:', headMesh ? headMesh.name : '(bulunamadi)');
 
+    // v3.06: Olcumden ONCE sahnenin oturmasini bekle. Kamera kadraji (lerp) ve
+    // figur yerlesimi sac hacmine gore birkac yuz kare surebiliyor; agiz kutusu
+    // hareket bitmeden olculurse sonraki renderlarla uyusmuyor ve kutu kayiyor
+    // (buyuk/kivircik saclarda agzin alt yarisi kesiliyordu).
+    {
+      const snap = () => {
+        camera.updateMatrixWorld(true);
+        let a = Array.from(camera.matrixWorld.elements);
+        if (headMesh) { headMesh.updateWorldMatrix(true, false); a = a.concat(Array.from(headMesh.matrixWorld.elements)); }
+        return a;
+      };
+      let prev = snap(), still = 0, waited = 0, lastDelta = 0;
+      while (waited < 360 && still < 12) {
+        await waitFrames(2); waited += 2;
+        const cur = snap();
+        lastDelta = 0;
+        for (let i = 0; i < cur.length; i++) lastDelta = Math.max(lastDelta, Math.abs(cur[i] - prev[i]));
+        still = lastDelta < 1e-5 ? still + 1 : 0;
+        prev = cur;
+      }
+      console.log('[exportFace] sahne sabitlendi:', waited, 'kare | son hareket', lastDelta.toExponential(2),
+                  still >= 12 ? '(sabit)' : '(ZAMAN ASIMI — hala hareketli)');
+    }
+
     // ── agzin gercek 3D sinir kutusu (kirpma ve MM olcegi icin) ─────────
     let mouthBox3 = null, mouthCenter = null, mouthSize = null;
 
@@ -450,6 +474,12 @@ async function exportFace(config, options) {
     await waitFrames(30);
     camera.aspect = RT_W / RT_H;
     camera.updateProjectionMatrix();
+    // v3.06: Tum renderlar ve kutu izdusumu DONDURULMUS tek bir kamerayla
+    // yapilir; canli kamerayi R3F dongusu kareler arasinda degistirebiliyor.
+    const rcam = camera.clone();
+    rcam.aspect = RT_W / RT_H;
+    rcam.updateProjectionMatrix();
+    rcam.updateMatrixWorld(true);
 
     // On yuz karanlik kaliyordu: sahnenin isiklari yandan/ustten geliyor.
     // Kameraya bagli bir dolgu isigi ekliyoruz (yalniz export sirasinda).
@@ -468,12 +498,12 @@ async function exportFace(config, options) {
       const prev = gl.getRenderTarget();
       gl.setRenderTarget(rt);
       gl.clear(true, true, true);
-      gl.render(scene, camera);
+      gl.render(scene, rcam);
       gl.setRenderTarget(prev);
     };
 
     renderToTarget();
-    const baseFull = readTarget(gl, rt, 0, 0, RT_W, RT_H, RT_H);
+    let baseFull = readTarget(gl, rt, 0, 0, RT_W, RT_H, RT_H);
     let baseGrab = flattenAndScale(baseFull, opt.width, opt.height);
     console.log('[exportFace] RT', RT_W + 'x' + RT_H,
                 '| bos mu:', looksBlank(baseGrab.imageData));
@@ -488,7 +518,7 @@ async function exportFace(config, options) {
        [b.min.x, b.max.y, b.min.z], [b.max.x, b.max.y, b.min.z],
        [b.min.x, b.min.y, b.max.z], [b.max.x, b.min.y, b.max.z],
        [b.min.x, b.max.y, b.max.z], [b.max.x, b.max.y, b.max.z]].forEach((c) => {
-        const v = new THREE.Vector3(c[0], c[1], c[2]).project(camera);
+        const v = new THREE.Vector3(c[0], c[1], c[2]).project(rcam);
         pts.push([(v.x * 0.5 + 0.5) * opt.width, (-v.y * 0.5 + 0.5) * opt.height]);
       });
       let x0 = Math.min(...pts.map(p => p[0])), x1 = Math.max(...pts.map(p => p[0]));
@@ -511,8 +541,8 @@ async function exportFace(config, options) {
     for (let t = 0; t < 8 && looksBlank(baseGrab.imageData); t++) {
       await waitFrames(20);
       renderToTarget();
-      baseGrab = flattenAndScale(readTarget(gl, rt, 0, 0, RT_W, RT_H, RT_H),
-                                 opt.width, opt.height);
+      baseFull = readTarget(gl, rt, 0, 0, RT_W, RT_H, RT_H);
+      baseGrab = flattenAndScale(baseFull, opt.width, opt.height);
     }
     report('Yuz karesi alindi', 15);
 
@@ -520,10 +550,11 @@ async function exportFace(config, options) {
     plainMouthMeshes.forEach((m) => { m.visible = true; });
     await waitFrames(3);
     renderToTarget();
-    const idleCrop = readTarget(gl, rt,
-      Math.round(opt.mouthBox.x * 2), Math.round(opt.mouthBox.y * 2),
-      Math.round(opt.mouthBox.w * 2), Math.round(opt.mouthBox.h * 2), RT_H);
-    const mouthIdleRef = { v: flattenAndScale(idleCrop, opt.mouthBox.w, opt.mouthBox.h).imageData };
+    // v3.06: kareler TAM olarak okunur; agiz kutusu en sonda PIKSEL farkindan
+    // (agizli kare - agizsiz taban) bulunur. 3D izdusume guvenilmez: bazi
+    // modellerde (varsayilan agiz, hacimli sac) izdusum agzin yerini tutmuyordu.
+    const idleFull = plainMouthMeshes.length ? readTarget(gl, rt, 0, 0, RT_W, RT_H, RT_H) : null;
+    const mouthIdleRef = { v: null };
     plainMouthMeshes.forEach((m) => { m.visible = false; });
 
     // ── MM agizlari ─────────────────────────────────────────────────────
@@ -536,6 +567,7 @@ async function exportFace(config, options) {
     loader.setResourcePath(`${opt.glbBase}/face/`);
 
     const mouths = [];
+    const mouthFulls = [];
     const sx = Math.round(opt.mouthBox.x * 2);
     const sy = Math.round(opt.mouthBox.y * 2);
     const sw = Math.min(RT_W - sx, Math.round(opt.mouthBox.w * 2));
@@ -695,13 +727,61 @@ async function exportFace(config, options) {
       }
       await waitFrames(3);
       renderToTarget();
-      const crop = readTarget(gl, rt, sx, sy, sw, sh, RT_H);
-      mouths.push(flattenAndScale(crop, opt.mouthBox.w, opt.mouthBox.h).imageData);
+      mouthFulls.push(readTarget(gl, rt, 0, 0, RT_W, RT_H, RT_H));
       report(`Agiz ${i + 1}/${MM_COUNT}`, 15 + Math.round((i + 1) / MM_COUNT * 80));
     }
 
     if (holder && holder.parent) holder.parent.remove(holder);
     plainMouthMeshes.forEach((m) => { m.visible = true; });
+
+    // ── v3.06: agiz kutusu = tabandan farkli piksellerin birlesimi ──────
+    {
+      const bdat = baseFull.data;
+      let x0 = RT_W, y0 = RT_H, x1 = -1, y1 = -1;
+      const scan = (img) => {
+        if (!img) return;
+        const d = img.data;
+        for (let y = 0; y < RT_H; y++) {
+          for (let x = 0; x < RT_W; x++) {
+            const i = (y * RT_W + x) * 4;
+            if (Math.abs(d[i] - bdat[i]) + Math.abs(d[i + 1] - bdat[i + 1]) +
+                Math.abs(d[i + 2] - bdat[i + 2]) + Math.abs(d[i + 3] - bdat[i + 3]) > 48) {
+              if (x < x0) x0 = x; if (x > x1) x1 = x;
+              if (y < y0) y0 = y; if (y > y1) y1 = y;
+            }
+          }
+        }
+      };
+      scan(idleFull);
+      mouthFulls.forEach(scan);
+      const projBox = { ...opt.mouthBox };
+      if (x1 > x0 + 4 && y1 > y0 + 4) {
+        const pad = 8;                                   // RT pikseli (= 4 cihaz pikseli)
+        x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad);
+        x1 = Math.min(RT_W - 1, x1 + pad); y1 = Math.min(RT_H - 1, y1 + pad);
+        // cift sayilara hizala (RT 2x olcekte)
+        x0 -= x0 % 2; y0 -= y0 % 2;
+        let w2 = x1 - x0 + 1; w2 += w2 % 2; if (x0 + w2 > RT_W) w2 = RT_W - x0;
+        let h2 = y1 - y0 + 1; h2 += h2 % 2; if (y0 + h2 > RT_H) h2 = RT_H - y0;
+        opt.mouthBox = { x: x0 / 2, y: y0 / 2, w: Math.floor(w2 / 2), h: Math.floor(h2 / 2) };
+        console.log('[exportFace] agiz kutusu (PIKSEL farki)', opt.mouthBox, '| izdusum kutusu', projBox);
+      } else {
+        console.warn('[exportFace] piksel farki bulunamadi, izdusum kutusu kullaniliyor', projBox);
+      }
+      const bx = Math.round(opt.mouthBox.x * 2), by = Math.round(opt.mouthBox.y * 2);
+      const bw = Math.min(RT_W - bx, Math.round(opt.mouthBox.w * 2));
+      const bh = Math.min(RT_H - by, Math.round(opt.mouthBox.h * 2));
+      const cropFull = (img) => {
+        const out = new Uint8ClampedArray(bw * bh * 4);
+        for (let r = 0; r < bh; r++) {
+          const src = ((by + r) * RT_W + bx) * 4;
+          out.set(img.data.subarray(src, src + bw * 4), r * bw * 4);
+        }
+        return new ImageData(out, bw, bh);
+      };
+      if (idleFull) mouthIdleRef.v = flattenAndScale(cropFull(idleFull), opt.mouthBox.w, opt.mouthBox.h).imageData;
+      mouthFulls.forEach((f) => mouths.push(flattenAndScale(cropFull(f), opt.mouthBox.w, opt.mouthBox.h).imageData));
+    }
 
     rt.dispose();
     gl.toneMappingExposure = prevExposure;
