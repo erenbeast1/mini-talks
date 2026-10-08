@@ -1,5 +1,12 @@
 # Mini-Talks plugins — changelog
 
+## mini-devices 3.4.7
+
+**The kit cards show their own artwork.** Fig-Talks was drawing the built-in
+SVG because the address it had moved, and Mini-Designs had no address at all,
+so it drew one too. All four are the pictures Elif sent. They stay filterable
+through `md_kit_icons`.
+
 ## mini-devices 3.4.6
 
 **Disconnect.** Connect had no opposite: once the browser held a kit's port the

@@ -130,4 +130,17 @@ foreach (array('2026/09/mini_designs_icon.png','2026/09/design_talks_icon.png','
                '2026/03/18_mini_volunteers_3D-e1772736794933.png','2026/09/mini_calendar.png') as $old)
     ok(strpos($head, $U . $old) === false, 'and no longer the old ' . basename($old));
 
+echo "\n── the kit cards on the profile shelf ──\n";
+/* Fig-Talks was drawing the built-in SVG because its address had moved, and
+   Mini-Designs had no address at all. */
+$dev = file_get_contents(dirname(__DIR__) . '/plugins/mini-devices/mini-devices.php');
+preg_match("/'icons' => apply_filters\('md_kit_icons', array\((.*?)\)\)/s", $dev, $m);
+ok(!empty($m[1]), 'the kit artwork map is where it was');
+foreach (array('fig-talks' => 'mini_kits_fig_talks', 'brick-talks' => 'mini_kits_brick_talks',
+               'design-talks' => 'mini_kits_design_talks', 'mini-designs' => 'mini_kits_mini_designs') as $slug => $file) {
+    ok(preg_match("/'" . preg_quote($slug, '/') . "'\s*=>\s*'" . preg_quote($U . '2026/09/' . $file . '.png', '/') . "'/", $m[1]),
+       "$slug draws $file.png");
+}
+ok(!preg_match("/=>\s*''/", $m[1]), 'and none of the four is left without one');
+
 done();

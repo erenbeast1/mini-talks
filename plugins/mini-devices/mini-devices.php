@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits section to the Mini-Forum profile. Members pick a Mini-Kit and request it — Mini-Designs by choosing scenes, Fig-Talks by personalising a figure — and follow it through Submitted, Contacted, Preparing, Connected. Connected kits also talk to the site over USB (WebSerial).
- * Version:     3.4.6
+ * Version:     3.4.7
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '3.4.6');
+define('MD_VER', '3.4.7');
 define('MD_PATH', plugin_dir_path(__FILE__));
 
 require_once MD_PATH . 'includes/class-md-design.php';
@@ -282,12 +282,14 @@ function md_enqueue_assets() {
         'admin' => current_user_can('manage_options') ? 1 : 0,
         // Product renders for the shelf cards. Filterable so the artwork can be
         // swapped without touching the plugin; the built-in SVG stands in if an
-        // image is missing or fails to load.
+        // image is missing or fails to load — which is what Fig-Talks and
+        // Mini-Designs were showing, one because its address had moved and one
+        // because it never had an address at all.
         'icons' => apply_filters('md_kit_icons', array(
-            'fig-talks'    => 'https://mini-talks.org/wp-content/uploads/2026/03/13_fig_talks_3D.png',
-            'brick-talks'  => 'https://mini-talks.org/wp-content/uploads/2026/03/12_brick_talks_3D.png',
-            'design-talks' => 'https://mini-talks.org/wp-content/uploads/2026/03/35_mini_settings_3D-e1772742962173.png',
-            'mini-designs' => '',
+            'fig-talks'    => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_fig_talks.png',
+            'brick-talks'  => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_brick_talks.png',
+            'design-talks' => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_design_talks.png',
+            'mini-designs' => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_mini_designs.png',
         )),
         // Copy for the screens the script draws, resolved server-side so the
         // Design page reaches inside the kit popups too.
