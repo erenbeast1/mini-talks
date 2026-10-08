@@ -29,6 +29,29 @@ class MD_Design {
         add_filter('mf_design_css_areas', array(__CLASS__, 'css_active'), 10, 2);
     }
 
+    /**
+     * The picture for each shelf card, as the Design page holds it.
+     *
+     * Falls back to what this file ships with when Mini-Forum is absent or
+     * older, the same way every string here does.
+     */
+    public static function kit_icons() {
+        $out = array();
+        foreach (self::KIT_IMAGES as $slug => $default)
+            $out[$slug] = self::t('kits.' . $slug . '.image', $default);
+        return $out;
+    }
+
+    /* Written once, read twice: these are both the fallback above and the
+       defaults the Design page offers, and the two drifting apart is how a
+       card ends up showing something nobody chose. */
+    const KIT_IMAGES = array(
+        'fig-talks'    => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_fig_talks.png',
+        'brick-talks'  => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_brick_talks.png',
+        'design-talks' => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_design_talks.png',
+        'mini-designs' => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_mini_designs.png',
+    );
+
     /** Is the Design page available at all? */
     public static function available() {
         return function_exists('mf_block_get');
@@ -65,6 +88,21 @@ class MD_Design {
             'kits.brick-talks.tagline'  => array('Brick-Talks — tagline', 'text', 'Bring personalized characters to life through voice and animation.'),
             'kits.fig-talks.name'       => array('Fig-Talks — name', 'text', 'Fig-Talks'),
             'kits.fig-talks.tagline'    => array('Fig-Talks — tagline', 'text', 'A personalized figure designed to represent the child.'),
+
+            /* The picture on each shelf card. These were the one set of
+               pictures on the site with nowhere to change them: an address in
+               the plugin, so a render that moved could only be fixed by
+               shipping a new version — which is how Fig-Talks came to be
+               drawing the fallback drawing instead of its own photograph.
+               Leave one empty and the card falls back to that drawing. */
+            'kits.mini-designs.image' => array('Mini-Designs — the picture on its card', 'text',
+                self::KIT_IMAGES['mini-designs']),
+            'kits.design-talks.image' => array('Design-Talks — the picture on its card', 'text',
+                self::KIT_IMAGES['design-talks']),
+            'kits.brick-talks.image'  => array('Brick-Talks — the picture on its card', 'text',
+                self::KIT_IMAGES['brick-talks']),
+            'kits.fig-talks.image'    => array('Fig-Talks — the picture on its card', 'text',
+                self::KIT_IMAGES['fig-talks']),
         ));
 
         $groups['minikits_status'] = array('label' => 'Mini-Kits — what a member is told', 'blocks' => array(

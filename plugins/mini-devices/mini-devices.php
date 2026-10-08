@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Mini Devices — Mini-Kits
  * Description: Adds the Mini-Kits section to the Mini-Forum profile. Members pick a Mini-Kit and request it — Mini-Designs by choosing scenes, Fig-Talks by personalising a figure — and follow it through Submitted, Contacted, Preparing, Connected. Connected kits also talk to the site over USB (WebSerial).
- * Version:     3.4.7
+ * Version:     3.4.8
  * Author:      Mini-Talks
  * Text Domain: mini-devices
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('MD_VER', '3.4.7');
+define('MD_VER', '3.4.8');
 define('MD_PATH', plugin_dir_path(__FILE__));
 
 require_once MD_PATH . 'includes/class-md-design.php';
@@ -280,17 +280,11 @@ function md_enqueue_assets() {
         // Demo mode is a front-end preview for admins. It never writes to the
         // server, so the capability check is only about who is offered it.
         'admin' => current_user_can('manage_options') ? 1 : 0,
-        // Product renders for the shelf cards. Filterable so the artwork can be
-        // swapped without touching the plugin; the built-in SVG stands in if an
-        // image is missing or fails to load — which is what Fig-Talks and
-        // Mini-Designs were showing, one because its address had moved and one
-        // because it never had an address at all.
-        'icons' => apply_filters('md_kit_icons', array(
-            'fig-talks'    => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_fig_talks.png',
-            'brick-talks'  => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_brick_talks.png',
-            'design-talks' => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_design_talks.png',
-            'mini-designs' => 'https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_mini_designs.png',
-        )),
+        // Product renders for the shelf cards, from the Design page under
+        // Mini-Kits. The built-in SVG stands in if one is missing or fails to
+        // load — which is what Fig-Talks and Mini-Designs were showing, one
+        // because its address had moved and one because it never had one.
+        'icons' => apply_filters('md_kit_icons', MD_Design::kit_icons()),
         // Copy for the screens the script draws, resolved server-side so the
         // Design page reaches inside the kit popups too.
         'text'  => MD_Design::js_text(),

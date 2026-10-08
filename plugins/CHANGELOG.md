@@ -1,5 +1,13 @@
 # Mini-Talks plugins — changelog
 
+## mini-devices 3.4.8
+
+**The kit card pictures are on the Design page**, under Mini-Kits, beside each
+kit's name and tagline. They were the one set of pictures on the site with
+nowhere to change them — an address in the plugin — which is why a render that
+moved could only be fixed by shipping a version. Leave a field empty and that
+card falls back to the built-in drawing, as before.
+
 ## mini-devices 3.4.7
 
 **The kit cards show their own artwork.** Fig-Talks was drawing the built-in
