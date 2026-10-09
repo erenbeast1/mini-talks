@@ -1,0 +1,1547 @@
+<title>Mini-Talks Technical Dossier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --blue:#0055BF; --yellow:#FFCC00; --red:#E52828; --green:#237841; --orange:#FF7417;
+  --ink:#1D1D1B; --bg:#ffffff; --bg2:#F7F7F5; --card:#ffffff; --line:#E4E4E0;
+  --mute:#5A5A56; --code-bg:#1D1D1B; --code-fg:#F2F2EE;
+  --t-blue:var(--blue); --t-red:var(--red); --t-yellow:var(--yellow);
+  --t-green:var(--green); --t-orange:var(--orange);
+  --h-key:#FFCC00; --h-str:#9BE8AE; --h-num:#FFAB70; --h-com:#8C8C84;
+  --h-fn:#79C0FF; --h-attr:#FF9EB3; --h-tag:#FF8A5B;
+  --stud:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2023.8%201.7%22%3E%3Cpath%20d%3D%22M%201.5%201.7%20V%200.22%20Q%201.5%200%201.72%200%20H%206.08%20Q%206.3%200%206.3%200.22%20V%201.7%20Z%22%2F%3E%3Cpath%20d%3D%22M%209.5%201.7%20V%200.22%20Q%209.5%200%209.72%200%20H%2014.08%20Q%2014.3%200%2014.3%200.22%20V%201.7%20Z%22%2F%3E%3Cpath%20d%3D%22M%2017.5%201.7%20V%200.22%20Q%2017.5%200%2017.72%200%20H%2022.08%20Q%2022.3%200%2022.3%200.22%20V%201.7%20Z%22%2F%3E%3C%2Fsvg%3E");
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#F2F2EE; --bg:#15151A; --bg2:#1C1C22; --card:#1E1E25; --line:#32323C;
+    --mute:#A8A8A2; --code-bg:#101016; --code-fg:#E8E8E2;
+    --t-blue:#4D93F0; --t-red:#FF6B5E; --t-yellow:#FFD84D; --t-green:#49B072; --t-orange:#FF9448;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#F2F2EE; --bg:#15151A; --bg2:#1C1C22; --card:#1E1E25; --line:#32323C;
+  --mute:#A8A8A2; --code-bg:#101016; --code-fg:#E8E8E2;
+  --t-blue:#4D93F0; --t-red:#FF6B5E; --t-yellow:#FFD84D; --t-green:#49B072; --t-orange:#FF9448;
+}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:Montserrat,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-weight:600;line-height:1.6;-webkit-text-size-adjust:100%;overflow-x:hidden}
+h1,h2,h3,h4{margin:0;line-height:1.15;font-weight:900}
+p{margin:0 0 .85em}
+p:last-child{margin-bottom:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--t-blue);outline-offset:4px;border-radius:4px}
+.wrap{width:100%;max-width:1180px;margin:0 auto;padding:0 16px}
+
+/* ---- top bar ---- */
+.bar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:blur(10px);border-bottom:2px solid var(--line)}
+.bar-in{display:flex;align-items:center;gap:14px;min-height:60px}
+.bar-logo{font-weight:900;font-size:17px;letter-spacing:-.4px;white-space:nowrap}
+.bar-logo i{font-style:normal;color:var(--t-red)}
+.bar nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.bar nav::-webkit-scrollbar{display:none}
+.bar nav a{text-decoration:none;font-size:12.5px;font-weight:800;padding:8px 11px;border-radius:6px;
+  white-space:nowrap;color:var(--mute)}
+.bar nav a:hover{background:var(--bg2);color:var(--ink)}
+.tog{flex:0 0 auto;border:2px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:6px;width:38px;height:38px;cursor:pointer;font-size:15px;line-height:1}
+.tog:hover{border-color:var(--t-blue)}
+
+/* ---- hero ---- */
+.hero{padding:52px 0 8px}
+.hero-grid{display:grid;grid-template-columns:1.45fr .85fr;gap:40px;align-items:center}
+.kicker{display:inline-block;background:var(--t-blue);color:#fff;font-size:11.5px;font-weight:900;
+  letter-spacing:.9px;text-transform:uppercase;padding:6px 12px;border-radius:5px;margin-bottom:18px}
+.hero h1{font-size:clamp(34px,5.4vw,62px);color:var(--t-red);letter-spacing:-1.3px;margin-bottom:18px}
+.hero .lead{font-size:clamp(15px,2vw,18.5px);max-width:620px}
+.hero-art{background:var(--t-yellow);border-radius:20px;padding:26px 22px;color:#1D1D1B}
+.hero-art h3{font-size:14px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+.hero-art ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hero-art li{display:flex;gap:10px;font-size:13.5px;font-weight:700;align-items:baseline}
+.hero-art li b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+  background:#1D1D1B;color:#FFCC00;padding:2px 7px;border-radius:4px;flex:0 0 auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:38px 0 10px}
+.stat{border:3px solid var(--line);border-radius:12px;padding:16px 14px;background:var(--card)}
+.stat b{display:block;font-size:clamp(22px,3.2vw,30px);font-weight:900;letter-spacing:-.8px}
+.stat span{font-size:11.5px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.5px}
+.stat:nth-child(1) b{color:var(--t-red)} .stat:nth-child(2) b{color:var(--t-blue)}
+.stat:nth-child(3) b{color:var(--t-green)} .stat:nth-child(4) b{color:var(--t-orange)}
+
+/* ---- section furniture ---- */
+section{scroll-margin-top:76px}
+.band{padding:62px 0}
+.band.alt{background:var(--bg2);border-top:2px solid var(--line);border-bottom:2px solid var(--line)}
+.s-head{max-width:760px;margin-bottom:34px}
+.s-head h2{font-size:clamp(24px,3.4vw,38px);letter-spacing:-.9px;margin-bottom:12px}
+.s-head p{color:var(--mute);font-size:15px}
+.pill{display:inline-block;font-size:11px;font-weight:900;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 11px;border-radius:5px;background:var(--tone);color:var(--tone-ink);margin-bottom:12px}
+
+/* tone resolution */
+[data-tone=red]{--tone:var(--t-red);--tone-ink:#fff}
+[data-tone=blue]{--tone:var(--t-blue);--tone-ink:#fff}
+[data-tone=green]{--tone:var(--t-green);--tone-ink:#fff}
+[data-tone=orange]{--tone:var(--t-orange);--tone-ink:#fff}
+[data-tone=yellow]{--tone:var(--t-yellow);--tone-ink:#1D1D1B}
+
+/* ---- three pillars, brick cards ---- */
+.pillars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px 24px}
+.brick{position:relative;border:7px solid var(--tone);border-radius:15px;background:var(--card);
+  padding:22px;margin-top:20px}
+.brick::before{content:"";position:absolute;left:-7px;right:-7px;bottom:calc(100% + 6px);
+  aspect-ratio:23.8/1.7;background:var(--tone);
+  -webkit-mask-image:var(--stud);mask-image:var(--stud);
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+.brick h3{font-size:19px;color:var(--tone);margin-bottom:4px}
+[data-tone=yellow] .brick h3{color:var(--ink)}
+.brick .dom{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:700;
+  color:var(--mute);margin-bottom:14px;display:block}
+.brick ul{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.brick li{font-size:13.5px;font-weight:700;padding-left:16px;position:relative}
+.brick li::before{content:"";position:absolute;left:0;top:.52em;width:8px;height:8px;border-radius:2px;
+  background:var(--tone)}
+.brick p{font-size:14px}
+
+/* ---- downloads ---- */
+.dls{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.dl{display:grid;grid-template-columns:1fr auto;gap:14px 20px;align-items:center;
+  border:3px solid var(--line);border-left:9px solid var(--tone);border-radius:11px;
+  background:var(--card);padding:15px 18px}
+.dl-txt b{display:block;font-size:15.5px;font-weight:900}
+.dl-txt span{font-size:12.5px;color:var(--mute);font-weight:700}
+.dl-get{display:grid;gap:6px;justify-items:end}
+.dl-btn{display:inline-block;text-decoration:none;background:var(--tone);color:var(--tone-ink);
+  font-size:13px;font-weight:900;padding:11px 16px;border-radius:6px;white-space:nowrap;
+  min-height:44px;display:inline-flex;align-items:center}
+.dl-btn:hover{filter:brightness(.93)}
+.dl-url{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;color:var(--mute);
+  font-weight:700;max-width:100%;overflow-wrap:anywhere;text-align:right;user-select:all}
+.dl-note{margin-top:18px;font-size:13px;color:var(--mute);border-left:4px solid var(--t-yellow);
+  padding-left:14px}
+.dl-all{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:0 0 22px}
+.dl-all span{font-size:13px;color:var(--mute);font-weight:700}
+.dl-big{--tone:var(--t-red);--tone-ink:#fff;font-size:14.5px;padding:14px 22px}
+
+/* ---- criteria ---- */
+.crit-group{margin-bottom:46px}
+.crit-group:last-child{margin-bottom:0}
+.crit-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;margin-bottom:20px;
+  padding-bottom:14px;border-bottom:3px solid var(--tone)}
+.crit-head .pill{margin:0}
+.crit-head h2{font-size:clamp(20px,2.6vw,27px);letter-spacing:-.6px}
+.crit-head p{margin:0;font-size:12px;font-weight:800;color:var(--mute);margin-left:auto}
+.crit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.crit{border:3px solid var(--line);border-radius:13px;background:var(--card);padding:22px}
+.crit h3{font-size:17.5px;color:var(--tone);margin-bottom:10px}
+[data-tone=yellow] .crit h3{color:var(--ink)}
+.crit blockquote{margin:0 0 14px;padding:10px 14px;background:var(--bg2);border-radius:7px;
+  border-left:4px solid var(--tone);font-size:13px;font-style:italic;font-weight:700;color:var(--mute)}
+.crit p{font-size:14px}
+.crit code,.crit-grid code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;
+  background:var(--bg2);padding:1px 5px;border-radius:4px;font-weight:700}
+
+/* ---- code snippets ---- */
+.code-sec{margin-bottom:12px}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px;
+  margin:0 0 34px;padding:0;list-style:none}
+.feat li{border:3px solid var(--line);border-radius:10px;background:var(--card);padding:13px 15px;
+  font-size:13.5px;font-weight:700}
+.feat li b{display:block;font-size:12px;font-weight:900;color:var(--tone);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:3px}
+[data-tone=yellow] .feat li b{color:var(--ink)}
+.snip{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:0;
+  border:3px solid var(--line);border-radius:13px;overflow:hidden;background:var(--card);
+  margin-bottom:20px}
+.snip-main{min-width:0;border-right:3px solid var(--line)}
+.snip-head{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;justify-content:space-between;
+  padding:10px 14px;background:var(--tone);color:var(--tone-ink)}
+.snip-file{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;font-weight:700;
+  overflow-wrap:anywhere}
+.snip-lines{font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.6px;opacity:.85;
+  white-space:nowrap}
+.snip-pre{margin:0;background:var(--code-bg);color:var(--code-fg);padding:16px 18px;
+  overflow-x:auto;max-height:560px;overflow-y:auto}
+.snip-pre code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.62;
+  font-weight:500;white-space:pre;display:block;tab-size:2}
+.snip-note{padding:18px 20px;min-width:0}
+.snip-note h4{font-size:15.5px;margin-bottom:10px;color:var(--tone)}
+[data-tone=yellow] .snip-note h4{color:var(--ink)}
+.snip-note p{font-size:13.5px;margin-bottom:.8em}
+.snip-note code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.87em;
+  background:var(--bg2);padding:1px 5px;border-radius:4px;font-weight:700}
+.snip-note q{font-style:italic}
+
+/* highlight.js tokens */
+.hljs-comment,.hljs-quote{color:var(--h-com);font-style:italic}
+.hljs-keyword,.hljs-selector-tag,.hljs-literal,.hljs-type{color:var(--h-key)}
+.hljs-string,.hljs-meta .hljs-string,.hljs-template-variable{color:var(--h-str)}
+.hljs-number,.hljs-symbol,.hljs-bullet{color:var(--h-num)}
+.hljs-title,.hljs-title.function_,.hljs-section{color:var(--h-fn)}
+.hljs-attr,.hljs-attribute,.hljs-variable,.hljs-property{color:var(--h-attr)}
+.hljs-tag,.hljs-name,.hljs-meta,.hljs-selector-class,.hljs-selector-id{color:var(--h-tag)}
+.hljs-built_in,.hljs-class .hljs-title{color:var(--h-fn)}
+.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}
+
+/* ---- tested / limits ---- */
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.panel{border:3px solid var(--line);border-radius:13px;background:var(--card);padding:24px}
+.panel h3{font-size:18px;margin-bottom:12px;color:var(--tone)}
+[data-tone=yellow] .panel h3{color:var(--ink)}
+.panel ul{margin:12px 0 0;padding-left:20px;display:grid;gap:8px}
+.panel li{font-size:13.5px;font-weight:700}
+.panel p{font-size:14px}
+footer{padding:44px 0 56px;border-top:2px solid var(--line);color:var(--mute);font-size:13px}
+footer b{color:var(--ink)}
+
+@media (max-width:1000px){
+  .hero-grid{grid-template-columns:1fr;gap:28px}
+  .pillars{grid-template-columns:1fr;gap:34px}
+  .crit-grid{grid-template-columns:1fr}
+  .snip{grid-template-columns:1fr}
+  .snip-main{border-right:0;border-bottom:3px solid var(--line)}
+  .two{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .band{padding:44px 0}
+  .hero{padding:34px 0 0}
+  .bar-logo{font-size:15px}
+  .dl{grid-template-columns:1fr}
+  .dl-get{justify-items:start}
+  .dl-url{text-align:left}
+  .snip-pre{padding:13px 14px;max-height:430px}
+  .snip-pre code{font-size:11.2px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <span class="bar-logo">Mini<i>-</i>Talks <span style="color:var(--mute);font-weight:800">&middot; dossier</span></span>
+    <nav><a href="#system">The system</a><a href="#download">Download</a><a href="#criteria">Criteria</a><a href="#game">Game code</a><a href="#forum">Forum code</a><a href="#devices">Kits code</a><a href="#firmware">Firmware</a><a href="#tested">Testing</a></nav>
+    <button class="tog" type="button" id="tog" aria-label="Switch between light and dark">&#9680;</button>
+  </div>
+</header>
+
+<main>
+<section class="hero wrap" id="top">
+  <div class="hero-grid">
+    <div>
+      <span class="kicker">Technical submission &middot; judged criteria</span>
+      <h1>Three codebases, one child learning to speak.</h1>
+      <p class="lead">Mini&#8209;Talks helps children with <b>selective mutism</b> practise speaking where
+      the stakes are theirs to set: a 3D game they talk to, a community site their family and their
+      speech expert share, and physical bricks that listen and answer. This page is the technical
+      account of all three &mdash; the full source to download, the core features, and
+      <b>30&nbsp;annotated extracts</b> from the code that actually ships.</p>
+    </div>
+    <aside class="hero-art">
+      <h3>What is in here</h3>
+      <ul>
+        <li><b>.com</b> React + Three.js game and its PHP/MySQL API</li>
+        <li><b>.org</b> WordPress community site, two plugins written for it</li>
+        <li><b>.io</b> ESP32&#8209;S3 firmware for three kit variants</li>
+      </ul>
+    </aside>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>108,679</b><span>lines of source</span></div>
+    <div class="stat"><b>317</b><span>source files</span></div>
+    <div class="stat"><b>30</b><span>annotated extracts</span></div>
+    <div class="stat"><b>11</b><span>criteria answered</span></div>
+  </div>
+</section>
+
+<section class="band alt" id="system">
+  <div class="wrap">
+    <div class="s-head">
+      <h2>The system</h2>
+      <p>Three deployments that know about each other. A forum member links their game account by
+      e&#8209;mail proof; a kit plugged into a laptop is recognised and bound to that same profile over
+      WebSerial, with no driver and no installer.</p>
+    </div>
+    <div class="pillars">
+      <div data-tone="blue">
+        <article class="brick">
+          <h3>The game</h3><span class="dom">mini-talks.com</span>
+          <p>A child builds a Mini, chooses a scene, and speaks. The Mini's mouth moves with their
+          voice; the attempt earns a brick whether or not the words were right.</p>
+          <ul>
+            <li>Three.js scenes with per&#8209;scene lighting and tone mapping</li>
+            <li>Live microphone level &rarr; 14 mouth frames</li>
+            <li>Character builder: face, hair, torso, legs, facial hair</li>
+            <li>Four levels: sound, word, sentence, dialogue</li>
+            <li>Recordings a parent or expert can review</li>
+            <li>Bricks &rarr; medals &rarr; cups, at a parent&#8209;set rate</li>
+            <li>Daily missions, streaks, motivation messages</li>
+            <li>Parent, expert and child dashboards</li>
+          </ul>
+        </article>
+      </div>
+      <div data-tone="green">
+        <article class="brick">
+          <h3>The community site</h3><span class="dom">mini-talks.org</span>
+          <p>Where the families, the volunteers and the speech experts are. Run entirely by the
+          charity's own staff &mdash; 278 editable areas, no deploy needed.</p>
+          <ul>
+            <li>Forum with profiles, avatars and an avatar editor</li>
+            <li>Mini&#8209;Calendar: workshops, family days, expert sessions, updates, special days</li>
+            <li>Join Us and Host an Event flows</li>
+            <li>Game&#8209;account linking by e&#8209;mail proof</li>
+            <li>Mini&#8209;Kits shelf with WebSerial device management</li>
+            <li>One Design page for every heading, picture and paragraph</li>
+            <li>English base, translated through TranslatePress</li>
+          </ul>
+        </article>
+      </div>
+      <div data-tone="yellow">
+        <article class="brick">
+          <h3>The kits</h3><span class="dom">mini-kits.io</span>
+          <p>Bricks a child can hold. Press to record, press to play back &mdash; and the same mouth
+          animation from the game, running on the brick's own screen.</p>
+          <ul>
+            <li>Three variants on ESP32&#8209;S3: Brick, D and F</li>
+            <li>I2S microphone and amplifier on separate buses</li>
+            <li>Recordings in LittleFS, with slots and history</li>
+            <li>JSON line protocol over USB serial at 115200</li>
+            <li>Bound to a profile, surviving power cycles</li>
+            <li><code>MTF1</code> face packs: base image + mouth frames</li>
+            <li>Debounced buttons, long press, idle sleep</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="download">
+  <div class="wrap">
+    <div class="s-head">
+      <h2>Download the code</h2>
+      <p>All of it, as deployed. Database credentials, mail passwords and the forum shared key are
+      replaced with placeholders, and the folder children's generated Minis are written to is left
+      out; nothing else is changed or omitted.</p>
+    </div>
+    <p class="dl-all">
+      <a class="dl-btn dl-big" href="https://github.com/erenbeast1/mini-talks/archive/refs/heads/claude/turkish-support-code-i2z7vq.zip" target="_blank" rel="noopener">Download all five
+      codebases &middot; .zip</a>
+      <span>One archive, 317 source files, the folder names they are deployed under.</span>
+    </p>
+    <ul class="dls">
+      <li class="dl" data-tone="blue">
+        <div class="dl-txt"><b>mini&#8209;talks.com &mdash; the game client</b><span>React&nbsp;18, Vite, Three.js. 81 files, 59,127 lines.</span></div>
+        <div class="dl-get">
+          <a class="dl-btn" href="https://github.com/erenbeast1/mini-talks/tree/claude/turkish-support-code-i2z7vq/game" target="_blank" rel="noopener">Browse the source</a>
+          <code class="dl-url">game/</code>
+        </div>
+      </li>
+      <li class="dl" data-tone="blue">
+        <div class="dl-txt"><b>mini&#8209;talks.com &mdash; the API</b><span>PHP&nbsp;8 + MySQL, one folder per domain. 110 files, 14,990 lines.</span></div>
+        <div class="dl-get">
+          <a class="dl-btn" href="https://github.com/erenbeast1/mini-talks/tree/claude/turkish-support-code-i2z7vq/game-api" target="_blank" rel="noopener">Browse the source</a>
+          <code class="dl-url">game-api/</code>
+        </div>
+      </li>
+      <li class="dl" data-tone="green">
+        <div class="dl-txt"><b>mini&#8209;talks.org &mdash; mini&#8209;forum</b><span>WordPress plugin: forum, profiles, Mini&#8209;Calendar, game link. 115 files, 23,329 lines.</span></div>
+        <div class="dl-get">
+          <a class="dl-btn" href="https://github.com/erenbeast1/mini-talks/tree/claude/turkish-support-code-i2z7vq/plugins/mini-forum" target="_blank" rel="noopener">Browse the source</a>
+          <code class="dl-url">plugins/mini-forum/</code>
+        </div>
+      </li>
+      <li class="dl" data-tone="green">
+        <div class="dl-txt"><b>mini&#8209;talks.org &mdash; mini&#8209;devices</b><span>WordPress plugin: the Mini&#8209;Kits shelf and WebSerial. 8 files, 5,182 lines.</span></div>
+        <div class="dl-get">
+          <a class="dl-btn" href="https://github.com/erenbeast1/mini-talks/tree/claude/turkish-support-code-i2z7vq/plugins/mini-devices" target="_blank" rel="noopener">Browse the source</a>
+          <code class="dl-url">plugins/mini-devices/</code>
+        </div>
+      </li>
+      <li class="dl" data-tone="yellow">
+        <div class="dl-txt"><b>mini&#8209;kits.io &mdash; firmware</b><span>ESP32&#8209;S3 sketches for the three kit variants. 6,051 lines.</span></div>
+        <div class="dl-get">
+          <a class="dl-btn" href="https://github.com/erenbeast1/mini-talks/tree/claude/turkish-support-code-i2z7vq/mini-kits-firmware" target="_blank" rel="noopener">Browse the source</a>
+          <code class="dl-url">mini-kits-firmware/</code>
+        </div>
+      </li>
+      <li class="dl" data-tone="orange">
+        <div class="dl-txt"><b>the test harness</b><span>The WordPress stub, the fixtures and the assertions described further down.</span></div>
+        <div class="dl-get">
+          <a class="dl-btn" href="https://github.com/erenbeast1/mini-talks/tree/claude/turkish-support-code-i2z7vq/tests" target="_blank" rel="noopener">Browse the source</a>
+          <code class="dl-url">tests/</code>
+        </div>
+      </li>
+    </ul>
+    <p class="dl-note">Repository <code>erenbeast1/mini-talks</code>, branch <code>claude/turkish-support-code-i2z7vq</code>. If a link
+    does nothing because of your browser's sandbox, copy the address into a new tab.</p>
+  </div>
+</section>
+
+<section class="band alt" id="criteria">
+  <div class="wrap">
+    <div class="s-head">
+      <h2>Answered against the criteria</h2>
+      <p>The eleven judging criteria, quoted as written, each with what in these three codebases
+      answers it.</p>
+    </div>
+  <section class="crit-group" data-tone="blue">
+    <header class="crit-head"><span class="pill">Technical</span><h2>Technical criteria</h2><p>4 of 11</p></header>
+    <div class="crit-grid">
+      <article class="crit">
+        <h3>Functionality</h3>
+        <blockquote>Project works reliably and demonstrates all major intended features</blockquote>
+        <p>Three systems are deployed and in use, not prototyped. The game runs at <b>mini&#8209;talks.com</b> with a PHP/MySQL API behind it; the community site runs at <b>mini&#8209;talks.org</b> on WordPress with two plugins written for it; the kits run firmware from <b>mini&#8209;kits.io</b> on ESP32&#8209;S3 hardware that has been assembled and handled by children.</p><p>They are joined up, not three demos: a forum member links their game account by e&#8209;mail proof, and a kit plugged into a laptop is recognised, named and bound to that same profile over WebSerial. Reliability is designed in at the seams &mdash; retries on the USB handshake, a local fallback scene board when the API is unreachable, idempotent reward writes that survive a double&#8209;tap or a retry.</p>
+      </article>
+      <article class="crit">
+        <h3>Code Quality</h3>
+        <blockquote>Code is organized, readable, well-commented, and uses appropriate structure</blockquote>
+        <p>108,679 lines across 317 source files, each codebase laid out by what it does: the API has one folder per domain (<code>auth</code>, <code>rewards</code>, <code>missions</code>, <code>streak</code>, <code>scene-level</code>&hellip;), the plugins one class per concern (<code>class-mini-forum-design.php</code>, <code>-events</code>, <code>-game</code>, <code>-avatar</code>), the firmware one sketch per kit variant with a shared wire protocol.</p><p>The comments are the part worth reading. They record <em>why</em>, including the failures: why the pixel ratio is 2&times; and not 3&times;, why the handshake sends two spellings of every field, why a default lives in one constant read twice, why a colour is a class and not an inline style. Several of the snippets below are quoted with their comments for exactly that reason.</p>
+      </article>
+      <article class="crit">
+        <h3>Use of Technology</h3>
+        <blockquote>Uses tools, libraries, hardware, APIs, or platforms effectively and appropriately</blockquote>
+        <p>Each tool is used for something it is uniquely good at. <b>Three.js</b> via react&#8209;three&#8209;fiber for the 3D scenes and the fourteen&#8209;frame mouth rig; the <b>Web&nbsp;Audio API</b> for a live loudness meter that drives it; <b>MediaRecorder</b> for recordings a parent can review; <b>WebSerial</b> to talk to physical hardware from a web page with no driver and no installer; <b>LittleFS</b> and two independent <b>I2S</b> buses on the ESP32&#8209;S3; <b>WordPress</b> because the charity's own staff already maintain content there, with <b>TranslatePress</b> over an English base.</p><p>Where a platform fights the design it is worked with rather than around: the category palette lives in classes because WordPress's <code>safecss_filter_attr</code> strips custom properties, and editable areas are sanitised before tokens are substituted rather than after.</p>
+      </article>
+      <article class="crit">
+        <h3>Testing and Debugging</h3>
+        <blockquote>Clear evidence of testing, debugging, and improvement</blockquote>
+        <p>There is a <code>tests/</code> harness in the repository: a WordPress stub faithful enough to reproduce <code>wp_kses</code> behaviour including the <code>data-*</code> wildcard, a fake <code>$wpdb</code> with fixtures, and assertions that every screen &mdash; signed in and signed out &mdash; renders with no empty <code>src</code> and no unsubstituted <code>{{token}}</code>. <code>run.sh</code> runs it alongside <code>php&nbsp;-l</code> and <code>node&nbsp;--check</code> on every file.</p><p>Rendering was measured rather than assumed: Playwright reading <code>getComputedStyle</code> to prove each category draws its own colour, the expert hero crop checked against the design's own viewBox, and no sideways scroll at 1280, 1100, 820 and 390&nbsp;px. The hamburger was tested by tapping it at phone width across four page shapes.</p><p>The bugs found that way are documented in the code: three separate faults turned out to be the same root cause &mdash; <em>the same thing present on the page twice</em>. Two stylesheets styling one id, two headers on one page, two scripts on one profile pill.</p>
+      </article>
+    </div>
+  </section>
+  <section class="crit-group" data-tone="red">
+    <header class="crit-head"><span class="pill">Impact</span><h2>Impact criteria</h2><p>4 of 11</p></header>
+    <div class="crit-grid">
+      <article class="crit">
+        <h3>Problem Relevance</h3>
+        <blockquote>Clearly addresses an accessibility, inclusion, or usability challenge for people with diverse abilities</blockquote>
+        <p>Selective mutism is an anxiety condition in which a child who speaks freely at home cannot speak at school or with unfamiliar adults. It is not shyness and not a choice, and the usual advice &mdash; encourage them to speak &mdash; raises the pressure that causes it.</p><p>What helps is graded, low&#8209;stakes practice where the child controls the stakes. That is the whole shape of this project: a child speaks to a character they built, in a room with nobody in it, at a difficulty an adult set for them, and is rewarded for having spoken at all rather than for having spoken correctly.</p>
+      </article>
+      <article class="crit">
+        <h3>User-Centered Design</h3>
+        <blockquote>Shows strong understanding of users' needs through research, interviews, personas, or testing</blockquote>
+        <p>The product was built under continuous review by the charity, with features arriving as reported needs rather than as ideas. Several are traceable in the code: <em>Disconnect</em> exists because parents were unsure whether unplugging a kit would lose their child's recordings, and the button's confirmation answers that fear in its own wording. The ownership prompt names the other child and promises the recordings stay.</p><p>The clearest example is a bug report in the client's own words &mdash; <i>the photo saves but nothing changes</i>. The cause was that people paste a whole <code>&lt;img&gt;</code> tag, not a URL. Rather than tell them to paste differently, the saver was taught to read what they actually paste.</p><p>Thresholds were set from watching real use, not from taste: the mouth&#8209;shape bands are tight at the quiet end because a shy voice lives in the bottom third of the microphone's range.</p>
+      </article>
+      <article class="crit">
+        <h3>Inclusive Design Choices</h3>
+        <blockquote>Project is designed for a wide range of users, including people with disabilities</blockquote>
+        <p>No step requires speech, reading fluency or a steady hand. Buttons on the kits are large, debounced, and respond on release with a long press at 800&nbsp;ms so nothing has to be timed. The web interfaces keep 44&nbsp;px minimum touch targets, a 3&nbsp;px <code>:focus-visible</code> outline for keyboard users, and honour <code>prefers-reduced-motion</code>.</p><p>Colour never carries meaning alone &mdash; every category has a name and an icon beside its colour. The whole site is written in English as a translation base and served through TranslatePress, so a family reads it in their own language. The game degrades to a playable state on machines with no GPU acceleration and on a failed network, because a school computer room is the normal case, not the edge case.</p><p>The kits themselves are the accessibility feature: a child who will not open a laptop will press a button on a brick.</p>
+      </article>
+      <article class="crit">
+        <h3>Real-World Usefulness</h3>
+        <blockquote>Solution could meaningfully help users in a practical setting</blockquote>
+        <p>It is already in a practical setting. The charity's own staff run the site &mdash; 278 editable areas mean every heading, picture and paragraph is changed from one Design page with no developer and no deploy, and the Design page detects when an area has drifted from the delivered file so a mistake is visible and reversible.</p><p>Parents and experts have their own dashboards: set the brick&#8209;to&#8209;medal rate, cap the rewards per day, unlock a scene, write a mission, review a recording. A Mini&#8209;Calendar carries real workshops, family days and expert sessions. The kits work with one USB cable and no software install, which is what makes them usable in a clinic or a classroom rather than only on a developer's desk.</p>
+      </article>
+    </div>
+  </section>
+  <section class="crit-group" data-tone="yellow">
+    <header class="crit-head"><span class="pill">Creativity</span><h2>Creativity criteria</h2><p>3 of 11</p></header>
+    <div class="crit-grid">
+      <article class="crit">
+        <h3>Originality</h3>
+        <blockquote>Project shows a creative, thoughtful, or novel approach</blockquote>
+        <p>The novel part is not the game and not the kit: it is the same idea implemented twice in two very different places. A child's loudness drives fourteen mouth frames on a Three.js character in a browser, and the identical rig &mdash; a base image, mouth frames, a mouth box &mdash; is compiled into an <code>MTF1</code> pack and shipped to a screen on a plastic brick a child is holding.</p><p>So practice does not stop when the laptop closes, and the thing the child built on screen is the thing that answers them in their hand. Reward progression is designed the same way: bricks become medals become cups, at a rate the parent sets, so the motivation ladder is tuned to the child rather than to the game.</p>
+      </article>
+      <article class="crit">
+        <h3>Design Thinking</h3>
+        <blockquote>Strong connection between problem, solution, and design decisions</blockquote>
+        <p>The chain holds at every level. The problem is that pressure to speak makes speaking harder. So the child speaks to a character, alone, with the difficulty set by an adult and the reward given for the attempt. So scenes and levels are unlocked by a parent and never by a score. So the reward rate and the daily cap are parent settings. So a reward write is idempotent, because a lost reward on a bad connection is a child being told their attempt did not count.</p><p>Even the 80&nbsp;ms throttle on the mouth is that chain: at 60&nbsp;fps the face flickers, and a flickering face reads as broken rather than as speech &mdash; which is exactly the kind of small wrongness that makes an anxious child stop.</p>
+      </article>
+      <article class="crit">
+        <h3>Student Voice</h3>
+        <blockquote>Project reflects student ideas, ownership, and personal motivation</blockquote>
+        <p>Every line in these archives was written for this project, by hand, against a real client's review cycle: three codebases, two languages of hardware and web, 317 files. The firmware protocol, the editable&#8209;design layer, the reward ladder and the WebSerial binding are all original work, and the comments in them are a record of someone reasoning in public about children they had met.</p><p>The ownership shows most in what was not taken as finished. A client said a photo would not save; it was traced to a WordPress sanitiser and fixed at the paste. A client said all the sections were blue; it was traced to <code>safecss_filter_attr</code> dropping custom properties and the palette was rebuilt as classes. Neither was the obvious cause, and neither was handed back as "working as designed".</p>
+      </article>
+    </div>
+  </section>
+  </div>
+</section>
+
+<section class="band code-sec" id="game" data-tone="blue">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="pill">mini-talks.com</span>
+      <h2>Inside the game</h2>
+      <p>Ten extracts from the React/Three.js client and the PHP API behind it &mdash; the lip sync,
+      the 3D stage, the locks a parent controls, and the reward arithmetic that has to survive a bad
+      school connection.</p>
+    </div>
+    <ul class="feat">
+      <li><b>Client</b>React 18, Vite, react-three-fiber, drei</li>
+      <li><b>3D</b>Three.js, GLB models, cached loaders</li>
+      <li><b>Audio</b>Web Audio analyser + MediaRecorder</li>
+      <li><b>API</b>PHP 8, MySQL, PDO prepared statements</li>
+      <li><b>Scale</b>81 client files &middot; 110 API files</li>
+      <li><b>Roles</b>child, parent, expert</li>
+    </ul>
+<article class="snip" id="g1" data-tone="red">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-frontend/src/pages/GamePage.jsx</code>
+      <span class="snip-lines">lines 1514&ndash;1547</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">// LIP SYNC
+useFrame((_, delta) =&gt; {
+  const safeDelta = Math.max(delta, 0.016);
+  if (mixer &amp;&amp; isReadyRef.current) mixer.update(safeDelta);
+
+  // ★ DEĞIŞIKLIK: prop yerine ref&#x27;ten oku (stale closure fix)
+  const currentAudioLevel = audioLevelRef?.current ?? 0;
+
+  if (isPlayingAudio &amp;&amp; selectedMini &amp;&amp; (mouthDataRef.current.mini1 || mouthDataRef.current.mini2)) {
+
+    const now = Date.now();
+    if (now - lastMouthChangeRef.current &lt; 80) return;
+
+    let mouthIndex;
+    if (currentAudioLevel &lt; 0.05) mouthIndex = 0;
+    else if (currentAudioLevel &lt; 0.1) mouthIndex = 1;
+    else if (currentAudioLevel &lt; 0.15) mouthIndex = 2;
+    else if (currentAudioLevel &lt; 0.2) mouthIndex = 3;
+    else if (currentAudioLevel &lt; 0.25) mouthIndex = 4;
+    else if (currentAudioLevel &lt; 0.3) mouthIndex = 5;
+    else if (currentAudioLevel &lt; 0.35) mouthIndex = 6;
+    else if (currentAudioLevel &lt; 0.4) mouthIndex = 7;
+    else if (currentAudioLevel &lt; 0.5) mouthIndex = 8;
+    else if (currentAudioLevel &lt; 0.6) mouthIndex = 9;
+    else if (currentAudioLevel &lt; 0.7) mouthIndex = 10;
+    else if (currentAudioLevel &lt; 0.85) mouthIndex = 11;
+    else if (currentAudioLevel &lt; 0.95) mouthIndex = 12;
+    else mouthIndex = 13;
+
+    if (mouthIndex !== currentMouthIndexRef.current) {
+      currentMouthIndexRef.current = mouthIndex;
+      lastMouthChangeRef.current = now;
+
+      const targetMinis = selectedMini === &#x27;both&#x27; ? [&#x27;mini1&#x27;, &#x27;mini2&#x27;] : [selectedMini];</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Lip sync: loudness becomes a mouth shape</h4>
+    <p>The child speaks into the microphone; the Mini on screen moves its mouth. One number &mdash; <code>audioLevel</code>, 0&ndash;1 &mdash; is mapped onto fourteen mouth frames inside Three.js's per&#8209;frame callback.</p><p>Two details matter. The level is read from a <em>ref</em>, not a prop, because <code>useFrame</code> closes over its props once and would otherwise keep reading the first value forever. And a change is allowed only every 80&nbsp;ms: at 60&nbsp;fps the mouth would otherwise flicker faster than a face can move, which children read as broken rather than as speech.</p><p>The thresholds are tighter at the quiet end (0.05, 0.10, 0.15&hellip;) and wider at the top, because a shy voice lives in the bottom third of the range &mdash; a linear mapping leaves a whispering child with a motionless face.</p>
+  </aside>
+</article>
+<article class="snip" id="g2" data-tone="blue">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-frontend/src/pages/GamePage.jsx</code>
+      <span class="snip-lines">lines 4376&ndash;4396</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">try {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Safari fix - resume suspended AudioContext
+  if (audioContextRef.current.state === &#x27;suspended&#x27;) {
+    await audioContextRef.current.resume();
+  }
+
+  analyserRef.current = audioContextRef.current.createAnalyser();
+  const source = audioContextRef.current.createMediaStreamSource(stream);
+  source.connect(analyserRef.current);
+  analyserRef.current.fftSize = 256;
+  const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+
+  const updateLevel = () =&gt; {
+    if (analyserRef.current) {
+      analyserRef.current.getByteFrequencyData(dataArray);
+      setAudioLevel(Math.min(dataArray.reduce((a, b) =&gt; a + b) / dataArray.length / 128, 1));
+      animationFrameRef.current = requestAnimationFrame(updateLevel);
+    }</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Where that number comes from</h4>
+    <p>The Web Audio API, not a library. <code>getUserMedia</code> opens the microphone, an <code>AnalyserNode</code> with <code>fftSize&nbsp;=&nbsp;256</code> gives 128 frequency bins, and the mean of those bins divided by 128 is the 0&ndash;1 level the mouth reads.</p><p>The Safari line is a bug fix that stayed: on iOS an <code>AudioContext</code> created outside a user gesture starts <code>suspended</code> and never produces a sample, so the meter sat at zero on every iPad. It is resumed explicitly.</p><p>The same stream feeds a <code>MediaRecorder</code>, so the recording the parent later hears and the animation the child sees come from one microphone pass.</p>
+  </aside>
+</article>
+<article class="snip" id="g3" data-tone="yellow">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-frontend/src/pages/GamePage.jsx</code>
+      <span class="snip-lines">lines 5550&ndash;5569</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">&lt;Canvas
+  camera={{ position: [100, 30, 60], fov: 50, near: 5, far: 1000 }}
+  shadows
+  dpr={[1, 2]} // 3x çok aşırıydı, 2x yeterli
+  gl={{ 
+    antialias: true, 
+    alpha: false, 
+    powerPreference: &#x27;high-performance&#x27;,
+    preserveDrawingBuffer: true,
+    failIfMajorPerformanceCaveat: false,
+    precision: &#x27;highp&#x27;,
+  }}
+  onCreated={({ gl, scene }) =&gt; {
+    gl.shadowMap.enabled = true;
+    gl.shadowMap.type = THREE.PCFSoftShadowMap;
+    gl.outputColorSpace = THREE.SRGBColorSpace;
+    scene.background = new THREE.Color(&#x27;#e8e8e8&#x27;);
+    // Tone mapping SceneGLSettings component&#x27;inde sahne bazlı ayarlanıyor
+  }}
+&gt;</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>The 3D stage, tuned for school hardware</h4>
+    <p>react&#8209;three&#8209;fiber's <code>&lt;Canvas&gt;</code> with the renderer configured by hand. <code>dpr={[1,&nbsp;2]}</code> caps the pixel ratio at 2&times; &mdash; the comment records that 3&times; was tried and was far too heavy on the tablets this is actually used on.</p><p><code>failIfMajorPerformanceCaveat:&nbsp;false</code> keeps the scene running on machines with no GPU acceleration instead of showing a blank canvas, which is the difference between working and not working in a school computer room.</p><p>Soft shadows, sRGB output and per&#8209;scene tone mapping are set in <code>onCreated</code>, so the colour pipeline is defined in exactly one place.</p>
+  </aside>
+</article>
+<article class="snip" id="g4" data-tone="green">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-frontend/src/pages/GamePage.jsx</code>
+      <span class="snip-lines">lines 2312&ndash;2328</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">// Facialhair modelinde ağız mesh&#x27;lerini işaretle (konuşurken gizlenecek)
+if (isFacialHair) {
+  mouthClone.traverse(c =&gt; {
+    if (!c.isMesh) return;
+    const mn = (c.name || &#x27;&#x27;).toLowerCase();
+    // Sakal/bıyık mesh&#x27;leri → sakal olarak işaretle
+    if (mn.includes(&#x27;facialhair&#x27;) || mn.includes(&#x27;beard&#x27;) || mn.includes(&#x27;mustache&#x27;)) {
+      c.userData._isBeardMesh = true;
+    } else {
+      // Geri kalan = ağız/dudak mesh&#x27;leri
+      c.userData._isMouthMesh = true;
+    }
+  });
+}
+kafaMesh.add(mouthClone);
+
+// Referansı kaydet (lip sync toggle için)</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>A beard that does not eat the mouth</h4>
+    <p>Minis can be given facial hair, and the beard model contains the mouth geometry too. Left alone, a bearded Mini stopped moving its lips.</p><p>So on load each mesh in the model is sorted by name: anything reading as <code>facialhair</code>/<code>beard</code>/<code>mustache</code> is tagged a beard, everything else a mouth. The lip&#8209;sync code then hides the mouth meshes and keeps the beard while the fourteen animated frames play underneath.</p><p>It is a small thing that protects a large one: a child who chose a beard still sees their Mini talk.</p>
+  </aside>
+</article>
+<article class="snip" id="g5" data-tone="orange">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-frontend/src/pages/Sceneselectionpage.jsx</code>
+      <span class="snip-lines">lines 258&ndash;274</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">setScenes(ALL_SCENES_DATA.map((sceneDef, idx) =&gt; {
+  // Unlock önceliği: allUnlocked &gt; firstNUnlocked &gt; sadece ilki
+  const unlocked = allUnlocked
+    || (firstNUnlocked &gt; 0 &amp;&amp; idx &lt; firstNUnlocked)
+    || idx === 0;
+
+  return {
+    scene_id:    sceneDef.id,
+    scene_name:  sceneDef.name,
+    scene_order: idx + 1,
+    is_unlocked: unlocked,
+    is_locked:   !unlocked,
+    level_locks: allUnlocked
+      ? { sound: false, word: false, sentence: false, dialogue: false }
+      : defaultLevelLocks
+  };
+}));</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Locks a parent controls, with a safe fallback</h4>
+    <p>Scenes and the four difficulty levels (sound, word, sentence, dialogue) unlock under adult control, not by score. A child who is not ready for a dialogue is not pushed into one.</p><p>This is the offline path: when the API cannot be reached the page still renders a usable board from a local scene table. The unlock priority is explicit &mdash; everything unlocked, else the first <em>n</em>, else just the first &mdash; so a network failure degrades to "scene one is playable" rather than to an empty screen or, worse, everything unlocked.</p>
+  </aside>
+</article>
+<article class="snip" id="g6" data-tone="red">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-frontend/src/api/axios.js</code>
+      <span class="snip-lines">lines 12&ndash;32</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">axiosInstance.interceptors.request.use(
+  (config) =&gt; {
+    const token = localStorage.getItem(&#x27;token&#x27;);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) =&gt; Promise.reject(error)
+);
+
+axiosInstance.interceptors.response.use(
+  (response) =&gt; response,
+  (error) =&gt; {
+    if (error.response?.status === 401) {
+      localStorage.removeItem(&#x27;token&#x27;);
+      localStorage.removeItem(&#x27;user&#x27;);
+      window.location.href = &#x27;/login&#x27;;
+    }
+    return Promise.reject(error);
+  }</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>One place that knows about the token</h4>
+    <p>Every call in the app goes through this Axios instance. A request interceptor attaches the bearer token; a response interceptor catches <code>401</code>, clears the stored session and returns the user to the login page.</p><p>The value is that no page component contains auth code. An expired session cannot leave one screen showing stale data while another redirects &mdash; the behaviour is identical everywhere because it is written once.</p>
+  </aside>
+</article>
+<article class="snip" id="g7" data-tone="blue">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-api/rewards/add-reward.php</code>
+      <span class="snip-lines">lines 56&ndash;79</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">$conn = getDBConnection();
+$conn-&gt;beginTransaction();
+
+try {
+    // Daily limit kontrolü
+    $stmt = $conn-&gt;prepare(&quot;SELECT daily_limit FROM reward_settings WHERE mini_id = ?&quot;);
+    $stmt-&gt;execute([$mini_id]);
+    $settings = $stmt-&gt;fetch(PDO::FETCH_ASSOC);
+    $dailyLimit = $settings ? intval($settings[&#x27;daily_limit&#x27;]) : 0;
+
+    if ($dailyLimit &gt; 0) {
+        // Bugün kazanılan reward sayısı
+        $stmt = $conn-&gt;prepare(&quot;
+            SELECT COUNT(*) as today_count 
+            FROM mini_rewards 
+            WHERE mini_id = ? AND DATE(earned_at) = CURDATE()
+        &quot;);
+        $stmt-&gt;execute([$mini_id]);
+        $todayCount = intval($stmt-&gt;fetch(PDO::FETCH_ASSOC)[&#x27;today_count&#x27;]);
+
+        if ($todayCount &gt;= $dailyLimit) {
+            throw new Exception(&#x27;Daily reward limit reached&#x27;);
+        }
+    }</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>The daily limit, inside the transaction</h4>
+    <p>Rewards are the motivation engine, so they are also the thing most easily broken. The check runs inside <code>beginTransaction()</code>: the count of today's rewards and the insert that follows cannot be split by a second request, which is how a double&#8209;tap used to award two bricks.</p><p>The limit itself is a parent setting (unlimited, 3 or 5 a day), read per Mini. Every statement is a prepared statement with bound parameters &mdash; there is no string&#8209;built SQL anywhere in the reward path.</p>
+  </aside>
+</article>
+<article class="snip" id="g8" data-tone="yellow">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-api/rewards/add-reward.php</code>
+      <span class="snip-lines">lines 107&ndash;145</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">// Brick to Medal conversion
+if ($reward_category === &#x27;brick&#x27;) {
+    $stmt = $conn-&gt;prepare(&quot;SELECT brick_to_medal FROM reward_settings WHERE mini_id = ?&quot;);
+    $stmt-&gt;execute([$mini_id]);
+    $convSettings = $stmt-&gt;fetch(PDO::FETCH_ASSOC);
+    $brickToMedal = $convSettings ? intval($convSettings[&#x27;brick_to_medal&#x27;]) : 10;
+
+    // Toplam brick sayısı
+    $stmt = $conn-&gt;prepare(&quot;SELECT total_bricks FROM mini_profiles WHERE mini_id = ?&quot;);
+    $stmt-&gt;execute([$mini_id]);
+    $totalBricks = intval($stmt-&gt;fetch(PDO::FETCH_ASSOC)[&#x27;total_bricks&#x27;]);
+
+    // Daha önce convert edilen medal sayısı
+    $stmt = $conn-&gt;prepare(&quot;
+        SELECT COUNT(*) as converted 
+        FROM mini_rewards 
+        WHERE mini_id = ? AND reward_type = &#x27;progress_medal&#x27; AND notes LIKE &#x27;Auto-converted from%bricks&#x27;
+    &quot;);
+    $stmt-&gt;execute([$mini_id]);
+    $convertedMedals = intval($stmt-&gt;fetch(PDO::FETCH_ASSOC)[&#x27;converted&#x27;]);
+
+    // Yeni convert edilmesi gereken medal sayısı
+    $shouldHaveMedals = floor($totalBricks / $brickToMedal);
+    $newMedals = $shouldHaveMedals - $convertedMedals;
+
+    if ($newMedals &gt; 0) {
+        for ($i = 0; $i &lt; $newMedals; $i++) {
+            $stmt = $conn-&gt;prepare(&quot;
+                INSERT INTO mini_rewards (mini_id, reward_type, reward_category, notes, earned_at)
+                VALUES (?, &#x27;progress_medal&#x27;, &#x27;medal&#x27;, ?, NOW())
+            &quot;);
+            $stmt-&gt;execute([$mini_id, &quot;Auto-converted from {$brickToMedal} bricks&quot;]);
+
+            // Total medals güncelle
+            $stmt = $conn-&gt;prepare(&quot;UPDATE mini_profiles SET total_medals = total_medals + 1 WHERE mini_id = ?&quot;);
+            $stmt-&gt;execute([$mini_id]);
+        }
+        $conversions[] = [&#x27;type&#x27; =&gt; &#x27;brick_to_medal&#x27;, &#x27;count&#x27; =&gt; $newMedals];
+    }</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Bricks into medals, computed not counted</h4>
+    <p>Bricks become medals at a rate the parent chooses (5, 10 or 20). The naive version &mdash; subtract bricks and add a medal &mdash; loses medals whenever a request is retried or arrives twice.</p><p>This version derives the answer instead: how many medals <em>should</em> exist at this brick total, minus how many were already converted, found by matching the note the converter itself writes. If the two agree, nothing happens. Running it twice is harmless, which is what makes it safe behind a flaky school connection.</p><p>Medals roll into cups by the same rule immediately below, so one ladder covers brick &rarr; medal &rarr; cup.</p>
+  </aside>
+</article>
+<article class="snip" id="g9" data-tone="green">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-api/missions/complete-mission.php</code>
+      <span class="snip-lines">lines 44&ndash;60</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">}
+
+// 2. mission_completions tablosuna da ekle (geriye dönük uyumluluk için)
+if (!$is_custom &amp;&amp; $mission_id &gt; 0) {
+    // Önce var mı kontrol et
+    $stmt = $pdo-&gt;prepare(&quot;SELECT id FROM mission_completions 
+                           WHERE mini_id = ? AND mission_id = ? AND DATE(completed_at) = ?&quot;);
+    $stmt-&gt;execute([$mini_id, $mission_id, $today]);
+
+    if (!$stmt-&gt;fetch()) {
+        // Yoksa ekle
+        $stmt = $pdo-&gt;prepare(&quot;INSERT INTO mission_completions 
+                               (mini_id, mission_id, completed_at) 
+                               VALUES (?, ?, ?)&quot;);
+        $stmt-&gt;execute([$mini_id, $mission_id, $now]);
+    }
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Writing to two tables without double counting</h4>
+    <p>Daily missions moved from <code>mission_completions</code> to <code>mission_assignments</code> part way through the project, and older installations still read the first table.</p><p>Rather than break them, the endpoint writes both &mdash; but it looks first, keyed on <code>(mini, mission, date)</code>, so completing a mission twice in one day cannot produce two rows and two bricks. The comment names the reason the second write exists, which is the part that is hard to recover six months later.</p>
+  </aside>
+</article>
+<article class="snip" id="g10" data-tone="orange">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">minitalks-api/auth/login.php</code>
+      <span class="snip-lines">lines 123&ndash;131</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">// Şifre kontrolü
+if (!password_verify($password, $user[&#x27;password_hash&#x27;])) {
+    http_response_code(401);
+    echo json_encode([
+        &#x27;success&#x27; =&gt; false,
+        &#x27;message&#x27; =&gt; &#x27;Invalid email/username or password&#x27;
+    ]);
+    exit;
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Passwords, and identical answers</h4>
+    <p>Passwords are stored as PHP <code>password_hash</code> digests and checked with <code>password_verify</code> &mdash; never compared, never reversible, and the algorithm can be upgraded without a migration.</p><p>The wrong&#8209;password and no&#8209;such&#8209;user branches return the same status and the same sentence. That is deliberate: different wording tells a stranger which e&#8209;mail addresses belong to families using the app.</p><p>A deactivated account gets its own <code>403</code> with an explanation, because that user needs to know why.</p>
+  </aside>
+</article>
+  </div>
+</section>
+
+<section class="band alt code-sec" id="forum" data-tone="green">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="pill">mini-talks.org &middot; mini-forum</span>
+      <h2>Inside the community site</h2>
+      <p>Eight extracts from the WordPress plugin that carries the forum, the profiles, the
+      Mini&#8209;Calendar and the link to the game &mdash; mostly about letting non&#8209;technical
+      staff edit a site safely.</p>
+    </div>
+    <ul class="feat">
+      <li><b>Platform</b>WordPress plugin, PHP 8</li>
+      <li><b>Design layer</b>278 editable areas, file-backed defaults</li>
+      <li><b>Safety</b>kses allow-lists, tokens after sanitising</li>
+      <li><b>Events</b>5 categories, 6 delivered page designs</li>
+      <li><b>Scale</b>115 files &middot; 23,329 lines</li>
+      <li><b>i18n</b>English base + TranslatePress</li>
+    </ul>
+<article class="snip" id="f1" data-tone="blue">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-forum/includes/class-mini-forum-design.php</code>
+      <span class="snip-lines">lines 1027&ndash;1042</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">public static function render($id, $vars = array()) {
+    $def = self::definition($id);
+    if (!$def) return &#x27;&#x27;;
+    $val = self::get($id);
+    $out = $def[1] === &#x27;text&#x27; ? esc_html($val) : wp_kses($val, self::allowed_html());
+
+    $tokens = isset($def[3]) &amp;&amp; is_array($def[3]) ? $def[3] : array();
+    if (!$tokens) return $out;
+
+    $find = $repl = array();
+    foreach ($tokens as $name =&gt; $note) {
+        $find[] = &#x27;{{&#x27; . $name . &#x27;}}&#x27;;
+        $repl[] = isset($vars[$name]) ? $vars[$name] : &#x27;&#x27;;
+    }
+    return str_replace($find, $repl, $out);
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Editable blocks: escape first, then fill in</h4>
+    <p>The whole site is editable from one Design page. An area is stored HTML; <code>render()</code> is what puts it on a page.</p><p>The order is the point. A text area is escaped, an HTML area is run through <code>wp_kses</code> against an explicit allow&#8209;list &mdash; and only <em>after</em> that are the <code>{{tokens}}</code> replaced with values the plugin itself produced. Substituting first would let an editor's paste be re&#8209;interpreted as markup; this way nothing an editor types can become a tag, and nothing the plugin inserts gets mangled by the sanitiser.</p>
+  </aside>
+</article>
+<article class="snip" id="f2" data-tone="yellow">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-forum/includes/class-mini-forum-design.php</code>
+      <span class="snip-lines">lines 1745&ndash;1757</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">private static function plain($raw, $default = &#x27;&#x27;) {
+    $raw = (string) $raw;
+    $out = sanitize_text_field($raw);
+    $wants_url = (bool) preg_match(&#x27;#^https?://#i&#x27;, (string) $default);
+
+    if ($wants_url || $out === &#x27;&#x27;) {
+        if (preg_match(&#x27;/\b(?:src|href)\s*=\s*[&quot;\&#x27;]([^&quot;\&#x27;]+)[&quot;\&#x27;]/i&#x27;, $raw, $m))
+            return esc_url_raw(trim($m[1]));
+        if (preg_match(&#x27;#https?://[^\s&quot;\&#x27;&lt;&gt;]+#i&#x27;, $raw, $m))
+            return esc_url_raw(trim($m[0]));
+    }
+    return $out;
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>The fix for &quot;the photo saves but nothing changes&quot;</h4>
+    <p>Reported by the client in exactly those words. People do not paste a URL into an image field &mdash; they paste what their browser gave them, usually a whole <code>&lt;img src="&hellip;"&gt;</code> tag. <code>sanitize_text_field</code> dutifully stripped the tag and stored an empty string, so the save succeeded and the picture did not change.</p><p>Now, when a field's own default is a URL, the saver digs the address out of a pasted tag &mdash; <code>src</code> or <code>href</code>, else the first bare URL &mdash; and stores that. The field accepts what people actually paste, and still stores only a validated URL.</p>
+  </aside>
+</article>
+<article class="snip" id="f3" data-tone="green">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-forum/includes/class-mini-forum-events.php</code>
+      <span class="snip-lines">lines 167&ndash;182</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">public static function details($ev) {
+    // Also called with a special-day row, which has no short_description.
+    $raw = isset($ev-&gt;description) ? trim((string) $ev-&gt;description) : &#x27;&#x27;;
+    if ($raw === &#x27;&#x27; &amp;&amp; isset($ev-&gt;short_description)) $raw = trim((string) $ev-&gt;short_description);
+    if ($raw === &#x27;&#x27;) return &#x27;&#x27;;
+
+    /* The column holds both kinds of description. Someone typing into the
+       admin form leaves plain text with blank lines between paragraphs;
+       someone pasting from an editor leaves HTML. Escaping the second kind
+       printed the tags on the page, which is what people were reading. */
+    $out = self::is_html($raw)
+        ? self::rich($raw)
+        : self::plain($raw);
+
+    return apply_filters(&#x27;mf_events_details&#x27;, $out, $raw, $ev);
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>One column, two kinds of description</h4>
+    <p>Event descriptions are typed in an admin form by some people and pasted out of a word processor by others. The column holds both. Escaping everything printed raw <code>&lt;p style=&hellip;&gt;</code> on the page &mdash; which is what visitors were reading.</p><p>So the text is sniffed: markup goes down the sanitising path, typed text down the paragraph path. The <code>mf_events_details</code> filter at the end means a site can override the whole decision without editing the plugin.</p>
+  </aside>
+</article>
+<article class="snip" id="f4" data-tone="orange">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-forum/includes/class-mini-forum-events.php</code>
+      <span class="snip-lines">lines 203&ndash;215</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">private static function rich($html) {
+    $allowed = wp_kses_allowed_html(&#x27;post&#x27;);
+    foreach ($allowed as $tag =&gt; $attrs) {
+        unset($allowed[$tag][&#x27;style&#x27;], $allowed[$tag][&#x27;align&#x27;], $allowed[$tag][&#x27;bgcolor&#x27;]);
+    }
+    $out = trim(wp_kses($html, $allowed));
+
+    /* A paste is often one long run of text with no block around it. */
+    if ($out !== &#x27;&#x27; &amp;&amp; !preg_match(&#x27;/^\s*&lt;(p|div|ul|ol|h[1-6]|blockquote|figure|table)\b/i&#x27;, $out)) {
+        $out = wpautop($out);
+    }
+    return $out;
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Accepting a paste without accepting its styling</h4>
+    <p>Pasted HTML is run through WordPress's own post allow&#8209;list with three attributes removed: <code>style</code>, <code>align</code> and <code>bgcolor</code>. Those are exactly the attributes a word processor leaves behind, and they are what makes a pasted paragraph fight the site's design.</p><p>The structure survives; the foreign typography does not. If the paste has no block wrapper at all, <code>wpautop</code> gives it paragraphs so it does not arrive as one wall of text.</p>
+  </aside>
+</article>
+<article class="snip" id="f5" data-tone="red">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-forum/includes/class-mini-forum-events.php</code>
+      <span class="snip-lines">lines 351&ndash;355</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">public static function bullet($i) {
+    $order = apply_filters(&#x27;mf_events_bullet_order&#x27;, array(1, 2, 3, 4, 2, 1, 4, 3));
+    $n = $order[($i - 1) % count($order)];
+    return Mini_Forum_Design::get(&#x27;mc.bullet.&#x27; . $n);
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Four bullet colours in the designer&#x27;s order</h4>
+    <p>Event bullets run yellow, red, blue, green &mdash; but not as a plain cycle. The delivered designs repeat them as 1,2,3,4,2,1,4,3, which reads as hand&#8209;placed rather than mechanical, and that is what was shipped.</p><p>The order is a filter, so it can be changed without touching the loop, and each bullet is itself an editable Design block rather than a hard&#8209;coded image.</p>
+  </aside>
+</article>
+<article class="snip" id="f6" data-tone="blue">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-forum/includes/class-mini-forum-game.php</code>
+      <span class="snip-lines">lines 146&ndash;163</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">
+$url  = $s[&#x27;api&#x27;] . &#x27;/forum/&#x27; . $endpoint;
+$host = parse_url($url, PHP_URL_HOST);
+$local = in_array($host, array(&#x27;localhost&#x27;, &#x27;127.0.0.1&#x27;, &#x27;::1&#x27;), true);
+if (strpos($url, &#x27;https://&#x27;) !== 0 &amp;&amp; !$local) {
+    return new WP_Error(&#x27;mf_game_insecure&#x27;, __(&#x27;The game address must start with https:// .&#x27;, &#x27;mini-forum&#x27;));
+}
+
+$res = wp_remote_post($url, array(
+    &#x27;timeout&#x27; =&gt; 15,
+    &#x27;headers&#x27; =&gt; array(
+        &#x27;Content-Type&#x27; =&gt; &#x27;application/json; charset=utf-8&#x27;,
+        &#x27;X-Forum-Key&#x27;  =&gt; $s[&#x27;key&#x27;],
+        &#x27;Accept&#x27;       =&gt; &#x27;application/json&#x27;,
+    ),
+    &#x27;body&#x27; =&gt; wp_json_encode($body),
+));</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>The forum talking to the game</h4>
+    <p>A forum member links their game account by proving they can read the inbox the game account is registered to &mdash; no game password is ever typed into WordPress, and no password crosses between the two systems.</p><p>This is the call that carries it: a shared key in <code>X&#8209;Forum&#8209;Key</code>, a hard refusal to send that key over plain HTTP (localhost excepted, so the thing can be developed), a timeout, and JSON in both directions. The guard exists because without it a mistyped <code>http://</code> in a settings field would put the shared key and the one&#8209;time token on the wire in clear text.</p>
+  </aside>
+</article>
+<article class="snip" id="f7" data-tone="yellow">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-forum/assets/js/mt-header.js</code>
+      <span class="snip-lines">lines 246&ndash;258</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">
+/* Only the pill this script drew. A header that still carries its own
+   copy of the script draws a different one — no .mt-auth-box around it,
+   an onclick on the button instead — and drives it itself. Both would
+   then run on the same click: the page&#x27;s own handler opens the menu and
+   this one, finding no menu of its own, closes everything. Which is a
+   profile photo that does nothing. */
+if(!pill.classList.contains(&#x27;mt-auth-signin&#x27;) &amp;&amp; !pill.closest(&#x27;.mt-auth-box&#x27;)) return;
+
+if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
+  if(typeof mtOpenAuth === &#x27;function&#x27;) mtOpenAuth();
+  else window.location.href = &#x27;/mini-community/join-us/&#x27;;
+  return;</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>A handler that knows when to stand down</h4>
+    <p>The header ships as a plugin script, but the site also still carries a hand&#8209;pasted copy in places. Both ran on the same click: the page's own handler opened the profile menu, and this one, finding no menu it had drawn, closed everything. The symptom was a profile photo that did nothing.</p><p>The fix is three lines and a comment: if this pill is not one we drew, return and let the other script own it. The whole header is bound by delegation from <code>document</code> and scoped with <code>closest('.mt-header')</code> for the same reason &mdash; the same widget is on the page more than once, so nothing may be found by <code>id</code>.</p>
+  </aside>
+</article>
+<article class="snip" id="f8" data-tone="green">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-forum/assets/css/mini-events.css</code>
+      <span class="snip-lines">lines 559&ndash;566</span>
+    </header>
+    <pre class="snip-pre"><code class="language-css">.me-page .me-kind-workshop{--c:#E52828;--t:#fff;--pale:#FFF4F4}
+.me-page .me-kind-family{--c:#FFCC00;--t:#1D1D1B;--pale:#FFFAE7}
+.me-page .me-kind-expert{--c:#0055BF;--t:#fff;--pale:#F1F7FF}
+.me-page .me-kind-updates{--c:#237841;--t:#fff;--pale:#F6FCF8}
+.me-page .me-kind-special{--c:#FF7417;--t:#fff;--pale:#FFF5ED}
+/* The one colour the designs give twice: on the hub a special day sits beside
+   events and is washed a touch lighter than on its own page. */
+.me-page.me-special-page .me-kind-special{--pale:#FFF3E8}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Why the categories are classes and not inline styles</h4>
+    <p>Every event category has a colour: workshops red, family days yellow, expert sessions blue, updates green, special days orange. All five rendered blue.</p><p>The cause was WordPress, not CSS. <code>safecss_filter_attr</code> keeps only known CSS properties in a <code>style</code> attribute, and a custom property such as <code>--c</code> is not one of them, so every inline colour was silently dropped. Moved into classes, the palette is out of that filter's reach &mdash; and it becomes one readable list instead of a value repeated through the markup.</p>
+  </aside>
+</article>
+  </div>
+</section>
+
+<section class="band code-sec" id="devices" data-tone="orange">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="pill">mini-talks.org &middot; mini-devices</span>
+      <h2>Talking to the kits from a web page</h2>
+      <p>Six extracts from the plugin that drives the Mini&#8209;Kits shelf. No driver, no installer
+      &mdash; WebSerial, a measured boot delay, and a handshake that is honest about failing.</p>
+    </div>
+    <ul class="feat">
+      <li><b>Transport</b>WebSerial, 115200 baud, JSON lines</li>
+      <li><b>Handshake</b>hello &rarr; bind &rarr; time &rarr; stats</li>
+      <li><b>Ownership</b>kit bound to a forum profile</li>
+      <li><b>Content</b>slot upload, demo, download, history</li>
+      <li><b>Scale</b>8 files &middot; 5,182 lines</li>
+      <li><b>Browsers</b>Chrome, Edge, Opera (desktop)</li>
+    </ul>
+<article class="snip" id="d1" data-tone="yellow">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <span class="snip-lines">lines 306&ndash;336</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">navigator.serial.requestPort()
+  .then(function (p) {
+    port = p;
+    lastRx = &#x27;&#x27;;
+    return port.open({ baudRate: 115200 });
+  })
+  .then(function () {
+    reader = port.readable.getReader();
+    writer = port.writable.getWriter();
+    readLoop();
+
+    // Port acilinca kart resetlenir; acilis ~1.5 sn surer.
+    try { port.setSignals({ dataTerminalReady: true, requestToSend: false }); } catch (e) {}
+
+    setStatus(&#x27;Waking the kit up…&#x27;);
+    return new Promise(function (r) { setTimeout(r, 1800); });
+  })
+  .then(function () { return helloWithRetry(4); })
+  .then(function (line) {
+    var hello = JSON.parse(line);
+    return checkOwnership(hello);
+  })
+  .then(function (hello) {
+    if (!hello) return null;                       // kullanici vazgecti
+    setStatus(DEV_LABEL[hello.dev] + &#x27; connected — syncing the clock…&#x27;, &#x27;ok&#x27;);
+    return send({ cmd: &#x27;time&#x27;, epoch: Math.floor(Date.now() / 1000) })
+      .then(function () {
+        return new Promise(function (r) { setTimeout(function () { r(hello); }, 300); });
+      });
+  })
+  .then(function (hello) { if (hello) return pullStats(hello); })</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Connecting to a physical kit from a web page</h4>
+    <p>No driver, no installer: WebSerial. <code>requestPort()</code> shows the browser's own chooser, the port opens at 115200 baud, and a read loop starts.</p><p>The 1800&nbsp;ms wait is measured, not guessed. Asserting DTR resets the ESP32&#8209;S3, and the board takes about a second and a half to come back; talking to it earlier gets silence. Then the chain is explicit &mdash; say hello, confirm who owns the kit, set its clock, pull its statistics &mdash; and the status line tells the user which step they are on.</p>
+  </aside>
+</article>
+<article class="snip" id="d2" data-tone="green">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <span class="snip-lines">lines 280&ndash;292</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">function helloWithRetry(tries) {
+  var attempt = 0;
+  function once() {
+    attempt++;
+    setStatus(&#x27;Looking for the kit… (&#x27; + attempt + &#x27;/&#x27; + tries + &#x27;)&#x27;);
+    return ask({ cmd: &#x27;hello&#x27; }, function (l) { return l.indexOf(&#x27;&quot;dev&quot;&#x27;) &gt;= 0; }, 2500)
+      .catch(function (e) {
+        if (attempt &gt;= tries) throw e;
+        return new Promise(function (r) { setTimeout(r, 700); }).then(once);
+      });
+  }
+  return once();
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Four tries, because USB is not reliable</h4>
+    <p>A kit that is still booting, or whose first reply was lost, used to look like a broken kit. <code>hello</code> is asked up to four times with a 2.5&nbsp;s window and a 700&nbsp;ms gap, and the attempt counter is shown to the user so the wait is legible rather than a frozen page.</p><p>A reply counts only if it carries <code>"dev"</code>. Boot&#8209;loader chatter and the firmware's own <code>#</code> log lines are therefore not mistaken for a handshake.</p>
+  </aside>
+</article>
+<article class="snip" id="d3" data-tone="orange">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <span class="snip-lines">lines 363&ndash;402</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">function checkOwnership(hello) {
+  var label = DEV_LABEL[hello.dev] || hello.dev;
+
+  if (!hello.uid) {                                  // eski firmware
+    setStatus(label + &#x27; connected (older firmware — no profile link).&#x27;, &#x27;ok&#x27;);
+    return Promise.resolve(hello);
+  }
+
+  return api(&#x27;whoami&#x27;).then(function (me) {
+    var bound = parseInt(hello.profile || 0, 10);
+
+    if (bound === me.profile) {                      // zaten bizim
+      return hello;
+    }
+
+    if (bound &amp;&amp; bound !== me.profile) {             // baskasinin
+      var msg = label + &#x27; is linked to another profile&#x27; +
+                (hello.owner ? &#x27; (&#x27; + hello.owner + &#x27;)&#x27; : &#x27;&#x27;) +
+                &#x27;. Move it to your profile? &#x27; +
+                &#x27;Recordings on the kit are kept — only the ownership changes.&#x27;;
+      if (!window.confirm(msg)) {
+        setStatus(&#x27;Cancelled — the kit stays linked to the other profile.&#x27;, &#x27;err&#x27;);
+        return null;
+      }
+    } else {                                         // bagsiz
+      if (!window.confirm(label + &#x27; is not linked to a profile yet. &#x27; +
+                          &#x27;Link it to &#x27; + me.owner + &#x27;?&#x27;)) {
+        setStatus(&#x27;The kit was not linked.&#x27;, &#x27;err&#x27;);
+        return null;
+      }
+    }
+
+    setStatus(&#x27;Linking the kit to your profile…&#x27;);
+    return ask({ cmd: &#x27;bind&#x27;, profile: me.profile, owner: me.owner },
+               function (l) { return l.indexOf(&#x27;&quot;ok&quot;&#x27;) &gt;= 0; }, 5000)
+      .then(function () {
+        hello.profile = me.profile;
+        hello.owner = me.owner;
+        return hello;
+      });</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Whose kit is this?</h4>
+    <p>Kits are shared &mdash; between siblings, or around a classroom. The firmware stores the profile it is bound to, and the site compares that with the signed&#8209;in profile.</p><p>Three cases, each handled out loud: already yours, unbound (offer to link it), or someone else's (name them and ask before taking it). The prompt promises that recordings stay on the kit, because the fear it answers is a child losing their voice recordings when a sibling plugs it in. Nothing is rebound without a human saying yes, and the first branch keeps older firmware with no <code>uid</code> working in read&#8209;only form instead of rejecting it.</p>
+  </aside>
+</article>
+<article class="snip" id="d4" data-tone="red">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <span class="snip-lines">lines 2170&ndash;2175</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">var SCENE_NAMES = Object.assign({ &#x27;1&#x27;: &#x27;Classroom&#x27;, &#x27;2&#x27;: &#x27;Coffee Shop&#x27; },
+                                (window.MD &amp;&amp; MD.sceneNames) || {});
+function sceneTitle(mode) {
+  var id = String(mode || &#x27;&#x27;).replace(/^scene_/, &#x27;&#x27;);
+  return SCENE_NAMES[id] ? SCENE_NAMES[id] + &#x27; (Scene &#x27; + id + &#x27;)&#x27; : &#x27;Scene &#x27; + id;
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Scene numbers read as names</h4>
+    <p>The firmware stores audio in folders named <code>scene_1</code>, <code>scene_2</code>. Nobody thinks in those terms, so the shelf shows <q>Classroom (Scene&nbsp;1)</q>.</p><p>The map is merged over <code>MD.sceneNames</code>, so a new scene in the game is named on the site by adding one line from outside the plugin &mdash; and an unknown number still renders as <q>Scene&nbsp;7</q> rather than as a blank.</p>
+  </aside>
+</article>
+<article class="snip" id="d5" data-tone="blue">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-devices/includes/class-md-design.php</code>
+      <span class="snip-lines">lines 45&ndash;53</span>
+    </header>
+    <pre class="snip-pre"><code class="language-php">/* Written once, read twice: these are both the fallback above and the
+   defaults the Design page offers, and the two drifting apart is how a
+   card ends up showing something nobody chose. */
+const KIT_IMAGES = array(
+    &#x27;fig-talks&#x27;    =&gt; &#x27;https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_fig_talks.png&#x27;,
+    &#x27;brick-talks&#x27;  =&gt; &#x27;https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_brick_talks.png&#x27;,
+    &#x27;design-talks&#x27; =&gt; &#x27;https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_design_talks.png&#x27;,
+    &#x27;mini-designs&#x27; =&gt; &#x27;https://mini-talks.org/wp-content/uploads/2026/09/mini_kits_mini_designs.png&#x27;,
+);</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>A default written once, read twice</h4>
+    <p>The picture on each kit card is editable, which means there are two places a default can live: the fallback the renderer uses and the value the Design page offers. When two copies exist they drift, and a card ends up showing something nobody chose &mdash; which is exactly what happened.</p><p>One constant now feeds both, as the comment records. The bug cannot come back without deleting the constant.</p>
+  </aside>
+</article>
+<article class="snip" id="d6" data-tone="yellow">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <span class="snip-lines">lines 1783&ndash;1795</span>
+    </header>
+    <pre class="snip-pre"><code class="language-javascript">function disconnectButton() {
+  var b = el(&#x27;button&#x27;, &#x27;md-btn md-btn-ghost md-btn-sm&#x27;, &#x27;Disconnect&#x27;);
+  b.type = &#x27;button&#x27;;
+  b.style.marginLeft = &#x27;10px&#x27;;
+  b.title = &#x27;Release the kit. It stays on your profile.&#x27;;
+  b.addEventListener(&#x27;click&#x27;, function () {
+    disconnect();
+    render();
+    if (openSlug) renderPopup();
+    setStatus(&#x27;Disconnected. The kit is still on your profile — press Connect to use it again.&#x27;, &#x27;ok&#x27;);
+  });
+  return b;
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Disconnect, requested by the client</h4>
+    <p>Until this was added there was no way to let go of a kit short of unplugging it, and parents were reasonably unsure whether unplugging would lose anything.</p><p>The button releases the serial port, re&#8209;renders the shelf and the open panel, and says the one thing that was worrying people: the kit stays on your profile. The confirmation is written in the same plain register as the rest of the interface &mdash; no state is lost, and pressing Connect picks up where it left off.</p>
+  </aside>
+</article>
+  </div>
+</section>
+
+<section class="band alt code-sec" id="firmware" data-tone="red">
+  <div class="wrap">
+    <div class="s-head">
+      <span class="pill">mini-kits.io</span>
+      <h2>Inside the firmware</h2>
+      <p>Six extracts from the ESP32&#8209;S3 sketches &mdash; the wire protocol, the face&#8209;pack
+      validator, the audio buses, and two bug fixes that are easier to understand than to find.</p>
+    </div>
+    <ul class="feat">
+      <li><b>Target</b>ESP32-S3, Arduino core, custom partitions</li>
+      <li><b>Variants</b>Brick-Talks, D and F</li>
+      <li><b>Audio</b>I2S mic (32-bit) + I2S amp (16-bit)</li>
+      <li><b>Storage</b>LittleFS slots, stats, history</li>
+      <li><b>Faces</b>MTF1 pack, validated before use</li>
+      <li><b>Scale</b>3 sketches &middot; 6,051 lines</li>
+    </ul>
+<article class="snip" id="k1" data-tone="green">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-kits-firmware/Version_F/F_versiyon/F_versiyon.ino</code>
+      <span class="snip-lines">lines 1428&ndash;1444</span>
+    </header>
+    <pre class="snip-pre"><code class="language-cpp">void sendHello() {
+  // SITE UYUMU: site hello cevabini &quot;dev&quot; anahtarindan tanir, yoksa 4 denemeden
+  // sonra baglanti kesilir. uid/profile/owner da sitenin bekledigi adlar.
+  String s = &quot;{\&quot;type\&quot;:\&quot;hello\&quot;,\&quot;dev\&quot;:\&quot;F\&quot;,\&quot;fw\&quot;:\&quot;&quot; FW_VERSION &quot;\&quot;,\&quot;chip\&quot;:\&quot;ESP32-S3\&quot;&quot;;
+  s += &quot;,\&quot;slots\&quot;:&quot; + String(SLOT_COUNT);
+  s += &quot;,\&quot;uid\&quot;:\&quot;&quot; + jsonEscape(deviceId) + &quot;\&quot;&quot;;
+  s += &quot;,\&quot;profile\&quot;:\&quot;&quot; + jsonEscape(profileId) + &quot;\&quot;&quot;;
+  s += &quot;,\&quot;owner\&quot;:\&quot;&quot; + jsonEscape(profileName) + &quot;\&quot;&quot;;
+  s += &quot;,\&quot;device_id\&quot;:\&quot;&quot; + jsonEscape(deviceId) + &quot;\&quot;&quot;;
+  s += &quot;,\&quot;bound\&quot;:&quot; + String(profileId.length() ? &quot;true&quot; : &quot;false&quot;);
+  s += &quot;,\&quot;profile_id\&quot;:\&quot;&quot; + jsonEscape(profileId) + &quot;\&quot;&quot;;
+  s += &quot;,\&quot;profile_name\&quot;:\&quot;&quot; + jsonEscape(profileName) + &quot;\&quot;&quot;;
+  s += &quot;,\&quot;bound_at\&quot;:&quot; + String(boundAt);
+  s += &quot;,\&quot;time_valid\&quot;:&quot; + String(nowEpoch() ? &quot;true&quot; : &quot;false&quot;);
+  s += &quot;}&quot;;
+  Serial.println(s);
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>A handshake that keeps its old names</h4>
+    <p>The kit answers <code>hello</code> with who it is, what it runs and whether it is bound to a profile. The duplication is deliberate and the comment says why: the website recognises a kit by the <code>dev</code> key and gives up after four tries, while an older tool reads <code>device_id</code>/<code>profile_id</code>/<code>profile_name</code>.</p><p>Both sets are sent. A dozen bytes of JSON is a cheap price for not breaking a tool that is already in someone's hands &mdash; and <code>time_valid</code> lets the site know, without asking, that the clock still needs setting.</p>
+  </aside>
+</article>
+<article class="snip" id="k2" data-tone="orange">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-kits-firmware/Version_F/F_versiyon/F_versiyon.ino</code>
+      <span class="snip-lines">lines 1551&ndash;1563</span>
+    </header>
+    <pre class="snip-pre"><code class="language-cpp">} else if (cmd == &quot;bind&quot;) {
+  String pid = jsonStr(line, &quot;profile_id&quot;);
+  if (!pid.length()) pid = jsonStr(line, &quot;profile&quot;);        // site bu adi gonderir
+  if (!pid.length()) {
+    Serial.println(&quot;{\&quot;type\&quot;:\&quot;bind\&quot;,\&quot;ok\&quot;:false,\&quot;msg\&quot;:\&quot;profile_id_missing\&quot;}&quot;);
+  } else {
+    profileId   = pid;
+    profileName = jsonStr(line, &quot;profile_name&quot;);
+    if (!profileName.length()) profileName = jsonStr(line, &quot;owner&quot;);
+    boundAt     = nowEpoch();
+    bool ok = saveOwner();
+    Serial.println(String(&quot;{\&quot;type\&quot;:\&quot;bind\&quot;,\&quot;ok\&quot;:&quot;) + (ok ? &quot;true&quot; : &quot;false&quot;) + &quot;}&quot;);
+  }</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Meeting the other side&#x27;s spelling halfway</h4>
+    <p>The firmware's own protocol calls the field <code>profile_id</code>; the website sends <code>profile</code>. Rather than make either side wrong, <code>bind</code> accepts both, and the same for <code>profile_name</code>/<code>owner</code>.</p><p>Every command replies with an explicit <code>ok</code> and, on failure, a named reason &mdash; <code>profile_id_missing</code> is a message someone can act on, where silence is a kit that appears dead. The binding is written to flash, so it survives a power cycle.</p>
+  </aside>
+</article>
+<article class="snip" id="k3" data-tone="red">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-kits-firmware/Version_B/BrickTalks_S3/BrickTalks_S3.ino</code>
+      <span class="snip-lines">lines 798&ndash;820</span>
+    </header>
+    <pre class="snip-pre"><code class="language-cpp">// MTF1 paketini dogrular; hata varsa aciklama dondurur, gecerliyse nullptr
+const char *faceValidate(const String &amp;path, FaceInfo &amp;fi) {
+  fi = FaceInfo();
+  File f = LittleFS.open(path, &quot;r&quot;);
+  if (!f) return &quot;acilamadi&quot;;
+  size_t size = f.size();
+  uint8_t h[18];
+  if (size &lt; 18 || f.read(h, 18) != 18) { f.close(); return &quot;kisa_dosya&quot;; }
+  if (memcmp(h, &quot;MTF1&quot;, 4) != 0)         { f.close(); return &quot;baslik&quot;; }
+
+  uint16_t v[7];
+  for (int i = 0; i &lt; 7; i++) v[i] = (uint16_t)(h[4 + i * 2] | (h[5 + i * 2] &lt;&lt; 8));
+  fi.bw = v[0]; fi.bh = v[1]; fi.mx = v[2]; fi.my = v[3];
+  fi.mw = v[4]; fi.mh = v[5]; fi.n = v[6];
+
+  if (fi.bw == 0 || fi.bh == 0 || fi.bw &gt; AREA_W || fi.bh &gt; AREA_H) { f.close(); return &quot;taban_boyutu&quot;; }
+  if (fi.n &gt; FACE_MAX_FRAMES) { f.close(); return &quot;kare_sayisi&quot;; }
+  if (fi.n &gt; 0 &amp;&amp; (fi.mw == 0 || fi.mh == 0 ||
+                   (uint32_t)fi.mx + fi.mw &gt; fi.bw || (uint32_t)fi.my + fi.mh &gt; fi.bh)) {
+    f.close();
+    return &quot;agiz_alani&quot;;
+  }</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Validating a face pack before trusting it</h4>
+    <p>Mouth animations are uploaded to the kit as an <code>MTF1</code> pack: a base image plus up to <em>n</em> mouth frames and the box they sit in &mdash; the same idea as the lip sync in the 3D game, shipped to a physical screen.</p><p>A microcontroller with a few hundred kilobytes of RAM cannot survive a malformed pack, so nothing is read until the header has been checked: magic bytes, non&#8209;zero dimensions that fit the real display, a frame count within the compiled maximum, and a mouth box that lies inside the base image. Each failure returns a named reason, and the block lengths and checksums are verified before a single frame is drawn.</p>
+  </aside>
+</article>
+<article class="snip" id="k4" data-tone="blue">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-kits-firmware/Version_F/F_versiyon/F_versiyon.ino</code>
+      <span class="snip-lines">lines 364&ndash;388</span>
+    </header>
+    <pre class="snip-pre"><code class="language-cpp">bool initI2S() {
+  // ---- Mikrofon: I2S0, RX, 32-bit, mono, sol kanal ----
+  i2s_chan_config_t rxc = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
+  rxc.dma_desc_num  = 8;                // 8 x 512 kare = ~256 ms tampon
+  rxc.dma_frame_num = 512;
+  if (i2s_new_channel(&amp;rxc, nullptr, &amp;rxChan) != ESP_OK) return false;
+
+  i2s_std_config_t rcfg = {
+    .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(SR),
+    .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_MONO),
+    .gpio_cfg = {
+      .mclk = I2S_GPIO_UNUSED,
+      .bclk = (gpio_num_t)PIN_MIC_SCK,
+      .ws   = (gpio_num_t)PIN_MIC_WS,
+      .dout = I2S_GPIO_UNUSED,
+      .din  = (gpio_num_t)PIN_MIC_SD,
+      .invert_flags = { .mclk_inv = false, .bclk_inv = false, .ws_inv = false },
+    },
+  };
+  rcfg.slot_cfg.slot_mask = MIC_SLOT_RIGHT ? I2S_STD_SLOT_RIGHT : I2S_STD_SLOT_LEFT;
+  rcfg.gpio_cfg.invert_flags.bclk_inv = MIC_BCLK_INVERT;
+  if (i2s_channel_init_std_mode(rxChan, &amp;rcfg) != ESP_OK) return false;
+  i2s_event_callbacks_t cbs = {};
+  cbs.on_recv_q_ovf = onRxOverflow;
+  i2s_channel_register_event_callback(rxChan, &amp;cbs, nullptr);</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Two independent I2S buses</h4>
+    <p>The kit records and plays back, so the microphone and the amplifier each get their own I2S peripheral &mdash; mic on I2S0 at 32&#8209;bit mono, amplifier on I2S1 at 16&#8209;bit stereo. One shared bus would force one format on both and put a click into every transition.</p><p>Eight DMA descriptors of 512 frames is about 256&nbsp;ms of buffer, enough that a slow flash write cannot drop samples; the comment records the arithmetic. An overflow callback is registered rather than assumed away, and the receive channel is opened only while recording, so the microphone draws nothing on battery when idle.</p>
+  </aside>
+</article>
+<article class="snip" id="k5" data-tone="yellow">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-kits-firmware/Version_F/F_versiyon/F_versiyon.ino</code>
+      <span class="snip-lines">lines 254&ndash;288</span>
+    </header>
+    <pre class="snip-pre"><code class="language-cpp">void updateButtons() {
+  uint32_t now = millis();
+  for (uint8_t bi = 0; bi &lt; NBTN; bi++) {
+    Button &amp;b = buttons[bi];
+    bool raw = (digitalRead(b.pin) == LOW);
+    if (raw != b.rawPressed) {
+      b.rawPressed   = raw;
+      b.rawChangedAt = now;
+      if (b.glitch &lt; 0xFFFF) b.glitch++;
+    }
+    if (raw != b.pressed &amp;&amp; (now - b.rawChangedAt) &gt;= DEBOUNCE_MS) {
+      b.pressed = raw;
+      b.glitch  = 0;
+      if (raw) btnLog(bi, &quot;bas&quot;, -1);
+      else     btnLog(bi, &quot;birak&quot;, (int32_t)(now - b.pressedAt));
+      if (raw) {
+        b.pressedAt = now;
+        b.suppress  = false;
+      } else if (!b.suppress) {
+        b.event = EV_SHORT;              // kisa basis: birakma aninda
+      }
+    }
+    if (b.pressed &amp;&amp; !b.suppress &amp;&amp; (now - b.pressedAt) &gt;= LONG_PRESS_MS) {
+      b.suppress = true;
+      b.event    = EV_LONG;              // uzun basis: ~800 ms&#x27;de
+    }
+  }
+  btnNoiseReport(now);
+}
+
+uint8_t takeEvent(uint8_t idx) {
+  uint8_t e = buttons[idx].event;
+  buttons[idx].event = EV_NONE;
+  return e;
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Debounce, long press, and counting the noise</h4>
+    <p>Large buttons pressed by small hands bounce. A change is accepted only after <code>DEBOUNCE_MS</code> of a steady reading; short presses fire on release, long presses at about 800&nbsp;ms while still held, so a child never has to time anything.</p><p><code>suppress</code> is what stops one long press also counting as a short one. The <code>glitch</code> counter is a debugging tool that stayed in: it counts raw transitions and reports them, which is how a noisy solder joint was found on an assembled kit without opening it.</p>
+  </aside>
+</article>
+<article class="snip" id="k6" data-tone="green">
+  <div class="snip-main">
+    <header class="snip-head">
+      <code class="snip-file">mini-kits-firmware/Version_F/F_versiyon/F_versiyon.ino</code>
+      <span class="snip-lines">lines 1354&ndash;1370</span>
+    </header>
+    <pre class="snip-pre"><code class="language-cpp">void enterSleep() {
+  logMsg(&quot;kapaniyor (uyku)&quot;);
+  powerOn = false;
+  sleepFeedback();
+  rxStop();
+  digitalWrite(PIN_AMP_SD, LOW);
+  ampOn = false;
+
+  // Uyku basisindan hemen uyanmamak icin butonlarin birakilmasini bekle
+  while (anyButtonHeld()) {
+    updateButtons();
+    delay(5);
+  }
+  clearButtonEvents();
+  state = ST_SLEEPING;
+  sleepQuietSince = millis();
+}</code></pre>
+  </div>
+  <aside class="snip-note">
+    <h4>Going to sleep without waking straight back up</h4>
+    <p>The kit sleeps on a long press of ON/OFF, or after a timeout. It shuts the microphone channel and pulls the amplifier's shutdown pin low first &mdash; an amplifier left enabled pops as the rail settles, which sounds like a fault.</p><p>The loop in the middle is the fix for a real bug: the press that puts it to sleep is still held, so it immediately woke the kit again. It now waits for every button to be released, clears the pending events, and only then changes state.</p>
+  </aside>
+</article>
+  </div>
+</section>
+
+<section class="band" id="tested">
+  <div class="wrap">
+    <div class="s-head">
+      <h2>How it was tested, and what is not finished</h2>
+      <p>Measured rather than assumed &mdash; and an honest list of what is still ahead.</p>
+    </div>
+    <div class="two">
+      <div data-tone="blue">
+        <div class="panel">
+          <h3>Evidence of testing</h3>
+          <p>A <code>tests/</code> harness lives in the repository and runs from one script.</p>
+          <ul>
+            <li>A WordPress stub faithful enough to reproduce <code>wp_kses</code>, including the
+            <code>data-*</code> wildcard, plus a fake <code>$wpdb</code> with fixtures.</li>
+            <li>Assertions that every screen, signed in and signed out, renders with no empty
+            <code>src</code> and no unsubstituted <code>{{token}}</code>.</li>
+            <li>An end&#8209;to&#8209;end panel test that calls <code>save_blocks()</code> and then
+            renders the page, so <q>it saved but nothing changed</q> cannot return.</li>
+            <li>Playwright reading <code>getComputedStyle</code> to prove each event category draws its
+            own colour, and the expert hero crop against the design's own viewBox.</li>
+            <li>No sideways scroll at 1280, 1100, 820 and 390&nbsp;px; the hamburger tapped at phone
+            width across four page shapes.</li>
+            <li><code>php -l</code> and <code>node --check</code> over every file on every run.</li>
+          </ul>
+        </div>
+      </div>
+      <div data-tone="orange">
+        <div class="panel">
+          <h3>What is still ahead</h3>
+          <p>Stated plainly, because a submission that claims to be finished is not believable.</p>
+          <ul>
+            <li><b>Server&#8209;side authorisation.</b> The API authenticates at login and the client
+            carries a bearer token, but the endpoints behind it still trust the identifier the client
+            sends. Verifying identity from the token inside every endpoint is the next milestone, and the
+            single&#8209;interceptor design means the client needs no change for it.</li>
+            <li><b>Automated tests for the game.</b> The web and plugin layers have the harness above;
+            the React client and the firmware are still tested by hand.</li>
+            <li><b>Firmware over&#8209;the&#8209;air updates.</b> Kits are flashed over USB today.</li>
+            <li><b>Offline play.</b> The fallback scene board keeps the game usable without the API, but
+            progress made offline is not yet queued and synced.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="wrap">
+  <p><b>Mini-Talks</b> &mdash; mini-talks.com &middot; mini-talks.org &middot; mini-kits.io<br>
+  Technical dossier prepared for judging. All source in the archives above is the current deployed
+  code, with credentials replaced by placeholders.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+(function(){
+  /* theme ------------------------------------------------------------- */
+  var root = document.documentElement, tog = document.getElementById('tog');
+  function stored(){ try { return localStorage.getItem('mt-dossier-theme'); } catch(e){ return null; } }
+  function keep(v){ try { localStorage.setItem('mt-dossier-theme', v); } catch(e){} }
+  var saved = stored();
+  if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved);
+  function dark(){
+    var a = root.getAttribute('data-theme');
+    if (a) return a === 'dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function label(){ tog.setAttribute('aria-pressed', dark() ? 'true' : 'false'); }
+  label();
+  tog.addEventListener('click', function(){
+    var next = dark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next); keep(next); label();
+  });
+
+  /* highlighting ------------------------------------------------------ */
+  if (window.hljs) {
+    document.querySelectorAll('.snip-pre code').forEach(function(b){
+      try { hljs.highlightElement(b); } catch(e){}
+    });
+  }
+
+})();
+</script>

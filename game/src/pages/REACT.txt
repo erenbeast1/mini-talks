@@ -1,0 +1,1042 @@
+const Background: React.VFC = () => {
+  return (
+    <div className="background">
+      <div className="container">
+        <div className="background" />
+        <div className="background-+-border" />
+        <div className="background" />
+        <div className="background" />
+        <div className="background-+-border" />
+        <div className="background-+-border" />
+        <div className="container">
+          <div className="background" />
+          <div className="background" />
+          <div className="background" />
+          <div className="background" />
+          <div className="background" />
+          <div className="background" />
+        </div>
+      </div>
+      <p className="text-1">Head</p>
+      <div className="container">
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="background-+-border" />
+        <p className="text-2">Hair</p>
+        <div className="image" />
+        <div className="background-+-border" />
+        <p className="text-3">Head</p>
+        <div className="image" />
+        <div className="background-+-border" />
+        <div className="image" />
+        <p className="text-4">Torso</p>
+        <div className="background-+-border" />
+        <div className="image" />
+        <p className="text-5">Legs</p>
+      </div>
+      <div className="container">
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="container" />
+        <div className="background-+-border" />
+        <p className="text-6">Female</p>
+        <div className="image" />
+        <div className="background-+-border" />
+        <div className="image" />
+        <p className="text-7">Male</p>
+        <div className="background-+-border" />
+        <p className="text-8">Child</p>
+        <div className="image" />
+      </div>
+      <div className="container">
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="background-+-border" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background-+-border" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+      </div>
+      <div className="container">
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="background-+-border" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+        <div className="background" />
+        <div className="image" />
+      </div>
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="background" />
+      <div className="container">
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="background-+-border">
+          <div className="container">
+            <p className="text-9">Mouth</p>
+          </div>
+        </div>
+        <div className="background-+-border">
+          <div className="container">
+            <p className="text-1-0">Facial Hair</p>
+          </div>
+        </div>
+        <div className="background-+-border" />
+      </div>
+      <div className="container">
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="rectangle" />
+        <div className="background-+-border">
+          <div className="container">
+            <p className="text-1-1">Eye</p>
+          </div>
+        </div>
+        <div className="background-+-border">
+          <div className="container">
+            <p className="text-1-2">Glasses</p>
+          </div>
+        </div>
+        <div className="background-+-border" />
+      </div>
+    </div>
+  )
+}
+
+.background {
+  height: 1080px;
+  width: 1904px;
+  background-color: #ffffff;
+}
+.container {
+  height: 994px;
+  width: 900px;
+}
+.background {
+  border-radius: 25px 25px 25px 0px;
+  height: 934px;
+  width: 720px;
+  background-color: #e3e3e3;
+}
+.background-+-border {
+  border-radius: 0px 0px 0px 25px;
+  height: 867px;
+  width: 180px;
+  background-color: #e52828;
+  border: 15px solid #e52828;
+}
+.background {
+  height: 69px;
+  width: 720px;
+  background-color: #e52828;
+}
+.background {
+  border-radius: 15px 0px 0px 0px;
+  height: 68px;
+  width: 720px;
+  background-color: #0055bf;
+}
+.background-+-border {
+  border-radius: 25px 25px 0px 0px;
+  height: 116px;
+  width: 900px;
+  background-color: #e52828;
+  border: 15px solid #e52828;
+}
+.background-+-border {
+  border-radius: 25px 25px 0px 0px;
+  height: 94px;
+  width: 736px;
+  background-color: #ffffff;
+  border: 15px solid #e52828;
+}
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 60px;
+}
+.background {
+  border-radius: 5px 5px 0px 0px;
+  height: 30px;
+  width: 90px;
+  background-color: #e52828;
+}
+.background {
+  border-radius: 5px 5px 0px 0px;
+  height: 30px;
+  width: 90px;
+  background-color: #e52828;
+}
+.background {
+  border-radius: 5px 5px 0px 0px;
+  height: 30px;
+  width: 90px;
+  background-color: #e52828;
+}
+.background {
+  border-radius: 5px 5px 0px 0px;
+  height: 30px;
+  width: 90px;
+  background-color: #e52828;
+}
+.background {
+  border-radius: 5px 5px 0px 0px;
+  height: 30px;
+  width: 90px;
+  background-color: #e52828;
+}
+.background {
+  border-radius: 5px 5px 0px 0px;
+  height: 30px;
+  width: 90px;
+  background-color: #e52828;
+}
+.text-1 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 32px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #e52828;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 20px;
+}
+.rectangle {
+  height: 151px;
+  width: 134px;
+}
+.rectangle {
+  height: 151px;
+  width: 134px;
+}
+.rectangle {
+  height: 151px;
+  width: 134px;
+}
+.rectangle {
+  height: 151px;
+  width: 134px;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 151px;
+  width: 134px;
+  background-color: #e52828;
+  border: 2px solid #ffffff;
+}
+.text-2 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 24px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #ffffff;
+}
+.image {
+  height: 64px;
+  width: 64px;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 151px;
+  width: 134px;
+  background-color: #e52828;
+  border: 2px solid #ffffff;
+}
+.text-3 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 24px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #ffffff;
+}
+.image {
+  height: 64px;
+  width: 64px;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 151px;
+  width: 134px;
+  background-color: #e52828;
+  border: 2px solid #ffffff;
+}
+.image {
+  height: 77px;
+  width: 77px;
+}
+.text-4 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 24px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #ffffff;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 151px;
+  width: 134px;
+  background-color: #e52828;
+  border: 2px solid #ffffff;
+}
+.image {
+  height: 57px;
+  width: 57px;
+}
+.text-5 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 24px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #ffffff;
+}
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 29px;
+}
+.rectangle {
+  height: 37px;
+  width: 200px;
+}
+.rectangle {
+  height: 37px;
+  width: 200px;
+}
+.container {
+  height: 37px;
+  width: 200px;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 37px;
+  width: 200px;
+  background-color: #0055bf;
+  border: 2px solid #ffffff;
+}
+.text-6 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #ffffff;
+}
+.image {
+  height: 25px;
+  width: 25px;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 37px;
+  width: 200px;
+  background-color: #ffffff;
+  border: 2px solid #ffffff;
+}
+.image {
+  height: 25px;
+  width: 25px;
+}
+.text-7 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #0055bf;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 37px;
+  width: 200px;
+  background-color: #0055bf;
+  border: 2px solid #ffffff;
+}
+.text-8 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #ffffff;
+}
+.image {
+  height: 25px;
+  width: 25px;
+}
+.container {
+  height: 215px;
+  width: 585px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+  border: 3px solid #e52828;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 21px;
+  width: 21px;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+  border: 3px solid rgba(0, 0, 0, 0);
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 21px;
+  width: 21px;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.container {
+  height: 227px;
+  width: 585px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.rectangle {
+  height: 100px;
+  width: 97px;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+  border: 3px solid #e52828;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.image {
+  height: 18px;
+  width: 18px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.image {
+  height: 18px;
+  width: 18px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 10px;
+  height: 100px;
+  width: 97px;
+  background-color: #ffffff;
+}
+.image {
+  height: 75px;
+  width: 75px;
+}
+.background {
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.background {
+  opacity: 0.4000000059604645;
+  border-radius: 3px;
+  height: 15px;
+  width: 15px;
+  background-color: #000000;
+}
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+}
+.rectangle {
+  height: 37px;
+  width: 98px;
+}
+.rectangle {
+  height: 37px;
+  width: 127px;
+}
+.rectangle {
+  height: 37px;
+  width: 269px;
+}
+.background-+-border {
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 25px;
+  background-color: #237841;
+  border: 2px solid rgba(0, 0, 0, 0);
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.text-9 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #ffffff;
+}
+.background-+-border {
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 25px;
+  background-color: #ffffff;
+  border: 2px solid rgba(0, 0, 0, 0);
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.text-1-0 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #000000;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 37px;
+  width: 54px;
+  background-color: #ffffff;
+  border: 2px solid rgba(0, 0, 0, 0);
+}
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+}
+.rectangle {
+  height: 37px;
+  width: 77px;
+}
+.rectangle {
+  height: 37px;
+  width: 105px;
+}
+.rectangle {
+  height: 37px;
+  width: 269px;
+}
+.background-+-border {
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 25px;
+  background-color: #237841;
+  border: 2px solid rgba(0, 0, 0, 0);
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.text-1-1 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #ffffff;
+}
+.background-+-border {
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 25px;
+  background-color: #ffffff;
+  border: 2px solid rgba(0, 0, 0, 0);
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.text-1-2 {
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  font-family: Montserrat;
+  line-height: auto;
+  color: #000000;
+}
+.background-+-border {
+  border-radius: 10px;
+  height: 37px;
+  width: 54px;
+  background-color: #ffffff;
+  border: 2px solid rgba(0, 0, 0, 0);
+}

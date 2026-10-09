@@ -4,3 +4,13 @@ dist/
 
 # The game-side shared key — created on the server, never committed.
 game-api/forum/config.php
+
+# Game client — local environment and build output
+game/.env
+game/.env.*
+game/node_modules/
+game/dist/
+
+# Game API — composer deps and the uploads children's Minis are written to
+game-api/vendor/
+game-api/uploads/

@@ -1,0 +1,42 @@
+SITE BAGLANTISI - PROTOKOL UYUM YAMASI (v1.0.1)
+================================================
+
+Sorun USB/CDC tarafinda degil. "USB CDC On Boot: Enabled" dogru, seri port aciliyor
+ve cihaz cevap veriyor. Sorun, cihazin gonderdigi JSON alan adlarinin sitenin
+bekledigi adlarla eslesmemesi. Yalnizca seri komut katmani degisti; donanim, pin,
+ses ve dosya sistemi koduna dokunulmadi. Eski alanlar korundu, firmanin
+brick_tool.py araci aynen calisir.
+
+Sitenin baglanti adimlari:
+  1) {"cmd":"hello"}  -> cevapta "dev" (F/B/D), "uid", "profile", "owner" olmali
+  2) {"cmd":"bind","profile":<sayi>,"owner":"..."} -> cevapta "ok"
+  3) {"cmd":"time","epoch":...}
+  4) {"cmd":"stats"}  -> cevapta "total_s" olmali (5 sn icinde); ayrica uid/profile
+                         ve slotlarda "i" + "len_ms" (Version_D'de "scenes")
+
+Version_B (BrickTalks_S3.ino)
+  - hello: "dev":"Brick-Talks" -> "dev":"B" (ad "name" alanina tasindi).
+    Sunucu yalniz F/B/D kabul ediyor, digerlerinde 400 donuyor.
+  - stats: yalniz total_ms / longest_ms vardi -> site "total_s" bulamayip 4. adimda
+    zaman asimina dusuyordu ("The kit did not respond"). Eklendi: total_s, longest_s,
+    uid, profile; slotlara i ve len_ms.
+
+Version_F (F_versiyon.ino)
+  - hello: "dev" alani hic yoktu, site 1. adimda takiliyordu. Eklendi: dev "F", uid,
+    profile, owner (eski device_id/profile_id/profile_name korunuyor).
+  - bind: site "profile"/"owner" gonderiyor; cihaz yalnizca "profile_id" okuyordu.
+    Artik ikisini de kabul ediyor.
+  - stats: Version_B'deki eksiklerin aynisi.
+  - dump: her satirda virgulle ayrilmis 32 ornek vardi; site her satirin ilk ornegini
+    alip gerisini atiyordu. Artik her satirda tek ornek var (Version_B ile ayni).
+    Hata satirlarina "err" eklendi.
+
+Version_D (d_versiyon.ino)
+  - hello ve bind zaten uyumluydu.
+  - stats: {"modes":[...]} -> {"uid","profile","total_s",...,"scenes":[{mode, stats,
+    slots:[{l,m,len_ms,demo}]}]}. Sunucu "modes" anahtarini okumuyor, sahneler bos
+    gorunuyordu. Eski alanlar (level, mini, user, user_s) slotlarda duruyor.
+
+Test (Arduino Serial Monitor, 115200, satir sonu "Newline"):
+  {"cmd":"hello"}   -> "dev":"F" / "B" / "D"
+  {"cmd":"stats"}   -> satirda "total_s" gorunmeli

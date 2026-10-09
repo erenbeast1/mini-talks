@@ -1,0 +1,42 @@
+:root {
+  --vh: 1vh;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ... geri kalanı aynı kalacak */
+
+@layer components {
+  .lego-button {
+    @apply px-6 py-3 rounded-lg font-bold text-white transition-all duration-200;
+    @apply hover:scale-105 active:scale-95;
+  }
+  
+  .lego-button-red {
+    @apply lego-button bg-lego-red hover:bg-red-700;
+  }
+  
+  .lego-button-blue {
+    @apply lego-button bg-lego-blue hover:bg-blue-700;
+  }
+  
+  .lego-button-green {
+    @apply lego-button bg-lego-green hover:bg-green-700;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}

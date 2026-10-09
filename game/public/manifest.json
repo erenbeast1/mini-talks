@@ -1,0 +1,17 @@
+{
+  "name": "Mini-Talks",
+  "short_name": "MiniTalks",
+  "description": "Speech therapy app for children",
+  "display": "standalone",
+  "orientation": "landscape",
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#0055bf",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
