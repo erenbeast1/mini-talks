@@ -197,7 +197,7 @@ class RewardTriggers {
      */
     private static function addReward($conn, $mini_id, $reward_type, $reward_category, $notes = null, $scene_id = null, $level_id = null) {
         try {
-            // Daily limit kontrolü
+            // Daily limit check
             $stmt = $conn->prepare("SELECT daily_limit FROM reward_settings WHERE mini_id = ?");
             $stmt->execute([$mini_id]);
             $settings = $stmt->fetch(PDO::FETCH_ASSOC);

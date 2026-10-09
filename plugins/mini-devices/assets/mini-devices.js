@@ -314,7 +314,7 @@
         writer = port.writable.getWriter();
         readLoop();
 
-        // Port acilinca kart resetlenir; acilis ~1.5 sn surer.
+        // Opening the port resets the board, and it takes ~1.5 s to come back.
         try { port.setSignals({ dataTerminalReady: true, requestToSend: false }); } catch (e) {}
 
         setStatus('Waking the kit up…');
@@ -326,7 +326,7 @@
         return checkOwnership(hello);
       })
       .then(function (hello) {
-        if (!hello) return null;                       // kullanici vazgecti
+        if (!hello) return null;                       // the user cancelled
         setStatus(DEV_LABEL[hello.dev] + ' connected — syncing the clock…', 'ok');
         return send({ cmd: 'time', epoch: Math.floor(Date.now() / 1000) })
           .then(function () {
@@ -363,7 +363,7 @@
   function checkOwnership(hello) {
     var label = DEV_LABEL[hello.dev] || hello.dev;
 
-    if (!hello.uid) {                                  // eski firmware
+    if (!hello.uid) {                                  // older firmware
       setStatus(label + ' connected (older firmware — no profile link).', 'ok');
       return Promise.resolve(hello);
     }
@@ -371,11 +371,11 @@
     return api('whoami').then(function (me) {
       var bound = parseInt(hello.profile || 0, 10);
 
-      if (bound === me.profile) {                      // zaten bizim
+      if (bound === me.profile) {                      // already ours
         return hello;
       }
 
-      if (bound && bound !== me.profile) {             // baskasinin
+      if (bound && bound !== me.profile) {             // someone else's
         var msg = label + ' is linked to another profile' +
                   (hello.owner ? ' (' + hello.owner + ')' : '') +
                   '. Move it to your profile? ' +
@@ -384,7 +384,7 @@
           setStatus('Cancelled — the kit stays linked to the other profile.', 'err');
           return null;
         }
-      } else {                                         // bagsiz
+      } else {                                         // not bound yet
         if (!window.confirm(label + ' is not linked to a profile yet. ' +
                             'Link it to ' + me.owner + '?')) {
           setStatus('The kit was not linked.', 'err');

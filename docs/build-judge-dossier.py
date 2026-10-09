@@ -3,9 +3,16 @@ import html, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from data import GAME, FORUM, DEVICES, FIRMWARE
 
-SRC = "/tmp/claude-0/-home-user-mini-talks/8d283174-51d2-5d53-8015-a994ca4e463f/scratchpad/pkg/src"
-PKG = "/tmp/claude-0/-home-user-mini-talks/8d283174-51d2-5d53-8015-a994ca4e463f/scratchpad/pkg"
-OUT = "/tmp/claude-0/-home-user-mini-talks/8d283174-51d2-5d53-8015-a994ca4e463f/scratchpad/gen/index.html"
+# Every extract is read out of the repository itself, by line range, so a
+# snippet on the page cannot drift from the code it claims to quote.
+SRC = os.environ.get("MT_REPO", "/home/user/mini-talks")
+
+# Where the archives are offered from:
+#   "github" — links to the repository (the hosted/artifact copy of the page)
+#   "local"  — relative links to code/*.zip sitting beside index.html, for a
+#              folder uploaded to the site as-is
+MODE = sys.argv[2] if len(sys.argv) > 2 else os.environ.get("MT_MODE", "github")
+OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(SRC, "docs", "judge-dossier.html")
 
 TONES = ["red", "blue", "yellow", "green", "orange"]
 
@@ -42,8 +49,13 @@ def snips(rows, start=0):
           '</article>' % (key, tone, html.escape(rel), a, b, lang, code, html.escape(head), note))
     return "\n".join(out)
 
-def kb(path):
-    n = os.path.getsize(os.path.join(PKG, path))
+PKG = os.environ.get("MT_PKG", os.path.join(os.path.dirname(OUT), "code"))
+
+def kb(name):
+    try:
+        n = os.path.getsize(os.path.join(PKG, name))
+    except OSError:
+        return "zip"
     return "%.1f MB" % (n / 1048576.0) if n >= 1048576 else "%d KB" % round(n / 1024.0)
 
 STUD = ("url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20"
@@ -58,29 +70,41 @@ BRANCH = "claude/turkish-support-code-i2z7vq"
 ZIPALL = REPO + "/archive/refs/heads/" + BRANCH + ".zip"
 
 DOWNLOADS = [
-  ("game", "mini&#8209;talks.com &mdash; the game client",
-   "React&nbsp;18, Vite, Three.js. 81 files, 59,127 lines.", "blue"),
-  ("game-api", "mini&#8209;talks.com &mdash; the API",
+  ("game", "game.zip", "mini&#8209;talks.com &mdash; the game client",
+   "React&nbsp;18, Vite, Three.js. 81 source files, 59,127 lines.", "blue"),
+  ("game-api", "game-api.zip", "mini&#8209;talks.com &mdash; the API",
    "PHP&nbsp;8 + MySQL, one folder per domain. 110 files, 14,990 lines.", "blue"),
-  ("plugins/mini-forum", "mini&#8209;talks.org &mdash; mini&#8209;forum",
+  ("plugins/mini-forum", "mini-forum.zip", "mini&#8209;talks.org &mdash; mini&#8209;forum",
    "WordPress plugin: forum, profiles, Mini&#8209;Calendar, game link. 115 files, 23,329 lines.", "green"),
-  ("plugins/mini-devices", "mini&#8209;talks.org &mdash; mini&#8209;devices",
+  ("plugins/mini-devices", "mini-devices.zip", "mini&#8209;talks.org &mdash; mini&#8209;devices",
    "WordPress plugin: the Mini&#8209;Kits shelf and WebSerial. 8 files, 5,182 lines.", "green"),
-  ("mini-kits-firmware", "mini&#8209;kits.io &mdash; firmware",
+  ("mini-kits-firmware", "mini-kits-firmware.zip", "mini&#8209;kits.io &mdash; firmware",
    "ESP32&#8209;S3 sketches for the three kit variants. 6,051 lines.", "yellow"),
-  ("tests", "the test harness",
+  ("tests", "tests.zip", "the test harness",
    "The WordPress stub, the fixtures and the assertions described further down.", "orange"),
 ]
 
-dl_rows = "\n".join(
-  '      <li class="dl" data-tone="%s">\n'
-  '        <div class="dl-txt"><b>%s</b><span>%s</span></div>\n'
-  '        <div class="dl-get">\n'
-  '          <a class="dl-btn" href="%s/tree/%s/%s" target="_blank" rel="noopener">Browse the source</a>\n'
-  '          <code class="dl-url">%s/</code>\n'
-  '        </div>\n'
-  '      </li>' % (t, title, note, REPO, BRANCH, path, path)
-  for (path, title, note, t) in DOWNLOADS)
+if MODE == "local":
+    ZIPALL = "code/mini-talks-all-code.zip"
+    dl_rows = "\n".join(
+      '      <li class="dl" data-tone="%s">\n'
+      '        <div class="dl-txt"><b>%s</b><span>%s</span></div>\n'
+      '        <div class="dl-get">\n'
+      '          <a class="dl-btn" href="code/%s" download>Download &middot; %s</a>\n'
+      '          <code class="dl-url">%s/</code>\n'
+      '        </div>\n'
+      '      </li>' % (t, title, note, zp, kb(zp), path)
+      for (path, zp, title, note, t) in DOWNLOADS)
+else:
+    dl_rows = "\n".join(
+      '      <li class="dl" data-tone="%s">\n'
+      '        <div class="dl-txt"><b>%s</b><span>%s</span></div>\n'
+      '        <div class="dl-get">\n'
+      '          <a class="dl-btn" href="%s/tree/%s/%s" target="_blank" rel="noopener">Browse the source</a>\n'
+      '          <code class="dl-url">%s/</code>\n'
+      '        </div>\n'
+      '      </li>' % (t, title, note, REPO, BRANCH, path, path)
+      for (path, zp, title, note, t) in DOWNLOADS)
 
 CRITERIA = [
  ("Technical", "blue", [
@@ -571,16 +595,11 @@ PAGE = """<title>Mini-Talks Technical Dossier</title>
       replaced with placeholders, and the folder children's generated Minis are written to is left
       out; nothing else is changed or omitted.</p>
     </div>
-    <p class="dl-all">
-      <a class="dl-btn dl-big" href="%(zipall)s" target="_blank" rel="noopener">Download all five
-      codebases &middot; .zip</a>
-      <span>One archive, 317 source files, the folder names they are deployed under.</span>
-    </p>
+%(dlbig)s
     <ul class="dls">
 %(dls)s
     </ul>
-    <p class="dl-note">Repository <code>%(repo)s</code>, branch <code>%(branch)s</code>. If a link
-    does nothing because of your browser's sandbox, copy the address into a new tab.</p>
+    <p class="dl-note">%(dlnote)s</p>
   </div>
 </section>
 
@@ -763,11 +782,29 @@ PAGE = """<title>Mini-Talks Technical Dossier</title>
 </script>
 """
 
+if MODE == "local":
+    DLBIG = ('    <p class="dl-all">\n'
+             '      <a class="dl-btn dl-big" href="%s" download>Download everything &middot; .zip</a>\n'
+             '      <span>One archive, %s, all five codebases under the folder names they are'
+             ' deployed with.</span>\n'
+             '    </p>' % (ZIPALL, kb("mini-talks-all-code.zip")))
+    DLNOTE = ("Every archive here is the source this page quotes, taken from the same commit. "
+              "Unzip and the folder names are the deployment layout.")
+else:
+    DLBIG = ('    <p class="dl-all">\n'
+             '      <a class="dl-btn dl-big" href="%s" target="_blank" rel="noopener">Download all'
+             ' five codebases &middot; .zip</a>\n'
+             '      <span>One archive, 317 source files, the folder names they are deployed'
+             ' under.</span>\n'
+             '    </p>' % ZIPALL)
+    DLNOTE = ("Repository <code>erenbeast1/mini-talks</code>, branch <code>" + BRANCH + "</code>. "
+              "If a link does nothing because of your browser's sandbox, copy the address into a "
+              "new tab.")
+
 open(OUT, "w", encoding="utf-8").write(PAGE % {
   "css": CSS,
-  "zipall": ZIPALL,
-  "repo": "erenbeast1/mini-talks",
-  "branch": BRANCH,
+  "dlbig": DLBIG,
+  "dlnote": DLNOTE,
   "nav": "".join('<a href="#%s">%s</a>' % (i, t) for i, t in NAV),
   "dls": dl_rows,
   "crit": crit_html(),

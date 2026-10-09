@@ -120,7 +120,7 @@ try {
         exit;
     }
 
-    // Şifre kontrolü
+    // Password check
     if (!password_verify($password, $user['password_hash'])) {
         http_response_code(401);
         echo json_encode([
@@ -130,7 +130,7 @@ try {
         exit;
     }
 
-    // Hesap aktif mi?
+    // Is the account active?
     if ($user['is_active'] != 1) {
         http_response_code(403);
         echo json_encode([

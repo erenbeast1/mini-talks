@@ -261,7 +261,7 @@ void btnLog(uint8_t i, const char *what, int32_t ms) {
 }
 
 void printButtonMap() {
-  Serial.print("# buton haritasi:");
+  Serial.print("# button map:");
   for (uint8_t i = 0; i < B_COUNT; i++) {
     if (buttons[i].pin < 0) continue;
     Serial.printf(" %s=IO%d", BTN_NAME[i], buttons[i].pin);

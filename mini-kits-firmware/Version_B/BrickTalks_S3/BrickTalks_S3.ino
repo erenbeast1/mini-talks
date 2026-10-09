@@ -324,7 +324,7 @@ void btnLog(uint8_t, const char *, int32_t) {}
 #endif
 
 void printButtonMap() {
-  Serial.print("# buton haritasi:");
+  Serial.print("# button map:");
   for (uint8_t i = 0; i < NBTN; i++) Serial.printf(" %s=IO%d", BTN_NAME[i], buttons[i].pin);
   Serial.println();
 }
@@ -365,8 +365,8 @@ void updateButtons() {
     if (raw != b.pressed && (now - b.rawChangedAt) >= DEBOUNCE_MS) {
       b.pressed = raw;
       b.glitch  = 0;
-      if (raw) btnLog(bi, "bas", -1);
-      else     btnLog(bi, "birak", (int32_t)(now - b.pressedAt));
+      if (raw) btnLog(bi, "press", -1);
+      else     btnLog(bi, "release", (int32_t)(now - b.pressedAt));
       if (raw) {
         b.pressedAt = now;
         b.suppress  = false;
@@ -795,43 +795,43 @@ bool drawRleFile(uint32_t off, uint32_t len, int16_t x, int16_t y, uint16_t w, u
   return ok;
 }
 
-// MTF1 paketini dogrular; hata varsa aciklama dondurur, gecerliyse nullptr
+// Validates an MTF1 pack: returns a named reason on failure, nullptr when valid
 const char *faceValidate(const String &path, FaceInfo &fi) {
   fi = FaceInfo();
   File f = LittleFS.open(path, "r");
-  if (!f) return "acilamadi";
+  if (!f) return "open_failed";
   size_t size = f.size();
   uint8_t h[18];
-  if (size < 18 || f.read(h, 18) != 18) { f.close(); return "kisa_dosya"; }
-  if (memcmp(h, "MTF1", 4) != 0)         { f.close(); return "baslik"; }
+  if (size < 18 || f.read(h, 18) != 18) { f.close(); return "short_file"; }
+  if (memcmp(h, "MTF1", 4) != 0)         { f.close(); return "bad_header"; }
 
   uint16_t v[7];
   for (int i = 0; i < 7; i++) v[i] = (uint16_t)(h[4 + i * 2] | (h[5 + i * 2] << 8));
   fi.bw = v[0]; fi.bh = v[1]; fi.mx = v[2]; fi.my = v[3];
   fi.mw = v[4]; fi.mh = v[5]; fi.n = v[6];
 
-  if (fi.bw == 0 || fi.bh == 0 || fi.bw > AREA_W || fi.bh > AREA_H) { f.close(); return "taban_boyutu"; }
-  if (fi.n > FACE_MAX_FRAMES) { f.close(); return "kare_sayisi"; }
+  if (fi.bw == 0 || fi.bh == 0 || fi.bw > AREA_W || fi.bh > AREA_H) { f.close(); return "base_size"; }
+  if (fi.n > FACE_MAX_FRAMES) { f.close(); return "frame_count"; }
   if (fi.n > 0 && (fi.mw == 0 || fi.mh == 0 ||
                    (uint32_t)fi.mx + fi.mw > fi.bw || (uint32_t)fi.my + fi.mh > fi.bh)) {
     f.close();
-    return "agiz_alani";
+    return "mouth_area";
   }
 
   uint32_t pos = 18;
   for (uint16_t blk = 0; blk <= fi.n; blk++) {
     uint8_t lb[4];
-    if (pos + 4 > size || !f.seek(pos) || f.read(lb, 4) != 4) { f.close(); return "eksik_blok"; }
+    if (pos + 4 > size || !f.seek(pos) || f.read(lb, 4) != 4) { f.close(); return "missing_block"; }
     uint32_t len = (uint32_t)lb[0] | ((uint32_t)lb[1] << 8) | ((uint32_t)lb[2] << 16) | ((uint32_t)lb[3] << 24);
     pos += 4;
-    if ((len % 4) != 0 || len > size - pos) { f.close(); return "blok_uzunlugu"; }
+    if ((len % 4) != 0 || len > size - pos) { f.close(); return "block_length"; }
 
     uint32_t expected = (blk == 0) ? (uint32_t)fi.bw * fi.bh : (uint32_t)fi.mw * fi.mh;
     uint32_t sum = 0;
     uint32_t left = len;
     while (left > 0) {
       uint32_t chunk = left > sizeof(ioBuf) ? sizeof(ioBuf) : left;
-      if (f.read(ioBuf, chunk) != (int)chunk) { f.close(); return "okuma"; }
+      if (f.read(ioBuf, chunk) != (int)chunk) { f.close(); return "read_failed"; }
       for (uint32_t i = 0; i + 3 < chunk; i += 4) sum += (uint16_t)(ioBuf[i] | (ioBuf[i + 1] << 8));
       left -= chunk;
     }
@@ -842,7 +842,7 @@ const char *faceValidate(const String &path, FaceInfo &fi) {
     pos += len;
   }
   f.close();
-  if (pos != size) return "fazla_veri";
+  if (pos != size) return "trailing_data";
   fi.valid = true;
   return nullptr;
 }
@@ -861,7 +861,7 @@ void faceLoad(uint8_t slot) {
 
   const char *err = faceValidate(p, face);
   if (err) {
-    logMsg(String("karakter gecersiz slot ") + (slot + 1) + ": " + err);
+    logMsg(String("face pack invalid in slot ") + (slot + 1) + ": " + err);
     face = FaceInfo();
     return;
   }
@@ -1742,7 +1742,7 @@ void lightSleepOnce() {
 }
 
 void enterSleep() {
-  logMsg("kapaniyor (uyku)");
+  logMsg("powering down (sleep)");
   powerOn = false;
   sleepFeedback();
   rxStop();
@@ -1831,7 +1831,7 @@ void idleStep() {
   if (led4Until && now > led4Until) { ledSet(PIN_LED4, false); led4Until = 0; }
   if (statusUntil && now > statusUntil) { drawStrip("READY", COL_TEXT); statusUntil = 0; }
 
-  if (takeEvent(B_ONOFF) & EVB_HOLD)    { logMsg("ON/OFF: kapat"); enterSleep(); return; }
+  if (takeEvent(B_ONOFF) & EVB_HOLD)    { logMsg("ON/OFF: power off"); enterSleep(); return; }
   if (takeEvent(B_PLAY)  & EVB_RELEASE) { startPlayback(); return; }
 
   uint8_t er = takeEvent(B_REC);
@@ -1840,7 +1840,7 @@ void idleStep() {
 
   if (takeEvent(B_NEXT) & EVB_RELEASE)  { selectNext(); return; }
 
-  if (now - lastActivity >= IDLE_SLEEP_MS) { logMsg("hareketsizlik"); enterSleep(); }
+  if (now - lastActivity >= IDLE_SLEEP_MS) { logMsg("idle timeout"); enterSleep(); }
 }
 
 // ======================= USB: KARAKTER YUKLEME =======================
@@ -1929,9 +1929,9 @@ void faceReceive(int slotNo) {
     err = faceValidate(tmp, test);
   }
   if (err) {
-    LittleFS.remove(tmp);                      // eski karakter korunur
+    LittleFS.remove(tmp);                      // the previous face is kept
     Serial.printf("{\"ok\":0,\"slot\":%d,\"err\":\"%s\",\"bytes\":%u}\n", slotNo, err, (unsigned)total);
-    logMsg(String("karakter yukleme hatasi: ") + err);
+    logMsg(String("face pack upload failed: ") + err);
     if (state != ST_SLEEPING) showStatus("UPLOAD ERROR", COL_RED);
     return;
   }

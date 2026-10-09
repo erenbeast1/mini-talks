@@ -57,14 +57,14 @@ try {
     $conn->beginTransaction();
     
     try {
-        // Daily limit kontrolü
+        // Daily limit check
         $stmt = $conn->prepare("SELECT daily_limit FROM reward_settings WHERE mini_id = ?");
         $stmt->execute([$mini_id]);
         $settings = $stmt->fetch(PDO::FETCH_ASSOC);
         $dailyLimit = $settings ? intval($settings['daily_limit']) : 0;
         
         if ($dailyLimit > 0) {
-            // Bugün kazanılan reward sayısı
+            // How many rewards were earned today
             $stmt = $conn->prepare("
                 SELECT COUNT(*) as today_count 
                 FROM mini_rewards 
@@ -111,12 +111,12 @@ try {
             $convSettings = $stmt->fetch(PDO::FETCH_ASSOC);
             $brickToMedal = $convSettings ? intval($convSettings['brick_to_medal']) : 10;
             
-            // Toplam brick sayısı
+            // Total brick count
             $stmt = $conn->prepare("SELECT total_bricks FROM mini_profiles WHERE mini_id = ?");
             $stmt->execute([$mini_id]);
             $totalBricks = intval($stmt->fetch(PDO::FETCH_ASSOC)['total_bricks']);
             
-            // Daha önce convert edilen medal sayısı
+            // Medals already converted before now
             $stmt = $conn->prepare("
                 SELECT COUNT(*) as converted 
                 FROM mini_rewards 
@@ -125,7 +125,7 @@ try {
             $stmt->execute([$mini_id]);
             $convertedMedals = intval($stmt->fetch(PDO::FETCH_ASSOC)['converted']);
             
-            // Yeni convert edilmesi gereken medal sayısı
+            // How many new medals are owed
             $shouldHaveMedals = floor($totalBricks / $brickToMedal);
             $newMedals = $shouldHaveMedals - $convertedMedals;
             
@@ -137,7 +137,7 @@ try {
                     ");
                     $stmt->execute([$mini_id, "Auto-converted from {$brickToMedal} bricks"]);
                     
-                    // Total medals güncelle
+                    // Update the medal total
                     $stmt = $conn->prepare("UPDATE mini_profiles SET total_medals = total_medals + 1 WHERE mini_id = ?");
                     $stmt->execute([$mini_id]);
                 }

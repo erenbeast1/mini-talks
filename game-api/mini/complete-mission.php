@@ -50,7 +50,7 @@ try {
         $updated = $stmt->rowCount();
     }
     
-    // 2. mission_completions tablosuna da ekle (geriye dönük uyumluluk için)
+    // 2. Write to mission_completions as well (kept for backward compatibility)
     if (!$is_custom && $mission_id > 0) {
         $stmt = $pdo->prepare("SELECT id FROM mission_completions 
                                WHERE mini_id = ? AND mission_id = ? AND DATE(completed_at) = ?");

@@ -223,7 +223,7 @@ void btnLog(uint8_t, const char *, int32_t) {}
 #endif
 
 void printButtonMap() {
-  Serial.print("# buton haritasi:");
+  Serial.print("# button map:");
   for (uint8_t i = 0; i < NBTN; i++) Serial.printf(" %s=IO%d", BTN_NAME[i], buttons[i].pin);
   Serial.println();
 }
@@ -264,18 +264,18 @@ void updateButtons() {
     if (raw != b.pressed && (now - b.rawChangedAt) >= DEBOUNCE_MS) {
       b.pressed = raw;
       b.glitch  = 0;
-      if (raw) btnLog(bi, "bas", -1);
-      else     btnLog(bi, "birak", (int32_t)(now - b.pressedAt));
+      if (raw) btnLog(bi, "press", -1);
+      else     btnLog(bi, "release", (int32_t)(now - b.pressedAt));
       if (raw) {
         b.pressedAt = now;
         b.suppress  = false;
       } else if (!b.suppress) {
-        b.event = EV_SHORT;              // kisa basis: birakma aninda
+        b.event = EV_SHORT;              // short press: on release
       }
     }
     if (b.pressed && !b.suppress && (now - b.pressedAt) >= LONG_PRESS_MS) {
       b.suppress = true;
-      b.event    = EV_LONG;              // uzun basis: ~800 ms'de
+      b.event    = EV_LONG;              // long press: at ~800 ms
     }
   }
   btnNoiseReport(now);
@@ -362,9 +362,9 @@ i2s_std_slot_config_t txSlotConfig(int fmt, bool bits32) {
 }
 
 bool initI2S() {
-  // ---- Mikrofon: I2S0, RX, 32-bit, mono, sol kanal ----
+  // ---- Microphone: I2S0, RX, 32-bit, mono, left channel ----
   i2s_chan_config_t rxc = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
-  rxc.dma_desc_num  = 8;                // 8 x 512 kare = ~256 ms tampon
+  rxc.dma_desc_num  = 8;                // 8 x 512 frames = ~256 ms of buffer
   rxc.dma_frame_num = 512;
   if (i2s_new_channel(&rxc, nullptr, &rxChan) != ESP_OK) return false;
 
@@ -386,11 +386,11 @@ bool initI2S() {
   i2s_event_callbacks_t cbs = {};
   cbs.on_recv_q_ovf = onRxOverflow;
   i2s_channel_register_event_callback(rxChan, &cbs, nullptr);
-  // RX yalnizca kayit sirasinda acilir (mikrofon bosta guc tasarrufu yapar)
+  // RX is opened only while recording (the mic draws nothing when idle)
 
-  // ---- Amfi: I2S1, TX, 16-bit, stereo (L=R) -> BCLK 512 kHz ----
+  // ---- Amplifier: I2S1, TX, 16-bit, stereo (L=R) -> BCLK 512 kHz ----
   i2s_chan_config_t txc = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_1, I2S_ROLE_MASTER);
-  txc.auto_clear = true;                // veri yokken sessizlik gonder
+  txc.auto_clear = true;                // send silence when there is no data
   txc.dma_desc_num  = 6;
   txc.dma_frame_num = 512;
   if (i2s_new_channel(&txc, &txChan, nullptr) != ESP_OK) return false;
@@ -683,7 +683,7 @@ int16_t adpcmDecode(AdpcmState &st, uint8_t nib) {
 
 // ======================= YARDIMCILAR =======================
 void logMsg(const String &msg) {
-  // Tanilama satirlari '#' ile baslar; istemci yalnizca JSON beklememeli
+  // Diagnostic lines start with '#', so a client must not expect only JSON
   Serial.print("# ");
   Serial.println(msg);
 }
@@ -1030,7 +1030,7 @@ void startRecording() {
   while (true) {
     updateButtons();
     if (takeEvent(B_REC) == EV_SHORT) cap.run = false;
-    takeEvent(B_ONOFF);                          // okunur, uygulanmaz
+    takeEvent(B_ONOFF);                          // read, but not acted on
     takeEvent(B_PLAY);
 
 #if REC_LED_BLINK
@@ -1352,14 +1352,14 @@ void lightSleepOnce() {
 }
 
 void enterSleep() {
-  logMsg("kapaniyor (uyku)");
+  logMsg("powering down (sleep)");
   powerOn = false;
   sleepFeedback();
   rxStop();
   digitalWrite(PIN_AMP_SD, LOW);
   ampOn = false;
 
-  // Uyku basisindan hemen uyanmamak icin butonlarin birakilmasini bekle
+  // Wait for every button to be released: the press that slept it would wake it
   while (anyButtonHeld()) {
     updateButtons();
     delay(5);
@@ -1414,20 +1414,20 @@ void idleStep() {
 #endif
   if (anyButtonHeld()) lastActivity = millis();
 
-  if (takeEvent(B_ONOFF) == EV_LONG) { logMsg("ON/OFF: kapat"); enterSleep(); return; }
+  if (takeEvent(B_ONOFF) == EV_LONG) { logMsg("ON/OFF: power off"); enterSleep(); return; }
 
   uint8_t ep = takeEvent(B_PLAY);
   if (ep == EV_SHORT || ep == EV_LONG) { startPlayback(); return; }
 
   if (takeEvent(B_REC) == EV_SHORT) { startRecording(); return; }
 
-  if (millis() - lastActivity >= IDLE_SLEEP_MS) { logMsg("hareketsizlik"); enterSleep(); }
+  if (millis() - lastActivity >= IDLE_SLEEP_MS) { logMsg("idle timeout"); enterSleep(); }
 }
 
 // ======================= SERI KOMUTLAR =======================
 void sendHello() {
-  // SITE UYUMU: site hello cevabini "dev" anahtarindan tanir, yoksa 4 denemeden
-  // sonra baglanti kesilir. uid/profile/owner da sitenin bekledigi adlar.
+  // SITE COMPATIBILITY: the site recognises a hello reply by its "dev" key and
+  // gives up after 4 tries. uid/profile/owner are the names it expects too.
   String s = "{\"type\":\"hello\",\"dev\":\"F\",\"fw\":\"" FW_VERSION "\",\"chip\":\"ESP32-S3\"";
   s += ",\"slots\":" + String(SLOT_COUNT);
   s += ",\"uid\":\"" + jsonEscape(deviceId) + "\"";
@@ -1444,7 +1444,7 @@ void sendHello() {
 }
 
 void sendStats() {
-  // SITE UYUMU: "total_s" + uid/profile + slotlarda "i"/"len_ms" (bkz. B notu)
+  // SITE COMPATIBILITY: "total_s" + uid/profile, and "i"/"len_ms" per slot (see B)
   String s = "{\"type\":\"stats\"";
   s += ",\"uid\":\"" + jsonEscape(deviceId) + "\"";
   s += ",\"profile\":\"" + jsonEscape(profileId) + "\"";
@@ -1541,7 +1541,7 @@ void handleCommand(String line) {
 
   String cmd = jsonStr(line, "cmd");
   if (!cmd.length()) cmd = jsonStr(line, "type");
-  if (!cmd.length()) cmd = line;                 // duz metin komut da kabul edilir
+  if (!cmd.length()) cmd = line;                 // a plain-text command is accepted too
   cmd.toLowerCase();
 
   if (cmd == "pins") {
@@ -1550,7 +1550,7 @@ void handleCommand(String line) {
     sendHello();
   } else if (cmd == "bind") {
     String pid = jsonStr(line, "profile_id");
-    if (!pid.length()) pid = jsonStr(line, "profile");        // site bu adi gonderir
+    if (!pid.length()) pid = jsonStr(line, "profile");        // the site sends this name
     if (!pid.length()) {
       Serial.println("{\"type\":\"bind\",\"ok\":false,\"msg\":\"profile_id_missing\"}");
     } else {

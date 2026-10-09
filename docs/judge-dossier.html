@@ -329,13 +329,12 @@ footer b{color:var(--ink)}
       out; nothing else is changed or omitted.</p>
     </div>
     <p class="dl-all">
-      <a class="dl-btn dl-big" href="https://github.com/erenbeast1/mini-talks/archive/refs/heads/claude/turkish-support-code-i2z7vq.zip" target="_blank" rel="noopener">Download all five
-      codebases &middot; .zip</a>
+      <a class="dl-btn dl-big" href="https://github.com/erenbeast1/mini-talks/archive/refs/heads/claude/turkish-support-code-i2z7vq.zip" target="_blank" rel="noopener">Download all five codebases &middot; .zip</a>
       <span>One archive, 317 source files, the folder names they are deployed under.</span>
     </p>
     <ul class="dls">
       <li class="dl" data-tone="blue">
-        <div class="dl-txt"><b>mini&#8209;talks.com &mdash; the game client</b><span>React&nbsp;18, Vite, Three.js. 81 files, 59,127 lines.</span></div>
+        <div class="dl-txt"><b>mini&#8209;talks.com &mdash; the game client</b><span>React&nbsp;18, Vite, Three.js. 81 source files, 59,127 lines.</span></div>
         <div class="dl-get">
           <a class="dl-btn" href="https://github.com/erenbeast1/mini-talks/tree/claude/turkish-support-code-i2z7vq/game" target="_blank" rel="noopener">Browse the source</a>
           <code class="dl-url">game/</code>
@@ -377,8 +376,7 @@ footer b{color:var(--ink)}
         </div>
       </li>
     </ul>
-    <p class="dl-note">Repository <code>erenbeast1/mini-talks</code>, branch <code>claude/turkish-support-code-i2z7vq</code>. If a link
-    does nothing because of your browser's sandbox, copy the address into a new tab.</p>
+    <p class="dl-note">Repository <code>erenbeast1/mini-talks</code>, branch <code>claude/turkish-support-code-i2z7vq</code>. If a link does nothing because of your browser's sandbox, copy the address into a new tab.</p>
   </div>
 </section>
 
@@ -482,7 +480,7 @@ footer b{color:var(--ink)}
 <article class="snip" id="g1" data-tone="red">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-frontend/src/pages/GamePage.jsx</code>
+      <code class="snip-file">game/src/pages/GamePage.jsx</code>
       <span class="snip-lines">lines 1514&ndash;1547</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">// LIP SYNC
@@ -490,7 +488,7 @@ useFrame((_, delta) =&gt; {
   const safeDelta = Math.max(delta, 0.016);
   if (mixer &amp;&amp; isReadyRef.current) mixer.update(safeDelta);
 
-  // ★ DEĞIŞIKLIK: prop yerine ref&#x27;ten oku (stale closure fix)
+  // Read the level from the ref, not the prop: useFrame closes over its props once
   const currentAudioLevel = audioLevelRef?.current ?? 0;
 
   if (isPlayingAudio &amp;&amp; selectedMini &amp;&amp; (mouthDataRef.current.mini1 || mouthDataRef.current.mini2)) {
@@ -528,7 +526,7 @@ useFrame((_, delta) =&gt; {
 <article class="snip" id="g2" data-tone="blue">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-frontend/src/pages/GamePage.jsx</code>
+      <code class="snip-file">game/src/pages/GamePage.jsx</code>
       <span class="snip-lines">lines 4376&ndash;4396</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">try {
@@ -561,13 +559,13 @@ useFrame((_, delta) =&gt; {
 <article class="snip" id="g3" data-tone="yellow">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-frontend/src/pages/GamePage.jsx</code>
+      <code class="snip-file">game/src/pages/GamePage.jsx</code>
       <span class="snip-lines">lines 5550&ndash;5569</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">&lt;Canvas
   camera={{ position: [100, 30, 60], fov: 50, near: 5, far: 1000 }}
   shadows
-  dpr={[1, 2]} // 3x çok aşırıydı, 2x yeterli
+  dpr={[1, 2]} // 3x was far too heavy on the tablets this runs on; 2x is enough
   gl={{ 
     antialias: true, 
     alpha: false, 
@@ -581,7 +579,7 @@ useFrame((_, delta) =&gt; {
     gl.shadowMap.type = THREE.PCFSoftShadowMap;
     gl.outputColorSpace = THREE.SRGBColorSpace;
     scene.background = new THREE.Color(&#x27;#e8e8e8&#x27;);
-    // Tone mapping SceneGLSettings component&#x27;inde sahne bazlı ayarlanıyor
+    // Tone mapping is set per scene in the SceneGLSettings component
   }}
 &gt;</code></pre>
   </div>
@@ -593,26 +591,26 @@ useFrame((_, delta) =&gt; {
 <article class="snip" id="g4" data-tone="green">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-frontend/src/pages/GamePage.jsx</code>
+      <code class="snip-file">game/src/pages/GamePage.jsx</code>
       <span class="snip-lines">lines 2312&ndash;2328</span>
     </header>
-    <pre class="snip-pre"><code class="language-javascript">// Facialhair modelinde ağız mesh&#x27;lerini işaretle (konuşurken gizlenecek)
+    <pre class="snip-pre"><code class="language-javascript">// Tag the mouth meshes inside the facial-hair model (hidden while speaking)
 if (isFacialHair) {
   mouthClone.traverse(c =&gt; {
     if (!c.isMesh) return;
     const mn = (c.name || &#x27;&#x27;).toLowerCase();
-    // Sakal/bıyık mesh&#x27;leri → sakal olarak işaretle
+    // Beard/moustache meshes -&gt; tag as beard
     if (mn.includes(&#x27;facialhair&#x27;) || mn.includes(&#x27;beard&#x27;) || mn.includes(&#x27;mustache&#x27;)) {
       c.userData._isBeardMesh = true;
     } else {
-      // Geri kalan = ağız/dudak mesh&#x27;leri
+      // Everything else = the mouth/lip meshes
       c.userData._isMouthMesh = true;
     }
   });
 }
 kafaMesh.add(mouthClone);
 
-// Referansı kaydet (lip sync toggle için)</code></pre>
+// Keep the reference, so lip sync can toggle it</code></pre>
   </div>
   <aside class="snip-note">
     <h4>A beard that does not eat the mouth</h4>
@@ -622,11 +620,11 @@ kafaMesh.add(mouthClone);
 <article class="snip" id="g5" data-tone="orange">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-frontend/src/pages/Sceneselectionpage.jsx</code>
+      <code class="snip-file">game/src/pages/Sceneselectionpage.jsx</code>
       <span class="snip-lines">lines 258&ndash;274</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">setScenes(ALL_SCENES_DATA.map((sceneDef, idx) =&gt; {
-  // Unlock önceliği: allUnlocked &gt; firstNUnlocked &gt; sadece ilki
+  // Unlock priority: allUnlocked &gt; firstNUnlocked &gt; only the first
   const unlocked = allUnlocked
     || (firstNUnlocked &gt; 0 &amp;&amp; idx &lt; firstNUnlocked)
     || idx === 0;
@@ -651,7 +649,7 @@ kafaMesh.add(mouthClone);
 <article class="snip" id="g6" data-tone="red">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-frontend/src/api/axios.js</code>
+      <code class="snip-file">game/src/api/axios.js</code>
       <span class="snip-lines">lines 12&ndash;32</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">axiosInstance.interceptors.request.use(
@@ -684,21 +682,21 @@ axiosInstance.interceptors.response.use(
 <article class="snip" id="g7" data-tone="blue">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-api/rewards/add-reward.php</code>
+      <code class="snip-file">game-api/rewards/add-reward.php</code>
       <span class="snip-lines">lines 56&ndash;79</span>
     </header>
     <pre class="snip-pre"><code class="language-php">$conn = getDBConnection();
 $conn-&gt;beginTransaction();
 
 try {
-    // Daily limit kontrolü
+    // Daily limit check
     $stmt = $conn-&gt;prepare(&quot;SELECT daily_limit FROM reward_settings WHERE mini_id = ?&quot;);
     $stmt-&gt;execute([$mini_id]);
     $settings = $stmt-&gt;fetch(PDO::FETCH_ASSOC);
     $dailyLimit = $settings ? intval($settings[&#x27;daily_limit&#x27;]) : 0;
 
     if ($dailyLimit &gt; 0) {
-        // Bugün kazanılan reward sayısı
+        // How many rewards were earned today
         $stmt = $conn-&gt;prepare(&quot;
             SELECT COUNT(*) as today_count 
             FROM mini_rewards 
@@ -720,7 +718,7 @@ try {
 <article class="snip" id="g8" data-tone="yellow">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-api/rewards/add-reward.php</code>
+      <code class="snip-file">game-api/rewards/add-reward.php</code>
       <span class="snip-lines">lines 107&ndash;145</span>
     </header>
     <pre class="snip-pre"><code class="language-php">// Brick to Medal conversion
@@ -730,12 +728,12 @@ if ($reward_category === &#x27;brick&#x27;) {
     $convSettings = $stmt-&gt;fetch(PDO::FETCH_ASSOC);
     $brickToMedal = $convSettings ? intval($convSettings[&#x27;brick_to_medal&#x27;]) : 10;
 
-    // Toplam brick sayısı
+    // Total brick count
     $stmt = $conn-&gt;prepare(&quot;SELECT total_bricks FROM mini_profiles WHERE mini_id = ?&quot;);
     $stmt-&gt;execute([$mini_id]);
     $totalBricks = intval($stmt-&gt;fetch(PDO::FETCH_ASSOC)[&#x27;total_bricks&#x27;]);
 
-    // Daha önce convert edilen medal sayısı
+    // Medals already converted before now
     $stmt = $conn-&gt;prepare(&quot;
         SELECT COUNT(*) as converted 
         FROM mini_rewards 
@@ -744,7 +742,7 @@ if ($reward_category === &#x27;brick&#x27;) {
     $stmt-&gt;execute([$mini_id]);
     $convertedMedals = intval($stmt-&gt;fetch(PDO::FETCH_ASSOC)[&#x27;converted&#x27;]);
 
-    // Yeni convert edilmesi gereken medal sayısı
+    // How many new medals are owed
     $shouldHaveMedals = floor($totalBricks / $brickToMedal);
     $newMedals = $shouldHaveMedals - $convertedMedals;
 
@@ -756,7 +754,7 @@ if ($reward_category === &#x27;brick&#x27;) {
             &quot;);
             $stmt-&gt;execute([$mini_id, &quot;Auto-converted from {$brickToMedal} bricks&quot;]);
 
-            // Total medals güncelle
+            // Update the medal total
             $stmt = $conn-&gt;prepare(&quot;UPDATE mini_profiles SET total_medals = total_medals + 1 WHERE mini_id = ?&quot;);
             $stmt-&gt;execute([$mini_id]);
         }
@@ -771,20 +769,20 @@ if ($reward_category === &#x27;brick&#x27;) {
 <article class="snip" id="g9" data-tone="green">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-api/missions/complete-mission.php</code>
+      <code class="snip-file">game-api/missions/complete-mission.php</code>
       <span class="snip-lines">lines 44&ndash;60</span>
     </header>
     <pre class="snip-pre"><code class="language-php">}
 
-// 2. mission_completions tablosuna da ekle (geriye dönük uyumluluk için)
+// 2. Write to mission_completions as well (kept for backward compatibility)
 if (!$is_custom &amp;&amp; $mission_id &gt; 0) {
-    // Önce var mı kontrol et
+    // Look first: is it already there?
     $stmt = $pdo-&gt;prepare(&quot;SELECT id FROM mission_completions 
                            WHERE mini_id = ? AND mission_id = ? AND DATE(completed_at) = ?&quot;);
     $stmt-&gt;execute([$mini_id, $mission_id, $today]);
 
     if (!$stmt-&gt;fetch()) {
-        // Yoksa ekle
+        // If not, insert it
         $stmt = $pdo-&gt;prepare(&quot;INSERT INTO mission_completions 
                                (mini_id, mission_id, completed_at) 
                                VALUES (?, ?, ?)&quot;);
@@ -800,10 +798,10 @@ if (!$is_custom &amp;&amp; $mission_id &gt; 0) {
 <article class="snip" id="g10" data-tone="orange">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">minitalks-api/auth/login.php</code>
+      <code class="snip-file">game-api/auth/login.php</code>
       <span class="snip-lines">lines 123&ndash;131</span>
     </header>
-    <pre class="snip-pre"><code class="language-php">// Şifre kontrolü
+    <pre class="snip-pre"><code class="language-php">// Password check
 if (!password_verify($password, $user[&#x27;password_hash&#x27;])) {
     http_response_code(401);
     echo json_encode([
@@ -841,7 +839,7 @@ if (!password_verify($password, $user[&#x27;password_hash&#x27;])) {
 <article class="snip" id="f1" data-tone="blue">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-forum/includes/class-mini-forum-design.php</code>
+      <code class="snip-file">plugins/mini-forum/includes/class-mini-forum-design.php</code>
       <span class="snip-lines">lines 1027&ndash;1042</span>
     </header>
     <pre class="snip-pre"><code class="language-php">public static function render($id, $vars = array()) {
@@ -869,7 +867,7 @@ if (!password_verify($password, $user[&#x27;password_hash&#x27;])) {
 <article class="snip" id="f2" data-tone="yellow">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-forum/includes/class-mini-forum-design.php</code>
+      <code class="snip-file">plugins/mini-forum/includes/class-mini-forum-design.php</code>
       <span class="snip-lines">lines 1745&ndash;1757</span>
     </header>
     <pre class="snip-pre"><code class="language-php">private static function plain($raw, $default = &#x27;&#x27;) {
@@ -894,7 +892,7 @@ if (!password_verify($password, $user[&#x27;password_hash&#x27;])) {
 <article class="snip" id="f3" data-tone="green">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-forum/includes/class-mini-forum-events.php</code>
+      <code class="snip-file">plugins/mini-forum/includes/class-mini-forum-events.php</code>
       <span class="snip-lines">lines 167&ndash;182</span>
     </header>
     <pre class="snip-pre"><code class="language-php">public static function details($ev) {
@@ -922,7 +920,7 @@ if (!password_verify($password, $user[&#x27;password_hash&#x27;])) {
 <article class="snip" id="f4" data-tone="orange">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-forum/includes/class-mini-forum-events.php</code>
+      <code class="snip-file">plugins/mini-forum/includes/class-mini-forum-events.php</code>
       <span class="snip-lines">lines 203&ndash;215</span>
     </header>
     <pre class="snip-pre"><code class="language-php">private static function rich($html) {
@@ -947,7 +945,7 @@ if (!password_verify($password, $user[&#x27;password_hash&#x27;])) {
 <article class="snip" id="f5" data-tone="red">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-forum/includes/class-mini-forum-events.php</code>
+      <code class="snip-file">plugins/mini-forum/includes/class-mini-forum-events.php</code>
       <span class="snip-lines">lines 351&ndash;355</span>
     </header>
     <pre class="snip-pre"><code class="language-php">public static function bullet($i) {
@@ -964,7 +962,7 @@ if (!password_verify($password, $user[&#x27;password_hash&#x27;])) {
 <article class="snip" id="f6" data-tone="blue">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-forum/includes/class-mini-forum-game.php</code>
+      <code class="snip-file">plugins/mini-forum/includes/class-mini-forum-game.php</code>
       <span class="snip-lines">lines 146&ndash;163</span>
     </header>
     <pre class="snip-pre"><code class="language-php">
@@ -993,7 +991,7 @@ $res = wp_remote_post($url, array(
 <article class="snip" id="f7" data-tone="yellow">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-forum/assets/js/mt-header.js</code>
+      <code class="snip-file">plugins/mini-forum/assets/js/mt-header.js</code>
       <span class="snip-lines">lines 246&ndash;258</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">
@@ -1018,7 +1016,7 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
 <article class="snip" id="f8" data-tone="green">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-forum/assets/css/mini-events.css</code>
+      <code class="snip-file">plugins/mini-forum/assets/css/mini-events.css</code>
       <span class="snip-lines">lines 559&ndash;566</span>
     </header>
     <pre class="snip-pre"><code class="language-css">.me-page .me-kind-workshop{--c:#E52828;--t:#fff;--pale:#FFF4F4}
@@ -1057,7 +1055,7 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
 <article class="snip" id="d1" data-tone="yellow">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <code class="snip-file">plugins/mini-devices/assets/mini-devices.js</code>
       <span class="snip-lines">lines 306&ndash;336</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">navigator.serial.requestPort()
@@ -1071,7 +1069,7 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
     writer = port.writable.getWriter();
     readLoop();
 
-    // Port acilinca kart resetlenir; acilis ~1.5 sn surer.
+    // Opening the port resets the board, and it takes ~1.5 s to come back.
     try { port.setSignals({ dataTerminalReady: true, requestToSend: false }); } catch (e) {}
 
     setStatus(&#x27;Waking the kit up…&#x27;);
@@ -1083,7 +1081,7 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
     return checkOwnership(hello);
   })
   .then(function (hello) {
-    if (!hello) return null;                       // kullanici vazgecti
+    if (!hello) return null;                       // the user cancelled
     setStatus(DEV_LABEL[hello.dev] + &#x27; connected — syncing the clock…&#x27;, &#x27;ok&#x27;);
     return send({ cmd: &#x27;time&#x27;, epoch: Math.floor(Date.now() / 1000) })
       .then(function () {
@@ -1100,7 +1098,7 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
 <article class="snip" id="d2" data-tone="green">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <code class="snip-file">plugins/mini-devices/assets/mini-devices.js</code>
       <span class="snip-lines">lines 280&ndash;292</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">function helloWithRetry(tries) {
@@ -1125,13 +1123,13 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
 <article class="snip" id="d3" data-tone="orange">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <code class="snip-file">plugins/mini-devices/assets/mini-devices.js</code>
       <span class="snip-lines">lines 363&ndash;402</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">function checkOwnership(hello) {
   var label = DEV_LABEL[hello.dev] || hello.dev;
 
-  if (!hello.uid) {                                  // eski firmware
+  if (!hello.uid) {                                  // older firmware
     setStatus(label + &#x27; connected (older firmware — no profile link).&#x27;, &#x27;ok&#x27;);
     return Promise.resolve(hello);
   }
@@ -1139,11 +1137,11 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
   return api(&#x27;whoami&#x27;).then(function (me) {
     var bound = parseInt(hello.profile || 0, 10);
 
-    if (bound === me.profile) {                      // zaten bizim
+    if (bound === me.profile) {                      // already ours
       return hello;
     }
 
-    if (bound &amp;&amp; bound !== me.profile) {             // baskasinin
+    if (bound &amp;&amp; bound !== me.profile) {             // someone else&#x27;s
       var msg = label + &#x27; is linked to another profile&#x27; +
                 (hello.owner ? &#x27; (&#x27; + hello.owner + &#x27;)&#x27; : &#x27;&#x27;) +
                 &#x27;. Move it to your profile? &#x27; +
@@ -1152,7 +1150,7 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
         setStatus(&#x27;Cancelled — the kit stays linked to the other profile.&#x27;, &#x27;err&#x27;);
         return null;
       }
-    } else {                                         // bagsiz
+    } else {                                         // not bound yet
       if (!window.confirm(label + &#x27; is not linked to a profile yet. &#x27; +
                           &#x27;Link it to &#x27; + me.owner + &#x27;?&#x27;)) {
         setStatus(&#x27;The kit was not linked.&#x27;, &#x27;err&#x27;);
@@ -1177,7 +1175,7 @@ if(pill.classList.contains(&#x27;mt-auth-signin&#x27;)){
 <article class="snip" id="d4" data-tone="red">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <code class="snip-file">plugins/mini-devices/assets/mini-devices.js</code>
       <span class="snip-lines">lines 2170&ndash;2175</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">var SCENE_NAMES = Object.assign({ &#x27;1&#x27;: &#x27;Classroom&#x27;, &#x27;2&#x27;: &#x27;Coffee Shop&#x27; },
@@ -1195,7 +1193,7 @@ function sceneTitle(mode) {
 <article class="snip" id="d5" data-tone="blue">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-devices/includes/class-md-design.php</code>
+      <code class="snip-file">plugins/mini-devices/includes/class-md-design.php</code>
       <span class="snip-lines">lines 45&ndash;53</span>
     </header>
     <pre class="snip-pre"><code class="language-php">/* Written once, read twice: these are both the fallback above and the
@@ -1216,7 +1214,7 @@ const KIT_IMAGES = array(
 <article class="snip" id="d6" data-tone="yellow">
   <div class="snip-main">
     <header class="snip-head">
-      <code class="snip-file">mini-devices/assets/mini-devices.js</code>
+      <code class="snip-file">plugins/mini-devices/assets/mini-devices.js</code>
       <span class="snip-lines">lines 1783&ndash;1795</span>
     </header>
     <pre class="snip-pre"><code class="language-javascript">function disconnectButton() {
@@ -1264,8 +1262,8 @@ const KIT_IMAGES = array(
       <span class="snip-lines">lines 1428&ndash;1444</span>
     </header>
     <pre class="snip-pre"><code class="language-cpp">void sendHello() {
-  // SITE UYUMU: site hello cevabini &quot;dev&quot; anahtarindan tanir, yoksa 4 denemeden
-  // sonra baglanti kesilir. uid/profile/owner da sitenin bekledigi adlar.
+  // SITE COMPATIBILITY: the site recognises a hello reply by its &quot;dev&quot; key and
+  // gives up after 4 tries. uid/profile/owner are the names it expects too.
   String s = &quot;{\&quot;type\&quot;:\&quot;hello\&quot;,\&quot;dev\&quot;:\&quot;F\&quot;,\&quot;fw\&quot;:\&quot;&quot; FW_VERSION &quot;\&quot;,\&quot;chip\&quot;:\&quot;ESP32-S3\&quot;&quot;;
   s += &quot;,\&quot;slots\&quot;:&quot; + String(SLOT_COUNT);
   s += &quot;,\&quot;uid\&quot;:\&quot;&quot; + jsonEscape(deviceId) + &quot;\&quot;&quot;;
@@ -1294,7 +1292,7 @@ const KIT_IMAGES = array(
     </header>
     <pre class="snip-pre"><code class="language-cpp">} else if (cmd == &quot;bind&quot;) {
   String pid = jsonStr(line, &quot;profile_id&quot;);
-  if (!pid.length()) pid = jsonStr(line, &quot;profile&quot;);        // site bu adi gonderir
+  if (!pid.length()) pid = jsonStr(line, &quot;profile&quot;);        // the site sends this name
   if (!pid.length()) {
     Serial.println(&quot;{\&quot;type\&quot;:\&quot;bind\&quot;,\&quot;ok\&quot;:false,\&quot;msg\&quot;:\&quot;profile_id_missing\&quot;}&quot;);
   } else {
@@ -1317,27 +1315,27 @@ const KIT_IMAGES = array(
       <code class="snip-file">mini-kits-firmware/Version_B/BrickTalks_S3/BrickTalks_S3.ino</code>
       <span class="snip-lines">lines 798&ndash;820</span>
     </header>
-    <pre class="snip-pre"><code class="language-cpp">// MTF1 paketini dogrular; hata varsa aciklama dondurur, gecerliyse nullptr
+    <pre class="snip-pre"><code class="language-cpp">// Validates an MTF1 pack: returns a named reason on failure, nullptr when valid
 const char *faceValidate(const String &amp;path, FaceInfo &amp;fi) {
   fi = FaceInfo();
   File f = LittleFS.open(path, &quot;r&quot;);
-  if (!f) return &quot;acilamadi&quot;;
+  if (!f) return &quot;open_failed&quot;;
   size_t size = f.size();
   uint8_t h[18];
-  if (size &lt; 18 || f.read(h, 18) != 18) { f.close(); return &quot;kisa_dosya&quot;; }
-  if (memcmp(h, &quot;MTF1&quot;, 4) != 0)         { f.close(); return &quot;baslik&quot;; }
+  if (size &lt; 18 || f.read(h, 18) != 18) { f.close(); return &quot;short_file&quot;; }
+  if (memcmp(h, &quot;MTF1&quot;, 4) != 0)         { f.close(); return &quot;bad_header&quot;; }
 
   uint16_t v[7];
   for (int i = 0; i &lt; 7; i++) v[i] = (uint16_t)(h[4 + i * 2] | (h[5 + i * 2] &lt;&lt; 8));
   fi.bw = v[0]; fi.bh = v[1]; fi.mx = v[2]; fi.my = v[3];
   fi.mw = v[4]; fi.mh = v[5]; fi.n = v[6];
 
-  if (fi.bw == 0 || fi.bh == 0 || fi.bw &gt; AREA_W || fi.bh &gt; AREA_H) { f.close(); return &quot;taban_boyutu&quot;; }
-  if (fi.n &gt; FACE_MAX_FRAMES) { f.close(); return &quot;kare_sayisi&quot;; }
+  if (fi.bw == 0 || fi.bh == 0 || fi.bw &gt; AREA_W || fi.bh &gt; AREA_H) { f.close(); return &quot;base_size&quot;; }
+  if (fi.n &gt; FACE_MAX_FRAMES) { f.close(); return &quot;frame_count&quot;; }
   if (fi.n &gt; 0 &amp;&amp; (fi.mw == 0 || fi.mh == 0 ||
                    (uint32_t)fi.mx + fi.mw &gt; fi.bw || (uint32_t)fi.my + fi.mh &gt; fi.bh)) {
     f.close();
-    return &quot;agiz_alani&quot;;
+    return &quot;mouth_area&quot;;
   }</code></pre>
   </div>
   <aside class="snip-note">
@@ -1349,12 +1347,12 @@ const char *faceValidate(const String &amp;path, FaceInfo &amp;fi) {
   <div class="snip-main">
     <header class="snip-head">
       <code class="snip-file">mini-kits-firmware/Version_F/F_versiyon/F_versiyon.ino</code>
-      <span class="snip-lines">lines 364&ndash;388</span>
+      <span class="snip-lines">lines 364&ndash;393</span>
     </header>
     <pre class="snip-pre"><code class="language-cpp">bool initI2S() {
-  // ---- Mikrofon: I2S0, RX, 32-bit, mono, sol kanal ----
+  // ---- Microphone: I2S0, RX, 32-bit, mono, left channel ----
   i2s_chan_config_t rxc = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
-  rxc.dma_desc_num  = 8;                // 8 x 512 kare = ~256 ms tampon
+  rxc.dma_desc_num  = 8;                // 8 x 512 frames = ~256 ms of buffer
   rxc.dma_frame_num = 512;
   if (i2s_new_channel(&amp;rxc, nullptr, &amp;rxChan) != ESP_OK) return false;
 
@@ -1375,7 +1373,12 @@ const char *faceValidate(const String &amp;path, FaceInfo &amp;fi) {
   if (i2s_channel_init_std_mode(rxChan, &amp;rcfg) != ESP_OK) return false;
   i2s_event_callbacks_t cbs = {};
   cbs.on_recv_q_ovf = onRxOverflow;
-  i2s_channel_register_event_callback(rxChan, &amp;cbs, nullptr);</code></pre>
+  i2s_channel_register_event_callback(rxChan, &amp;cbs, nullptr);
+  // RX is opened only while recording (the mic draws nothing when idle)
+
+  // ---- Amplifier: I2S1, TX, 16-bit, stereo (L=R) -&gt; BCLK 512 kHz ----
+  i2s_chan_config_t txc = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_1, I2S_ROLE_MASTER);
+  txc.auto_clear = true;                // send silence when there is no data</code></pre>
   </div>
   <aside class="snip-note">
     <h4>Two independent I2S buses</h4>
@@ -1401,18 +1404,18 @@ const char *faceValidate(const String &amp;path, FaceInfo &amp;fi) {
     if (raw != b.pressed &amp;&amp; (now - b.rawChangedAt) &gt;= DEBOUNCE_MS) {
       b.pressed = raw;
       b.glitch  = 0;
-      if (raw) btnLog(bi, &quot;bas&quot;, -1);
-      else     btnLog(bi, &quot;birak&quot;, (int32_t)(now - b.pressedAt));
+      if (raw) btnLog(bi, &quot;press&quot;, -1);
+      else     btnLog(bi, &quot;release&quot;, (int32_t)(now - b.pressedAt));
       if (raw) {
         b.pressedAt = now;
         b.suppress  = false;
       } else if (!b.suppress) {
-        b.event = EV_SHORT;              // kisa basis: birakma aninda
+        b.event = EV_SHORT;              // short press: on release
       }
     }
     if (b.pressed &amp;&amp; !b.suppress &amp;&amp; (now - b.pressedAt) &gt;= LONG_PRESS_MS) {
       b.suppress = true;
-      b.event    = EV_LONG;              // uzun basis: ~800 ms&#x27;de
+      b.event    = EV_LONG;              // long press: at ~800 ms
     }
   }
   btnNoiseReport(now);
@@ -1436,14 +1439,14 @@ uint8_t takeEvent(uint8_t idx) {
       <span class="snip-lines">lines 1354&ndash;1370</span>
     </header>
     <pre class="snip-pre"><code class="language-cpp">void enterSleep() {
-  logMsg(&quot;kapaniyor (uyku)&quot;);
+  logMsg(&quot;powering down (sleep)&quot;);
   powerOn = false;
   sleepFeedback();
   rxStop();
   digitalWrite(PIN_AMP_SD, LOW);
   ampOn = false;
 
-  // Uyku basisindan hemen uyanmamak icin butonlarin birakilmasini bekle
+  // Wait for every button to be released: the press that slept it would wake it
   while (anyButtonHeld()) {
     updateButtons();
     delay(5);

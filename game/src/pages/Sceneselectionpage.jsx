@@ -256,7 +256,7 @@ const getSceneImage = (sceneId) => {
     : { sound: false, word: true, sentence: true, dialogue: true };
 
   setScenes(ALL_SCENES_DATA.map((sceneDef, idx) => {
-    // Unlock önceliği: allUnlocked > firstNUnlocked > sadece ilki
+    // Unlock priority: allUnlocked > firstNUnlocked > only the first
     const unlocked = allUnlocked
       || (firstNUnlocked > 0 && idx < firstNUnlocked)
       || idx === 0;

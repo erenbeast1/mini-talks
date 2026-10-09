@@ -2,7 +2,7 @@
 # Snippet table: (key, file, first_line, last_line, lang, heading, explanation_html)
 
 GAME = [
- ("g1","minitalks-frontend/src/pages/GamePage.jsx",1514,1547,"javascript",
+ ("g1","game/src/pages/GamePage.jsx",1514,1547,"javascript",
   "Lip sync: loudness becomes a mouth shape",
   "<p>The child speaks into the microphone; the Mini on screen moves its mouth. One number &mdash; "
   "<code>audioLevel</code>, 0&ndash;1 &mdash; is mapped onto fourteen mouth frames inside Three.js's "
@@ -15,7 +15,7 @@ GAME = [
   "a shy voice lives in the bottom third of the range &mdash; a linear mapping leaves a whispering child "
   "with a motionless face.</p>"),
 
- ("g2","minitalks-frontend/src/pages/GamePage.jsx",4376,4396,"javascript",
+ ("g2","game/src/pages/GamePage.jsx",4376,4396,"javascript",
   "Where that number comes from",
   "<p>The Web Audio API, not a library. <code>getUserMedia</code> opens the microphone, an "
   "<code>AnalyserNode</code> with <code>fftSize&nbsp;=&nbsp;256</code> gives 128 frequency bins, and the "
@@ -26,7 +26,7 @@ GAME = [
   "<p>The same stream feeds a <code>MediaRecorder</code>, so the recording the parent later hears and the "
   "animation the child sees come from one microphone pass.</p>"),
 
- ("g3","minitalks-frontend/src/pages/GamePage.jsx",5550,5569,"javascript",
+ ("g3","game/src/pages/GamePage.jsx",5550,5569,"javascript",
   "The 3D stage, tuned for school hardware",
   "<p>react&#8209;three&#8209;fiber's <code>&lt;Canvas&gt;</code> with the renderer configured by hand. "
   "<code>dpr={[1,&nbsp;2]}</code> caps the pixel ratio at 2&times; &mdash; the comment records that 3&times; "
@@ -37,7 +37,7 @@ GAME = [
   "<p>Soft shadows, sRGB output and per&#8209;scene tone mapping are set in <code>onCreated</code>, so the "
   "colour pipeline is defined in exactly one place.</p>"),
 
- ("g4","minitalks-frontend/src/pages/GamePage.jsx",2312,2328,"javascript",
+ ("g4","game/src/pages/GamePage.jsx",2312,2328,"javascript",
   "A beard that does not eat the mouth",
   "<p>Minis can be given facial hair, and the beard model contains the mouth geometry too. Left alone, a "
   "bearded Mini stopped moving its lips.</p>"
@@ -48,7 +48,7 @@ GAME = [
   "<p>It is a small thing that protects a large one: a child who chose a beard still sees their Mini "
   "talk.</p>"),
 
- ("g5","minitalks-frontend/src/pages/Sceneselectionpage.jsx",258,274,"javascript",
+ ("g5","game/src/pages/Sceneselectionpage.jsx",258,274,"javascript",
   "Locks a parent controls, with a safe fallback",
   "<p>Scenes and the four difficulty levels (sound, word, sentence, dialogue) unlock under adult control, "
   "not by score. A child who is not ready for a dialogue is not pushed into one.</p>"
@@ -57,7 +57,7 @@ GAME = [
   "<em>n</em>, else just the first &mdash; so a network failure degrades to \"scene one is playable\" "
   "rather than to an empty screen or, worse, everything unlocked.</p>"),
 
- ("g6","minitalks-frontend/src/api/axios.js",12,32,"javascript",
+ ("g6","game/src/api/axios.js",12,32,"javascript",
   "One place that knows about the token",
   "<p>Every call in the app goes through this Axios instance. A request interceptor attaches the bearer "
   "token; a response interceptor catches <code>401</code>, clears the stored session and returns the user "
@@ -66,7 +66,7 @@ GAME = [
   "showing stale data while another redirects &mdash; the behaviour is identical everywhere because it is "
   "written once.</p>"),
 
- ("g7","minitalks-api/rewards/add-reward.php",56,79,"php",
+ ("g7","game-api/rewards/add-reward.php",56,79,"php",
   "The daily limit, inside the transaction",
   "<p>Rewards are the motivation engine, so they are also the thing most easily broken. The check runs "
   "inside <code>beginTransaction()</code>: the count of today's rewards and the insert that follows cannot "
@@ -75,7 +75,7 @@ GAME = [
   "prepared statement with bound parameters &mdash; there is no string&#8209;built SQL anywhere in the "
   "reward path.</p>"),
 
- ("g8","minitalks-api/rewards/add-reward.php",107,145,"php",
+ ("g8","game-api/rewards/add-reward.php",107,145,"php",
   "Bricks into medals, computed not counted",
   "<p>Bricks become medals at a rate the parent chooses (5, 10 or 20). The naive version &mdash; subtract "
   "bricks and add a medal &mdash; loses medals whenever a request is retried or arrives twice.</p>"
@@ -86,7 +86,7 @@ GAME = [
   "<p>Medals roll into cups by the same rule immediately below, so one ladder covers brick &rarr; medal "
   "&rarr; cup.</p>"),
 
- ("g9","minitalks-api/missions/complete-mission.php",44,60,"php",
+ ("g9","game-api/missions/complete-mission.php",44,60,"php",
   "Writing to two tables without double counting",
   "<p>Daily missions moved from <code>mission_completions</code> to <code>mission_assignments</code> part "
   "way through the project, and older installations still read the first table.</p>"
@@ -95,7 +95,7 @@ GAME = [
   "and two bricks. The comment names the reason the second write exists, which is the part that is hard to "
   "recover six months later.</p>"),
 
- ("g10","minitalks-api/auth/login.php",123,131,"php",
+ ("g10","game-api/auth/login.php",123,131,"php",
   "Passwords, and identical answers",
   "<p>Passwords are stored as PHP <code>password_hash</code> digests and checked with "
   "<code>password_verify</code> &mdash; never compared, never reversible, and the algorithm can be "
@@ -108,7 +108,7 @@ GAME = [
 ]
 
 FORUM = [
- ("f1","mini-forum/includes/class-mini-forum-design.php",1027,1042,"php",
+ ("f1","plugins/mini-forum/includes/class-mini-forum-design.php",1027,1042,"php",
   "Editable blocks: escape first, then fill in",
   "<p>The whole site is editable from one Design page. An area is stored HTML; "
   "<code>render()</code> is what puts it on a page.</p>"
@@ -118,7 +118,7 @@ FORUM = [
   "an editor's paste be re&#8209;interpreted as markup; this way nothing an editor types can become a "
   "tag, and nothing the plugin inserts gets mangled by the sanitiser.</p>"),
 
- ("f2","mini-forum/includes/class-mini-forum-design.php",1745,1757,"php",
+ ("f2","plugins/mini-forum/includes/class-mini-forum-design.php",1745,1757,"php",
   "The fix for \"the photo saves but nothing changes\"",
   "<p>Reported by the client in exactly those words. People do not paste a URL into an image field &mdash; "
   "they paste what their browser gave them, usually a whole <code>&lt;img src=\"&hellip;\"&gt;</code> tag. "
@@ -128,7 +128,7 @@ FORUM = [
   "<code>src</code> or <code>href</code>, else the first bare URL &mdash; and stores that. The field "
   "accepts what people actually paste, and still stores only a validated URL.</p>"),
 
- ("f3","mini-forum/includes/class-mini-forum-events.php",167,182,"php",
+ ("f3","plugins/mini-forum/includes/class-mini-forum-events.php",167,182,"php",
   "One column, two kinds of description",
   "<p>Event descriptions are typed in an admin form by some people and pasted out of a word processor by "
   "others. The column holds both. Escaping everything printed raw "
@@ -137,7 +137,7 @@ FORUM = [
   "The <code>mf_events_details</code> filter at the end means a site can override the whole decision "
   "without editing the plugin.</p>"),
 
- ("f4","mini-forum/includes/class-mini-forum-events.php",203,215,"php",
+ ("f4","plugins/mini-forum/includes/class-mini-forum-events.php",203,215,"php",
   "Accepting a paste without accepting its styling",
   "<p>Pasted HTML is run through WordPress's own post allow&#8209;list with three attributes removed: "
   "<code>style</code>, <code>align</code> and <code>bgcolor</code>. Those are exactly the attributes a "
@@ -145,7 +145,7 @@ FORUM = [
   "<p>The structure survives; the foreign typography does not. If the paste has no block wrapper at all, "
   "<code>wpautop</code> gives it paragraphs so it does not arrive as one wall of text.</p>"),
 
- ("f5","mini-forum/includes/class-mini-forum-events.php",351,355,"php",
+ ("f5","plugins/mini-forum/includes/class-mini-forum-events.php",351,355,"php",
   "Four bullet colours in the designer's order",
   "<p>Event bullets run yellow, red, blue, green &mdash; but not as a plain cycle. The delivered designs "
   "repeat them as 1,2,3,4,2,1,4,3, which reads as hand&#8209;placed rather than mechanical, and that is "
@@ -153,7 +153,7 @@ FORUM = [
   "<p>The order is a filter, so it can be changed without touching the loop, and each bullet is itself an "
   "editable Design block rather than a hard&#8209;coded image.</p>"),
 
- ("f6","mini-forum/includes/class-mini-forum-game.php",146,163,"php",
+ ("f6","plugins/mini-forum/includes/class-mini-forum-game.php",146,163,"php",
   "The forum talking to the game",
   "<p>A forum member links their game account by proving they can read the inbox the game account is "
   "registered to &mdash; no game password is ever typed into WordPress, and no password crosses between "
@@ -164,7 +164,7 @@ FORUM = [
   "<code>http://</code> in a settings field would put the shared key and the one&#8209;time token on the "
   "wire in clear text.</p>"),
 
- ("f7","mini-forum/assets/js/mt-header.js",246,258,"javascript",
+ ("f7","plugins/mini-forum/assets/js/mt-header.js",246,258,"javascript",
   "A handler that knows when to stand down",
   "<p>The header ships as a plugin script, but the site also still carries a hand&#8209;pasted copy in "
   "places. Both ran on the same click: the page's own handler opened the profile menu, and this one, "
@@ -175,7 +175,7 @@ FORUM = [
   "<code>closest('.mt-header')</code> for the same reason &mdash; the same widget is on the page more than "
   "once, so nothing may be found by <code>id</code>.</p>"),
 
- ("f8","mini-forum/assets/css/mini-events.css",559,566,"css",
+ ("f8","plugins/mini-forum/assets/css/mini-events.css",559,566,"css",
   "Why the categories are classes and not inline styles",
   "<p>Every event category has a colour: workshops red, family days yellow, expert sessions blue, updates "
   "green, special days orange. All five rendered blue.</p>"
@@ -186,7 +186,7 @@ FORUM = [
 ]
 
 DEVICES = [
- ("d1","mini-devices/assets/mini-devices.js",306,336,"javascript",
+ ("d1","plugins/mini-devices/assets/mini-devices.js",306,336,"javascript",
   "Connecting to a physical kit from a web page",
   "<p>No driver, no installer: WebSerial. <code>requestPort()</code> shows the browser's own chooser, the "
   "port opens at 115200 baud, and a read loop starts.</p>"
@@ -195,7 +195,7 @@ DEVICES = [
   "is explicit &mdash; say hello, confirm who owns the kit, set its clock, pull its statistics &mdash; and "
   "the status line tells the user which step they are on.</p>"),
 
- ("d2","mini-devices/assets/mini-devices.js",280,292,"javascript",
+ ("d2","plugins/mini-devices/assets/mini-devices.js",280,292,"javascript",
   "Four tries, because USB is not reliable",
   "<p>A kit that is still booting, or whose first reply was lost, used to look like a broken kit. "
   "<code>hello</code> is asked up to four times with a 2.5&nbsp;s window and a 700&nbsp;ms gap, and the "
@@ -203,7 +203,7 @@ DEVICES = [
   "<p>A reply counts only if it carries <code>\"dev\"</code>. Boot&#8209;loader chatter and the firmware's "
   "own <code>#</code> log lines are therefore not mistaken for a handshake.</p>"),
 
- ("d3","mini-devices/assets/mini-devices.js",363,402,"javascript",
+ ("d3","plugins/mini-devices/assets/mini-devices.js",363,402,"javascript",
   "Whose kit is this?",
   "<p>Kits are shared &mdash; between siblings, or around a classroom. The firmware stores the profile it "
   "is bound to, and the site compares that with the signed&#8209;in profile.</p>"
@@ -213,7 +213,7 @@ DEVICES = [
   "rebound without a human saying yes, and the first branch keeps older firmware with no "
   "<code>uid</code> working in read&#8209;only form instead of rejecting it.</p>"),
 
- ("d4","mini-devices/assets/mini-devices.js",2170,2175,"javascript",
+ ("d4","plugins/mini-devices/assets/mini-devices.js",2170,2175,"javascript",
   "Scene numbers read as names",
   "<p>The firmware stores audio in folders named <code>scene_1</code>, <code>scene_2</code>. Nobody thinks "
   "in those terms, so the shelf shows <q>Classroom (Scene&nbsp;1)</q>.</p>"
@@ -221,7 +221,7 @@ DEVICES = [
   "by adding one line from outside the plugin &mdash; and an unknown number still renders as "
   "<q>Scene&nbsp;7</q> rather than as a blank.</p>"),
 
- ("d5","mini-devices/includes/class-md-design.php",45,53,"php",
+ ("d5","plugins/mini-devices/includes/class-md-design.php",45,53,"php",
   "A default written once, read twice",
   "<p>The picture on each kit card is editable, which means there are two places a default can live: the "
   "fallback the renderer uses and the value the Design page offers. When two copies exist they drift, and "
@@ -229,7 +229,7 @@ DEVICES = [
   "<p>One constant now feeds both, as the comment records. The bug cannot come back without deleting the "
   "constant.</p>"),
 
- ("d6","mini-devices/assets/mini-devices.js",1783,1795,"javascript",
+ ("d6","plugins/mini-devices/assets/mini-devices.js",1783,1795,"javascript",
   "Disconnect, requested by the client",
   "<p>Until this was added there was no way to let go of a kit short of unplugging it, and parents were "
   "reasonably unsure whether unplugging would lose anything.</p>"
@@ -270,7 +270,7 @@ FIRMWARE = [
   "Each failure returns a named reason, and the block lengths and checksums are verified before a single "
   "frame is drawn.</p>"),
 
- ("k4","mini-kits-firmware/Version_F/F_versiyon/F_versiyon.ino",364,388,"cpp",
+ ("k4","mini-kits-firmware/Version_F/F_versiyon/F_versiyon.ino",364,393,"cpp",
   "Two independent I2S buses",
   "<p>The kit records and plays back, so the microphone and the amplifier each get their own I2S "
   "peripheral &mdash; mic on I2S0 at 32&#8209;bit mono, amplifier on I2S1 at 16&#8209;bit stereo. One "

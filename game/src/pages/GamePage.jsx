@@ -1516,7 +1516,7 @@ function BlenderScene({ scenePath, character1Config, character2Config, onAnimati
     const safeDelta = Math.max(delta, 0.016);
     if (mixer && isReadyRef.current) mixer.update(safeDelta);
     
-    // ★ DEĞIŞIKLIK: prop yerine ref'ten oku (stale closure fix)
+    // Read the level from the ref, not the prop: useFrame closes over its props once
     const currentAudioLevel = audioLevelRef?.current ?? 0;
     
     if (isPlayingAudio && selectedMini && (mouthDataRef.current.mini1 || mouthDataRef.current.mini2)) {
@@ -2258,10 +2258,10 @@ addDefaultEyes(kafaMesh, config);
       let mouthData = null;
       
       if (hasCustomMouth) {
-        // Custom mouth/facial hair model yükle — lip sync ile birlikte çalışacak
+        // Load the custom mouth / facial-hair model — it runs together with lip sync
         const mouthPath = `/models/face/${config.mouthModelName}.glb`;
         
-        // Önce default ağzı da ekle (lip sync FBX'leri buna bağlı)
+        // Add the default mouth first: the lip-sync FBX clips are bound to it
         const defaultMouthForSync = addDefaultMouth(kafaMesh);
         defaultMouthForSync.visible = false; // Custom varken gizle
         
@@ -2309,23 +2309,23 @@ addDefaultEyes(kafaMesh, config);
           mouthClone.position.set(0, 0 * sf, 0.2 * sf);
           mouthClone.rotation.set(4.712, Math.PI, 0);
           mouthClone.scale.set(1 * sf, 1 * sf, 1 * sf);
-          // Facialhair modelinde ağız mesh'lerini işaretle (konuşurken gizlenecek)
+          // Tag the mouth meshes inside the facial-hair model (hidden while speaking)
           if (isFacialHair) {
             mouthClone.traverse(c => {
               if (!c.isMesh) return;
               const mn = (c.name || '').toLowerCase();
-              // Sakal/bıyık mesh'leri → sakal olarak işaretle
+              // Beard/moustache meshes -> tag as beard
               if (mn.includes('facialhair') || mn.includes('beard') || mn.includes('mustache')) {
                 c.userData._isBeardMesh = true;
               } else {
-                // Geri kalan = ağız/dudak mesh'leri
+                // Everything else = the mouth/lip meshes
                 c.userData._isMouthMesh = true;
               }
             });
           }
           kafaMesh.add(mouthClone);
           
-          // Referansı kaydet (lip sync toggle için)
+          // Keep the reference, so lip sync can toggle it
           if (mouthDataObj) mouthDataObj.customMouthObj = mouthClone;
         }).catch((err) => {
           console.warn('Custom mouth model yüklenemedi:', mouthPath, err);
@@ -5550,7 +5550,7 @@ const playRecordedAudio = async () => {
           <Canvas
             camera={{ position: [100, 30, 60], fov: 50, near: 5, far: 1000 }}
             shadows
-            dpr={[1, 2]} // 3x çok aşırıydı, 2x yeterli
+            dpr={[1, 2]} // 3x was far too heavy on the tablets this runs on; 2x is enough
             gl={{ 
               antialias: true, 
               alpha: false, 
@@ -5564,7 +5564,7 @@ const playRecordedAudio = async () => {
               gl.shadowMap.type = THREE.PCFSoftShadowMap;
               gl.outputColorSpace = THREE.SRGBColorSpace;
               scene.background = new THREE.Color('#e8e8e8');
-              // Tone mapping SceneGLSettings component'inde sahne bazlı ayarlanıyor
+              // Tone mapping is set per scene in the SceneGLSettings component
             }}
           >
             <Suspense fallback={null}>
