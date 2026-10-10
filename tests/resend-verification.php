@@ -59,7 +59,14 @@ class EmailHandler {
 }
 PHP);
 
-/* ── schema: only the columns the endpoint touches ───────────────────────── */
+/* ── schema: only the columns the endpoint touches ───────────────────────────
+ * Checked against the production dump (minitalks_13): users.is_active and
+ * is_email_verified are tinyint(1), email_verification_token is varchar(64) —
+ * which is exactly the length of bin2hex(random_bytes(32)), so the assertion
+ * below that a new token is 64 characters is also the assertion that it is not
+ * silently truncated on the way in. SQLite does not enforce the length, hence
+ * checking it here rather than relying on the column.
+ */
 $pdo = new PDO('sqlite:' . $db);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->exec("CREATE TABLE user_roles (role_id INTEGER PRIMARY KEY, role_name TEXT)");
@@ -90,6 +97,10 @@ $pdo->prepare("INSERT INTO users VALUES (5,'builder@example.com',2,1,0,'old-toke
     ->execute([expiryFor(7200)]);
 $pdo->prepare("INSERT INTO users VALUES (6,'mini@example.com',4,1,0,'old-token-6',?)")
     ->execute([expiryFor(7200)]);
+// This one is real: the production dump has an unverified account carrying no
+// token and no expiry at all. Before this endpoint existed there was no way in
+// for them — nothing to verify with, and nothing that could issue a new link.
+$pdo->exec("INSERT INTO users VALUES (7,'notoken@example.com',1,1,0,NULL,NULL)");
 
 $pdo->exec("INSERT INTO parent_profiles  VALUES (1,'Ayse Yilmaz')");
 $pdo->exec("INSERT INTO builder_profiles VALUES (5,'Bora Builder','bora_b')");
@@ -186,6 +197,18 @@ ok('and the mail carries the new one', count($sent) === 1 && $sent[0]['token'] =
 $generic = $res['message'];
 ok('the message does not say whether the account exists',
    stripos($generic, 'not found') === false && stripos($generic, 'no account') === false);
+
+/* ── 1b. an unverified account with no token at all is recoverable ───────── */
+clearLog($dir);
+list($res2) = post($dir, array('email_or_username' => 'notoken@example.com'));
+$sent2 = sentLog($dir);
+ok('an account holding no token is not mistaken for one just mailed',
+   count($sent2) === 1);
+ok('it is given a fresh link', strlen((string) tokenOf($db, 7)) === 64);
+ok('and that link is the one mailed',
+   count($sent2) === 1 && $sent2[0]['token'] === tokenOf($db, 7));
+ok('it is answered exactly like every other case',
+   isset($res2['message']) && $res2['message'] === $res['message']);
 
 /* ── 2. nothing distinguishes the other cases ────────────────────────────── */
 foreach (array(

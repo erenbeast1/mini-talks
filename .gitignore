@@ -14,3 +14,7 @@ game/dist/
 # Game API — composer deps and the uploads children's Minis are written to
 game-api/vendor/
 game-api/uploads/
+
+# Database dumps — they carry real e-mail addresses and password hashes.
+*.sql
+!game/src/components/dashboard/api/missions/schema.sql
