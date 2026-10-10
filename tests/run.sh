@@ -17,9 +17,12 @@ node --check plugins/mini-forum/assets/js/mini-events.js
 node --check plugins/mini-devices/assets/mini-devices.js
 printf '%-22s %s\n' "js" "no problems"
 
-# The game's own checks. node tests print their own line.
-for t in tests/*.mjs; do
+# The game's own checks. node tests print their own line. The asset check runs
+# first: a missing or zero-byte picture is the one failure that stops the build
+# outright, so there is no point reading the rest until it passes.
+for t in tests/assets.mjs tests/*.mjs; do
   [ -e "$t" ] || continue
+  case "$t" in tests/assets.mjs) [ "$seen_assets" = 1 ] && continue; seen_assets=1 ;; esac
   node "$t" || fail=1
 done
 

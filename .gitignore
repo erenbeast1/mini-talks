@@ -18,3 +18,6 @@ game-api/uploads/
 # Database dumps — they carry real e-mail addresses and password hashes.
 *.sql
 !game/src/components/dashboard/api/missions/schema.sql
+
+# Vite build output for the game (dist/ above already covers it, kept explicit)
+game/dist/

@@ -79,8 +79,8 @@ import animationIcon from '../assets/animation_icon.png';
 import imageIcon from '../assets/image_icon.png';
 import downloadBtn from '../assets/download_btn.png';
 import downloadBtnHover from '../assets/download_btn_hover.png';
-import cancelBtn from '../assets/Cancel_btn.png';
-import cancelBtnHover from '../assets/Cancel_btn_hover.png';
+import cancelBtn from '../assets/cancel_btn.png';
+import cancelBtnHover from '../assets/cancel_btn_hover.png';
 
 // Recording Popup Buttons
 import closeBtn from '../assets/close_btn.png';
