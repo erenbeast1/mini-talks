@@ -12,6 +12,7 @@
 
 import React from 'react';
 import { useAvatar } from '../../hooks/useAvatar';
+import { avatarImageStyle } from '../../utils/avatars';
 import profileIcon from '../../assets/profile-icon.png';
 
 const ProfileAvatar = ({
@@ -19,12 +20,10 @@ const ProfileAvatar = ({
   id,
   size = 30,
   alt = '',
-  rounded = true,
   style = {},
   className,
 }) => {
   const { avatarUrl, checked } = useAvatar(role, id);
-  const px = typeof size === 'number' ? `${size}px` : size;
 
   return (
     <img
@@ -32,12 +31,10 @@ const ProfileAvatar = ({
       alt={alt}
       className={className}
       style={{
-        width: avatarUrl ? '100%' : px,
-        height: avatarUrl ? '100%' : px,
-        objectFit: avatarUrl ? 'cover' : 'contain',
-        // The rings around these are drawn as round divs with no overflow
-        // clipping, so the picture has to round its own corners.
-        borderRadius: avatarUrl && rounded ? '50%' : 0,
+        // The saved avatar is a transparent PNG of the whole figure, so it is
+        // shown whole on whatever ring the caller drew behind it, never cropped
+        // to fill. One rule, in utils/avatars.js.
+        ...avatarImageStyle(avatarUrl, size),
         // Fade in rather than flashing the placeholder first.
         opacity: checked ? 1 : 0,
         transition: 'opacity 0.25s ease',

@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useRewardNotifications } from '../components/popups/RewardNotifications';
+import ProfileAvatar from '../components/common/ProfileAvatar';
 import Header from '../components/common/Header';
 import axios from 'axios';
 
@@ -19,6 +21,7 @@ import rightSlider from '../assets/right_slider_icon.png';
 const MiniSelectionPage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { checkRewards } = useRewardNotifications();
   const [minis, setMinis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cardHoverIndex, setCardHoverIndex] = useState(null);
@@ -138,6 +141,9 @@ const MiniSelectionPage = () => {
         activity_type: 'login'
       });
       console.log('Mini login recorded for mini_id:', miniId);
+      // Opening the app is itself worth a daily brick, and can finish a streak.
+      // The server decides; this only asks what came of it.
+      checkRewards(miniId);
     } catch (error) {
       console.error('Failed to record mini login:', error);
     }
@@ -193,6 +199,9 @@ const MiniSelectionPage = () => {
       subtitle: `Age Range: ${mini.age_range}`,
       icon: profileIcon,
       iconStyle: { width: '80px', height: '80px' },
+      // Whose picture belongs on this card. ProfileAvatar falls back to the
+      // LEGO head for a profile that has not made one yet.
+      avatar: { role: 'mini', id: mini.mini_id },
       onSelect: () => handleSelectMini(mini),
     }));
 
@@ -206,6 +215,7 @@ const MiniSelectionPage = () => {
         subtitle: 'Play as Parent',
         icon: profileIcon,
         iconStyle: { width: '80px', height: '80px' },
+        avatar: { role: 'parent', id: user.user_id },
         onSelect: handleSelectParent,
       });
     }
@@ -220,6 +230,7 @@ const MiniSelectionPage = () => {
         subtitle: 'Play as Expert',
         icon: expertIcon,
         iconStyle: { width: '70px', height: '70px', objectFit: 'contain' },
+        avatar: { role: 'expert', id: user.user_id },
         onSelect: handleSelectExpert,
       });
     }
@@ -354,11 +365,24 @@ const MiniSelectionPage = () => {
           backgroundColor: isHovered ? '#FFFFFF' : '#FFCC00',
           transition: 'all 0.2s ease'
         }}>
-          <img 
-            src={card.icon}
-            alt={card.name}
-            style={{ width: iconSize, height: iconSize, ...card.iconStyle, width: card.iconStyle?.width ? (isSmallScreen ? iconSize : card.iconStyle.width) : iconSize, height: card.iconStyle?.height ? (isSmallScreen ? iconSize : card.iconStyle.height) : iconSize }}
-          />
+          {card.avatar ? (
+            <ProfileAvatar
+              role={card.avatar.role}
+              id={card.avatar.id}
+              alt={card.name}
+              size={isSmallScreen ? iconSize : (card.iconStyle?.width || iconSize)}
+            />
+          ) : (
+            <img 
+              src={card.icon}
+              alt={card.name}
+              style={{
+                width: card.iconStyle?.width ? (isSmallScreen ? iconSize : card.iconStyle.width) : iconSize,
+                height: card.iconStyle?.height ? (isSmallScreen ? iconSize : card.iconStyle.height) : iconSize,
+                objectFit: card.iconStyle?.objectFit || 'contain',
+              }}
+            />
+          )}
         </div>
 
         {/* Name */}

@@ -136,9 +136,10 @@ const Header = ({
   const { role: avatarRole, id: avatarId } = avatarTarget(user, selectedMini);
   const { avatarUrl: activeAvatarUrl } = useAvatar(avatarRole, avatarId);
 
-  // Same rule the dashboard screens use: an avatar fills its box, the fallback
-  // LEGO head sits inside it.
-  const avatarImgStyle = { objectFit: activeAvatarUrl ? 'cover' : 'contain' };
+  // The saved avatar is a transparent PNG of the whole figure, so it is drawn
+  // whole rather than cropped to fill — see avatarImageStyle. The sizing here
+  // stays with the pill's own classes.
+  const avatarImgStyle = { objectFit: 'contain' };
 
   // Aktif profil: selectedMini varsa mini, yoksa user
   const getActiveProfile = () => {

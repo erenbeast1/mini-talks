@@ -356,7 +356,7 @@ const HomePage = () => {
                     style={{
                       width: rv.menuIconSize,
                       height: rv.menuIconSize,
-                      objectFit: headerAvatarUrl ? 'cover' : 'contain',
+                      objectFit: 'contain',
                     }}
                   />
                   <span 

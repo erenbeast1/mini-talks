@@ -7,6 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAvatar } from '../../hooks/useAvatar';
+import { avatarImageStyle } from '../../utils/avatars';
 import axios from 'axios';
 
 // Modal Components - Builder sadece Progress (View only)
@@ -646,7 +647,7 @@ const BuilderHub = ({ user, builder: builderProp, onClose, onViewProfile }) => {
               overflow: 'hidden',
               WebkitFlexShrink: 1, flexShrink: 1
             }}>
-              <img src={avatarUrl || profileIcon} alt={builder?.full_name} style={{ width: avatarUrl ? '100%' : '80%', height: avatarUrl ? '100%' : '80%', objectFit: avatarUrl ? 'cover' : 'contain' }} />
+              <img src={avatarUrl || profileIcon} alt={builder?.full_name} style={avatarImageStyle(avatarUrl, '80%')} />
             </div>
 
             <div style={{

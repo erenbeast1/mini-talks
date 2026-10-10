@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { AlertProvider } from './components/popups/AlertSystem';
+import { RewardNotificationProvider } from './components/popups/RewardNotifications';
 import PortraitGuard from './components/common/PortraitGuard';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -22,6 +23,9 @@ function App() {
   return (
     <AuthProvider>
       <AlertProvider>
+      {/* Reward notifications sit outside the Router so a card that arrives
+          while the child is moving between screens is not thrown away. */}
+      <RewardNotificationProvider>
       <Router>
         <PortraitGuard>
         <div className="min-h-screen bg-gray-50">
@@ -63,6 +67,7 @@ function App() {
         </div>
         </PortraitGuard>
       </Router>
+      </RewardNotificationProvider>
       </AlertProvider>
     </AuthProvider>
   );

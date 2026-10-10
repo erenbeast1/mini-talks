@@ -57,6 +57,8 @@ try {
             ep.organization as expert_organization,
             ep.profession as expert_profession,
             u.email as expert_email,
+            u.user_id as expert_user_id,   -- the id an expert's avatar is keyed by
+
             mp.mini_name,
             mp.age_range
         FROM expert_mini_connections emc
@@ -85,6 +87,8 @@ try {
             ep.organization as expert_organization,
             ep.profession as expert_profession,
             u.email as expert_email,
+            u.user_id as expert_user_id,   -- the id an expert's avatar is keyed by
+
             mp.mini_name,
             mp.age_range
         FROM expert_mini_connections emc
@@ -111,6 +115,8 @@ try {
             ep.organization as expert_organization,
             ep.profession as expert_profession,
             u.email as expert_email,
+            u.user_id as expert_user_id,   -- the id an expert's avatar is keyed by
+
             mp.mini_name,
             mp.age_range
         FROM expert_mini_connections emc

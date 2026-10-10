@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAvatar } from '../../hooks/useAvatar';
+import { avatarImageStyle } from '../../utils/avatars';
 
 // Modal Components
 import MotivationMessagesManager from './MotivationMessagesManager';
@@ -1012,7 +1013,7 @@ const MiniManage = ({ mini, onClose, onViewProfile, viewerRole = 'parent' }) => 
               WebkitFlexShrink: 1,
               flexShrink: 1
             }}>
-<img src={avatarUrl || profileIcon} alt={mini?.mini_name} style={{ width: avatarUrl ? '100%' : '80%', height: avatarUrl ? '100%' : '80%', objectFit: avatarUrl ? 'cover' : 'contain' }} />
+<img src={avatarUrl || profileIcon} alt={mini?.mini_name} style={avatarImageStyle(avatarUrl, '80%')} />
             </div>
             
             <div style={{ 

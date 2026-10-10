@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import LegoFigure from '../components/LegoFigure';
 import Header from '../components/common/Header';
+import { useRewardNotifications } from '../components/popups/RewardNotifications';
 import axios from 'axios';
 import { EXCLUDED_HAIR } from '../components/HairModels'; // ← EXCLUDED_HAIR import
 
@@ -1364,6 +1365,7 @@ const getRandomHairTextureIndexFiltered = (g, type) => {
 const CharacterCustomizationPage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { checkRewards } = useRewardNotifications();
   
   // Safari viewport fix
   useSafariViewportFix();
@@ -1855,6 +1857,9 @@ useEffect(() => {
     try {
       const response = await axios.post(apiUrl, requestData);
       console.log(`📥 Response ${charIndex + 1}:`, response.data);
+      // Building a Mini earns a Mini Creation Brick, and may tip a counter over
+      // into a medal. Builders do not collect rewards.
+      if (!isBuilder) checkRewards(entityId);
       return response.data;
     } catch (err) {
       console.error(`❌ ${isBuilder ? 'Builder' : 'Mini'} ${charIndex + 1} Error:`, err);

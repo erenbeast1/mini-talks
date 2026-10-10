@@ -71,6 +71,7 @@ import deleteButton from '../assets/Action Buton/Delete_Buton.png';
 import deleteButtonHover from '../assets/Action Buton/Delete_Buton_Hover.png';
 
 import { useAlert } from '../components/popups/AlertSystem';
+import { useRewardNotifications } from '../components/popups/RewardNotifications';
 import gameSaveBtn from '../assets/Game_Save_btn.png';
 import gameSaveBtnHover from '../assets/Game_Save_btn_hover.png';
 import infoIcon from '../assets/info_icon.png';
@@ -4092,6 +4093,7 @@ ${lines}
 const GamePage = () => {
   const navigate = useNavigate();
   const { alert: showAlert } = useAlert();
+  const { checkRewards } = useRewardNotifications();
 
   // ── Responsive: mobil tespiti (desktop görünümü değişmez) ──
   const [screenSize, setScreenSize] = useState('desktop');
@@ -4473,7 +4475,12 @@ const [gameHairOverrides, setGameHairOverrides] = useState({});
               console.log('📥 API Response:', result);
               
               if (result.success && result.reward_given) {
-                console.log('🧱 Recording Brick earned!');
+                // The response says something was awarded but not what: one
+                // recording can trigger a recording brick, a daily brick, a
+                // streak brick and a new-level medal at once. So ask what is
+                // new and let the notifications name each of them.
+                // Builders do not collect rewards, hence the mini-only call.
+                if (!isBuilder) checkRewards(entityId);
               } else if (!result.success) {
                 console.error('❌ API Error:', result.error);
               }

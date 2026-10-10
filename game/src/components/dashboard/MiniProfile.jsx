@@ -4,6 +4,7 @@ import axios from 'axios';
 import profileIcon from '../../assets/profile-icon.png';
 import AvatarEditorModal from './AvatarEditorModal';
 import { useAvatar } from '../../hooks/useAvatar';
+import { avatarImageStyle } from '../../utils/avatars';
 
 // PNG Assets (ParentProfile ile aynı path'ler)
 import changeAvatarBtn from '../../assets/change_avatar_btn.png';
@@ -134,7 +135,7 @@ const MiniProfile = ({ user, mini, onUserUpdate }) => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <div style={{ width: '108px', height: '108px', backgroundColor: '#FFCC00', borderRadius: '14px', border: '3px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <img src={avatarUrl || profileIcon} alt="Mini Avatar"
-                style={{ width: avatarUrl ? '100%' : '64px', height: avatarUrl ? '100%' : '64px', objectFit: avatarUrl ? 'cover' : 'contain', opacity: avatarChecked ? 1 : 0, transition: 'opacity 0.25s ease' }} />
+                style={{ ...avatarImageStyle(avatarUrl, 64), opacity: avatarChecked ? 1 : 0, transition: 'opacity 0.25s ease' }} />
             </div>
             <button onClick={() => setAvatarEditorOpen(true)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}>
               <img src={changeAvatarBtn} alt="Change Avatar" style={{ height: '36px' }} />
@@ -201,7 +202,7 @@ const MiniProfile = ({ user, mini, onUserUpdate }) => {
               <img
                 src={avatarUrl || profileIcon}
                 alt="Mini Avatar"
-                style={{ width: avatarUrl ? '100%' : '100px', height: avatarUrl ? '100%' : '100px', objectFit: avatarUrl ? 'cover' : 'contain', opacity: avatarChecked ? 1 : 0, transition: 'opacity 0.25s ease' }}
+                style={{ ...avatarImageStyle(avatarUrl, 100), opacity: avatarChecked ? 1 : 0, transition: 'opacity 0.25s ease' }}
               />
             </div>
             <button onClick={() => setAvatarEditorOpen(true)} onMouseEnter={() => setAvatarHover(true)} onMouseLeave={() => setAvatarHover(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>

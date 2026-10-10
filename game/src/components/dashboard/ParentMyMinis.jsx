@@ -100,6 +100,7 @@ import loadingIcon from '../../assets/loading.png';
 import companyIcon from '../../assets/company.png';
 import profileIcon from '../../assets/profile-icon.png';
 import ProfileAvatar from '../common/ProfileAvatar';
+import AvatarEditorModal from './AvatarEditorModal';
 import okBtnRed from '../../assets/ok_btn_red.png';
 import okBtnRedHover from '../../assets/ok_btn_red_hover.png';
 import cancelBtnImg from '../../assets/cancel_btn.png';
@@ -280,6 +281,12 @@ const ParentMyMinis = ({ user }) => {
     }
   };
 
+  // A Mini the parent has just created, waiting for its picture. Set only on a
+  // successful add: creating a profile is the one moment its avatar is the
+  // creator's to choose. Connecting to a Mini or an expert that already exists
+  // never opens this — that person's picture is theirs.
+  const [newMiniForAvatar, setNewMiniForAvatar] = useState(null);
+
   const handleAddMini = async (e) => {
     e.preventDefault();
     
@@ -300,6 +307,10 @@ const ParentMyMinis = ({ user }) => {
         setMobileAddView(null);
         setNewMini({ mini_name: '', age_range: '', email: '', password: '' });
         fetchMinis();
+        // add-mini.php hands back the new mini_id, so the picture can be made
+        // straight away rather than being hunted for later.
+        const newId = response.data?.data?.mini_id;
+        if (newId) setNewMiniForAvatar(newId);
       }
     } catch (error) {
       console.error('Failed to add mini:', error);
@@ -906,7 +917,7 @@ const ParentMyMinis = ({ user }) => {
                     <div key={expert.connection_id} className="pmm-card-snap" style={miniCardBlue}>
                       <div style={cardHead}>
                         <div style={cardAvatar()}>
-                          <img src={expertIcon} alt="Expert" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                          <ProfileAvatar role="expert" id={expert.expert_user_id} size={30} alt="Expert" />
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <div style={cardName()}>{expert.expert_name}</div>
@@ -932,7 +943,7 @@ const ParentMyMinis = ({ user }) => {
                       <div key={request.connection_id} className="pmm-card-snap" style={pendingCard}>
                         <div style={cardHead}>
                           <div style={cardAvatar()}>
-                            <img src={expertIcon} alt="Expert" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                            <ProfileAvatar role="expert" id={request.expert_user_id} size={30} alt="Expert" />
                           </div>
                           <div style={{ minWidth: 0 }}>
                             <div style={cardName()}>{request.expert_name}</div>
@@ -975,7 +986,7 @@ const ParentMyMinis = ({ user }) => {
                     <div key={request.connection_id} className="pmm-card-snap" style={pendingCard}>
                       <div style={cardHead}>
                         <div style={cardAvatar()}>
-                          <img src={expertIcon} alt="Expert" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                          <ProfileAvatar role="expert" id={request.expert_user_id} size={30} alt="Expert" />
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <div style={cardName()}>{request.expert_name}</div>
@@ -1039,7 +1050,7 @@ const ParentMyMinis = ({ user }) => {
                 </div>
                 <div style={{ backgroundColor: '#fff', borderRadius: '13px', margin: '0 5px 5px', padding: '10px 12px', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '64px', height: '64px', minWidth: '64px', borderRadius: '50%', backgroundColor: '#FFCC00', border: '3px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <img src={expertIcon} alt="Expert" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
+                    <ProfileAvatar role="expert" id={request.expert_user_id} size={36} alt="Expert" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                     <p style={{ ...mFont, color: '#000', fontSize: '12px', fontWeight: 500, textAlign: 'center', marginBottom: '4px', lineHeight: 1.4 }}>
@@ -1066,6 +1077,13 @@ const ParentMyMinis = ({ user }) => {
             </div>
           </div>
         )}
+      <AvatarEditorModal
+        isOpen={Boolean(newMiniForAvatar)}
+        onClose={() => setNewMiniForAvatar(null)}
+        userId={newMiniForAvatar}
+        role="mini"
+        onSaved={() => { setNewMiniForAvatar(null); fetchMinis(); }}
+      />
       </div>
     );
   }
@@ -1360,7 +1378,7 @@ const ParentMyMinis = ({ user }) => {
                         backgroundColor: '#FFCC00'
                       }}
                     >
-                      <img src={expertIcon} alt="Expert" style={{ height: '40px', width: '40px', objectFit: 'contain' }} />
+                      <ProfileAvatar role="expert" id={request.expert_user_id} size={40} alt="Expert" />
                     </div>
                     
                     <div className="flex-1">
@@ -1485,7 +1503,7 @@ const ParentMyMinis = ({ user }) => {
                       backgroundColor: '#FFCC00'
                     }}
                   >
-                    <img src={expertIcon} alt="Expert" style={{ height: '36px', width: '36px', objectFit: 'contain' }} />
+                    <ProfileAvatar role="expert" id={request.expert_user_id} size={36} alt="Expert" />
                   </div>
                   
                   <div className="flex-1">
@@ -1579,7 +1597,7 @@ const ParentMyMinis = ({ user }) => {
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    <img src={expertIcon} alt="Expert" style={{ height: '56px', width: '56px', objectFit: 'contain' }} />
+                    <ProfileAvatar role="expert" id={expert.expert_user_id} size={56} alt="Expert" />
                   </div>
                   
                   {/* Sağ taraf */}
@@ -2016,11 +2034,7 @@ const ParentMyMinis = ({ user }) => {
                       border: '4px solid #000000'
                     }}
                   >
-                    <img
-                      src={expertIcon}
-                      alt="Expert"
-                      style={{ width: '56px', height: '56px', objectFit: 'contain' }}
-                    />
+                    <ProfileAvatar role="expert" id={expert.expert_user_id} size={56} alt="Expert" />
                   </div>
                 </div>
 
@@ -2375,15 +2389,7 @@ const ParentMyMinis = ({ user }) => {
                     flexShrink: 0
                   }}
                 >
-                  <img
-                    src={expertIcon}
-                    alt="Expert"
-                    style={{
-                      width: '56px',
-                      height: '56px',
-                      objectFit: 'contain'
-                    }}
-                  />
+                  <ProfileAvatar role="expert" id={expert.expert_user_id} size={56} alt="Expert" />
                 </div>
 
                 {/* Sağ taraf - Mesaj ve Butonlar */}
@@ -2468,6 +2474,13 @@ const ParentMyMinis = ({ user }) => {
           </div>
         </div>
       )}
+      <AvatarEditorModal
+        isOpen={Boolean(newMiniForAvatar)}
+        onClose={() => setNewMiniForAvatar(null)}
+        userId={newMiniForAvatar}
+        role="mini"
+        onSaved={() => { setNewMiniForAvatar(null); fetchMinis(); }}
+      />
     </>
   );
 };

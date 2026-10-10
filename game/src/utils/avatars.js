@@ -51,6 +51,29 @@ export function avatarKey(role, id) {
   return `${normalizeRole(role)}:${id}`;
 }
 
+/**
+ * How a saved avatar is drawn inside its box.
+ *
+ * The editor saves the whole canvas as a transparent PNG — a wide shot of the
+ * whole figure, deliberately, so that hair and arms are never cut off (see the
+ * comment on downscaleCanvasToDataUrl in AvatarEditor.jsx). The screens were
+ * drawing it with object-fit: cover, which fills a square by throwing the sides
+ * away, so what survived was a slice through the middle of a figure: a cropped
+ * head in the profile box and something unreadable in the header pill.
+ *
+ * `contain` is the rule that matches what is actually in the file. Nothing is
+ * cut, and because the background is transparent the figure sits straight on
+ * the yellow square or the blue pill behind it.
+ *
+ * One place, so the header, the cards and the profile screens cannot disagree.
+ */
+export function avatarImageStyle(avatarUrl, placeholderSize = '100%') {
+  const size = typeof placeholderSize === 'number' ? `${placeholderSize}px` : placeholderSize;
+  return avatarUrl
+    ? { width: '100%', height: '100%', objectFit: 'contain' }
+    : { width: size, height: size, objectFit: 'contain' };
+}
+
 /** The saved PNG keeps its name between versions, so the version busts it. */
 export function withVersion(url, version) {
   if (!url) return null;
@@ -151,6 +174,7 @@ export default {
   roleHasAvatar,
   avatarKey,
   withVersion,
+  avatarImageStyle,
   readAvatar,
   fetchAvatar,
   publishAvatar,
