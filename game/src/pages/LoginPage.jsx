@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { authAPI } from '../utils/api';
 
 import mainMenuBtn from '../assets/main-menu-btn.png';
 import mainMenuBtnHover from '../assets/main-menu-btn-hover.png';
@@ -33,6 +34,12 @@ const LoginPage = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Unverified account: login.php answers 403 with email_not_verified:true.
+  // Showing only the error text left people with nowhere to go, because the
+  // first mail is usually the one that went missing.
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendState, setResendState] = useState('idle'); // idle | sending | sent
 
   const [guestHover, setGuestHover] = useState(false);
   const [signInHover, setSignInHover] = useState(false);
@@ -77,21 +84,70 @@ const LoginPage = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
+    setNeedsVerification(false);
+    setResendState('idle');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNeedsVerification(false);
+    setResendState('idle');
     setLoading(true);
     try {
       await login(formData.emailOrUsername, formData.password);
       navigate('/play');
     } catch (err) {
-      setError(err?.response?.data?.message || 'Login failed. Please try again.');
+      const data = err?.response?.data;
+      if (data?.email_not_verified) {
+        setNeedsVerification(true);
+        setError('');
+      } else {
+        setError(data?.message || 'Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResendVerification = async () => {
+    if (resendState === 'sending') return;
+    setResendState('sending');
+    try {
+      await authAPI.resendVerification(formData.emailOrUsername);
+    } catch (err) {
+      // The endpoint answers the same way whatever happens, so a failure here
+      // is the network, not the account. Telling them to check the inbox is
+      // still the right next step — a second press costs nothing.
+      console.error('Resend verification failed:', err);
+    }
+    setResendState('sent');
+  };
+
+  // One notice, rendered in both the mobile and the desktop layout.
+  const verificationNotice = (prefix) => (
+    <div className={`${prefix}-verify`}>
+      <strong>Your email is not verified yet.</strong>
+      <span>
+        We sent a link when the account was created. Open it to finish signing up —
+        it is worth checking the spam folder.
+      </span>
+      {resendState === 'sent' ? (
+        <span className={`${prefix}-verify-ok`}>
+          A new link is on its way. It is valid for 24 hours.
+        </span>
+      ) : (
+        <button
+          type="button"
+          className={`${prefix}-verify-btn`}
+          onClick={handleResendVerification}
+          disabled={resendState === 'sending'}
+        >
+          {resendState === 'sending' ? 'Sending…' : 'Send me a new link'}
+        </button>
+      )}
+    </div>
+  );
 
   const handleGuestMode = () => {
     navigate('/play?guest=true');
@@ -242,6 +298,41 @@ const LoginPage = () => {
       font-weight: 600;
       font-size: 14px;
     }
+
+    /* An unverified account is not an error the user made, so it is told in
+       the site's own blue rather than in the red of a wrong password. */
+    .lp-verify {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #F1F7FF;
+      border: 2px solid #0055BF;
+      color: #1D1D1B;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      font-weight: 600;
+      font-size: 13.5px;
+      text-align: left;
+    }
+    .lp-verify strong { font-weight: 900; color: #0055BF; }
+    .lp-verify-btn {
+      align-self: flex-start;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      color: #fff;
+      background: #0055BF;
+      border: 2px solid #0055BF;
+      border-radius: 6px;
+      padding: 9px 16px;
+      min-height: 40px;
+      cursor: pointer;
+    }
+    .lp-verify-btn:hover:not(:disabled) { background: #00469c; }
+    .lp-verify-btn:disabled { opacity: 0.6; cursor: default; }
+    .lp-verify-ok { font-weight: 800; color: #237841; }
 
     .lp-form { width: 100%; }
     .lp-group { margin-bottom: 14px; }
@@ -538,6 +629,37 @@ const LoginPage = () => {
       font-weight: 600;
       font-size: 11px;
     }
+    .lpm-verify {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      background: #F1F7FF;
+      border: 2px solid #0055BF;
+      color: #1D1D1B;
+      padding: 7px 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 10.5px;
+      line-height: 1.45;
+      text-align: left;
+    }
+    .lpm-verify strong { font-weight: 900; color: #0055BF; }
+    .lpm-verify-btn {
+      align-self: flex-start;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 10.5px;
+      color: #fff;
+      background: #0055BF;
+      border: 2px solid #0055BF;
+      border-radius: 6px;
+      padding: 6px 11px;
+      cursor: pointer;
+    }
+    .lpm-verify-btn:disabled { opacity: 0.6; cursor: default; }
+    .lpm-verify-ok { font-weight: 800; color: #237841; }
     .lpm-form { width: 100%; }
     .lpm-group { margin-bottom: 8px; }
     .lpm-label {
@@ -671,6 +793,7 @@ const LoginPage = () => {
           <h2 className="lpm-title">Sign in</h2>
 
           {error && <div className="lpm-error">{error}</div>}
+          {needsVerification && verificationNotice('lpm')}
 
           <form onSubmit={handleSubmit} className="lpm-form">
             <div className="lpm-group">
@@ -761,6 +884,7 @@ const LoginPage = () => {
             <h2 className="lp-title">Sign in</h2>
 
             {error && <div className="lp-error">{error}</div>}
+            {needsVerification && verificationNotice('lp')}
 
             <form onSubmit={handleSubmit} className="lp-form">
               <div className="lp-group">

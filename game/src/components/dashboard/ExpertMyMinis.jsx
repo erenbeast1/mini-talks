@@ -101,6 +101,7 @@ import viewBtnHover from '../../assets/View_Buton_Hover.png';
 import addMiniBtn from '../../assets/add_mini_btn.png';
 import addMiniBtnHover from '../../assets/add_mini_btn_hover.png';
 import profileIcon from '../../assets/profile-icon.png';
+import ProfileAvatar from '../common/ProfileAvatar';
 import approveBtn from '../../assets/approve_btn.png';
 import approveBtnHover from '../../assets/approve_btn_hover.png';
 import rejectBtn from '../../assets/reject_btn.png';
@@ -706,7 +707,7 @@ const ExpertMyMinis = ({ user }) => {
                 <div key={mini.mini_id} className="emm-card-snap" style={miniCard}>
                   <div style={cardHead}>
                     <div style={cardAvatar()}>
-                      <img src={profileIcon} alt={mini.mini_name} style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                      <ProfileAvatar role="mini" id={mini.mini_id} size={30} alt={mini.mini_name} />
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={cardName()}>{mini.mini_name}</div>
@@ -734,7 +735,7 @@ const ExpertMyMinis = ({ user }) => {
                   <div key={connection.connection_id} className="emm-card-snap" style={pendingCard}>
                     <div style={cardHead}>
                       <div style={cardAvatar()}>
-                        <img src={profileIcon} alt="Mini" style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                        <ProfileAvatar role="mini" id={connection.mini_id} size={30} alt={connection.mini_name} />
                       </div>
                       <div style={{ minWidth: 0 }}>
                         <div style={cardName()}>{connection.mini_name}</div>
@@ -764,7 +765,7 @@ const ExpertMyMinis = ({ user }) => {
                 <div key={request.connection_id} className="emm-card-snap" style={pendingCard}>
                   <div style={cardHead}>
                     <div style={cardAvatar()}>
-                      <img src={profileIcon} alt={request.mini_name} style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                      <ProfileAvatar role="mini" id={request.mini_id} size={30} alt={request.mini_name} />
                     </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={cardName()}>{request.mini_name}</div>
@@ -790,7 +791,7 @@ const ExpertMyMinis = ({ user }) => {
                 </div>
                 <div style={{ backgroundColor: '#fff', borderRadius: '13px', margin: '0 5px 5px', padding: '10px 12px', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '64px', height: '64px', minWidth: '64px', borderRadius: '50%', backgroundColor: '#FFCC00', border: '3px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <img src={profileIcon} alt="Mini" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
+                    <ProfileAvatar role="mini" id={miniToDisconnect?.mini_id} size={36} alt="Mini" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                     <p style={{ ...mFont, color: '#000', fontSize: '12px', fontWeight: 500, textAlign: 'center', marginBottom: '4px', lineHeight: 1.4 }}>
@@ -926,11 +927,7 @@ const ExpertMyMinis = ({ user }) => {
                     backgroundColor: isHovered ? '#FFFFFF' : '#FFCC00',
                     transition: 'all 0.2s ease'
                   }}>
-                    <img 
-                      src={profileIcon}
-                      alt={mini.mini_name}
-                      className="w-16 h-16"
-                    />
+                    <ProfileAvatar role="mini" id={mini.mini_id} size={64} alt={mini.mini_name} />
                   </div>
 
                   {/* Sağ taraf - İsim, Age Range, Parent, Butonlar */}

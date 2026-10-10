@@ -24,6 +24,17 @@ export const authAPI = {
       },
     }),
 
+  // RESEND VERIFICATION
+  // login.php refuses an unverified account with email_not_verified:true; this
+  // is what the login page offers them. The answer is the same whatever the
+  // address, so there is nothing to branch on but the HTTP failure.
+  resendVerification: (emailOrUsername) =>
+    axios.post(
+      `${API_BASE_URL}/auth/resend-verification.php`,
+      { email_or_username: emailOrUsername },
+      { headers: { 'Content-Type': 'application/json' } }
+    ),
+
   // Logout için backend varsa endpoint koyarsın, yoksa localStorage temizlemek yeter
   logout: () => {
     // İstersen backend'e de istek atarsın

@@ -4,6 +4,7 @@ import axios from 'axios';
 import profileIcon from '../../assets/profile-icon.png';
 import expertIcon from '../../assets/expert.png';
 import AvatarEditorModal from './AvatarEditorModal';
+import { useAvatar } from '../../hooks/useAvatar';
 
 // PNG Assets (ParentProfile ile aynı path'ler)
 import changeAvatarBtn from '../../assets/change_avatar_btn.png';
@@ -137,8 +138,9 @@ const ExpertProfile = ({ user, onUserUpdate }) => {
   const [passwordPopupOpen, setPasswordPopupOpen] = useState(false);
 
   // Kayıtlı 3D avatar PNG'si (yoksa default ikon)
-  const [avatarUrl, setAvatarUrl] = useState(null);
-  const [avatarChecked, setAvatarChecked] = useState(false);
+  // Shared with the header and every other screen showing this profile, so a
+  // save here lands there too — and a save there lands here.
+  const { avatarUrl, checked: avatarChecked } = useAvatar('expert', user?.user_id);
 
   // ── Responsive: mobil tespiti (desktop görünümü değişmez) ──
   const [screenSize, setScreenSize] = useState('desktop');
@@ -161,19 +163,6 @@ const ExpertProfile = ({ user, onUserUpdate }) => {
     };
   }, []);
   const isSmallScreen = screenSize === 'mobile' || screenSize === 'tablet-small';
-
-  // Kayıtlı avatar'ı çek
-  useEffect(() => {
-    if (!user?.user_id) { setAvatarChecked(true); return; }
-    axios.get(`${API_BASE}/avatar/get.php`, { params: { user_id: user.user_id, role: 'expert' } })
-      .then((res) => {
-        if (res.data?.success && res.data.data?.avatar_url) {
-          setAvatarUrl(res.data.data.avatar_url);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setAvatarChecked(true));
-  }, [user?.user_id]);
 
   const handleChange = (e) => { setFormData({ ...formData, [e.target.name]: e.target.value }); };
 
@@ -202,11 +191,9 @@ const ExpertProfile = ({ user, onUserUpdate }) => {
   const handlePasswordSaved = () => { setMessage('Password updated successfully!'); };
 
   // 3D avatar kaydedilince
-  const handleAvatarSaved = (savedData) => {
-    if (savedData?.avatar_url) {
-      const bust = savedData.version ? `?v=${savedData.version}` : '';
-      setAvatarUrl(savedData.avatar_url + bust);
-    }
+  // The editor modal publishes the new picture to the shared cache itself, so
+  // there is nothing to set here — only something to say.
+  const handleAvatarSaved = () => {
     setMessage('Profile picture updated!');
   };
 

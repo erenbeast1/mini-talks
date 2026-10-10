@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAvatar } from '../../hooks/useAvatar';
 
 // Modal Components
 import MotivationMessagesManager from './MotivationMessagesManager';
@@ -181,7 +182,8 @@ const MiniManage = ({ mini, onClose, onViewProfile, viewerRole = 'parent' }) => 
   const [calendarData, setCalendarData] = useState({});
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loading, setLoading] = useState(true);
-  const [avatarUrl, setAvatarUrl] = useState(null);
+  // Shared with the header, the Mini's own profile and the My Mini(s) cards.
+  const { avatarUrl } = useAvatar('mini', mini?.mini_id);
 
   // Motivation message - Mini kartında gösterilecek
   const [motivationMessage, setMotivationMessage] = useState('The bravest Mini ever!');
@@ -272,17 +274,6 @@ const MiniManage = ({ mini, onClose, onViewProfile, viewerRole = 'parent' }) => 
     } else {
       setLoading(false);
     }
-  }, [mini?.mini_id]);
-
-   useEffect(() => {
-    if (!mini?.mini_id) return;
-    axios.get(`https://mini-talks.org/minitalks-api/avatar/get.php`, { params: { user_id: mini.mini_id, role: 'mini' } })
-      .then((res) => {
-        if (res.data?.success && res.data.data?.avatar_url) {
-          setAvatarUrl(res.data.data.avatar_url);
-        }
-      })
-      .catch(() => {});
   }, [mini?.mini_id]);
 
   // Ay değiştiğinde takvim verisini güncelle

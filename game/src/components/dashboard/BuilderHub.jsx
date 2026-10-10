@@ -6,6 +6,7 @@
 // NOT: Mini Scenes ProgressBrick renkleri MiniManage ile AYNI bırakıldı (kırmızı/sarı/mavi/yeşil).
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAvatar } from '../../hooks/useAvatar';
 import axios from 'axios';
 
 // Modal Components - Builder sadece Progress (View only)
@@ -154,7 +155,8 @@ const BuilderHub = ({ user, builder: builderProp, onClose, onViewProfile }) => {
   const [missionDate, setMissionDate] = useState(new Date());
 
   // Kayıtlı 3D avatar PNG'si (yoksa default profileIcon)
-  const [avatarUrl, setAvatarUrl] = useState(null);
+  // Shared with the header and the Builder's own profile.
+  const { avatarUrl } = useAvatar('builder', builder?.builder_id);
 
   const [profileViewHover, setProfileViewHover] = useState(false);
   const [profileOverlayHover, setProfileOverlayHover] = useState(false);
@@ -209,18 +211,6 @@ const BuilderHub = ({ user, builder: builderProp, onClose, onViewProfile }) => {
     } else {
       setLoading(false);
     }
-  }, [builder?.builder_id]);
-
-  // Kayıtlı avatarı çek (builder sistemi builder_id=user_id kullanıyor, role: 'builder')
-  useEffect(() => {
-    if (!builder?.builder_id) return;
-    axios.get(`https://mini-talks.org/minitalks-api/avatar/get.php`, { params: { user_id: builder.builder_id, role: 'builder' } })
-      .then((res) => {
-        if (res.data?.success && res.data.data?.avatar_url) {
-          setAvatarUrl(res.data.data.avatar_url);
-        }
-      })
-      .catch(() => {});
   }, [builder?.builder_id]);
 
   useEffect(() => {

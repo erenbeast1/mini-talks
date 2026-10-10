@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useAvatar } from '../../hooks/useAvatar';
+import { clearAvatars } from '../../utils/avatars';
 
 // Assets
 import logoImg from '../../assets/logo.png';
@@ -125,6 +127,26 @@ const Header = ({
     }
   };
 
+  // The picture on the pill follows whichever profile is active: the Mini while
+  // one is open, the signed-in account otherwise. It comes from the shared
+  // avatar cache, so opening a Mini swaps it here on its own, and saving a new
+  // avatar in the editor reaches the header without a reload.
+  const avatarRole = selectedMini ? 'mini' : (user?.role || '');
+  // parent/expert/builder avatars are keyed by the user id; a Mini's is keyed
+  // by its mini_id, which is a different number — the same rule MiniProfile
+  // and the My Mini(s) cards follow.
+  const isMiniAvatar = avatarRole === 'mini' || avatarRole === 'child';
+  const avatarId = selectedMini
+    ? selectedMini.mini_id
+    : (isMiniAvatar
+        ? (user?.profile?.mini_id || user?.mini_id)
+        : user?.user_id);
+  const { avatarUrl: activeAvatarUrl } = useAvatar(avatarRole, avatarId);
+
+  // Same rule the dashboard screens use: an avatar fills its box, the fallback
+  // LEGO head sits inside it.
+  const avatarImgStyle = { objectFit: activeAvatarUrl ? 'cover' : 'contain' };
+
   // Aktif profil: selectedMini varsa mini, yoksa user
   const getActiveProfile = () => {
     // Guest kullanıcılar her zaman sadece Sign In görsün
@@ -208,6 +230,9 @@ const Header = ({
   const handleSignOut = () => {
     sessionStorage.removeItem('selectedMini');
     setSelectedMini(null);
+    // Otherwise the next person to sign in on this computer sees the previous
+    // family's faces until their own avatars have loaded.
+    clearAvatars();
     logout();
     navigate('/');
   };
@@ -402,10 +427,11 @@ const Header = ({
                       minWidth: rProfileMinW
                     }}
                   >
-                    <img 
-                      src={profileIcon}
+                    <img
+                      src={activeAvatarUrl || profileIcon}
                       alt="Profile"
                       className={`${rProfileIconSize} object-cover`}
+                      style={avatarImgStyle}
                     />
                     <span className={`text-white font-black ${rProfileFontSize}`}>
                       {activeProfile.label}
@@ -480,10 +506,11 @@ const Header = ({
                     borderRadius: `${rProfileRadius} 0 0 ${rProfileRadius}`
                   }}
                 >
-                  <img 
-                    src={profileIcon}
+                  <img
+                    src={activeAvatarUrl || profileIcon}
                     alt="Profile"
                     className={`${rProfileIconSize} object-cover`}
+                    style={avatarImgStyle}
                   />
                 </div>
                 

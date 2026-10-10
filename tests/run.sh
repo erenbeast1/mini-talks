@@ -16,4 +16,33 @@ printf '%-22s ' "php -l"; [ $fail -eq 0 ] && echo "no problems" || echo "problem
 node --check plugins/mini-forum/assets/js/mini-events.js
 node --check plugins/mini-devices/assets/mini-devices.js
 printf '%-22s %s\n' "js" "no problems"
+
+# The game's own checks. node tests print their own line.
+for t in tests/*.mjs; do
+  [ -e "$t" ] || continue
+  node "$t" || fail=1
+done
+
+# The game is JSX, which node --check cannot read; esbuild can, and it is
+# already a Vite dependency. Skipped rather than failed when node_modules is
+# not installed, so this script still runs on a fresh clone.
+if [ -x game/node_modules/.bin/esbuild ]; then
+  jsxfail=0
+  for f in $(find game/src -name '*.jsx' -o -name '*.js'); do
+    game/node_modules/.bin/esbuild --log-level=error --outfile=/dev/null "$f" || jsxfail=1
+  done
+  printf '%-22s ' "game jsx"
+  [ $jsxfail -eq 0 ] && echo "no problems" || { echo "problems"; fail=1; }
+else
+  printf '%-22s %s\n' "game jsx" "skipped (run npm install in game/)"
+fi
+
+# php -l over the game API as well.
+apifail=0
+for f in $(find game-api -name '*.php' -not -path '*/vendor/*'); do
+  php -l "$f" > /dev/null || apifail=1
+done
+printf '%-22s ' "game-api php -l"
+[ $apifail -eq 0 ] && echo "no problems" || { echo "problems"; fail=1; }
+
 exit $fail

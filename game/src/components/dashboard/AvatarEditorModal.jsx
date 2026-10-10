@@ -14,6 +14,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AvatarEditor from '../../avatar-editor/AvatarEditor';
 import '../../avatar-editor/AvatarEditor.css';
+import { publishAvatar } from '../../utils/avatars';
 
 const API_BASE = 'https://mini-talks.org/minitalks-api';
 
@@ -177,6 +178,11 @@ const AvatarEditorModal = ({ isOpen, onClose, userId, role = 'parent', onSaved }
               role={role}
               torsoId={torsoId}
               onSaveSuccess={(savedData) => {
+                // Publish before the caller's own handler runs. Every screen
+                // showing this profile — the header, the My Mini(s) cards, the
+                // other dashboard tabs — picks the new picture up from here,
+                // so no caller has to remember to tell anybody.
+                publishAvatar(role, userId, savedData?.avatar_url, savedData?.version);
                 if (onSaved) onSaved(savedData);
                 onClose();
               }}

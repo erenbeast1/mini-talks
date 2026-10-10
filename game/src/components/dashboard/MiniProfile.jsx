@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import profileIcon from '../../assets/profile-icon.png';
 import AvatarEditorModal from './AvatarEditorModal';
+import { useAvatar } from '../../hooks/useAvatar';
 
 // PNG Assets (ParentProfile ile aynı path'ler)
 import changeAvatarBtn from '../../assets/change_avatar_btn.png';
@@ -26,8 +27,9 @@ const MiniProfile = ({ user, mini, onUserUpdate }) => {
   const [miniName, setMiniName] = useState('');
 
   // Kayıtlı 3D avatar PNG'si (yoksa default ikon)
-  const [avatarUrl, setAvatarUrl] = useState(null);
-  const [avatarChecked, setAvatarChecked] = useState(false);
+  // Shared with the header and the My Mini(s) cards, so changing a Mini's
+  // picture changes it everywhere that Mini appears.
+  const { avatarUrl, checked: avatarChecked } = useAvatar('mini', miniId);
 
   // ── Responsive: mobil tespiti (desktop görünümü değişmez) ──
   const [screenSize, setScreenSize] = useState('desktop');
@@ -58,19 +60,6 @@ const MiniProfile = ({ user, mini, onUserUpdate }) => {
       setMiniName(user.profile.mini_name);
     }
   }, [mini, user]);
-
-  // Kayıtlı avatar'ı çek
-  useEffect(() => {
-    if (!miniId) { setAvatarChecked(true); return; }
-    axios.get(`${API_BASE}/avatar/get.php`, { params: { user_id: miniId, role: 'mini' } })
-      .then((res) => {
-        if (res.data?.success && res.data.data?.avatar_url) {
-          setAvatarUrl(res.data.data.avatar_url);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setAvatarChecked(true));
-  }, [miniId]);
 
   const handleSave = async () => {
     if (!miniId) {
@@ -116,11 +105,9 @@ const MiniProfile = ({ user, mini, onUserUpdate }) => {
   };
 
   // 3D avatar kaydedilince
-  const handleAvatarSaved = (savedData) => {
-    if (savedData?.avatar_url) {
-      const bust = savedData.version ? `?v=${savedData.version}` : '';
-      setAvatarUrl(savedData.avatar_url + bust);
-    }
+  // The editor modal publishes the new picture to the shared cache itself, so
+  // there is nothing to set here — only something to say.
+  const handleAvatarSaved = () => {
     setMessage('Profile picture updated!');
   };
 

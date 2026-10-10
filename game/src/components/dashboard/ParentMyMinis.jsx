@@ -99,6 +99,7 @@ import expertIcon from '../../assets/expert.png';
 import loadingIcon from '../../assets/loading.png';
 import companyIcon from '../../assets/company.png';
 import profileIcon from '../../assets/profile-icon.png';
+import ProfileAvatar from '../common/ProfileAvatar';
 import okBtnRed from '../../assets/ok_btn_red.png';
 import okBtnRedHover from '../../assets/ok_btn_red_hover.png';
 import cancelBtnImg from '../../assets/cancel_btn.png';
@@ -834,7 +835,7 @@ const ParentMyMinis = ({ user }) => {
                     <div key={mini.mini_id} className="pmm-card-snap" style={miniCardBlue}>
                       <div style={cardHead}>
                         <div style={cardAvatar()}>
-                          <img src={profileIcon} alt={mini.mini_name} style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                          <ProfileAvatar role="mini" id={mini.mini_id} size={30} alt={mini.mini_name} />
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <div style={cardName()}>{mini.mini_name}</div>
@@ -864,7 +865,7 @@ const ParentMyMinis = ({ user }) => {
                     <div key={mini.mini_id} className="pmm-card-snap" style={pendingCard}>
                       <div style={cardHead}>
                         <div style={cardAvatar()}>
-                          <img src={profileIcon} alt={mini.mini_name} style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                          <ProfileAvatar role="mini" id={mini.mini_id} size={30} alt={mini.mini_name} />
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <div style={cardName()}>{mini.mini_name}</div>
@@ -1002,7 +1003,7 @@ const ParentMyMinis = ({ user }) => {
                 </div>
                 <div style={{ backgroundColor: '#fff', borderRadius: '13px', margin: '0 5px 5px', padding: '10px 12px', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '64px', height: '64px', minWidth: '64px', borderRadius: '50%', backgroundColor: '#FFCC00', border: '3px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <img src={profileIcon} alt="Mini" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
+                    <ProfileAvatar role="mini" id={miniToDelete?.mini_id} size={36} alt="Mini" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                     <p style={{ ...mFont, color: '#000', fontSize: '12px', fontWeight: 500, textAlign: 'center', marginBottom: '4px', lineHeight: 1.4 }}>
@@ -1175,11 +1176,7 @@ const ParentMyMinis = ({ user }) => {
                     backgroundColor: isHovered ? '#FFFFFF' : '#FFCC00',
                     transition: 'all 0.2s ease'
                   }}>
-                    <img 
-                      src={profileIcon}
-                      alt={mini.mini_name}
-                      className="w-16 h-16"
-                    />
+                    <ProfileAvatar role="mini" id={mini.mini_id} size={64} alt={mini.mini_name} />
                   </div>
 
                   {/* Sağ taraf - İsim, Age Range, Butonlar */}
@@ -1277,11 +1274,7 @@ const ParentMyMinis = ({ user }) => {
               >
                 <div className="flex items-center gap-6 mb-6">
                   <div className="w-24 h-24 rounded-full flex items-center justify-center border-4 bg-yellow-400 border-black shadow-md">
-                    <img 
-                      src={profileIcon}
-                      alt={mini.mini_name}
-                      className="w-14 h-14"
-                    />
+                    <ProfileAvatar role="mini" id={mini.mini_id} size={56} alt={mini.mini_name} />
                   </div>
                   
                   <div className="flex-1">
@@ -2234,14 +2227,11 @@ const ParentMyMinis = ({ user }) => {
                     flexShrink: 0
                   }}
                 >
-                  <img
-                    src={profileIcon}
+                  <ProfileAvatar
+                    role="mini"
+                    id={miniToDelete?.mini_id}
                     alt="Mini"
-                    style={{
-                      width: '56px',
-                      height: '56px',
-                      objectFit: 'contain'
-                    }}
+                    size={56}
                   />
                 </div>
 
