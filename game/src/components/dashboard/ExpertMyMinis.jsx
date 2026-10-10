@@ -620,7 +620,7 @@ const ExpertMyMinis = ({ user }) => {
                             {isSelected && <span style={{ color: '#0055BF', fontWeight: 900, fontSize: '11px' }}>✓</span>}
                           </div>
                           <div style={{ width: '30px', height: '30px', minWidth: '30px', borderRadius: '50%', backgroundColor: '#FFCC00', border: isSelected ? '2px solid #FFCC00' : '2px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <img src={profileIcon} alt="" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                            <ProfileAvatar role="mini" id={mini.mini_id} size={18} alt={mini.mini_name} />
                           </div>
                           <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: 900, fontSize: '12px' }}>{mini.mini_name}</div>

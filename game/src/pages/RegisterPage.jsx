@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import AvatarEditorModal from '../components/dashboard/AvatarEditorModal';
 import { CheckEmailPopup, ParentInvitationSentPopup, ErrorPopup } from '../components/popups/EmailPopups';
 
 import mainMenuBtn from '../assets/main-menu-btn.png';
@@ -55,6 +56,9 @@ const RegisterPage = () => {
   const [mainMenuHover, setMainMenuHover] = useState(false);
 
   const [showCheckEmailPopup, setShowCheckEmailPopup] = useState(false);
+  // The account just created, waiting for its picture.
+  const [newAvatar, setNewAvatar] = useState(null);
+  const [avatarStep, setAvatarStep] = useState(false);
   const [showParentInvitationPopup, setShowParentInvitationPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -159,7 +163,7 @@ const RegisterPage = () => {
     if (validationError) { setError(validationError); return; }
     setLoading(true);
     try {
-      await register({
+      const created = await register({
         email: formData.email,
         password: formData.password,
         role_type: roleType,
@@ -169,6 +173,12 @@ const RegisterPage = () => {
         organization: formData.organization,
         age_group: formData.ageGroup,
       });
+      // register.php hands back the id to save an avatar against, already
+      // resolved per role: a Mini's avatar is keyed by mini_id, everyone
+      // else's by user_id. Making the profile is the one moment its picture
+      // belongs to whoever is making it.
+      const avatarId = created?.user?.avatar_id || null;
+      if (avatarId) setNewAvatar({ id: avatarId, role: roleType });
       if (roleType === 'child') {
         setShowParentInvitationPopup(true);
       } else {
@@ -200,6 +210,20 @@ const RegisterPage = () => {
     setShowCheckEmailPopup(false);
     setShowParentInvitationPopup(false);
     setShowErrorPopup(false);
+
+    // Offer the avatar editor once, on the way out. Skipping it is fine — the
+    // profile page has the same editor, and nobody should be held at the door
+    // of an account they have just made.
+    if (newAvatar && !avatarStep) {
+      setAvatarStep(true);
+      return;
+    }
+    setTimeout(() => navigate('/login'), 300);
+  };
+
+  const finishAvatarStep = () => {
+    setAvatarStep(false);
+    setNewAvatar(null);
     setTimeout(() => navigate('/login'), 300);
   };
 
@@ -1024,6 +1048,13 @@ const RegisterPage = () => {
         <ParentInvitationSentPopup show={showParentInvitationPopup} onClose={handlePopupClose}
           parentEmail={formData.parentEmail} childName={formData.fullName} />
         <ErrorPopup show={showErrorPopup} onClose={() => setShowErrorPopup(false)} message={errorMessage} />
+        <AvatarEditorModal
+          isOpen={avatarStep && Boolean(newAvatar)}
+          onClose={finishAvatarStep}
+          userId={newAvatar?.id}
+          role={newAvatar?.role}
+          onSaved={finishAvatarStep}
+        />
       </>
     );
   }
@@ -1090,6 +1121,13 @@ const RegisterPage = () => {
       <ParentInvitationSentPopup show={showParentInvitationPopup} onClose={handlePopupClose}
         parentEmail={formData.parentEmail} childName={formData.fullName} />
       <ErrorPopup show={showErrorPopup} onClose={() => setShowErrorPopup(false)} message={errorMessage} />
+      <AvatarEditorModal
+        isOpen={avatarStep && Boolean(newAvatar)}
+        onClose={finishAvatarStep}
+        userId={newAvatar?.id}
+        role={newAvatar?.role}
+        onSaved={finishAvatarStep}
+      />
     </>
   );
 };

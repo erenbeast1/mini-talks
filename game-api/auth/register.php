@@ -92,6 +92,11 @@ try {
 
     $userId = (int)$pdo->lastInsertId();
 
+    // The id of the row written below. An avatar is keyed by users.user_id for
+    // a parent, expert or builder, but by mini_profiles.mini_id for a Mini, so
+    // the caller is told the profile id as well and does not have to guess.
+    $profileId = 0;
+
     // ---- Role göre profil tablosuna ekle ----
     $sendParentEmail = false;
     $childName = '';
@@ -104,6 +109,7 @@ try {
             VALUES (?, ?)
         ");
         $stmt->execute([$fullName, $userId]);
+        $profileId = (int) $pdo->lastInsertId();
 
     } elseif ($roleType === 'builder') {
 
@@ -116,6 +122,7 @@ try {
             VALUES (?, ?, ?, ?)
         ");
         $stmt->execute([$fullName, $username, $ageGroup, $userId]);
+        $profileId = (int) $pdo->lastInsertId();
 
     } elseif ($roleType === 'child') {
 
@@ -129,6 +136,7 @@ try {
             VALUES (?, ?, ?, ?, ?, 'pending')
         ");
         $stmt->execute([$fullName, $ageGroup, $email, $parentEmail, $userId]);
+        $profileId = (int) $pdo->lastInsertId();
 
         // Parent'a email gönderilecek
         $sendParentEmail = true;
@@ -146,6 +154,7 @@ try {
             VALUES (?, ?, ?, ?)
         ");
         $stmt->execute([$fullName, $username, $organization, $userId]);
+        $profileId = (int) $pdo->lastInsertId();
     }
 
     $pdo->commit();
@@ -184,9 +193,12 @@ try {
         'success' => true,
         'message' => 'User registered successfully.',
         'user' => [
-            'user_id'   => $userId,
-            'email'     => $email,
-            'role_type' => $roleType,
+            'user_id'    => $userId,
+            'email'      => $email,
+            'role_type'  => $roleType,
+            'profile_id' => $profileId,
+            // The id to save an avatar against, already resolved per role.
+            'avatar_id'  => $roleType === 'child' ? $profileId : $userId,
         ],
         'verification_email_sent' => $verificationEmailSent,
     ];
