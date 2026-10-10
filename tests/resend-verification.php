@@ -38,6 +38,17 @@ if (!is_file($src)) {
 }
 copy($src, $dir . '/auth/resend-verification.php');
 
+// verify-email.php comes along unchanged, so the last section can prove that a
+// link this endpoint issues is one the EXISTING verification page accepts. That
+// is the question that matters: the resend has to feed the flow that was
+// already there, not stand up a second one beside it.
+$verifySrc = $root . '/game-api/auth/verify-email.php';
+if (!is_file($verifySrc)) {
+    fwrite(STDERR, "missing endpoint: $verifySrc\n");
+    exit(1);
+}
+copy($verifySrc, $dir . '/auth/verify-email.php');
+
 /* ── the database the endpoint will be given ─────────────────────────────── */
 file_put_contents($dir . '/config/db.php', <<<'PHP'
 <?php
@@ -281,9 +292,71 @@ ok('a quote in the identifier finds nothing rather than everything',
    isset($r['message']) && $r['message'] === $generic);
 ok('and sends nothing', count(sentLog($dir)) === 0);
 
+/* ── 7. the link it issues is accepted by the EXISTING verification page ──
+ * register.php and this endpoint both call EmailHandler::sendVerificationEmail,
+ * which builds .../auth/verify-email.php?token=... — so a resent link is the
+ * same link, re-issued. This walks it: ask for a new one, then open it.
+ */
+function getVerify($query) {
+    global $port;
+    $ctx = stream_context_create(array('http' => array(
+        'method' => 'GET', 'timeout' => 10, 'ignore_errors' => true,
+    )));
+    return (string) @file_get_contents(
+        "http://127.0.0.1:$port/auth/verify-email.php?" . $query, false, $ctx);
+}
+
+function verifiedFlag($db, $userId) {
+    $pdo = new PDO('sqlite:' . $db);
+    $stmt = $pdo->prepare("SELECT is_email_verified FROM users WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    return (int) $stmt->fetchColumn();
+}
+
+clearLog($dir);
+$pdo = new PDO('sqlite:' . $db);
+$pdo->prepare("UPDATE users SET email_verification_token_expiry = ? WHERE user_id = 6")
+    ->execute([expiryFor(7200)]);                 // past the one-minute floor
+
+post($dir, array('email_or_username' => 'mini@example.com'));
+$sent = sentLog($dir);
+ok('a resend was issued for the round trip', count($sent) === 1);
+$link = count($sent) ? $sent[0]['token'] : '';
+
+ok('the account is not verified before the link is opened', verifiedFlag($db, 6) === 0);
+
+$page = getVerify('token=' . urlencode($link));
+ok('the existing verification page accepts the resent link',
+   strpos($page, 'Email Verified') !== false);
+ok('and does not report it as invalid or expired',
+   strpos($page, 'Verification Failed') === false && stripos($page, 'expired') === false);
+ok('the account really is verified afterwards', verifiedFlag($db, 6) === 1);
+ok('and the spent link is cleared, so it cannot be reused',
+   tokenOf($db, 6) === null);
+
+$again = getVerify('token=' . urlencode($link));
+ok('opening the same link twice is refused rather than re-verifying',
+   strpos($again, 'Verification Failed') !== false);
+
+$bogus = getVerify('token=' . str_repeat('0', 64));
+ok('an invented token is refused', strpos($bogus, 'Verification Failed') !== false);
+
+// A resend replaces the stored token rather than adding a second live one, so
+// a link out of an older mail stops working. That is on purpose; this pins it.
+clearLog($dir);
+$pdo->prepare("UPDATE users SET is_email_verified = 0, email_verification_token = ?,
+               email_verification_token_expiry = ? WHERE user_id = 6")
+    ->execute(['first-link-token', expiryFor(7200)]);
+post($dir, array('email_or_username' => 'mini@example.com'));
+$older = getVerify('token=first-link-token');
+ok('a link from the older mail stops working once a new one is sent',
+   strpos($older, 'Verification Failed') !== false);
+ok('while the newest link still verifies',
+   strpos(getVerify('token=' . urlencode(sentLog($dir)[0]['token'])), 'Email Verified') !== false);
+
 /* ── tidy up ─────────────────────────────────────────────────────────────── */
 foreach (array('/auth/resend-verification.php', '/config/db.php', '/utils/EmailHandler.php',
-               '/sent.log', '/test.sqlite', '/server.log') as $f) {
+               '/auth/verify-email.php', '/sent.log', '/test.sqlite', '/server.log') as $f) {
     @unlink($dir . $f);
 }
 foreach (glob($dir . '/tmp/minitalks-verif/*') as $f) { @unlink($f); }
