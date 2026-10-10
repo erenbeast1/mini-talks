@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useAvatar } from '../../hooks/useAvatar';
 import { clearAvatars } from '../../utils/avatars';
+import { avatarTarget } from '../../utils/activeProfile';
 
 // Assets
 import logoImg from '../../assets/logo.png';
@@ -131,16 +132,8 @@ const Header = ({
   // one is open, the signed-in account otherwise. It comes from the shared
   // avatar cache, so opening a Mini swaps it here on its own, and saving a new
   // avatar in the editor reaches the header without a reload.
-  const avatarRole = selectedMini ? 'mini' : (user?.role || '');
-  // parent/expert/builder avatars are keyed by the user id; a Mini's is keyed
-  // by its mini_id, which is a different number — the same rule MiniProfile
-  // and the My Mini(s) cards follow.
-  const isMiniAvatar = avatarRole === 'mini' || avatarRole === 'child';
-  const avatarId = selectedMini
-    ? selectedMini.mini_id
-    : (isMiniAvatar
-        ? (user?.profile?.mini_id || user?.mini_id)
-        : user?.user_id);
+  // This header's label follows the selected Mini, so its picture does too.
+  const { role: avatarRole, id: avatarId } = avatarTarget(user, selectedMini);
   const { avatarUrl: activeAvatarUrl } = useAvatar(avatarRole, avatarId);
 
   // Same rule the dashboard screens use: an avatar fills its box, the fallback

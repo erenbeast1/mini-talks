@@ -945,7 +945,7 @@ const ParentMyMinis = ({ user }) => {
                           <div style={{ ...cardSub(), marginBottom: '3px' }}>Wants to connect with:</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{ ...cardAvatar(), width: '28px', height: '28px', minWidth: '28px', border: '2px solid #000' }}>
-                              <img src={profileIcon} alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                              <ProfileAvatar role="mini" id={request.mini_id} size={16} alt={request.mini_name} />
                             </div>
                             <div>
                               <div style={{ ...mFont, fontWeight: 900, fontSize: '12px' }}>{request.mini_name}</div>
@@ -1401,7 +1401,7 @@ const ParentMyMinis = ({ user }) => {
                           backgroundColor: '#FFCC00'
                         }}
                       >
-                        <img src={profileIcon} alt="" className="w-5 h-5" />
+                        <ProfileAvatar role="mini" id={request.mini_id} size={20} alt={request.mini_name} />
                       </div>
                       <div>
                         <div className="font-black text-base">{request.mini_name}</div>

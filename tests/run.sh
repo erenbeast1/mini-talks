@@ -37,6 +37,18 @@ else
   printf '%-22s %s\n' "game jsx" "skipped (run npm install in game/)"
 fi
 
+# esbuild parses, so it cannot see a name that is never bound — which is how a
+# `{request.mini_id}` pasted into a block where there is no `request` gets all
+# the way to the browser. ESLint can. The game has pre-existing unused-variable
+# errors, so this gates on no-undef alone rather than on a clean run.
+if [ -x game/node_modules/.bin/eslint ]; then
+  printf '%-22s ' "game no-undef"
+  undef=$(cd game && node_modules/.bin/eslint src --format unix 2>/dev/null | grep "no-undef" || true)
+  if [ -z "$undef" ]; then echo "no problems"; else echo "problems"; echo "$undef"; fail=1; fi
+else
+  printf '%-22s %s\n' "game no-undef" "skipped (run npm install in game/)"
+fi
+
 # php -l over the game API as well.
 apifail=0
 for f in $(find game-api -name '*.php' -not -path '*/vendor/*'); do

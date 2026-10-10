@@ -1,7 +1,7 @@
 // src/components/dashboard/MiniJourney.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import profileIcon from '../../assets/profile-icon.png';
+import ProfileAvatar from '../common/ProfileAvatar';
 
 // LEGO Brick Button Component
 const LegoBrickButton = ({ onClick, variant = 'red', children, className = '' }) => {
@@ -233,10 +233,11 @@ const MiniJourney = ({ user }) => {
           <div className="bg-white rounded-3xl border-4 border-gray-300 p-6 h-full flex flex-col items-center">
             {/* Avatar */}
             <div className="w-44 h-44 bg-yellow-400 rounded-3xl flex items-center justify-center mb-4 border-4 border-yellow-500 shadow-lg">
-              <img 
-                src={profileIcon} 
+              <ProfileAvatar
+                role="mini"
+                id={miniId}
+                size={128}
                 alt={miniProfile.mini_name}
-                className="w-32 h-32 object-contain"
               />
             </div>
             

@@ -1046,7 +1046,7 @@ const ExpertMyMinis = ({ user }) => {
                         backgroundColor: '#FFCC00'
                       }}
                     >
-                      <img src={profileIcon} alt="Mini" style={{ height: '40px', width: '40px', objectFit: 'contain' }} />
+                      <ProfileAvatar role="mini" id={connection.mini_id} size={40} alt={connection.mini_name} />
                     </div>
                     
                     <div className="flex-1">
@@ -1136,10 +1136,11 @@ const ExpertMyMinis = ({ user }) => {
                       backgroundColor: '#FFCC00'
                     }}
                   >
-                    <img 
-                      src={profileIcon}
+                    <ProfileAvatar
+                      role="mini"
+                      id={request.mini_id}
                       alt={request.mini_name}
-                      style={{ height: '36px', width: '36px', objectFit: 'contain' }}
+                      size={36}
                     />
                   </div>
                   
@@ -1238,6 +1239,8 @@ const ExpertMyMinis = ({ user }) => {
                       border: '4px solid #000000'
                     }}
                   >
+                    {/* Add Mini popup: no Mini has been chosen yet, so this
+                        stays the placeholder rather than anyone's picture. */}
                     <img
                       src={profileIcon}
                       alt="Mini"
@@ -1431,7 +1434,7 @@ const ExpertMyMinis = ({ user }) => {
                                   justifyContent: 'center'
                                 }}
                               >
-                                <img src={profileIcon} alt="" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+                                <ProfileAvatar role="mini" id={mini.mini_id} size={24} alt={mini.mini_name} />
                               </div>
                               
                               {/* Mini Info */}
@@ -1572,14 +1575,11 @@ const ExpertMyMinis = ({ user }) => {
                     flexShrink: 0
                   }}
                 >
-                  <img
-                    src={profileIcon}
+                  <ProfileAvatar
+                    role="mini"
+                    id={miniToDisconnect?.mini_id}
                     alt="Mini"
-                    style={{
-                      width: '56px',
-                      height: '56px',
-                      objectFit: 'contain'
-                    }}
+                    size={56}
                   />
                 </div>
 

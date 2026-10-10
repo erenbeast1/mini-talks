@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useAvatar } from '../hooks/useAvatar';
+import { avatarTarget } from '../utils/activeProfile';
 
 // ---- GÖRSELLER ----
 import logoHorizontal from '../assets/Logo-Yatay.png';
@@ -68,6 +70,17 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { user, logout, loginAsGuest } = useAuth();
   const { screenSize, isMobileOrTablet } = useResponsive();
+
+  // This page draws its own profile pill rather than using components/common/
+  // Header, so the picture has to be wired up here too — otherwise the home
+  // page is the one place still showing the stock LEGO head.
+  //
+  // `null` for the selected Mini on purpose: this pill's label names the
+  // signed-in account (getRoleLabel reads user.role and ignores the selected
+  // Mini), so its picture names the same account. The shared header follows
+  // the Mini because its label does.
+  const { role: avatarRole, id: avatarId } = avatarTarget(user, null);
+  const { avatarUrl: headerAvatarUrl } = useAvatar(avatarRole, avatarId);
 
   // hover state'leri
   const [playHover, setPlayHover] = useState(false);
@@ -337,13 +350,13 @@ const HomePage = () => {
                     paddingRight: rv.menuPx,
                   }}
                 >
-                  <img 
-                    src={profileIcon}
+                  <img
+                    src={headerAvatarUrl || profileIcon}
                     alt="Profile"
                     style={{
                       width: rv.menuIconSize,
                       height: rv.menuIconSize,
-                      objectFit: 'cover',
+                      objectFit: headerAvatarUrl ? 'cover' : 'contain',
                     }}
                   />
                   <span 
