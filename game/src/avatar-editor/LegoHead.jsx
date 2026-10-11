@@ -87,57 +87,77 @@ function loadArmTexture(torsoId) {
 // Screenshot framing was previously a *tighter* override. That's gone — both
 // 'preview' and 'screenshot' now use the same numbers, so the saved PNG is
 // always what the user sees on screen.
-// These numbers come from measuring the GLB, not from guessing. With the legs
-// and hands hidden, the bust occupies this much world space:
-//
-//   torso  1.402 .. 3.260      arms  1.426 .. 2.567
-//   head   2.682 .. 3.820      width -1.157 .. 1.157
-//
-// so the bust is y 1.402 .. 3.820, plus hair above the head: the tallest
-// styles reach about 4.75.
-//
-// The old framing was camY/targetY 3.3 with camZ 6.8, which shows
-// camY ± 6.8 * tan(12°) = 1.855 .. 4.745. Its bottom edge falls across the
-// shoulders, so the arms were sliced off mid-shoulder — the hard horizontal
-// cut Eren was seeing. It was too high as well as too tight, so moving the
-// camera back alone could not reach them.
-//
-// The job here is now only to get the whole bust into the capture with room to
-// spare. What the avatar actually shows is decided afterwards, when the PNG is
-// cropped in AvatarEditor.jsx — that is where the composition lives, and the
-// body is deliberately allowed to run off the bottom edge there rather than
-// stopping dead inside the frame.
-//
-//   camY/targetY 3.2  centres the window on the bust rather than the chest
-//   camZ 10.6         -> half-height 10.6 * tan(12°) = 2.25, window 0.95 .. 5.45
-//
-// The headroom is for hair, which is not part of this GLB and so cannot be
-// measured here — it comes from HairModels.jsx, on top of the head at 3.82.
-// Measured instead by rendering a stand-in block of known height: at camZ 9.2
-// a style reaching 5.0 was already being clipped by the top of the frame, and
-// one reaching 4.75 (the tallest in Eren's own saved avatar) had only 3.5%
-// left. At 10.6 those become 7.7% and 13.5%. Below the bust there is 8.5%.
-//
-// Being generous here costs nothing but a slightly smaller live preview: the
-// saved PNG is cropped to the figure afterwards, so the spare margin never
-// reaches the avatar.
+// DEFAULT_FRAMING is what the child sees while customising. It is Eren's
+// original framing and is left alone: the editor is not the thing that was
+// wrong, the saved PNG was. Changing it here shrinks the figure in the modal
+// for everyone, which is not wanted.
 //
 // To re-tune by hand: open the editor with ?camcal=1 (or set
 // localStorage.mfCamCal = '1'), move the sliders, copy the printed values.
 const DEFAULT_FRAMING = {
   wrapperY:    0.8,
-  targetY:     3.2,
-  camY:        3.2,
-  camZ:        10.6,
-  camZExpr:    10.6,
+  targetY:     3.3,
+  camY:        3.3,
+  camZ:        6.8,
+  camZExpr:    6.8,
   fov:         24,
   fovExpr:     24,
 };
 
+// CAPTURE_FRAMING is used for the one frame the avatar PNG is taken from, and
+// then dropped again — see setCaptureFraming() below and handleSave() in
+// AvatarEditor.jsx.
+//
+// Why a separate framing at all: measured off the GLB, with the legs and hands
+// hidden, the bust occupies y 1.402 .. 3.820 (torso 1.402..3.260, arms
+// 1.426..2.567, head 2.682..3.820), plus hair on top of the head, which the
+// tallest styles carry to about 4.75. The editor's own framing shows
+// 3.3 ± 6.8 * tan(12°) = 1.855 .. 4.745, whose bottom edge falls across the
+// shoulders — which is exactly why the saved avatars had their arms sliced off
+// in a straight line. It is a good view to customise in and a bad one to
+// photograph.
+//
+//   camY/targetY 3.2  centres on the bust rather than the chest
+//   camZ 10.6         -> half-height 2.25, window 0.95 .. 5.45
+//
+// Measured by rendering a hair stand-in of known height (hair itself lives in
+// HairModels.jsx, not in this GLB): at camZ 9.2 a style reaching 5.0 was still
+// being clipped and one reaching 4.75 had 3.5% left; at 10.6 they have 7.7%
+// and 13.5%, with 8.5% below the bust.
+//
+// There is deliberately more room here than the avatar needs. Nothing is lost
+// to it: the PNG is cropped to the figure afterwards in AvatarEditor.jsx, and
+// that crop is where the composition is decided.
+//
+// (A screenshot override existed here before and was removed because it was
+// *tighter* than the preview and cut arms and hair. This one is wider, and the
+// crop puts the framing back.)
+export const CAPTURE_FRAMING = {
+  targetY:  3.2,
+  camY:     3.2,
+  camZ:     10.6,
+  camZExpr: 10.6,
+};
+
+// Turn the capture framing on for a moment. While it is on the camera snaps
+// instead of easing, so a frame or two later the canvas holds the wide shot.
+export function setCaptureFraming(on) {
+  if (typeof window === 'undefined') return;
+  window.__MF_CAPTURE = !!on;
+}
+
+export function isCapturing() {
+  return typeof window !== 'undefined' && !!window.__MF_CAPTURE;
+}
+
 function getCameraFraming(hairTextureIndex) {
   const isExpressive = EXPRESSIVE_HAIR.has(hairTextureIndex);
   const cal = (typeof window !== 'undefined' && window.__MF_CAM_CAL) || {};
-  const f = { ...DEFAULT_FRAMING, ...cal };
+  // The capture framing wins while a photo is being taken; the calibration
+  // panel wins the rest of the time.
+  const f = isCapturing()
+    ? { ...DEFAULT_FRAMING, ...cal, ...CAPTURE_FRAMING }
+    : { ...DEFAULT_FRAMING, ...cal };
 
   return {
     position: new THREE.Vector3(0, f.camY, isExpressive ? f.camZExpr : f.camZ),
@@ -157,11 +177,14 @@ function LockedCamera({ hairTextureIndex, calVersion }) {
 
   useFrame(() => {
     const f = getCameraFraming(hairTextureIndex);
-    camera.position.lerp(f.position, 0.18);
-    target.current.lerp(f.target, 0.18);
+    // Ease normally, but snap while capturing — the photo is taken a frame or
+    // two later and must not catch the camera halfway.
+    const ease = isCapturing() ? 1 : 0.18;
+    camera.position.lerp(f.position, ease);
+    target.current.lerp(f.target, ease);
     camera.lookAt(target.current);
     if (Math.abs(camera.fov - f.fov) > 0.05) {
-      camera.fov = THREE.MathUtils.lerp(camera.fov, f.fov, 0.18);
+      camera.fov = THREE.MathUtils.lerp(camera.fov, f.fov, ease);
       camera.updateProjectionMatrix();
     }
   });

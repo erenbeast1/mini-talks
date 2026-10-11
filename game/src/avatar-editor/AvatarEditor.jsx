@@ -20,7 +20,7 @@
 //   3. Call onSaveSuccess(savedData) → WordPress reloads avatar imgs
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import LegoHead from './LegoHead.jsx';
+import LegoHead, { setCaptureFraming } from './LegoHead.jsx';
 import {
   DEFAULT_HAIR,
   TERS_YONLU_SACLAR,
@@ -225,12 +225,10 @@ FaceColorPanel.displayName = 'FaceColorPanel';
 //           figure's bounding box includes whatever hair is on it, so this is
 //           measured from the top of the hair, not the head.
 //
-//           0.06 is Eren's choice: the hair runs right up to the top edge and
-//           the figure fills the badge. Note that the display zoom's band
-//           starts at 6.4%, so at 0.06 the very tip is shaved — 0.67% of the
-//           badge's height, about one pixel at 140px and less than one in the
-//           header. 0.07 is the smallest value that cuts nothing at all;
-//           0.14 leaves a clear band of yellow above the hair.
+//           0.08 keeps the hair whole with barely any yellow above it: the
+//           display zoom's band starts at 6.4%, so anything below about 0.07
+//           shaves the tip of the hair, and much above it starts to look like
+//           a gap. 0.14 leaves a clear band, if that is ever wanted.
 // VISIBLE   how much of the bust's height is still shown once the avatar is
 //           on screen. Below 1 the body runs off the bottom edge, which is
 //           what we want: a portrait that continues past the frame reads as a
@@ -241,11 +239,13 @@ FaceColorPanel.displayName = 'FaceColorPanel';
 //           6.4%..91.2% of the image). The crop has to allow for it or the
 //           composition chosen here is not the one that reaches the screen.
 //
-// 0.85 shows the head, the shoulders and the arms past the elbow. For the
-// whole bust with clear space under it use 1.07; for a tighter head-and-
-// shoulders crop use 0.72. Nothing else needs to change.
-const TOP_GAP = 0.06;
-const VISIBLE = 0.85;
+// 0.75 shows the hair, the face, the shoulders and the top of the arms, and
+// lets the rest of the torso run off the bottom — the t-shirt was taking up
+// too much of the badge at 0.85. For the whole bust with clear space under it
+// use 1.07; for a tighter head-and-shoulders crop use 0.72. Nothing else needs
+// to change.
+const TOP_GAP = 0.08;
+const VISIBLE = 0.75;
 const ZOOM_END = 0.912;
 const ALPHA_MIN = 16; // ignore the faint halo the bloom pass leaves behind
 
@@ -549,13 +549,31 @@ const AvatarEditor = ({
     setSaveError(null);
 
     try {
-      // No zoom switching — what you see in preview is what gets saved.
-      // (The camera is already framed correctly; switching to a tighter
-      // mode previously cropped arms/hair, which was unwanted.)
-
       const canvas = document.querySelector('.mfae-canvas-host canvas');
       if (!canvas) throw new Error('Canvas not found');
-      const dataUrl = downscaleCanvasToDataUrl(canvas, 480);
+
+      // Take the photo from a wider camera than the one being customised in.
+      // The editor's view is a good one to work in and a bad one to photograph
+      // — its bottom edge falls across the shoulders — but changing it would
+      // shrink the figure in the modal for everyone. So it is widened for the
+      // moment of the capture and put straight back.
+      //
+      // The camera snaps rather than eases while this is on (see LockedCamera),
+      // so a couple of frames is enough; a few more cost nothing and leave room
+      // for a slow device. If it somehow has not applied, the worst case is the
+      // old tight photo, not a failure.
+      setCaptureFraming(true);
+      let dataUrl;
+      try {
+        await new Promise((resolve) => {
+          let frames = 0;
+          const step = () => (++frames >= 6 ? resolve() : requestAnimationFrame(step));
+          requestAnimationFrame(step);
+        });
+        dataUrl = downscaleCanvasToDataUrl(canvas, 480);
+      } finally {
+        setCaptureFraming(false);
+      }
 
       const approxBytes = Math.ceil((dataUrl.length - 22) * 3 / 4);
       if (approxBytes > 1.5 * 1024 * 1024) {
