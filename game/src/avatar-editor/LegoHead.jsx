@@ -87,12 +87,28 @@ function loadArmTexture(torsoId) {
 // Screenshot framing was previously a *tighter* override. That's gone — both
 // 'preview' and 'screenshot' now use the same numbers, so the saved PNG is
 // always what the user sees on screen.
+// camZ was 6.8 for both. At fov 24 that puts the visible half-height at
+// 6.8 * tan(12°) = 1.45 world units, and the bust — head, torso, arms, with
+// the legs hidden on purpose — is slightly taller than that window, so it was
+// being clipped at the bottom: the arms ended at the edge of the frame rather
+// than inside it. That clipping happens when the PNG is captured, so no amount
+// of CSS can put the arms back; it has to be fixed here.
+//
+// 8.2 widens the window to 8.2 * tan(12°) = 1.74, about 20% more room, which
+// is margin rather than a different composition. It cannot cut anything that
+// was visible before — moving the camera back only ever adds.
+//
+// NOTE: dialled from the arithmetic, not from looking at it, because the GLB
+// models this needs are not in the repository. The calibration panel is the
+// quick way to check and adjust: open the editor with ?camcal=1 (or set
+// localStorage.mfCamCal = '1'), move the sliders, and copy the values it
+// prints back into here.
 const DEFAULT_FRAMING = {
   wrapperY:    0.8,
   targetY:     3.3,
   camY:        3.3,
-  camZ:        6.8,
-  camZExpr:    6.8,
+  camZ:        8.2,
+  camZExpr:    8.2,
   fov:         24,
   fovExpr:     24,
 };

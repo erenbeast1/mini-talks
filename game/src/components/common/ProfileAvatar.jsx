@@ -41,14 +41,24 @@ const ProfileAvatar = ({
     />
   );
 
-  // The framing zooms slightly, so it has to be clipped or it spills out of
-  // whatever ring the caller drew. The wrapper inherits that ring's radius, so
-  // a round badge stays round and a rounded square stays square.
-  if (!avatarUrl) return img;
+  // Both paths get the same wrapper, for two different reasons.
+  //
+  // With an avatar: the framing zooms slightly, so it has to be clipped or it
+  // spills out of whatever ring the caller drew.
+  //
+  // Without one: the placeholder is drawn at its own size, and whether it ends
+  // up centred used to depend on the caller remembering to centre its box.
+  // Most do; the ones that forget put a LEGO head in the top-left corner. The
+  // wrapper centres it either way.
+  //
+  // The radius is inherited, so a round badge stays round and a rounded square
+  // stays square.
   return (
     <span
       style={{
-        display: 'block',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         width: '100%',
         height: '100%',
         overflow: 'hidden',

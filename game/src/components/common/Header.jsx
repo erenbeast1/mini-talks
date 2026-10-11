@@ -140,7 +140,22 @@ const Header = ({
   // The pill's own size classes still set the box; ProfileAvatar fills it and
   // brings the framing and the clipping with it, so a slightly zoomed avatar
   // cannot spill out of the pill.
-  const avatarBoxStyle = { display: 'block', flex: '0 0 auto', borderRadius: '6px', overflow: 'hidden' };
+  //
+  // The yellow behind it is not decoration. The saved avatar is a transparent
+  // PNG, so on the blue pill the figure floated with nothing holding it — and
+  // a LEGO head in a dark yellow-brown sits badly on blue. Yellow is the
+  // backing every other avatar in the app already has (the profile squares,
+  // the My Mini(s) badges), so the pill now matches them instead of being the
+  // one place an avatar has no frame.
+  const avatarBoxStyle = {
+    display: 'block',
+    flex: '0 0 auto',
+    backgroundColor: '#FFCC00',
+    border: '2px solid #1D1D1B',
+    borderRadius: '7px',
+    overflow: 'hidden',
+    boxSizing: 'border-box',
+  };
 
   // Aktif profil: selectedMini varsa mini, yoksa user
   const getActiveProfile = () => {

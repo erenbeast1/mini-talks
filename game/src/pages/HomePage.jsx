@@ -353,12 +353,20 @@ const HomePage = () => {
                 >
                   <span
                     style={{
-                      display: 'block',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       flex: '0 0 auto',
                       width: rv.menuIconSize,
                       height: rv.menuIconSize,
-                      borderRadius: '6px',
+                      // Same yellow backing the rest of the app's avatars have.
+                      // The saved PNG is transparent, so without it the figure
+                      // floats on the blue pill with nothing holding it.
+                      backgroundColor: '#FFCC00',
+                      border: '2px solid #1D1D1B',
+                      borderRadius: '7px',
                       overflow: 'hidden',
+                      boxSizing: 'border-box',
                     }}
                   >
                     <img
