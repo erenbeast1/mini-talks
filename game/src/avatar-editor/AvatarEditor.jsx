@@ -220,8 +220,24 @@ FaceColorPanel.displayName = 'FaceColorPanel';
 // in a flat 'all' list. The default hair on first open is bald (textureIndex 0),
 // not a per-gender default.
 // Avatar capture framing — see downscaleCanvasToDataUrl below.
-const FIGURE_FRACTION = 0.76;
+//
+// TOP_GAP   empty space above the head, as a fraction of the square.
+// VISIBLE   how much of the bust's height is still shown once the avatar is
+//           on screen. Below 1 the body runs off the bottom edge, which is
+//           what we want: a portrait that continues past the frame reads as a
+//           crop, while one that stops dead inside it reads as a chopped-off
+//           figure — the thing that was wrong before.
+// ZOOM_END  where the display zoom's visible band ends (AVATAR_ZOOM in
+//           utils/avatars.js is scale 1.18 at origin 50% 42%, which shows
+//           6.4%..91.2% of the image). The crop has to allow for it or the
+//           composition chosen here is not the one that reaches the screen.
+//
+// 0.85 shows the head, the shoulders and the arms past the elbow. For the
+// whole bust with clear space under it use 1.07; for a tighter head-and-
+// shoulders crop use 0.72. Nothing else needs to change.
 const TOP_GAP = 0.10;
+const VISIBLE = 0.85;
+const ZOOM_END = 0.912;
 const ALPHA_MIN = 16; // ignore the faint halo the bloom pass leaves behind
 
 const AvatarEditor = ({
@@ -447,15 +463,8 @@ const AvatarEditor = ({
   // cut a square around it. The output is then the same framing every time,
   // whatever the window was doing.
   //
-  //   FIGURE_FRACTION  how much of the square's height the figure fills
-  //   TOP_GAP          empty space above it, as a fraction of the square
-  //
-  // These two leave a margin that survives the slight zoom every avatar gets
-  // when it is displayed (AVATAR_ZOOM in utils/avatars.js, currently 1.18 at
-  // origin 50% 42%, which shows the band 6.4%..91.2%). The figure lands inside
-  // that band at 10%..86%, so nothing is cut a second time on the way out, and
-  // the hands still clear the edge of a round badge — which they did not at
-  // 0.80/0.09, checked by rendering the real figure at 150/96/48/header.
+  // The square is sized from TOP_GAP / VISIBLE / ZOOM_END above, so the figure
+  // lands where those say it should once the display zoom has had its share.
   const downscaleCanvasToDataUrl = useCallback((sourceCanvas, maxSize = 480) => {
     const sw = sourceCanvas.width;
     const sh = sourceCanvas.height;
@@ -502,8 +511,12 @@ const AvatarEditor = ({
       return plain();
     }
 
+    // Side of the square, in source pixels. The visible band of the finished
+    // avatar runs from TOP_GAP to ZOOM_END of the square, and we want VISIBLE
+    // of the figure's height to fill it:
+    //     VISIBLE * figureH = (ZOOM_END - TOP_GAP) * side
     const figureH = box.bottom - box.top + 1;
-    const side = figureH / FIGURE_FRACTION;          // square side, source px
+    const side = (VISIBLE * figureH) / (ZOOM_END - TOP_GAP);
     const centreX = (box.left + box.right + 1) / 2;
     const scale = maxSize / side;
 

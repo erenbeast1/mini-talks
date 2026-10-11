@@ -88,42 +88,40 @@ function loadArmTexture(torsoId) {
 // 'preview' and 'screenshot' now use the same numbers, so the saved PNG is
 // always what the user sees on screen.
 // These numbers come from measuring the GLB, not from guessing. With the legs
-// hidden and the hands visible, the bust occupies this much world space:
+// and hands hidden, the bust occupies this much world space:
 //
 //   torso  1.402 .. 3.260      arms  1.426 .. 2.567
-//   head   2.682 .. 3.820      hands 1.074 .. 2.029   (the lowest point)
-//   width  -1.272 .. 1.272
+//   head   2.682 .. 3.820      width -1.157 .. 1.157
 //
-// so the whole bust is y 1.074 .. 3.820, plus hair above the head: the tallest
+// so the bust is y 1.402 .. 3.820, plus hair above the head: the tallest
 // styles reach about 4.75.
 //
-// The old framing was camY/targetY 3.3 with camZ 6.8. At fov 24 that shows
-// camY ± 6.8 * tan(12°) = 3.3 ± 1.45, i.e. y 1.855 .. 4.745. The bottom of
-// that window sits 0.78 ABOVE the hands and 0.45 above the forearms, so the
-// capture cut them off — and a capture that cut them off is why no amount of
-// CSS could bring them back.
+// The old framing was camY/targetY 3.3 with camZ 6.8, which shows
+// camY ± 6.8 * tan(12°) = 1.855 .. 4.745. Its bottom edge falls across the
+// shoulders, so the arms were sliced off mid-shoulder — the hard horizontal
+// cut Eren was seeing. It was too high as well as too tight, so moving the
+// camera back alone could not reach them.
 //
-// It was framed too high as well as too tight, so moving the camera back alone
-// does not fix it: the window has to come down to where the bust actually is.
+// The job here is now only to get the whole bust into the capture with room to
+// spare. What the avatar actually shows is decided afterwards, when the PNG is
+// cropped in AvatarEditor.jsx — that is where the composition lives, and the
+// body is deliberately allowed to run off the bottom edge there rather than
+// stopping dead inside the frame.
 //
-//   camY/targetY 2.9  centres the window on the bust instead of the chest
-//   camZ 9.8          -> half-height 9.8 * tan(12°) = 2.08, window 0.82 .. 4.98
-//                        which clears the hands by 0.26 and the tallest hair
-//                        by 0.23
+//   camY/targetY 3.05  centres the window on the bust rather than the chest
+//   camZ 9.2           -> half-height 9.2 * tan(12°) = 1.96, window 1.09 .. 5.01
 //
-// Everything above was checked by rendering the real GLB and reading back the
-// alpha bounding box, not by eye and not by arithmetic alone. The saved PNG is
-// then cropped to the figure in AvatarEditor.jsx, so the leftover margin here
-// costs nothing — it is only insurance against clipping.
+// Measured on a render of the real GLB (not by eye, not by arithmetic alone):
+// 6% clear below the torso, 30% above the head for hair.
 //
 // To re-tune by hand: open the editor with ?camcal=1 (or set
 // localStorage.mfCamCal = '1'), move the sliders, copy the printed values.
 const DEFAULT_FRAMING = {
   wrapperY:    0.8,
-  targetY:     2.9,
-  camY:        2.9,
-  camZ:        9.8,
-  camZExpr:    9.8,
+  targetY:     3.05,
+  camY:        3.05,
+  camZ:        9.2,
+  camZExpr:    9.2,
   fov:         24,
   fovExpr:     24,
 };
@@ -205,12 +203,19 @@ function FullBodyFromGLB({ torsoId }) {
       const isLeg    = name.includes('bacak') || name.includes('leg')  || name.includes('ayak') || name.includes('foot');
 
       // Hide hair (we render our chosen hair model on top), legs (bust portrait),
-      // and unrecognized meshes (skeleton helpers etc).
-      if (isHair || isLeg) {
+      // hands, and unrecognized meshes (skeleton helpers etc).
+      //
+      // The hands used to be hidden by accident: the tests above look for
+      // 'sağ el' with a space while the GLB names them Sağ_El, so they matched
+      // nothing and fell through to the catch-all below. Normalising the names
+      // made them appear — and they are not wanted, the portrait ends at the
+      // wrist. So they are now hidden deliberately, which is also the one line
+      // to delete if they are ever wanted back.
+      if (isHair || isLeg || isHand) {
         child.visible = false;
         return;
       }
-      if (!isHead && !isHand && !isArm && !isTorso) {
+      if (!isHead && !isArm && !isTorso) {
         child.visible = false;
         return;
       }
