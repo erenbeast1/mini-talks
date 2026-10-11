@@ -223,9 +223,14 @@ FaceColorPanel.displayName = 'FaceColorPanel';
 //
 // TOP_GAP   empty space above the hair, as a fraction of the square. The
 //           figure's bounding box includes whatever hair is on it, so this is
-//           measured from the top of the hair, not the head. At 0.10 the
-//           tallest styles ended up touching the top edge of a square badge
-//           and being shaved by a round one; 0.14 leaves them visibly clear.
+//           measured from the top of the hair, not the head.
+//
+//           0.06 is Eren's choice: the hair runs right up to the top edge and
+//           the figure fills the badge. Note that the display zoom's band
+//           starts at 6.4%, so at 0.06 the very tip is shaved — 0.67% of the
+//           badge's height, about one pixel at 140px and less than one in the
+//           header. 0.07 is the smallest value that cuts nothing at all;
+//           0.14 leaves a clear band of yellow above the hair.
 // VISIBLE   how much of the bust's height is still shown once the avatar is
 //           on screen. Below 1 the body runs off the bottom edge, which is
 //           what we want: a portrait that continues past the frame reads as a
@@ -239,7 +244,7 @@ FaceColorPanel.displayName = 'FaceColorPanel';
 // 0.85 shows the head, the shoulders and the arms past the elbow. For the
 // whole bust with clear space under it use 1.07; for a tighter head-and-
 // shoulders crop use 0.72. Nothing else needs to change.
-const TOP_GAP = 0.14;
+const TOP_GAP = 0.06;
 const VISIBLE = 0.85;
 const ZOOM_END = 0.912;
 const ALPHA_MIN = 16; // ignore the faint halo the bloom pass leaves behind
