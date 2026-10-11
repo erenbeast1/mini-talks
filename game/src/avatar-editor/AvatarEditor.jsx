@@ -221,7 +221,11 @@ FaceColorPanel.displayName = 'FaceColorPanel';
 // not a per-gender default.
 // Avatar capture framing — see downscaleCanvasToDataUrl below.
 //
-// TOP_GAP   empty space above the head, as a fraction of the square.
+// TOP_GAP   empty space above the hair, as a fraction of the square. The
+//           figure's bounding box includes whatever hair is on it, so this is
+//           measured from the top of the hair, not the head. At 0.10 the
+//           tallest styles ended up touching the top edge of a square badge
+//           and being shaved by a round one; 0.14 leaves them visibly clear.
 // VISIBLE   how much of the bust's height is still shown once the avatar is
 //           on screen. Below 1 the body runs off the bottom edge, which is
 //           what we want: a portrait that continues past the frame reads as a
@@ -235,7 +239,7 @@ FaceColorPanel.displayName = 'FaceColorPanel';
 // 0.85 shows the head, the shoulders and the arms past the elbow. For the
 // whole bust with clear space under it use 1.07; for a tighter head-and-
 // shoulders crop use 0.72. Nothing else needs to change.
-const TOP_GAP = 0.10;
+const TOP_GAP = 0.14;
 const VISIBLE = 0.85;
 const ZOOM_END = 0.912;
 const ALPHA_MIN = 16; // ignore the faint halo the bloom pass leaves behind

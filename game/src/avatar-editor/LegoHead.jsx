@@ -108,20 +108,28 @@ function loadArmTexture(torsoId) {
 // body is deliberately allowed to run off the bottom edge there rather than
 // stopping dead inside the frame.
 //
-//   camY/targetY 3.05  centres the window on the bust rather than the chest
-//   camZ 9.2           -> half-height 9.2 * tan(12°) = 1.96, window 1.09 .. 5.01
+//   camY/targetY 3.2  centres the window on the bust rather than the chest
+//   camZ 10.6         -> half-height 10.6 * tan(12°) = 2.25, window 0.95 .. 5.45
 //
-// Measured on a render of the real GLB (not by eye, not by arithmetic alone):
-// 6% clear below the torso, 30% above the head for hair.
+// The headroom is for hair, which is not part of this GLB and so cannot be
+// measured here — it comes from HairModels.jsx, on top of the head at 3.82.
+// Measured instead by rendering a stand-in block of known height: at camZ 9.2
+// a style reaching 5.0 was already being clipped by the top of the frame, and
+// one reaching 4.75 (the tallest in Eren's own saved avatar) had only 3.5%
+// left. At 10.6 those become 7.7% and 13.5%. Below the bust there is 8.5%.
+//
+// Being generous here costs nothing but a slightly smaller live preview: the
+// saved PNG is cropped to the figure afterwards, so the spare margin never
+// reaches the avatar.
 //
 // To re-tune by hand: open the editor with ?camcal=1 (or set
 // localStorage.mfCamCal = '1'), move the sliders, copy the printed values.
 const DEFAULT_FRAMING = {
   wrapperY:    0.8,
-  targetY:     3.05,
-  camY:        3.05,
-  camZ:        9.2,
-  camZExpr:    9.2,
+  targetY:     3.2,
+  camY:        3.2,
+  camZ:        10.6,
+  camZExpr:    10.6,
   fov:         24,
   fovExpr:     24,
 };
