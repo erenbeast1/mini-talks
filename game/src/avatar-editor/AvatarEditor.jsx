@@ -219,6 +219,11 @@ FaceColorPanel.displayName = 'FaceColorPanel';
 // glasses, mouth, facialhair) show every variant from every gender bucket
 // in a flat 'all' list. The default hair on first open is bald (textureIndex 0),
 // not a per-gender default.
+// Avatar capture framing — see downscaleCanvasToDataUrl below.
+const FIGURE_FRACTION = 0.76;
+const TOP_GAP = 0.10;
+const ALPHA_MIN = 16; // ignore the faint halo the bloom pass leaves behind
+
 const AvatarEditor = ({
   initialConfig,
   // minitalks-api entegrasyonu (forum nonce/ajaxUrl yerine)
@@ -426,27 +431,94 @@ const AvatarEditor = ({
     setGlassesColor(useGlasses ? GLASSES_COLORS[Math.floor(Math.random() * GLASSES_COLORS.length)] : '#1C1C1C');
   }, [faceItemsByCat, hasBeard]);
 
-  // ── Resize+compress canvas screenshot ──────────────────────────────
+  // ── Crop to the figure, then resize ────────────────────────────────
   // Source canvas may be 1500×1500+ at retina dpr. Avatar is shown at max
-  // 120×120 in the UI, so we downscale to 480×480 (4× retina headroom) and
-  // keep PNG (transparent background needed). This usually yields ~80–200KB.
+  // 120×120 in the UI, so we output 480×480 (4× retina headroom) and keep PNG
+  // (transparent background needed). This usually yields ~80–200KB.
+  //
+  // It used to save the whole canvas and keep its aspect. The canvas is sized
+  // by the modal's flex layout, so its shape depends on the window: the same
+  // avatar came out wide on a laptop and nearly square on a phone, and every
+  // place that shows it had to cope with both. Worse, the figure sat wherever
+  // the camera happened to leave it.
+  //
+  // So: find the figure in the canvas (it is the only thing drawn — the
+  // background is CSS on the host div, the canvas itself is transparent) and
+  // cut a square around it. The output is then the same framing every time,
+  // whatever the window was doing.
+  //
+  //   FIGURE_FRACTION  how much of the square's height the figure fills
+  //   TOP_GAP          empty space above it, as a fraction of the square
+  //
+  // These two leave a margin that survives the slight zoom every avatar gets
+  // when it is displayed (AVATAR_ZOOM in utils/avatars.js, currently 1.18 at
+  // origin 50% 42%, which shows the band 6.4%..91.2%). The figure lands inside
+  // that band at 10%..86%, so nothing is cut a second time on the way out, and
+  // the hands still clear the edge of a round badge — which they did not at
+  // 0.80/0.09, checked by rendering the real figure at 150/96/48/header.
   const downscaleCanvasToDataUrl = useCallback((sourceCanvas, maxSize = 480) => {
     const sw = sourceCanvas.width;
     const sh = sourceCanvas.height;
     if (!sw || !sh) return sourceCanvas.toDataURL('image/png');
 
-    // Pick scale so the longest side fits maxSize (preserves aspect)
-    const scale = Math.min(1, maxSize / Math.max(sw, sh));
-    const dw = Math.round(sw * scale);
-    const dh = Math.round(sh * scale);
+    // Fall back to the old behaviour (whole canvas, aspect kept) if anything
+    // about reading the pixels fails — a tainted canvas, a browser that will
+    // not give us the data. Never lose the avatar over the framing.
+    const plain = () => {
+      const scale = Math.min(1, maxSize / Math.max(sw, sh));
+      const off = document.createElement('canvas');
+      off.width = Math.round(sw * scale);
+      off.height = Math.round(sh * scale);
+      const c = off.getContext('2d');
+      c.imageSmoothingEnabled = true;
+      c.imageSmoothingQuality = 'high';
+      c.drawImage(sourceCanvas, 0, 0, off.width, off.height);
+      return off.toDataURL('image/png');
+    };
+
+    let box;
+    try {
+      const read = document.createElement('canvas');
+      read.width = sw;
+      read.height = sh;
+      const rctx = read.getContext('2d', { willReadFrequently: true });
+      rctx.drawImage(sourceCanvas, 0, 0);
+      const { data } = rctx.getImageData(0, 0, sw, sh);
+
+      let top = -1, bottom = -1, left = sw, right = -1;
+      for (let y = 0; y < sh; y++) {
+        for (let x = 0; x < sw; x++) {
+          if (data[(y * sw + x) * 4 + 3] > ALPHA_MIN) {
+            if (top < 0) top = y;
+            bottom = y;
+            if (x < left) left = x;
+            if (x > right) right = x;
+          }
+        }
+      }
+      if (top < 0 || bottom <= top) return plain(); // nothing drawn yet
+      box = { top, bottom, left, right };
+    } catch (e) {
+      return plain();
+    }
+
+    const figureH = box.bottom - box.top + 1;
+    const side = figureH / FIGURE_FRACTION;          // square side, source px
+    const centreX = (box.left + box.right + 1) / 2;
+    const scale = maxSize / side;
 
     const off = document.createElement('canvas');
-    off.width = dw;
-    off.height = dh;
+    off.width = maxSize;
+    off.height = maxSize;
     const ctx = off.getContext('2d');
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(sourceCanvas, 0, 0, dw, dh);
+    // Draw the whole source, placed so the figure lands where we want it.
+    // Anything outside the square simply falls off, and anything the square
+    // reaches past the canvas edge stays transparent.
+    const dx = maxSize / 2 - centreX * scale;
+    const dy = TOP_GAP * maxSize - box.top * scale;
+    ctx.drawImage(sourceCanvas, 0, 0, sw, sh, dx, dy, sw * scale, sh * scale);
     return off.toDataURL('image/png');
   }, []);
 

@@ -87,28 +87,43 @@ function loadArmTexture(torsoId) {
 // Screenshot framing was previously a *tighter* override. That's gone — both
 // 'preview' and 'screenshot' now use the same numbers, so the saved PNG is
 // always what the user sees on screen.
-// camZ was 6.8 for both. At fov 24 that puts the visible half-height at
-// 6.8 * tan(12°) = 1.45 world units, and the bust — head, torso, arms, with
-// the legs hidden on purpose — is slightly taller than that window, so it was
-// being clipped at the bottom: the arms ended at the edge of the frame rather
-// than inside it. That clipping happens when the PNG is captured, so no amount
-// of CSS can put the arms back; it has to be fixed here.
+// These numbers come from measuring the GLB, not from guessing. With the legs
+// hidden and the hands visible, the bust occupies this much world space:
 //
-// 8.2 widens the window to 8.2 * tan(12°) = 1.74, about 20% more room, which
-// is margin rather than a different composition. It cannot cut anything that
-// was visible before — moving the camera back only ever adds.
+//   torso  1.402 .. 3.260      arms  1.426 .. 2.567
+//   head   2.682 .. 3.820      hands 1.074 .. 2.029   (the lowest point)
+//   width  -1.272 .. 1.272
 //
-// NOTE: dialled from the arithmetic, not from looking at it, because the GLB
-// models this needs are not in the repository. The calibration panel is the
-// quick way to check and adjust: open the editor with ?camcal=1 (or set
-// localStorage.mfCamCal = '1'), move the sliders, and copy the values it
-// prints back into here.
+// so the whole bust is y 1.074 .. 3.820, plus hair above the head: the tallest
+// styles reach about 4.75.
+//
+// The old framing was camY/targetY 3.3 with camZ 6.8. At fov 24 that shows
+// camY ± 6.8 * tan(12°) = 3.3 ± 1.45, i.e. y 1.855 .. 4.745. The bottom of
+// that window sits 0.78 ABOVE the hands and 0.45 above the forearms, so the
+// capture cut them off — and a capture that cut them off is why no amount of
+// CSS could bring them back.
+//
+// It was framed too high as well as too tight, so moving the camera back alone
+// does not fix it: the window has to come down to where the bust actually is.
+//
+//   camY/targetY 2.9  centres the window on the bust instead of the chest
+//   camZ 9.8          -> half-height 9.8 * tan(12°) = 2.08, window 0.82 .. 4.98
+//                        which clears the hands by 0.26 and the tallest hair
+//                        by 0.23
+//
+// Everything above was checked by rendering the real GLB and reading back the
+// alpha bounding box, not by eye and not by arithmetic alone. The saved PNG is
+// then cropped to the figure in AvatarEditor.jsx, so the leftover margin here
+// costs nothing — it is only insurance against clipping.
+//
+// To re-tune by hand: open the editor with ?camcal=1 (or set
+// localStorage.mfCamCal = '1'), move the sliders, copy the printed values.
 const DEFAULT_FRAMING = {
   wrapperY:    0.8,
-  targetY:     3.3,
-  camY:        3.3,
-  camZ:        8.2,
-  camZExpr:    8.2,
+  targetY:     2.9,
+  camY:        2.9,
+  camZ:        9.8,
+  camZExpr:    9.8,
   fov:         24,
   fovExpr:     24,
 };
@@ -132,7 +147,7 @@ function getWrapperY() {
 
 function LockedCamera({ hairTextureIndex, calVersion }) {
   const { camera } = useThree();
-  const target = useRef(new THREE.Vector3(0, 3.3, 0));
+  const target = useRef(new THREE.Vector3(0, DEFAULT_FRAMING.targetY, 0));
 
   useFrame(() => {
     const f = getCameraFraming(hairTextureIndex);
@@ -175,7 +190,12 @@ function FullBodyFromGLB({ torsoId }) {
     root.traverse((child) => {
       if (!child.isMesh) return;
 
-      const name = (child.name || '').toLowerCase();
+      // The GLB separates words with underscores (Sağ_El, Sol_Kol, Sağ_Ayak),
+      // so normalise them to spaces before matching. Without this the hand
+      // tests below ('sağ el', 'sol el', ' el') never fire and both hands fall
+      // through to the catch-all that hides unrecognised meshes — which is why
+      // the arms appeared to stop at the wrist.
+      const name = (child.name || '').toLowerCase().replace(/[_-]+/g, ' ');
 
       const isHead   = name.includes('kafa') || name.includes('head');
       const isHair   = name.includes('saç') || name.includes('sac') || name.includes('hair');
