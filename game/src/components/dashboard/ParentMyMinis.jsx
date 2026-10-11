@@ -1050,7 +1050,7 @@ const ParentMyMinis = ({ user }) => {
                 </div>
                 <div style={{ backgroundColor: '#fff', borderRadius: '13px', margin: '0 5px 5px', padding: '10px 12px', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '64px', height: '64px', minWidth: '64px', borderRadius: '50%', backgroundColor: '#FFCC00', border: '3px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <ProfileAvatar role="expert" id={request.expert_user_id} size={36} alt="Expert" />
+                    <ProfileAvatar role="expert" id={expertToDelete?.expert_user_id} size={36} alt="Expert" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                     <p style={{ ...mFont, color: '#000', fontSize: '12px', fontWeight: 500, textAlign: 'center', marginBottom: '4px', lineHeight: 1.4 }}>
@@ -2034,7 +2034,10 @@ const ParentMyMinis = ({ user }) => {
                       border: '4px solid #000000'
                     }}
                   >
-                    <ProfileAvatar role="expert" id={expert.expert_user_id} size={56} alt="Expert" />
+                    {/* Add Expert form: nobody has been chosen yet — the parent
+                        types an address and a request goes out — so this stays
+                        the placeholder rather than somebody's picture. */}
+                    <img src={expertIcon} alt="Expert" style={{ width: '56px', height: '56px', objectFit: 'contain' }} />
                   </div>
                 </div>
 
@@ -2389,7 +2392,7 @@ const ParentMyMinis = ({ user }) => {
                     flexShrink: 0
                   }}
                 >
-                  <ProfileAvatar role="expert" id={expert.expert_user_id} size={56} alt="Expert" />
+                  <ProfileAvatar role="expert" id={expertToDelete?.expert_user_id} size={56} alt="Expert" />
                 </div>
 
                 {/* Sağ taraf - Mesaj ve Butonlar */}

@@ -25,15 +25,13 @@ const ProfileAvatar = ({
 }) => {
   const { avatarUrl, checked } = useAvatar(role, id);
 
-  return (
+  const img = (
     <img
       src={avatarUrl || profileIcon}
       alt={alt}
       className={className}
       style={{
-        // The saved avatar is a transparent PNG of the whole figure, so it is
-        // shown whole on whatever ring the caller drew behind it, never cropped
-        // to fill. One rule, in utils/avatars.js.
+        // One rule for how a saved avatar is framed, in utils/avatars.js.
         ...avatarImageStyle(avatarUrl, size),
         // Fade in rather than flashing the placeholder first.
         opacity: checked ? 1 : 0,
@@ -41,6 +39,24 @@ const ProfileAvatar = ({
         ...style,
       }}
     />
+  );
+
+  // The framing zooms slightly, so it has to be clipped or it spills out of
+  // whatever ring the caller drew. The wrapper inherits that ring's radius, so
+  // a round badge stays round and a rounded square stays square.
+  if (!avatarUrl) return img;
+  return (
+    <span
+      style={{
+        display: 'block',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        borderRadius: 'inherit',
+      }}
+    >
+      {img}
+    </span>
   );
 };
 

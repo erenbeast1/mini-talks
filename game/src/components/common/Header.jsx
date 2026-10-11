@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useAvatar } from '../../hooks/useAvatar';
+import ProfileAvatar from './ProfileAvatar';
 import { clearAvatars } from '../../utils/avatars';
 import { avatarTarget } from '../../utils/activeProfile';
 
@@ -136,10 +137,10 @@ const Header = ({
   const { role: avatarRole, id: avatarId } = avatarTarget(user, selectedMini);
   const { avatarUrl: activeAvatarUrl } = useAvatar(avatarRole, avatarId);
 
-  // The saved avatar is a transparent PNG of the whole figure, so it is drawn
-  // whole rather than cropped to fill — see avatarImageStyle. The sizing here
-  // stays with the pill's own classes.
-  const avatarImgStyle = { objectFit: 'contain' };
+  // The pill's own size classes still set the box; ProfileAvatar fills it and
+  // brings the framing and the clipping with it, so a slightly zoomed avatar
+  // cannot spill out of the pill.
+  const avatarBoxStyle = { display: 'block', flex: '0 0 auto', borderRadius: '6px', overflow: 'hidden' };
 
   // Aktif profil: selectedMini varsa mini, yoksa user
   const getActiveProfile = () => {
@@ -421,12 +422,9 @@ const Header = ({
                       minWidth: rProfileMinW
                     }}
                   >
-                    <img
-                      src={activeAvatarUrl || profileIcon}
-                      alt="Profile"
-                      className={`${rProfileIconSize} object-cover`}
-                      style={avatarImgStyle}
-                    />
+                    <span className={rProfileIconSize} style={avatarBoxStyle}>
+                      <ProfileAvatar role={avatarRole} id={avatarId} alt="Profile" size="100%" />
+                    </span>
                     <span className={`text-white font-black ${rProfileFontSize}`}>
                       {activeProfile.label}
                     </span>
@@ -500,12 +498,9 @@ const Header = ({
                     borderRadius: `${rProfileRadius} 0 0 ${rProfileRadius}`
                   }}
                 >
-                  <img
-                    src={activeAvatarUrl || profileIcon}
-                    alt="Profile"
-                    className={`${rProfileIconSize} object-cover`}
-                    style={avatarImgStyle}
-                  />
+                  <span className={rProfileIconSize} style={avatarBoxStyle}>
+                    <ProfileAvatar role={avatarRole} id={avatarId} alt="Profile" size="100%" />
+                  </span>
                 </div>
                 
                 <div 

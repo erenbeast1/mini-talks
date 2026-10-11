@@ -69,10 +69,41 @@ export function avatarKey(role, id) {
  */
 export function avatarImageStyle(avatarUrl, placeholderSize = '100%') {
   const size = typeof placeholderSize === 'number' ? `${placeholderSize}px` : placeholderSize;
-  return avatarUrl
-    ? { width: '100%', height: '100%', objectFit: 'contain' }
-    : { width: size, height: size, objectFit: 'contain' };
+  if (!avatarUrl) {
+    // The LEGO-head placeholder is already a head; it is drawn at its own size
+    // inside whatever ring the caller has, and never zoomed.
+    return { width: size, height: size, objectFit: 'contain' };
+  }
+  return {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    ...AVATAR_ZOOM,
+  };
 }
+
+/**
+ * The small zoom that turns the saved picture into a profile picture.
+ *
+ * Measured from a real saved avatar rather than guessed: in the file, the
+ * figure runs from 3% to 99% of the height, and the narrowest row — the neck —
+ * is at 70%. So the head alone already fills the top two thirds; what the file
+ * has too much of is shirt, and what it has too little of is margin, because
+ * the figure touches the bottom edge.
+ *
+ * Showing the top 85% centres the composition on the face and drops the lower
+ * shirt, without clipping the hair — and 85% is 1/1.18, hence the scale, with
+ * the origin at the middle of that window. At 180px it is a better portrait;
+ * at the header's 30px it is the difference between a readable face and a
+ * smudge.
+ *
+ * Anything drawing this must clip: ProfileAvatar brings its own clipping
+ * wrapper, and the profile screens' boxes already have overflow: hidden.
+ */
+export const AVATAR_ZOOM = {
+  transform: 'scale(1.18)',
+  transformOrigin: '50% 42%',
+};
 
 /** The saved PNG keeps its name between versions, so the version busts it. */
 export function withVersion(url, version) {
@@ -174,6 +205,7 @@ export default {
   roleHasAvatar,
   avatarKey,
   withVersion,
+  AVATAR_ZOOM,
   avatarImageStyle,
   readAvatar,
   fetchAvatar,

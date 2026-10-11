@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useAvatar } from '../hooks/useAvatar';
 import { avatarTarget } from '../utils/activeProfile';
+import { AVATAR_ZOOM } from '../utils/avatars';
 
 // ---- GÖRSELLER ----
 import logoHorizontal from '../assets/Logo-Yatay.png';
@@ -350,15 +351,29 @@ const HomePage = () => {
                     paddingRight: rv.menuPx,
                   }}
                 >
-                  <img
-                    src={headerAvatarUrl || profileIcon}
-                    alt="Profile"
+                  <span
                     style={{
+                      display: 'block',
+                      flex: '0 0 auto',
                       width: rv.menuIconSize,
                       height: rv.menuIconSize,
-                      objectFit: 'contain',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
                     }}
-                  />
+                  >
+                    <img
+                      src={headerAvatarUrl || profileIcon}
+                      alt="Profile"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        // The same framing the rest of the app uses; the span
+                        // above clips it so it cannot spill out of the pill.
+                        ...(headerAvatarUrl ? AVATAR_ZOOM : null),
+                      }}
+                    />
+                  </span>
                   <span 
                     className="text-white font-black"
                     style={{ fontSize: rv.menuFontSize }}

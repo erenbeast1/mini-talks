@@ -46,8 +46,49 @@ fi
 # errors, so this gates on no-undef alone rather than on a clean run.
 if [ -x game/node_modules/.bin/eslint ]; then
   printf '%-22s ' "game no-undef"
-  undef=$(cd game && node_modules/.bin/eslint src --format unix 2>/dev/null | grep "no-undef" || true)
-  if [ -z "$undef" ]; then echo "no problems"; else echo "problems"; echo "$undef"; fail=1; fi
+  # Two things this has to get right, both learned the hard way.
+  #
+  # The formatter: an earlier version of this passed --format unix, which this
+  # ESLint does not have. It exited with an error message instead of a report,
+  # grep found no "no-undef" in that message, and the check reported "no
+  # problems" for weeks while an undefined variable shipped. So: the default
+  # formatter, and stderr kept rather than thrown away.
+  #
+  # The exit code: eslint exits 1 when it finds anything, including the
+  # pre-existing unused-variable errors this repository has. So the exit code
+  # cannot be the signal — the report is. But a run that produced NO report at
+  # all is a broken check, not a clean one, and must fail loudly.
+  # KNOWN holds the names already undefined before any of this work, so a new
+  # one fails loudly instead of hiding in the noise. They are a real bug, in
+  # GamePage.jsx: scenes 2, 3 and 4 fall past the isRealTimeScene branch into a
+  # block that reads isScene4/isScene2/lightmapTex/scene2LightmapMap, none of
+  # which exist, so loading one of those scenes throws. Fixing it needs to know
+  # what lightmapTex was meant to be, so it is reported rather than guessed at.
+  KNOWN="isScene4|isScene2|scene2LightmapMap|lightmapTex"
+
+  # eslint exits non-zero whenever it reports anything, and this file runs
+  # under `set -e`, so without the `|| true` the assignment itself ends the
+  # script — silently, right after the label has been printed with no newline.
+  out=$(cd game && node_modules/.bin/eslint src 2>&1 || true)
+  if [ -z "$out" ]; then
+    echo "problems"
+    echo "  eslint produced no output at all — the check is broken, not clean"
+    fail=1
+  else
+    undef=$(printf '%s\n' "$out" | grep "no-undef" || true)
+    new=$(printf '%s\n' "$undef" | grep -vE "'($KNOWN)'" | grep . || true)
+    old=$(printf '%s\n' "$undef" | grep -cE "'($KNOWN)'" || true)
+    if [ -n "$new" ]; then
+      echo "problems"; printf '%s\n' "$new" | sed 's/^ */  /'; fail=1
+    elif [ "$old" -gt 0 ]; then
+      echo "no new problems ($old known, pre-existing — see KNOWN in tests/run.sh)"
+    else
+      # Nothing left: the known ones were fixed, so stop excusing them.
+      echo "problems"
+      echo "  the KNOWN list in tests/run.sh is stale — nothing matches it any more, remove it"
+      fail=1
+    fi
+  fi
 else
   printf '%-22s %s\n' "game no-undef" "skipped (run npm install in game/)"
 fi
