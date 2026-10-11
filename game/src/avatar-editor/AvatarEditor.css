@@ -36,14 +36,19 @@
   min-height: 0 !important;
 }
 
-/* ── Left: 3D preview (narrower, makes room for editor on right) ─── */
+/* ── Left: 3D preview ─────────────────────────────────────────────
+   Wider than it was (260/26vw/380). The camera's field of view is
+   vertical, so a tall narrow panel gives the figure very little room
+   left and right, and the wide hair styles ran off both sides. The
+   saved avatar does not depend on this any more — it is cropped to the
+   figure — so the panel is free to be shaped for looking at. */
 .mfae-left {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
-  width: clamp(260px, 26vw, 380px) !important;
+  width: clamp(300px, 34vw, 540px) !important;
   height: 100% !important;
   min-height: 0 !important;
 }

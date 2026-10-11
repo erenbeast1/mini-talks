@@ -96,9 +96,13 @@ const AvatarEditorModal = ({ isOpen, onClose, userId, role = 'parent', onSaved }
           backgroundColor: '#0055BF',
           borderRadius: '20px',
           width: '100%',
-          maxWidth: '1120px',
-          height: '92vh',
-          maxHeight: '920px',
+          // Shorter than it was (92vh / 920px). It filled the screen top to
+          // bottom for no good reason — the grid rows scale with the height,
+          // so the only thing the extra height bought was empty space. A
+          // little wider in exchange, to pay for the roomier preview column.
+          maxWidth: '1200px',
+          height: '82vh',
+          maxHeight: '780px',
           position: 'relative',
           boxShadow: '4px 4px 50px 10px rgba(0, 0, 0, 0.5)',
           overflow: 'hidden',
