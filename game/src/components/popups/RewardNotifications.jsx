@@ -37,7 +37,13 @@ import { describeReward } from '../../utils/rewardCatalog';
 const API_BASE = 'https://mini-talks.org/minitalks-api';
 
 const OPEN_MS = 7000;   // how long it stays open before folding down
-const MAX_ON_SCREEN = 3; // older ones drop off rather than filling the screen
+// At most three cards at once, so a burst does not bury the game. The rest
+// wait their turn rather than being thrown away: one action can easily award
+// several at once — a recording in a new level on a streak day earns the
+// recording brick, the completion medal, the scene and level medals, the
+// daily brick and possibly a streak milestone, six in one go — and a child
+// who earned six should be told about six.
+const MAX_ON_SCREEN = 3;
 
 const RewardNotificationContext = createContext(null);
 
@@ -127,7 +133,10 @@ const RewardCard = ({ item, onDismiss }) => {
 /* ── the provider ──────────────────────────────────────────────────────── */
 
 export const RewardNotificationProvider = ({ children }) => {
-  const [items, setItems] = useState([]);
+  // `visible` is what is on screen, `waiting` is the queue behind it. They
+  // live in one piece of state so the hand-over from queue to screen is a
+  // single update and cannot drop anything in between.
+  const [{ visible, waiting }, setStack] = useState({ visible: [], waiting: [] });
 
   // Rewards already turned into a card, so two checks landing together cannot
   // show the same one twice.
@@ -136,12 +145,22 @@ export const RewardNotificationProvider = ({ children }) => {
   const inFlight = useRef(new Set());
 
   const push = useCallback((reward) => {
-    const key = nextKey.current++;
-    setItems((list) => [...list, { key, reward }].slice(-MAX_ON_SCREEN));
+    const item = { key: nextKey.current++, reward };
+    setStack(({ visible: shown, waiting: queued }) => (
+      shown.length < MAX_ON_SCREEN
+        ? { visible: [...shown, item], waiting: queued }
+        : { visible: shown, waiting: [...queued, item] }
+    ));
   }, []);
 
   const dismiss = useCallback((key) => {
-    setItems((list) => list.filter((i) => i.key !== key));
+    setStack(({ visible: shown, waiting: queued }) => {
+      const rest = shown.filter((i) => i.key !== key);
+      // A slot just freed up — let the next one in.
+      return rest.length < MAX_ON_SCREEN && queued.length > 0
+        ? { visible: [...rest, queued[0]], waiting: queued.slice(1) }
+        : { visible: rest, waiting: queued };
+    });
   }, []);
 
   /** Show one straight away, by reward_type. */
@@ -219,9 +238,14 @@ export const RewardNotificationProvider = ({ children }) => {
       {children}
       <style>{STYLES}</style>
       <div className="mt-rn-stack" aria-label="Rewards">
-        {items.map((item) => (
+        {visible.map((item) => (
           <RewardCard key={item.key} item={item} onDismiss={dismiss} />
         ))}
+        {waiting.length > 0 && (
+          <div className="mt-rn-more" role="status">
+            +{waiting.length} more
+          </div>
+        )}
       </div>
     </RewardNotificationContext.Provider>
   );
@@ -263,6 +287,21 @@ const STYLES = `
   animation: mt-rn-in 260ms cubic-bezier(.17,.84,.44,1) both;
 }
 .mt-rn-leaving { animation: mt-rn-out 240ms ease-in forwards; }
+
+/* How many are still queued behind the three on screen. */
+.mt-rn-more {
+  pointer-events: none;
+  background: #1D1D1B;
+  color: #FFCC00;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  animation: mt-rn-in 260ms cubic-bezier(.17,.84,.44,1) both;
+}
 
 @keyframes mt-rn-in  { from { transform: translateX(115%); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes mt-rn-out { from { transform: none; opacity: 1; } to { transform: translateX(115%); opacity: 0; } }
