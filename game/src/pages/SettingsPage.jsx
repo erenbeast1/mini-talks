@@ -21,13 +21,38 @@ const SettingsPage = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   
+  // The two rows that used to be here, "Daily Streak Reminders" and
+  // "Recording Reminders", were never read by anything — there is no reminder
+  // system to switch on or off. The one notification the game actually has is
+  // the reward card that slides in when a Mini earns something, so that is
+  // what this section now controls. Default on; only an explicit off hides
+  // them (see RewardNotifications.jsx).
   const [settings, setSettings] = useState({
     audioGuidance: true,
     reducedMotion: false,
-    dailyStreakReminders: false,
-    recordingReminders: true,
+    rewardNotifications: true,
     microphoneAccess: true,
   });
+
+  // Saved settings were written on Save and then never read back — not even by
+  // this page, so reopening it showed the defaults again and a switch the user
+  // had turned off looked on. Load them on mount, and keep whatever the
+  // defaults above say for anything a stored copy predates.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('appSettings');
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved && typeof saved === 'object') {
+          setSettings((current) => ({ ...current, ...saved }));
+        }
+      }
+      const lang = localStorage.getItem('appLanguage');
+      if (lang) setSelectedLanguage(lang);
+    } catch {
+      // Private window or blocked storage — the defaults stand.
+    }
+  }, []);
 
   // ── Responsive: mobil tespiti (desktop görünümü değişmez) ──
   const [screenSize, setScreenSize] = useState('desktop');
@@ -215,14 +240,10 @@ const SettingsPage = () => {
 
             {mobileTab === 'notification' && (
               <div>
-                <p style={sectionDesc}>Choose which reminders you want to receive.</p>
-                <div style={rowStyle}>
-                  <span style={rowLabel}>Daily Streak Reminders</span>
-                  <ToggleButton small isOn={settings.dailyStreakReminders} onToggle={(val) => setSettings(prev => ({ ...prev, dailyStreakReminders: val }))} />
-                </div>
+                <p style={sectionDesc}>Choose whether rewards are announced while you play.</p>
                 <div style={{ ...rowStyle, borderBottom: 'none' }}>
-                  <span style={rowLabel}>Recording Reminders</span>
-                  <ToggleButton small isOn={settings.recordingReminders} onToggle={(val) => setSettings(prev => ({ ...prev, recordingReminders: val }))} />
+                  <span style={rowLabel}>Reward Notifications</span>
+                  <ToggleButton small isOn={settings.rewardNotifications} onToggle={(val) => setSettings(prev => ({ ...prev, rewardNotifications: val }))} />
                 </div>
               </div>
             )}
@@ -510,22 +531,15 @@ const SettingsPage = () => {
                   Notifications:
                 </h3>
                 <p style={{ fontSize: '12px', color: '#636363', margin: '0 0 10px 0', fontWeight: 600 }}>
-                  Choose which reminders you want to receive.
+                  Choose whether rewards are announced while you play.
                 </p>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '15px', fontWeight: 700 }}>Daily Streak Reminders</span>
+                    <span style={{ fontSize: '15px', fontWeight: 700 }}>Reward Notifications</span>
                     <ToggleButton 
-                      isOn={settings.dailyStreakReminders} 
-                      onToggle={(val) => setSettings(prev => ({ ...prev, dailyStreakReminders: val }))}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '15px', fontWeight: 700 }}>Recording Reminders</span>
-                    <ToggleButton 
-                      isOn={settings.recordingReminders} 
-                      onToggle={(val) => setSettings(prev => ({ ...prev, recordingReminders: val }))}
+                      isOn={settings.rewardNotifications} 
+                      onToggle={(val) => setSettings(prev => ({ ...prev, rewardNotifications: val }))}
                     />
                   </div>
                 </div>

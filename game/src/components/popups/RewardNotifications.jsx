@@ -49,6 +49,22 @@ const RewardNotificationContext = createContext(null);
 
 const seenKey = (miniId) => `mt-rewards-seen-${miniId}`;
 
+/**
+ * The Settings page's "Reward Notifications" switch, saved under 'appSettings'.
+ * On unless it has been explicitly turned off, so a player who has never
+ * opened Settings — or whose storage is blocked — still gets their rewards
+ * announced.
+ */
+function notificationsOn() {
+  try {
+    const raw = localStorage.getItem('appSettings');
+    if (!raw) return true;
+    return JSON.parse(raw)?.rewardNotifications !== false;
+  } catch {
+    return true;
+  }
+}
+
 function readMark(miniId) {
   try {
     const raw = localStorage.getItem(seenKey(miniId));
@@ -165,13 +181,16 @@ export const RewardNotificationProvider = ({ children }) => {
 
   /** Show one straight away, by reward_type. */
   const notifyReward = useCallback((rewardType, category) => {
+    if (!notificationsOn()) return;
     push(describeReward({ reward_type: rewardType, reward_category: category }));
   }, [push]);
 
   /**
    * Ask what is new for this Mini and show it. Safe to call after anything
    * that might have awarded something — it is one small GET, it de-duplicates
-   * against itself, and it shows nothing when there is nothing new.
+   * against itself, and it shows nothing when there is nothing new. With the
+   * Settings switch off it still runs, and still keeps the place, but says
+   * nothing.
    */
   const checkRewards = useCallback(async (miniId) => {
     if (!miniId) return;
@@ -179,6 +198,9 @@ export const RewardNotificationProvider = ({ children }) => {
     inFlight.current.add(miniId);
 
     try {
+      // Read the switch once per check, not once per card, so a reward never
+      // half-appears if it is flipped mid-flight.
+      const announce = notificationsOn();
       const after = readMark(miniId);
       const res = await axios.get(`${API_BASE}/rewards/get-recent.php`, {
         params: after > 0
@@ -204,7 +226,10 @@ export const RewardNotificationProvider = ({ children }) => {
         if (r.reward_id > highest) highest = r.reward_id;
         if (shown.current.has(r.reward_id)) return;
         shown.current.add(r.reward_id);
-        push(describeReward(r));
+        // With the switch off we still walk the list and still move the mark
+        // below, so turning it back on starts from here rather than emptying
+        // weeks of rewards onto the screen at once.
+        if (announce) push(describeReward(r));
       });
 
       if (latest > highest) highest = latest;
