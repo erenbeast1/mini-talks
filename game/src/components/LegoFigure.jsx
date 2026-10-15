@@ -2,12 +2,40 @@
 import React, { Suspense, useRef, useLayoutEffect, useMemo, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
+import { drawTorsoText, sanitiseTorsoText } from './torsoText';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { HairModel } from './HairModels';
 import { FaceModel } from './FaceModel';
 
 const legoFigureUrl = new URL('../assets/models/lego-figure-2glb.glb', import.meta.url).href;
+
+// Writing on the shirt — the chest patch of the atlas and the drawing live in
+// torsoText.js, so the avatar editor and this figure cannot drift apart.
+function makeTorsoTextTexture(url, text) {
+  // The texture is handed back straight away and filled in when the atlas has
+  // loaded, so nothing upstream has to wait or re-render.
+  const placeholder = document.createElement('canvas');
+  placeholder.width = placeholder.height = 2;
+  const texture = new THREE.CanvasTexture(placeholder);
+  texture.flipY = false;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    texture.image = drawTorsoText(img, text);
+    texture.needsUpdate = true;
+  };
+  img.onerror = () => {
+    // The shirt simply stays plain; losing the writing is better than losing
+    // the figure.
+  };
+  img.src = url;
+  return texture;
+}
 
 // Torso texture'ları - assets/textures/torso/ klasöründe olmalı
 // index 0 = varsayılan (texture yok), index 1+ = PNG texture'lar
@@ -84,6 +112,7 @@ function LegoModel({ view, customization }) {
     gender = 'male',
     headTextureIndex, 
     torsoTextureId = null,
+    torsoText = '',
     legTextureId = null,
     eyeModelName = null,
     mouthModelName = null,
@@ -104,9 +133,14 @@ const hairColors = [
 '#A93A1A',  // 6: Kızıl — kahve-kırmızı bakır
 ];
 
+ const cleanTorsoText = sanitiseTorsoText(torsoText);
+
  const torsoTexture = useMemo(() => {
     const url = getTorsoUvUrl(torsoTextureId);
     if (url) {
+      // With writing on it the atlas has to be redrawn onto a canvas first;
+      // without, it is loaded exactly as it always was.
+      if (cleanTorsoText) return makeTorsoTextTexture(url, cleanTorsoText);
       const loader = new THREE.TextureLoader();
       const texture = loader.load(url);
       texture.flipY = false;
@@ -116,7 +150,7 @@ const hairColors = [
       return texture;
     }
     return null;
-  }, [torsoTextureId]);
+  }, [torsoTextureId, cleanTorsoText]);
 
  const armTexture = useMemo(() => {
     const url = getTorsoUvUrl(torsoTextureId);
