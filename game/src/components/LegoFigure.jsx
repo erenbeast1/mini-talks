@@ -271,6 +271,14 @@ const hairColors = [
       t.colorSpace = THREE.SRGBColorSpace;
       t.wrapS = THREE.ClampToEdgeWrapping;
       t.wrapT = THREE.ClampToEdgeWrapping;
+      // The chest is a small part of a big texture, so the card the GPU picks
+      // from the mipmap chain is a blurred one — which is what made the
+      // writing and the stickers look soft. No mipmaps, and as much anisotropy
+      // as the device will give, and it samples the pixels that were drawn.
+      t.generateMipmaps = false;
+      t.minFilter = THREE.LinearFilter;
+      t.magFilter = THREE.LinearFilter;
+      t.anisotropy = 16;
       designTextureRef.current = t;
       bumpDesign((n) => n + 1);
     } else {

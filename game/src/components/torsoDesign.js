@@ -71,6 +71,10 @@ export const TEXT_COLOURS = [
 // purpose rather than by accident.
 
 /**
+ * Four stickers to be going on with — the others Eren looked at and did not
+ * think were up to it, which they were not: a shape that reads at 48px does
+ * not necessarily read on a shirt. They go when Elif's pack arrives.
+ *
  * A handful of stickers to be going on with, drawn here as SVG so the feature
  * works before Elif's pack arrives and so nothing has to be fetched. Her pack
  * replaces this list; the drawing code does not care where an icon came from.
@@ -88,13 +92,60 @@ export const BUILTIN_ICONS = [
   { id: 'heart', label: 'Heart', src: svg('<path d="M24 42S5 29 5 17.5A9.5 9.5 0 0 1 24 13a9.5 9.5 0 0 1 19 4.5C43 29 24 42 24 42z"/>', '#E31E24') },
   { id: 'bolt',  label: 'Bolt',  src: svg('<path d="M27 3L9 27h11l-3 18 20-26H25z"/>', '#FFCC00') },
   { id: 'smile', label: 'Smiley',src: svg('<circle cx="24" cy="24" r="19"/><circle cx="17" cy="19" r="2.6" fill="#1D1D1B" stroke="none"/><circle cx="31" cy="19" r="2.6" fill="#1D1D1B" stroke="none"/><path d="M15 29a10 10 0 0 0 18 0" fill="none"/>', '#FFCC00') },
-  { id: 'cloud', label: 'Cloud', src: svg('<path d="M14 36a9 9 0 0 1 0-18 12 12 0 0 1 23 3 7 7 0 0 1-2 15z"/>', '#FFFFFF') },
-  { id: 'note',  label: 'Music', src: svg('<path d="M20 34V10l18-4v24"/><circle cx="14" cy="34" r="6"/><circle cx="32" cy="30" r="6"/>', '#0055BF') },
-  { id: 'ball',  label: 'Ball',  src: svg('<circle cx="24" cy="24" r="19"/><path d="M24 11l7 5-3 9h-8l-3-9z" fill="#1D1D1B" stroke="none"/>', '#FFFFFF') },
-  { id: 'paw',   label: 'Paw',   src: svg('<ellipse cx="24" cy="31" rx="10" ry="8"/><circle cx="13" cy="20" r="4.2"/><circle cx="20" cy="14" r="4.2"/><circle cx="28" cy="14" r="4.2"/><circle cx="35" cy="20" r="4.2"/>', '#6D4C41') },
-  { id: 'brick', label: 'Brick', src: svg('<rect x="7" y="18" width="34" height="18" rx="2"/><rect x="13" y="12" width="8" height="7" rx="1.6"/><rect x="27" y="12" width="8" height="7" rx="1.6"/>', '#E31E24') },
-  { id: 'medal', label: 'Medal', src: svg('<circle cx="24" cy="30" r="11"/><path d="M17 20L13 6h8l4 10M31 20l4-14h-8"/>', '#FFCC00') },
 ];
+
+
+/* ── A child's own picture ──────────────────────────────────────────────── */
+
+// What is accepted, and what it is turned into. The picture is not kept as the
+// file that was chosen: it is drawn onto a canvas and re-encoded, which scales
+// it down to something a shirt can use and, as a side effect, drops every
+// scrap of metadata the original carried. A photograph taken on a phone can
+// hold the place it was taken; none of that should end up saved against a
+// child's Mini.
+export const UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+export const UPLOAD_MAX_BYTES = 6 * 1024 * 1024;   // before shrinking
+export const UPLOAD_PX = 256;                      // after
+export const MAX_UPLOADS_PER_SIDE = 4;             // these ride in the Mini's own record
+
+/**
+ * Turn a chosen file into something that can be put on a shirt: a square-ish
+ * PNG data URL of at most UPLOAD_PX on its longest side, transparency kept.
+ * Rejects anything that is not one of UPLOAD_TYPES or is too big to be worth
+ * reading in the first place.
+ */
+export function fileToIconSrc(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) { reject(new Error('no file')); return; }
+    if (!UPLOAD_TYPES.includes(file.type)) { reject(new Error('type')); return; }
+    if (file.size > UPLOAD_MAX_BYTES) { reject(new Error('size')); return; }
+
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const longest = Math.max(img.naturalWidth, img.naturalHeight) || 1;
+      const ratio = Math.min(1, UPLOAD_PX / longest);
+      const w = Math.max(1, Math.round(img.naturalWidth * ratio));
+      const h = Math.max(1, Math.round(img.naturalHeight * ratio));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('decode')); };
+    img.src = url;
+  });
+}
+
+/** How many of the items on a side came from the child's own pictures. */
+export function uploadCount(items, side) {
+  return items.filter((i) => (i.side || 'front') === side && i.from === 'upload').length;
+}
 
 export const MAX_ITEMS_PER_SIDE = 10;
 // Full panel width would never fit inside the safe margins, so the slider
@@ -404,9 +455,15 @@ function drawSelection(ctx, item, rect) {
  */
 export function drawTorsoDesign(atlas, items, icons = {}, opts = {}) {
   const { selectedId = null, target = null } = opts;
-  const scale = 2;
-  const w = Math.min(2048, (atlas.naturalWidth || atlas.width) * scale);
-  const h = Math.min(2048, (atlas.naturalHeight || atlas.height) * scale);
+  // The chest is only about 17% of the atlas across, so whatever the atlas is
+  // drawn at, the panel gets a sixth of it — at 2x a 1024 atlas that is barely
+  // 350px for the whole shirt front, and writing on it came out soft. Three
+  // times, up to 4096, gives the panel about 530px on a 1024 atlas. Phones get
+  // half that: the memory matters more there than the last of the sharpness.
+  const ceiling = (typeof window !== 'undefined' && window.innerWidth < 900) ? 2048 : 4096;
+  const scale = 3;
+  const w = Math.min(ceiling, (atlas.naturalWidth || atlas.width) * scale);
+  const h = Math.min(ceiling, (atlas.naturalHeight || atlas.height) * scale);
 
   // Dragging redraws this on every frame, so the editor passes the same canvas
   // back in rather than having one allocated and thrown away sixty times a

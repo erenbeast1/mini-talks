@@ -10,8 +10,11 @@
 // Everything it does goes through the handlers from useTorsoDesign; the
 // gestures on the figure itself live there.
 
-import React from 'react';
-import { FONTS, TEXT_COLOURS, MAX_ITEMS_PER_SIDE, MAX_TEXT_LENGTH, sanitiseText, BUILTIN_ICONS } from '../torsoDesign';
+import React, { useRef, useState } from 'react';
+import {
+  FONTS, TEXT_COLOURS, MAX_ITEMS_PER_SIDE, MAX_TEXT_LENGTH, sanitiseText, BUILTIN_ICONS,
+  fileToIconSrc, uploadCount, MAX_UPLOADS_PER_SIDE, UPLOAD_TYPES, UPLOAD_PX,
+} from '../torsoDesign';
 
 const BLUE = '#0055BF';
 const DARK = '#1D1D1B';
@@ -135,6 +138,39 @@ const TorsoDesignPanel = ({
   const { selected, sideItems, update, addText, addIcon, removeSelected, reorder, resetSide } = design;
   const full = sideItems.length >= MAX_ITEMS_PER_SIDE;
 
+  // The child's own pictures. They are shrunk and re-encoded here rather than
+  // sent anywhere: the picture ends up inside this Mini's own saved
+  // customisation and goes no further.
+  const fileRef = useRef(null);
+  const [uploadError, setUploadError] = useState('');
+  const uploadsUsed = uploadCount(items, side);
+  const uploadsFull = uploadsUsed >= MAX_UPLOADS_PER_SIDE;
+
+  const onPickFile = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setUploadError('');
+    try {
+      const src = await fileToIconSrc(file);
+      addIcon(src, { from: 'upload', name: file.name.slice(0, 40) });
+    } catch (e) {
+      setUploadError(
+        e.message === 'type' ? 'PNG, JPG or WEBP only.'
+        : e.message === 'size' ? 'That picture is too big.'
+        : 'That picture could not be read.'
+      );
+    }
+  };
+
+  // The card shows what the open tab is about. With a line of writing selected,
+  // pressing Decorations used to leave "Edit text" sitting there and no sticker
+  // grid at all — the one thing that tab is for.
+  const editingHere = !!selected && (
+    (tab === 'text' && selected.type === 'text') ||
+    (tab === 'icons' && selected.type === 'icon')
+  );
+
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 10, minHeight: 0, height: '100%',
@@ -169,11 +205,13 @@ const TorsoDesignPanel = ({
                     overflow: 'hidden', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <Row style={{ padding: '12px 12px 8px', justifyContent: 'space-between', flexShrink: 0 }}>
           <strong style={{ fontSize: 14 }}>
-            {selected ? (selected.type === 'text' ? 'Edit text' : 'Edit decoration') : (tab === 'text' ? 'Text' : 'Decorations')}
+            {editingHere
+              ? (selected.type === 'text' ? 'Edit text' : 'Edit decoration')
+              : (tab === 'text' ? 'Text' : 'Decorations')}
           </strong>
         </Row>
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          {!selected && tab === 'text' ? (
+          {!editingHere && tab === 'text' ? (
             <div style={{ padding: '0 12px 12px' }}>
               <Btn onClick={addText} tone="blue" disabled={full} style={{ width: '100%', fontSize: 13 }}>
                 + Add text
@@ -185,8 +223,23 @@ const TorsoDesignPanel = ({
             </div>
           ) : null}
 
-          {!selected && tab === 'icons' ? (
+          {!editingHere && tab === 'icons' ? (
             <div style={{ padding: '0 12px 12px' }}>
+              <input ref={fileRef} type="file" accept={UPLOAD_TYPES.join(',')}
+                     onChange={onPickFile} style={{ display: 'none' }} />
+              <Btn onClick={() => fileRef.current?.click()} tone="blue"
+                   disabled={full || uploadsFull}
+                   style={{ width: '100%', fontSize: 13, marginBottom: 10 }}>
+                + Upload your own
+              </Btn>
+              <p style={{ fontSize: 11, color: '#6B7079', fontWeight: 600, margin: '0 0 10px' }}>
+                {uploadsFull
+                  ? `That is all ${MAX_UPLOADS_PER_SIDE} of your own pictures on this side.`
+                  : `Your picture stays on this Mini. It is shrunk to ${UPLOAD_PX}px — ${uploadsUsed}/${MAX_UPLOADS_PER_SIDE} used.`}
+              </p>
+              {uploadError ? (
+                <p style={{ fontSize: 12, color: '#C81E24', fontWeight: 700, margin: '0 0 10px' }}>{uploadError}</p>
+              ) : null}
               {icons.length === 0 ? (
                 <p style={{ fontSize: 12, color: '#6B7079', fontWeight: 600, lineHeight: 1.5 }}>
                   No stickers yet — they arrive with the icon pack.
@@ -205,7 +258,7 @@ const TorsoDesignPanel = ({
             </div>
           ) : null}
 
-          {selected && selected.type === 'text' ? (
+          {editingHere && selected.type === 'text' ? (
             <div style={{ padding: '0 12px 8px' }}>
               <Field style={{ marginBottom: 8, padding: 0 }}>
                 <select value={selected.fontId}
@@ -252,7 +305,7 @@ const TorsoDesignPanel = ({
             </div>
           ) : null}
 
-          {selected ? (
+          {editingHere ? (
             <div style={{ borderTop: '1px solid #E4E6EA' }}>
               <CardRow icon={<IconForward />}  onClick={() => reorder('forward')}>Move forwards</CardRow>
               <CardRow icon={<IconBackward />} onClick={() => reorder('backward')}>Move backwards</CardRow>

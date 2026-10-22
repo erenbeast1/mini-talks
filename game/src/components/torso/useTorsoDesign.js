@@ -96,11 +96,11 @@ export function useTorsoDesign({ items, setItems, side, selectedId, setSelectedI
     setSelectedId(item.id);
   }, [side, sideItems.length, setItems, setSelectedId]);
 
-  const addIcon = useCallback((src) => {
+  const addIcon = useCallback((src, meta = {}) => {
     if (sideItems.length >= MAX_ITEMS_PER_SIDE) return;
     const item = clampItem({
       id: `i${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-      type: 'icon', side, x: 0.5, y: 0.45, scale: 0.4, rotation: 0, src,
+      type: 'icon', side, x: 0.5, y: 0.45, scale: 0.4, rotation: 0, src, ...meta,
     });
     setItems((l) => [...l, item]);
     setSelectedId(item.id);
