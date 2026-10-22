@@ -109,6 +109,45 @@ function CameraController({ cameraMode, controlsRef }) {
   return null;
 }
 
+
+/**
+ * A texture that only ever appears once it has actually loaded.
+ *
+ * TextureLoader.load() hands back a texture with no image in it yet, and a
+ * texture with no image renders BLACK — which is why a white shirt flashed
+ * black, and why a long-sleeved one flashed over a short-sleeved one, every
+ * time the choice changed. Until the new one is ready the previous one stays
+ * on the figure, and if there was none the material simply has no map and
+ * shows the plain colour underneath.
+ */
+function useLoadedTexture(url, configure) {
+  const [texture, setTexture] = useState(null);
+  const configureRef = useRef(configure);
+  configureRef.current = configure;
+
+  useEffect(() => {
+    if (!url) { setTexture(null); return undefined; }
+    let cancelled = false;
+    new THREE.TextureLoader().load(
+      url,
+      (t) => {
+        if (cancelled) { t.dispose(); return; }
+        t.flipY = false;
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.wrapS = THREE.ClampToEdgeWrapping;
+        t.wrapT = THREE.ClampToEdgeWrapping;
+        configureRef.current?.(t);
+        setTexture(t);
+      },
+      undefined,
+      () => { /* keep whatever is on the figure rather than going black */ },
+    );
+    return () => { cancelled = true; };
+  }, [url]);
+
+  return texture;
+}
+
 function LegoModel({ view, customization, design }) {
   const group = useRef();
   const hairGroup = useRef();
@@ -147,17 +186,7 @@ const hairColors = [
  // The shirt exactly as it has always been loaded. This is what is shown while
  // any writing is still being composed, and what it falls back to if that ever
  // fails — never a blank texture.
- const plainTorsoTexture = useMemo(() => {
-    const url = getTorsoUvUrl(torsoTextureId);
-    if (!url) return null;
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load(url);
-    texture.flipY = false;
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.wrapS = THREE.ClampToEdgeWrapping;
-    texture.wrapT = THREE.ClampToEdgeWrapping;
-    return texture;
-  }, [torsoTextureId]);
+ const plainTorsoTexture = useLoadedTexture(getTorsoUvUrl(torsoTextureId));
 
  // ── Designing the shirt ────────────────────────────────────────────────
  // While the designer is open the torso is painted from the design rather
@@ -165,15 +194,35 @@ const hairColors = [
  // stickers drawn into the chest and back panels. It is redrawn onto one kept
  // canvas so dragging does not allocate a 2048px one per frame.
  const designActive = !!design?.active;
+ // The items belong to the Mini, not to the editor: once they are on the
+ // shirt they stay on it after Save, which is what "it went back to normal
+ // when I left" was about.
+ const designItems = (designActive ? design?.items : customization.torsoItems) || [];
+ const designWanted = designActive || designItems.length > 0;
  const [designAtlas, setDesignAtlas] = useState(null);
  const designCanvasRef = useRef(null);
  const designTextureRef = useRef(null);
  const [, bumpDesign] = useState(0);
 
+ // A design needs something to be drawn onto. Usually that is the chosen
+ // shirt's atlas; with no shirt chosen — which is how the Torso tab opens —
+ // a plain one is made in its place, the same off-white the figure wears by
+ // default. Going straight into the designer without picking a shirt first
+ // used to leave it with nothing to draw on.
  useEffect(() => {
-    if (!designActive) { setDesignAtlas(null); return undefined; }
+    if (!designWanted) { setDesignAtlas(null); return undefined; }
     const url = getTorsoUvUrl(torsoTextureId);
-    if (!url) { setDesignAtlas(null); return undefined; }
+    if (!url) {
+      const blank = document.createElement('canvas');
+      blank.width = blank.height = 512;
+      const ctx = blank.getContext('2d');
+      ctx.fillStyle = '#F5F5F5';
+      ctx.fillRect(0, 0, 512, 512);
+      const img = new Image();
+      img.onload = () => setDesignAtlas(img);
+      img.src = blank.toDataURL('image/png');
+      return undefined;
+    }
     let cancelled = false;
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -181,13 +230,39 @@ const hairColors = [
     img.onerror = () => { if (!cancelled) setDesignAtlas(null); };
     img.src = url;
     return () => { cancelled = true; };
-  }, [designActive, torsoTextureId]);
+  }, [designWanted, torsoTextureId]);
+
+ // An icon item carries the address of its picture, not the picture, so the
+ // pictures in use are loaded here and kept. Splitting the designer into a
+ // panel and a hook lost this, which is why a sticker could be added, counted
+ // and selected, and still never appear on the shirt.
+ const [iconImages, setIconImages] = useState({});
 
  useEffect(() => {
-    if (!designActive || !designAtlas) return;
+    const wanted = [...new Set(designItems.filter((i) => i.type === 'icon' && i.src).map((i) => i.src))];
+    const missing = wanted.filter((src) => !iconImages[src]);
+    if (missing.length === 0) return undefined;
+    let cancelled = false;
+    Promise.all(missing.map((src) => new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve([src, img]);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    }))).then((loaded) => {
+      if (cancelled) return;
+      const add = {};
+      loaded.filter(Boolean).forEach(([src, img]) => { add[src] = img; });
+      if (Object.keys(add).length) setIconImages((prev) => ({ ...prev, ...add }));
+    });
+    return () => { cancelled = true; };
+  }, [designItems, iconImages]);
+
+ useEffect(() => {
+    if (!designWanted || !designAtlas) return;
     if (!designCanvasRef.current) designCanvasRef.current = document.createElement('canvas');
-    drawTorsoDesign(designAtlas, design.items || [], design.icons || {}, {
-      selectedId: design.selectedId,
+    drawTorsoDesign(designAtlas, designItems, iconImages, {
+      selectedId: designActive ? design?.selectedId : null,
       target: designCanvasRef.current,
     });
     if (!designTextureRef.current) {
@@ -201,7 +276,7 @@ const hairColors = [
     } else {
       designTextureRef.current.needsUpdate = true;
     }
-  }, [designActive, designAtlas, design?.items, design?.icons, design?.selectedId]);
+  }, [designWanted, designActive, designAtlas, designItems, iconImages, design?.selectedId]);
 
  const [writtenTorsoTexture, setWrittenTorsoTexture] = useState(null);
 
@@ -222,39 +297,17 @@ const hairColors = [
     return () => { cancelled = true; };
   }, [torsoTextureId, cleanTorsoText]);
 
- const torsoTexture = (designActive && designTextureRef.current)
+ const torsoTexture = (designWanted && designTextureRef.current)
    ? designTextureRef.current
    : (writtenTorsoTexture || plainTorsoTexture);
 
- const armTexture = useMemo(() => {
-    const url = getTorsoUvUrl(torsoTextureId);
-    if (url) {
-      const loader = new THREE.TextureLoader();
-      const texture = loader.load(url);
-      texture.flipY = false;
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.wrapS = THREE.ClampToEdgeWrapping;
-      texture.wrapT = THREE.ClampToEdgeWrapping;
-      texture.offset.set(0.78, 0.42);
-      texture.repeat.set(0.18, 0.18);
-      return texture;
-    }
-    return null;
-  }, [torsoTextureId]);
+ const armTexture = useLoadedTexture(getTorsoUvUrl(torsoTextureId), (t) => {
+    // the small square in the upper-right of the atlas that the sleeves use
+    t.offset.set(0.78, 0.42);
+    t.repeat.set(0.18, 0.18);
+  });
 
-   const legTexture = useMemo(() => {
-    const url = getLegsUvUrl(legTextureId);
-    if (url) {
-      const loader = new THREE.TextureLoader();
-      const texture = loader.load(url);
-      texture.flipY = false;
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.wrapS = THREE.ClampToEdgeWrapping;
-      texture.wrapT = THREE.ClampToEdgeWrapping;
-      return texture;
-    }
-    return null;
-  }, [legTextureId]);
+  const legTexture = useLoadedTexture(getLegsUvUrl(legTextureId));
 
   useLayoutEffect(() => {
     if (!group.current || !scene) return;
@@ -289,6 +342,10 @@ const hairColors = [
       const isHead = name.includes('kafa') || name.includes('head');
       const isHair = name.includes('saç') || name.includes('hair') || name.includes('sac');
       const isTorsoBody = name.includes('gövde') || name.includes('govde') || name === '3814uv.002';
+      // The designer needs to know which mesh is the shirt: the raycast will
+      // happily hand back the uv of an arm or the head, and a design item
+      // would then leap somewhere strange.
+      child.userData.isTorsoBody = isTorsoBody;
       const isArm = name.includes('kol') || name.includes('arm') || name === '3818v2.001' || name === '3819v2.001';
       const isLeg = name.includes('bacak') || name.includes('leg');
       
@@ -304,7 +361,9 @@ const hairColors = [
         applyTexture = true;
       }
          else if (isArm) {
-        if (torsoTexture && torsoTextureId) {
+        // A design counts as a texture even with no shirt chosen — that was
+        // why going straight into the designer left a blank shirt.
+        if (torsoTexture && (torsoTextureId || designWanted)) {
           child.material = new THREE.MeshStandardMaterial({
             map: torsoTexture,
             metalness: 0.1,
@@ -336,7 +395,7 @@ const hairColors = [
         color = torsoColor;
       }
       
-          if (applyTexture && torsoTexture && torsoTextureId) {
+          if (applyTexture && torsoTexture && (torsoTextureId || designWanted)) {
         child.material = new THREE.MeshStandardMaterial({
           map: torsoTexture,
           metalness: 0.1,
@@ -365,7 +424,7 @@ const hairColors = [
     
     group.current.clear();
     group.current.add(root);
-  }, [scene, headTextureIndex, torsoTextureId, torsoTexture, armTexture, legTextureId, legTexture]);
+  }, [scene, headTextureIndex, torsoTextureId, torsoTexture, armTexture, legTextureId, legTexture, designWanted]);
   
   useLayoutEffect(() => {
     if (!group.current) return;
@@ -387,9 +446,16 @@ const hairColors = [
   // 3D to the page, and it keeps working however the figure is turned.
   const designPointer = (phase) => (event) => {
     if (!designActive || !design?.onPanelPointer || !event.uv) return;
+    // Only the shirt. The ray also meets arms, hands and the head, and their
+    // uvs live elsewhere in the atlas — reading one of those as a position on
+    // the chest is what threw items across the shirt mid-drag.
+    if (!event.object?.userData?.isTorsoBody) return;
     const panel = PANELS[view === 'back' ? 'back' : 'front'];
     const px = (event.uv.x - panel.u0) / (panel.u1 - panel.u0);
     const py = (event.uv.y - panel.v0) / (panel.v1 - panel.v0);
+    // The same mesh carries the other side and the sides of the body; a point
+    // well outside this panel is one of those, not a slip of the finger.
+    if (px < -0.4 || px > 1.4 || py < -0.4 || py > 1.4) return;
     design.onPanelPointer(phase, px, py, event);
   };
 

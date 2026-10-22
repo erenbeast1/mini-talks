@@ -69,6 +69,33 @@ export const TEXT_COLOURS = [
 // Caps. A shirt with thirty things on it is not a design, and every item is
 // carried in the Mini's saved customisation, so the count is bounded on
 // purpose rather than by accident.
+
+/**
+ * A handful of stickers to be going on with, drawn here as SVG so the feature
+ * works before Elif's pack arrives and so nothing has to be fetched. Her pack
+ * replaces this list; the drawing code does not care where an icon came from.
+ */
+const svg = (body, fill) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    // width and height, not just a viewBox: an SVG with no intrinsic size
+    // loads with naturalWidth 0, and drawImage then draws nothing at all.
+    `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 48 48">` +
+    `<g fill="${fill}" stroke="#1D1D1B" stroke-width="2.2" stroke-linejoin="round">${body}</g></svg>`
+  )}`;
+
+export const BUILTIN_ICONS = [
+  { id: 'star',  label: 'Star',  src: svg('<path d="M24 4l6 12 13 2-9.5 9 2.3 13L24 33l-11.8 7 2.3-13L5 18l13-2z"/>', '#FFCC00') },
+  { id: 'heart', label: 'Heart', src: svg('<path d="M24 42S5 29 5 17.5A9.5 9.5 0 0 1 24 13a9.5 9.5 0 0 1 19 4.5C43 29 24 42 24 42z"/>', '#E31E24') },
+  { id: 'bolt',  label: 'Bolt',  src: svg('<path d="M27 3L9 27h11l-3 18 20-26H25z"/>', '#FFCC00') },
+  { id: 'smile', label: 'Smiley',src: svg('<circle cx="24" cy="24" r="19"/><circle cx="17" cy="19" r="2.6" fill="#1D1D1B" stroke="none"/><circle cx="31" cy="19" r="2.6" fill="#1D1D1B" stroke="none"/><path d="M15 29a10 10 0 0 0 18 0" fill="none"/>', '#FFCC00') },
+  { id: 'cloud', label: 'Cloud', src: svg('<path d="M14 36a9 9 0 0 1 0-18 12 12 0 0 1 23 3 7 7 0 0 1-2 15z"/>', '#FFFFFF') },
+  { id: 'note',  label: 'Music', src: svg('<path d="M20 34V10l18-4v24"/><circle cx="14" cy="34" r="6"/><circle cx="32" cy="30" r="6"/>', '#0055BF') },
+  { id: 'ball',  label: 'Ball',  src: svg('<circle cx="24" cy="24" r="19"/><path d="M24 11l7 5-3 9h-8l-3-9z" fill="#1D1D1B" stroke="none"/>', '#FFFFFF') },
+  { id: 'paw',   label: 'Paw',   src: svg('<ellipse cx="24" cy="31" rx="10" ry="8"/><circle cx="13" cy="20" r="4.2"/><circle cx="20" cy="14" r="4.2"/><circle cx="28" cy="14" r="4.2"/><circle cx="35" cy="20" r="4.2"/>', '#6D4C41') },
+  { id: 'brick', label: 'Brick', src: svg('<rect x="7" y="18" width="34" height="18" rx="2"/><rect x="13" y="12" width="8" height="7" rx="1.6"/><rect x="27" y="12" width="8" height="7" rx="1.6"/>', '#E31E24') },
+  { id: 'medal', label: 'Medal', src: svg('<circle cx="24" cy="30" r="11"/><path d="M17 20L13 6h8l4 10M31 20l4-14h-8"/>', '#FFCC00') },
+];
+
 export const MAX_ITEMS_PER_SIDE = 10;
 // Full panel width would never fit inside the safe margins, so the slider
 // would have a dead top end. This is the largest that still fits.

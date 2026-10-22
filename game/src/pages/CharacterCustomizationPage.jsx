@@ -3004,7 +3004,7 @@ useEffect(() => {
                       } : null}
                       customization={{
                         gender, hairType, hairColor, hairTextureIndex,
-                        torsoTextureId, torsoText, legTextureId, eyeTextureIndex, mouthTextureIndex,
+                        torsoTextureId, torsoText, torsoItems, legTextureId, eyeTextureIndex, mouthTextureIndex,
                         eyeModelName: activeEyeModelName,
                         mouthModelName: activeMouthModelName,
                         eyeColor: eyeColor,
@@ -3082,6 +3082,7 @@ useEffect(() => {
                     hairTextureIndex, 
                     torsoTextureId,
                     torsoText,
+                    torsoItems,
                     legTextureId,
                     eyeTextureIndex,
                     mouthTextureIndex,
@@ -3787,7 +3788,6 @@ useEffect(() => {
                           side={view === 'back' ? 'back' : 'front'}
                           tab={designTab}
                           setTab={setDesignTab}
-                          icons={[]}
                           compact={isSmallScreen}
                           onFlip={() => { toggleView(); setDesignSelectedId(null); }}
                           onDone={() => { setDesignMode(false); setDesignSelectedId(null); }}

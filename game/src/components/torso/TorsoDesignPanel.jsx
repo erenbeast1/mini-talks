@@ -11,7 +11,7 @@
 // gestures on the figure itself live there.
 
 import React from 'react';
-import { FONTS, TEXT_COLOURS, MAX_ITEMS_PER_SIDE, MAX_TEXT_LENGTH, sanitiseText } from '../torsoDesign';
+import { FONTS, TEXT_COLOURS, MAX_ITEMS_PER_SIDE, MAX_TEXT_LENGTH, sanitiseText, BUILTIN_ICONS } from '../torsoDesign';
 
 const BLUE = '#0055BF';
 const DARK = '#1D1D1B';
@@ -98,6 +98,21 @@ const Btn = ({ children, onClick, disabled, tone = 'plain', title, style }) => {
   );
 };
 
+const selectStyle = {
+  // Browsers each draw their own box around a <select>; this is the one place
+  // the shapes stopped matching the rest of the panel, so the native one is
+  // turned off and the chevron drawn in.
+  appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
+  width: '100%', border: 'none', outline: 'none', background: 'transparent',
+  fontFamily: "'Montserrat', sans-serif", cursor: 'pointer',
+};
+
+const Chevron = () => (
+  <span style={{ pointerEvents: 'none', display: 'flex', paddingRight: 12, color: '#6B7079' }}>
+    <Ico d={<path d="M6 9l6 6 6-6" />} size={16} />
+  </span>
+);
+
 const Field = ({ children, style }) => (
   <div style={{
     border: '1px solid #D8DBE0', borderRadius: 10, background: '#fff',
@@ -112,7 +127,7 @@ const TorsoDesignPanel = ({
   items,
   side,
   tab, setTab,
-  icons = [],
+  icons = BUILTIN_ICONS,
   onFlip,
   onDone,
   compact = false,
@@ -195,10 +210,10 @@ const TorsoDesignPanel = ({
               <Field style={{ marginBottom: 8, padding: 0 }}>
                 <select value={selected.fontId}
                         onChange={(e) => update(selected.id, { fontId: e.target.value, text: sanitiseText(selected.text, e.target.value) })}
-                        style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent',
-                                 padding: '10px 12px', fontSize: 13.5, fontWeight: 600, fontFamily: "'Montserrat', sans-serif" }}>
+                        style={{ ...selectStyle, padding: '10px 0 10px 12px', fontSize: 13.5, fontWeight: 600 }}>
                   {FONTS.map((f) => <option key={f.id} value={f.id}>{f.family}</option>)}
                 </select>
+                <Chevron />
               </Field>
 
               <Field style={{ marginBottom: 8, padding: 0 }}>
@@ -206,11 +221,11 @@ const TorsoDesignPanel = ({
                                background: selected.colour, border: '1px solid #B9BDC4' }} />
                 <select value={selected.colour}
                         onChange={(e) => update(selected.id, { colour: e.target.value })}
-                        style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent',
-                                 padding: '10px 12px 10px 0', fontSize: 13.5, fontWeight: 600,
-                                 textTransform: 'capitalize', fontFamily: "'Montserrat', sans-serif" }}>
+                        style={{ ...selectStyle, padding: '10px 0 10px 10px', fontSize: 13.5, fontWeight: 600,
+                                 textTransform: 'capitalize' }}>
                   {TEXT_COLOURS.map((c) => <option key={c.id} value={c.hex}>{c.id}</option>)}
                 </select>
+                <Chevron />
               </Field>
 
               <Row gap={0} style={{ border: '1px solid #D8DBE0', borderRadius: 10, overflow: 'hidden', marginBottom: 10 }}>
