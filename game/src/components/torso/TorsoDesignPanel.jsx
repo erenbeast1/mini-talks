@@ -10,10 +10,11 @@
 // Everything it does goes through the handlers from useTorsoDesign; the
 // gestures on the figure itself live there.
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FONTS, TEXT_COLOURS, MAX_ITEMS_PER_SIDE, MAX_TEXT_LENGTH, sanitiseText, BUILTIN_ICONS,
-  fileToIconSrc, uploadCount, MAX_UPLOADS_PER_SIDE, UPLOAD_TYPES, UPLOAD_PX,
+  fileToIconSrc, putSessionIcon, removeSessionIcon, sessionIcons, MAX_SESSION_ICONS,
+  UPLOAD_TYPES, UPLOAD_PX,
 } from '../torsoDesign';
 
 const BLUE = '#0055BF';
@@ -127,7 +128,6 @@ const Field = ({ children, style }) => (
 
 const TorsoDesignPanel = ({
   design,            // everything from useTorsoDesign
-  items,
   side,
   tab, setTab,
   icons = BUILTIN_ICONS,
@@ -135,16 +135,20 @@ const TorsoDesignPanel = ({
   onDone,
   compact = false,
 }) => {
-  const { selected, sideItems, update, addText, addIcon, removeSelected, reorder, resetSide } = design;
+  const {
+    selected, sideItems, update, addText, addIcon, removeSelected, removeBySrc,
+    reorder, resetSide, setSelectedId,
+  } = design;
   const full = sideItems.length >= MAX_ITEMS_PER_SIDE;
 
   // The child's own pictures. They are shrunk and re-encoded here rather than
-  // sent anywhere: the picture ends up inside this Mini's own saved
-  // customisation and goes no further.
+  // sent anywhere, and then kept in this sitting's store — the shirt item holds
+  // only a reference to one, so nothing of the picture reaches the database.
+  // What keeps it is the screenshot taken when the character is saved.
   const fileRef = useRef(null);
   const [uploadError, setUploadError] = useState('');
-  const uploadsUsed = uploadCount(items, side);
-  const uploadsFull = uploadsUsed >= MAX_UPLOADS_PER_SIDE;
+  const [uploads, setUploads] = useState(() => sessionIcons());
+  const uploadsFull = uploads.length >= MAX_SESSION_ICONS;
 
   const onPickFile = async (event) => {
     const file = event.target.files?.[0];
@@ -152,15 +156,25 @@ const TorsoDesignPanel = ({
     if (!file) return;
     setUploadError('');
     try {
-      const src = await fileToIconSrc(file);
-      addIcon(src, { from: 'upload', name: file.name.slice(0, 40) });
+      const ref = putSessionIcon(await fileToIconSrc(file), file.name);
+      setUploads(sessionIcons());
+      addIcon(ref, { from: 'upload', name: file.name.slice(0, 40) });
     } catch (e) {
       setUploadError(
         e.message === 'type' ? 'PNG, JPG or WEBP only.'
         : e.message === 'size' ? 'That picture is too big.'
+        : e.message === 'full' ? `That is all ${MAX_SESSION_ICONS} pictures — remove one first.`
+        : e.message === 'store' ? 'This browser would not keep that picture.'
         : 'That picture could not be read.'
       );
     }
+  };
+
+  const dropUpload = (icon) => {
+    removeBySrc(icon.src);
+    removeSessionIcon(icon.src);
+    setUploads(sessionIcons());
+    setUploadError('');
   };
 
   // The card shows what the open tab is about. With a line of writing selected,
@@ -170,6 +184,25 @@ const TorsoDesignPanel = ({
     (tab === 'text' && selected.type === 'text') ||
     (tab === 'icons' && selected.type === 'icon')
   );
+
+  // Tabs and the selection are two halves of one thing, and they have to agree
+  // both ways round. Picking something up on the shirt opens the tab that can
+  // edit it — tapping a sticker while Text was open used to show "Add text"
+  // and no way to change the sticker at all. The id alone is watched, so
+  // pressing the other tab afterwards is not undone.
+  useEffect(() => {
+    if (!selected) return;
+    const wants = selected.type === 'text' ? 'text' : 'icons';
+    if (wants !== tab) setTab(wants);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id]);
+
+  // ...and pressing a tab by hand lets go of anything that tab cannot edit,
+  // so the handles leave the shirt with it.
+  const changeTab = (next) => {
+    if (selected && (next === 'text') !== (selected.type === 'text')) setSelectedId(null);
+    setTab(next);
+  };
 
   return (
     <div style={{
@@ -196,8 +229,8 @@ const TorsoDesignPanel = ({
 
       <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 1px 6px rgba(0,0,0,0.08)', flexShrink: 0 }}>
         <Row gap={0}>
-          <Tab icon={<IconSticker />} label="Decorations" active={tab === 'icons'} onClick={() => setTab('icons')} />
-          <Tab icon={<IconText />}    label="Text"        active={tab === 'text'}  onClick={() => setTab('text')} />
+          <Tab icon={<IconSticker />} label="Decorations" active={tab === 'icons'} onClick={() => changeTab('icons')} />
+          <Tab icon={<IconText />}    label="Text"        active={tab === 'text'}  onClick={() => changeTab('text')} />
         </Row>
       </div>
 
@@ -211,50 +244,85 @@ const TorsoDesignPanel = ({
           </strong>
         </Row>
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          {!editingHere && tab === 'text' ? (
+          {/* The way to add another of whatever this tab is for stays put, above
+              whatever is being edited: adding a second sticker used to mean
+              letting go of the first one to get the tray back. */}
+          {tab === 'text' ? (
             <div style={{ padding: '0 12px 12px' }}>
               <Btn onClick={addText} tone="blue" disabled={full} style={{ width: '100%', fontSize: 13 }}>
                 + Add text
               </Btn>
-              <p style={{ fontSize: 12, color: '#6B7079', fontWeight: 600, lineHeight: 1.5, marginTop: 10 }}>
-                Tap anything on the shirt to pick it up. Drag to move it, pull a corner to resize,
-                and use the handle above it to turn it.
-              </p>
+              {!editingHere ? (
+                <p style={{ fontSize: 12, color: '#6B7079', fontWeight: 600, lineHeight: 1.5, marginTop: 10 }}>
+                  Tap anything on the shirt to pick it up. Drag to move it, pull a corner to resize,
+                  and use the handle above it to turn it.
+                </p>
+              ) : null}
             </div>
           ) : null}
 
-          {!editingHere && tab === 'icons' ? (
+          {tab === 'icons' ? (
             <div style={{ padding: '0 12px 12px' }}>
               <input ref={fileRef} type="file" accept={UPLOAD_TYPES.join(',')}
                      onChange={onPickFile} style={{ display: 'none' }} />
-              <Btn onClick={() => fileRef.current?.click()} tone="blue"
-                   disabled={full || uploadsFull}
-                   style={{ width: '100%', fontSize: 13, marginBottom: 10 }}>
-                + Upload your own
-              </Btn>
-              <p style={{ fontSize: 11, color: '#6B7079', fontWeight: 600, margin: '0 0 10px' }}>
-                {uploadsFull
-                  ? `That is all ${MAX_UPLOADS_PER_SIDE} of your own pictures on this side.`
-                  : `Your picture stays on this Mini. It is shrunk to ${UPLOAD_PX}px — ${uploadsUsed}/${MAX_UPLOADS_PER_SIDE} used.`}
-              </p>
-              {uploadError ? (
-                <p style={{ fontSize: 12, color: '#C81E24', fontWeight: 700, margin: '0 0 10px' }}>{uploadError}</p>
-              ) : null}
-              {icons.length === 0 ? (
-                <p style={{ fontSize: 12, color: '#6B7079', fontWeight: 600, lineHeight: 1.5 }}>
-                  No stickers yet — they arrive with the icon pack.
-                </p>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                  {icons.map((ic) => (
-                    <button key={ic.id} type="button" title={ic.label} onClick={() => addIcon(ic.src)} disabled={full}
-                            style={{ aspectRatio: '1', border: '1px solid #D8DBE0', borderRadius: 10,
+
+              {/* The child's own pictures sit in the same tray as the stickers,
+                  and the way to add one is the first tile in it: a plus where
+                  the eye already is, rather than a button above the grid. */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                <button type="button" onClick={() => fileRef.current?.click()}
+                        disabled={full || uploadsFull}
+                        title={uploadsFull
+                          ? `That is all ${MAX_SESSION_ICONS} of your own pictures`
+                          : 'Upload your own picture'}
+                        style={{ aspectRatio: '1', borderRadius: 10, padding: 0,
+                                 border: `2px dashed ${full || uploadsFull ? '#D8DBE0' : BLUE}`,
+                                 background: full || uploadsFull ? '#FAFBFC' : '#F2F6FD',
+                                 color: full || uploadsFull ? '#B4B4B4' : BLUE,
+                                 display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                 justifyContent: 'center', gap: 1,
+                                 cursor: full || uploadsFull ? 'default' : 'pointer' }}>
+                  <span style={{ fontSize: 22, fontWeight: 800, lineHeight: 1 }}>+</span>
+                  <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 0.3 }}>ADD</span>
+                </button>
+
+                {uploads.map((ic) => (
+                  <div key={ic.id} style={{ position: 'relative' }}>
+                    <button type="button" title={ic.label} onClick={() => addIcon(ic.src, { from: 'upload', name: ic.label })}
+                            disabled={full}
+                            style={{ aspectRatio: '1', width: '100%', border: `1px solid ${BLUE}`, borderRadius: 10,
                                      background: '#fff', cursor: full ? 'default' : 'pointer', padding: 6 }}>
-                      <img src={ic.src} alt={ic.label} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      <img src={ic.data} alt={ic.label}
+                           style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </button>
-                  ))}
-                </div>
-              )}
+                    <button type="button" onClick={() => dropUpload(ic)} aria-label={`Remove ${ic.label}`}
+                            title="Remove this picture"
+                            style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20,
+                                     borderRadius: 999, border: '1px solid #D8DBE0', background: '#fff',
+                                     color: '#C81E24', fontSize: 13, fontWeight: 800, lineHeight: 1,
+                                     cursor: 'pointer', padding: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.18)' }}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+
+                {icons.map((ic) => (
+                  <button key={ic.id} type="button" title={ic.label} onClick={() => addIcon(ic.src)} disabled={full}
+                          style={{ aspectRatio: '1', border: '1px solid #D8DBE0', borderRadius: 10,
+                                   background: '#fff', cursor: full ? 'default' : 'pointer', padding: 6 }}>
+                    <img src={ic.src} alt={ic.label} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  </button>
+                ))}
+              </div>
+
+              {uploadError ? (
+                <p style={{ fontSize: 12, color: '#C81E24', fontWeight: 700, margin: '10px 0 0' }}>{uploadError}</p>
+              ) : null}
+              <p style={{ fontSize: 11, color: '#6B7079', fontWeight: 600, lineHeight: 1.5, margin: '10px 0 0' }}>
+                Your own pictures are shrunk to {UPLOAD_PX}px and kept only for this visit
+                ({uploads.length}/{MAX_SESSION_ICONS}). They stay on your Mini's picture, and
+                are never sent anywhere.
+              </p>
             </div>
           ) : null}
 

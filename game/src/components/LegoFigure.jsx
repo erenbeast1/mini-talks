@@ -3,7 +3,7 @@ import React, { Suspense, useRef, useLayoutEffect, useMemo, useEffect, useState 
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
 import { drawTorsoText, sanitiseTorsoText } from './torsoText';
-import { drawTorsoDesign, PANELS } from './torsoDesign';
+import { drawTorsoDesign, resolveIconSrc, PANELS } from './torsoDesign';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { HairModel } from './HairModels';
@@ -236,19 +236,26 @@ const hairColors = [
  // pictures in use are loaded here and kept. Splitting the designer into a
  // panel and a hook lost this, which is why a sticker could be added, counted
  // and selected, and still never appear on the shirt.
+ //
+ // A child's own picture is addressed as "session:..." and has to be looked up
+ // in this sitting's store; one from a sitting that has ended resolves to
+ // nothing, and then nothing is drawn for it.
  const [iconImages, setIconImages] = useState({});
 
  useEffect(() => {
     const wanted = [...new Set(designItems.filter((i) => i.type === 'icon' && i.src).map((i) => i.src))];
-    const missing = wanted.filter((src) => !iconImages[src]);
+    const missing = wanted
+      .filter((src) => !iconImages[src])
+      .map((src) => [src, resolveIconSrc(src)])
+      .filter(([, url]) => !!url);
     if (missing.length === 0) return undefined;
     let cancelled = false;
-    Promise.all(missing.map((src) => new Promise((resolve) => {
+    Promise.all(missing.map(([src, url]) => new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => resolve([src, img]);
       img.onerror = () => resolve(null);
-      img.src = src;
+      img.src = url;
     }))).then((loaded) => {
       if (cancelled) return;
       const add = {};

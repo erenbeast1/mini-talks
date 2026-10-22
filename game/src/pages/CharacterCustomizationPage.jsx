@@ -3784,7 +3784,6 @@ useEffect(() => {
                       return (
                         <TorsoDesignPanel
                           design={torsoDesign}
-                          items={torsoItems}
                           side={view === 'back' ? 'back' : 'front'}
                           tab={designTab}
                           setTab={setDesignTab}

@@ -106,7 +106,6 @@ export const BUILTIN_ICONS = [
 export const UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 export const UPLOAD_MAX_BYTES = 6 * 1024 * 1024;   // before shrinking
 export const UPLOAD_PX = 256;                      // after
-export const MAX_UPLOADS_PER_SIDE = 4;             // these ride in the Mini's own record
 
 /**
  * Turn a chosen file into something that can be put on a shirt: a square-ish
@@ -142,9 +141,93 @@ export function fileToIconSrc(file) {
   });
 }
 
-/** How many of the items on a side came from the child's own pictures. */
-export function uploadCount(items, side) {
-  return items.filter((i) => (i.side || 'front') === side && i.from === 'upload').length;
+
+/* ── Where an uploaded picture lives: this sitting, and no longer ─────── */
+//
+// A picture a child picks is kept in sessionStorage, not in the Mini's saved
+// record. The shirt item holds only a short reference — "session:ab12xy" — so
+// the record stays small and a family photograph is never written to the
+// database. Inside the sitting the reference resolves, the shirt is drawn with
+// the picture on it, and the screenshot taken when the character is saved
+// keeps that picture for good: that is the copy the game shows. Come back
+// another day and the reference resolves to nothing, so the sticker is simply
+// not drawn.
+
+const STORE_KEY = 'miniTalks.torsoIcons';
+export const SESSION_PREFIX = 'session:';
+export const MAX_SESSION_ICONS = 6;
+
+const keyOf = (ref) => String(ref).slice(SESSION_PREFIX.length);
+
+function readStore() {
+  if (typeof sessionStorage === 'undefined') return {};
+  try {
+    return JSON.parse(sessionStorage.getItem(STORE_KEY) || '{}') || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeStore(store) {
+  if (typeof sessionStorage === 'undefined') return false;
+  try {
+    sessionStorage.setItem(STORE_KEY, JSON.stringify(store));
+    return true;
+  } catch {
+    // Out of room, or private browsing with storage turned off. Nothing was
+    // kept, and the caller is told so rather than being left with a sticker
+    // that would never draw.
+    return false;
+  }
+}
+
+export const isSessionIcon = (src) =>
+  typeof src === 'string' && src.startsWith(SESSION_PREFIX);
+
+/** The pictures uploaded in this sitting, oldest first, shaped like stickers. */
+export function sessionIcons() {
+  return Object.entries(readStore())
+    .map(([key, entry]) => ({
+      id: `${SESSION_PREFIX}${key}`,
+      src: `${SESSION_PREFIX}${key}`,
+      label: entry.name || 'Your picture',
+      data: entry.data,
+      at: entry.at || 0,
+      from: 'upload',
+    }))
+    .filter((i) => !!i.data)
+    .sort((a, b) => a.at - b.at);
+}
+
+/**
+ * Keep a picture for this sitting and hand back the reference that goes on
+ * the shirt. Throws 'full' when there are already MAX_SESSION_ICONS of them
+ * and 'store' when the browser would not keep it.
+ */
+export function putSessionIcon(data, name = '') {
+  const store = readStore();
+  if (Object.keys(store).length >= MAX_SESSION_ICONS) throw new Error('full');
+  const key = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  store[key] = { data, name: String(name).slice(0, 40), at: Date.now() };
+  if (!writeStore(store)) throw new Error('store');
+  return `${SESSION_PREFIX}${key}`;
+}
+
+/** Forget a picture. Whatever was drawn from it has to go with it. */
+export function removeSessionIcon(ref) {
+  const store = readStore();
+  delete store[keyOf(ref)];
+  writeStore(store);
+}
+
+/**
+ * What to load for an icon item: a sticker from the pack is its own address,
+ * an uploaded one has to be looked up, and one from a sitting that has ended
+ * resolves to nothing.
+ */
+export function resolveIconSrc(src) {
+  if (!isSessionIcon(src)) return src || null;
+  return readStore()[keyOf(src)]?.data || null;
 }
 
 export const MAX_ITEMS_PER_SIDE = 10;

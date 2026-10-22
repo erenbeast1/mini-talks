@@ -106,6 +106,17 @@ export function useTorsoDesign({ items, setItems, side, selectedId, setSelectedI
     setSelectedId(item.id);
   }, [side, sideItems.length, setItems, setSelectedId]);
 
+  /**
+   * Everything drawn from one picture goes when that picture goes: an
+   * uploaded sticker the child deletes from the tray cannot be left behind on
+   * the shirt as an item whose picture no longer exists.
+   */
+  const removeBySrc = useCallback((src) => {
+    if (!src) return;
+    setItems((l) => l.filter((i) => i.src !== src));
+    setSelectedId((cur) => (items.some((i) => i.id === cur && i.src === src) ? null : cur));
+  }, [items, setItems, setSelectedId]);
+
   const removeSelected = useCallback(() => {
     if (!selected) return;
     setItems((l) => l.filter((i) => i.id !== selected.id));
@@ -136,8 +147,8 @@ export function useTorsoDesign({ items, setItems, side, selectedId, setSelectedI
   }, [side, setItems, setSelectedId]);
 
   return {
-    selected, sideItems, update, onPanelPointer, endDrag,
-    addText, addIcon, removeSelected, reorder, resetSide,
+    selected, sideItems, update, onPanelPointer, endDrag, setSelectedId,
+    addText, addIcon, removeSelected, removeBySrc, reorder, resetSide,
     itemBounds,
   };
 }
