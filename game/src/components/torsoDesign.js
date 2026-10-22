@@ -128,15 +128,27 @@ export function newIconItem(src, side = 'front', meta = {}) {
   };
 }
 
-/** Keep an item inside the safe area, whatever the editor tried to set. */
+/**
+ * Keep an item inside the safe area, whatever the editor tried to set — and
+ * the whole of it, not just its middle: dragging a word to the edge used to
+ * leave half of it cut off at the seam, which is right for a sticker that is
+ * meant to run off the shoulder and wrong for a name.
+ *
+ * An item too big to fit the safe area at all is centred rather than refused;
+ * the size slider is the thing to turn down, and it is right there.
+ */
 export function clampItem(item) {
-  const half = Math.max(0.02, item.scale) / 2;
-  const minX = SAFE.x + half * 0.2, maxX = 1 - SAFE.x - half * 0.2;
+  const scale = Math.min(1.0, Math.max(0.08, item.scale));
+  const bounds = itemBounds({ ...item, scale });
+  const halfW = bounds.w / 2;
+  const halfH = bounds.h / 2;
+  const minX = SAFE.x + halfW, maxX = 1 - SAFE.x - halfW;
+  const minY = SAFE.y + halfH, maxY = 1 - SAFE.y - halfH;
   return {
     ...item,
-    x: Math.min(maxX, Math.max(minX, item.x)),
-    y: Math.min(1 - SAFE.y, Math.max(SAFE.y, item.y)),
-    scale: Math.min(1.0, Math.max(0.08, item.scale)),
+    scale,
+    x: minX > maxX ? 0.5 : Math.min(maxX, Math.max(minX, item.x)),
+    y: minY > maxY ? 0.5 : Math.min(maxY, Math.max(minY, item.y)),
     rotation: ((item.rotation % 360) + 360) % 360,
   };
 }
@@ -210,6 +222,38 @@ function drawIcon(ctx, item, rect, image) {
   ctx.restore();
 }
 
+/** Box roughly covering an item, in panel fractions — also used for hit-testing. */
+export function itemBounds(item) {
+  const w = Math.max(0.12, item.scale);
+  const h = item.type === 'text' ? Math.max(0.10, item.scale * 0.34) : w;
+  return { w, h, x0: item.x - w / 2, x1: item.x + w / 2, y0: item.y - h / 2, y1: item.y + h / 2 };
+}
+
+/** Which item a tap landed on: the last drawn one wins, as on screen. */
+export function hitTest(items, side, px, py) {
+  const onSide = items.filter((i) => (i.side || 'front') === side);
+  for (let i = onSide.length - 1; i >= 0; i -= 1) {
+    const b = itemBounds(onSide[i]);
+    if (px >= b.x0 && px <= b.x1 && py >= b.y0 && py <= b.y1) return onSide[i].id;
+  }
+  return null;
+}
+
+function drawSelection(ctx, item, rect) {
+  const b = itemBounds(item);
+  const x = rect.x + b.x0 * rect.w;
+  const y = rect.y + b.y0 * rect.h;
+  const w = b.w * rect.w;
+  const h = b.h * rect.h;
+  const pad = Math.max(2, rect.w * 0.012);
+  ctx.save();
+  ctx.setLineDash([Math.max(4, rect.w * 0.02), Math.max(3, rect.w * 0.015)]);
+  ctx.lineWidth = Math.max(2, rect.w * 0.012);
+  ctx.strokeStyle = '#0055BF';
+  ctx.strokeRect(x - pad, y - pad, w + pad * 2, h + pad * 2);
+  ctx.restore();
+}
+
 /**
  * Draw a whole design onto a copy of the shirt's atlas.
  *
@@ -222,15 +266,20 @@ function drawIcon(ctx, item, rect, image) {
  * the atlas across and the letters would otherwise be soft; the artwork is
  * merely scaled up, and only what is drawn on top gets the extra resolution.
  */
-export function drawTorsoDesign(atlas, items, icons = {}) {
+export function drawTorsoDesign(atlas, items, icons = {}, opts = {}) {
+  const { selectedId = null, target = null } = opts;
   const scale = 2;
   const w = Math.min(2048, (atlas.naturalWidth || atlas.width) * scale);
   const h = Math.min(2048, (atlas.naturalHeight || atlas.height) * scale);
 
-  const canvas = document.createElement('canvas');
+  // Dragging redraws this on every frame, so the editor passes the same canvas
+  // back in rather than having one allocated and thrown away sixty times a
+  // second.
+  const canvas = target || document.createElement('canvas');
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(atlas, 0, 0, w, h);
@@ -250,6 +299,10 @@ export function drawTorsoDesign(atlas, items, icons = {}) {
       ctx.clip();
       if (item.type === 'text') drawText(ctx, item, rect);
       else drawIcon(ctx, item, rect, icons[item.id] || icons[item.src]);
+      // The selection is painted into the texture rather than floated over the
+      // page in HTML: it then sits on the shirt itself, follows the figure when
+      // it turns, and needs nothing projected back from 3D to screen.
+      if (item.id === selectedId) drawSelection(ctx, item, rect);
       ctx.restore();
     }
   }
