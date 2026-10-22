@@ -70,7 +70,12 @@ export const TEXT_COLOURS = [
 // carried in the Mini's saved customisation, so the count is bounded on
 // purpose rather than by accident.
 export const MAX_ITEMS_PER_SIDE = 10;
+// Full panel width would never fit inside the safe margins, so the slider
+// would have a dead top end. This is the largest that still fits.
+export const MAX_SCALE = 0.78;
 export const MAX_TEXT_LENGTH = 16;
+
+const rad = (deg) => (deg * Math.PI) / 180;
 
 const FOLD = { 'Ş': 'S', 'Ğ': 'G', 'Ü': 'U', 'Ö': 'O', 'Ç': 'C', 'İ': 'I', 'Â': 'A', 'Î': 'I', 'Û': 'U' };
 
@@ -138,10 +143,16 @@ export function newIconItem(src, side = 'front', meta = {}) {
  * the size slider is the thing to turn down, and it is right there.
  */
 export function clampItem(item) {
-  const scale = Math.min(1.0, Math.max(0.08, item.scale));
+  const scale = Math.min(MAX_SCALE, Math.max(0.08, item.scale));
+  const rotation = ((item.rotation % 360) + 360) % 360;
   const bounds = itemBounds({ ...item, scale });
-  const halfW = bounds.w / 2;
-  const halfH = bounds.h / 2;
+  // A turned item needs the box that contains it turned, not its own box, or
+  // a corner pokes out past the seam at 45°.
+  const a = rad(rotation);
+  const cos = Math.abs(Math.cos(a));
+  const sin = Math.abs(Math.sin(a));
+  const halfW = (bounds.w * cos + bounds.h * sin) / 2;
+  const halfH = (bounds.w * sin + bounds.h * cos) / 2;
   const minX = SAFE.x + halfW, maxX = 1 - SAFE.x - halfW;
   const minY = SAFE.y + halfH, maxY = 1 - SAFE.y - halfH;
   return {
@@ -149,7 +160,7 @@ export function clampItem(item) {
     scale,
     x: minX > maxX ? 0.5 : Math.min(maxX, Math.max(minX, item.x)),
     y: minY > maxY ? 0.5 : Math.min(maxY, Math.max(minY, item.y)),
-    rotation: ((item.rotation % 360) + 360) % 360,
+    rotation,
   };
 }
 
@@ -229,28 +240,126 @@ export function itemBounds(item) {
   return { w, h, x0: item.x - w / 2, x1: item.x + w / 2, y0: item.y - h / 2, y1: item.y + h / 2 };
 }
 
+/**
+ * Panel coordinates run 0..1 both ways, but the panel itself is wider than it
+ * is tall, so a circle drawn in them would be an ellipse on the shirt. Angles
+ * and distances are therefore worked out in a space corrected by this.
+ */
+export function panelAspect(side, atlasW = 1, atlasH = 1) {
+  const p = PANELS[side] || PANELS.front;
+  return ((p.u1 - p.u0) * atlasW) / ((p.v1 - p.v0) * atlasH);
+}
+
+/** A point in the item's own frame: undo its turn, so the box is square again. */
+function toLocal(item, px, py, aspect) {
+  const dx = (px - item.x) * aspect;
+  const dy = py - item.y;
+  const a = -rad(item.rotation || 0);
+  return { x: (dx * Math.cos(a) - dy * Math.sin(a)) / aspect, y: dx * Math.sin(a) + dy * Math.cos(a) };
+}
+
+/** ...and back out again. */
+function toPanel(item, lx, ly, aspect) {
+  const dx = lx * aspect;
+  const a = rad(item.rotation || 0);
+  return {
+    x: item.x + (dx * Math.cos(a) - ly * Math.sin(a)) / aspect,
+    y: item.y + dx * Math.sin(a) + ly * Math.cos(a),
+  };
+}
+
+/** The four corners of an item, turned with it. */
+export function itemCorners(item, aspect) {
+  const b = itemBounds(item);
+  return [
+    ['nw', -b.w / 2, -b.h / 2], ['ne', b.w / 2, -b.h / 2],
+    ['se', b.w / 2, b.h / 2],   ['sw', -b.w / 2, b.h / 2],
+  ].map(([id, lx, ly]) => ({ id, ...toPanel(item, lx, ly, aspect) }));
+}
+
+/** The turning handle, on a stem above the item — the same idea as the stud. */
+export function itemRotateHandle(item, aspect) {
+  const b = itemBounds(item);
+  return toPanel(item, 0, -b.h / 2 - 0.09, aspect);
+}
+
+// Fingers are not precise, and this is for children.
+const HANDLE_GRAB = 0.075;
+
+/** Did a tap land on one of the selected item's handles? */
+export function hitHandle(item, px, py, aspect) {
+  if (!item) return null;
+  const near = (p) => {
+    const dx = (px - p.x) * aspect, dy = py - p.y;
+    return Math.sqrt(dx * dx + dy * dy) <= HANDLE_GRAB;
+  };
+  const r = itemRotateHandle(item, aspect);
+  if (near(r)) return 'rotate';
+  const corner = itemCorners(item, aspect).find(near);
+  return corner ? 'resize' : null;
+}
+
 /** Which item a tap landed on: the last drawn one wins, as on screen. */
-export function hitTest(items, side, px, py) {
+export function hitTest(items, side, px, py, aspect = 1) {
   const onSide = items.filter((i) => (i.side || 'front') === side);
   for (let i = onSide.length - 1; i >= 0; i -= 1) {
-    const b = itemBounds(onSide[i]);
-    if (px >= b.x0 && px <= b.x1 && py >= b.y0 && py <= b.y1) return onSide[i].id;
+    const item = onSide[i];
+    const b = itemBounds(item);
+    const local = toLocal(item, px, py, aspect);
+    if (Math.abs(local.x) <= b.w / 2 && Math.abs(local.y) <= b.h / 2) return item.id;
   }
   return null;
 }
 
+/**
+ * The selection, drawn into the texture: a box turned with the item, a square
+ * at each corner to pull it bigger or smaller, and a handle on a stem above it
+ * to turn it. They live on the shirt, so they follow the figure when it is
+ * turned and need nothing projected back from 3D; and the same geometry that
+ * draws them is what hitHandle tests against, so what is grabbed is exactly
+ * what is seen.
+ */
 function drawSelection(ctx, item, rect) {
   const b = itemBounds(item);
-  const x = rect.x + b.x0 * rect.w;
-  const y = rect.y + b.y0 * rect.h;
+  const cx = rect.x + item.x * rect.w;
+  const cy = rect.y + item.y * rect.h;
   const w = b.w * rect.w;
   const h = b.h * rect.h;
-  const pad = Math.max(2, rect.w * 0.012);
+  const unit = rect.w;
+  const knob = Math.max(5, unit * 0.035);
+  const line = Math.max(2, unit * 0.012);
+
   ctx.save();
-  ctx.setLineDash([Math.max(4, rect.w * 0.02), Math.max(3, rect.w * 0.015)]);
-  ctx.lineWidth = Math.max(2, rect.w * 0.012);
+  ctx.translate(cx, cy);
+  ctx.rotate(rad(item.rotation || 0));
+
   ctx.strokeStyle = '#0055BF';
-  ctx.strokeRect(x - pad, y - pad, w + pad * 2, h + pad * 2);
+  ctx.lineWidth = line;
+  ctx.setLineDash([Math.max(4, unit * 0.022), Math.max(3, unit * 0.016)]);
+  ctx.strokeRect(-w / 2, -h / 2, w, h);
+  ctx.setLineDash([]);
+
+  // the stem and its handle
+  const stem = 0.09 * rect.h;
+  ctx.beginPath();
+  ctx.moveTo(0, -h / 2);
+  ctx.lineTo(0, -h / 2 - stem);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(0, -h / 2 - stem, knob * 0.9, 0, Math.PI * 2);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fill();
+  ctx.stroke();
+
+  // the corners
+  ctx.fillStyle = '#FFFFFF';
+  [[-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2]].forEach(([x, y]) => {
+    ctx.beginPath();
+    ctx.rect(x - knob / 2, y - knob / 2, knob, knob);
+    ctx.fill();
+    ctx.stroke();
+  });
+
   ctx.restore();
 }
 
