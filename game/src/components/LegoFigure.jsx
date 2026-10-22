@@ -1,5 +1,5 @@
 // src/components/LegoFigure.jsx
-import React, { Suspense, useRef, useLayoutEffect, useMemo, useEffect } from 'react';
+import React, { Suspense, useRef, useLayoutEffect, useMemo, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
 import { drawTorsoText, sanitiseTorsoText } from './torsoText';
@@ -12,29 +12,33 @@ const legoFigureUrl = new URL('../assets/models/lego-figure-2glb.glb', import.me
 
 // Writing on the shirt — the chest patch of the atlas and the drawing live in
 // torsoText.js, so the avatar editor and this figure cannot drift apart.
-function makeTorsoTextTexture(url, text) {
-  // The texture is handed back straight away and filled in when the atlas has
-  // loaded, so nothing upstream has to wait or re-render.
-  const placeholder = document.createElement('canvas');
-  placeholder.width = placeholder.height = 2;
-  const texture = new THREE.CanvasTexture(placeholder);
-  texture.flipY = false;
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.wrapS = THREE.ClampToEdgeWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
-
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    texture.image = drawTorsoText(img, text);
-    texture.needsUpdate = true;
-  };
-  img.onerror = () => {
-    // The shirt simply stays plain; losing the writing is better than losing
-    // the figure.
-  };
-  img.src = url;
-  return texture;
+//
+// This used to hand back a texture straight away and fill it in when the atlas
+// had loaded. The placeholder it started from was a transparent canvas, and a
+// transparent texture on the shirt renders BLACK — so every time someone typed,
+// the shirt went black until the atlas had loaded and the canvas had been
+// composed, and stayed black for good if that ever failed. What you see while
+// waiting has to be the plain shirt, so the composing now happens off to one
+// side and the result is swapped in only once it is ready.
+function composeTorsoText(url, text) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const texture = new THREE.CanvasTexture(drawTorsoText(img, text));
+        texture.flipY = false;
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        resolve(texture);
+      } catch (e) {
+        reject(e);
+      }
+    };
+    img.onerror = () => reject(new Error('atlas yuklenemedi: ' + url));
+    img.src = url;
+  });
 }
 
 // Torso texture'ları - assets/textures/torso/ klasöründe olmalı
@@ -135,22 +139,41 @@ const hairColors = [
 
  const cleanTorsoText = sanitiseTorsoText(torsoText);
 
- const torsoTexture = useMemo(() => {
+ // The shirt exactly as it has always been loaded. This is what is shown while
+ // any writing is still being composed, and what it falls back to if that ever
+ // fails — never a blank texture.
+ const plainTorsoTexture = useMemo(() => {
     const url = getTorsoUvUrl(torsoTextureId);
-    if (url) {
-      // With writing on it the atlas has to be redrawn onto a canvas first;
-      // without, it is loaded exactly as it always was.
-      if (cleanTorsoText) return makeTorsoTextTexture(url, cleanTorsoText);
-      const loader = new THREE.TextureLoader();
-      const texture = loader.load(url);
-      texture.flipY = false;
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.wrapS = THREE.ClampToEdgeWrapping;
-      texture.wrapT = THREE.ClampToEdgeWrapping;
-      return texture;
-    }
-    return null;
+    if (!url) return null;
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load(url);
+    texture.flipY = false;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    return texture;
+  }, [torsoTextureId]);
+
+ const [writtenTorsoTexture, setWrittenTorsoTexture] = useState(null);
+
+ useEffect(() => {
+    const url = getTorsoUvUrl(torsoTextureId);
+    setWrittenTorsoTexture(null);
+    if (!url || !cleanTorsoText) return undefined;
+
+    let cancelled = false;
+    composeTorsoText(url, cleanTorsoText)
+      .then((texture) => {
+        // Typing again while this was in flight — throw it away rather than
+        // flashing yesterday's word onto the shirt.
+        if (cancelled) { texture.dispose(); return; }
+        setWrittenTorsoTexture(texture);
+      })
+      .catch(() => { /* the plain shirt stays */ });
+    return () => { cancelled = true; };
   }, [torsoTextureId, cleanTorsoText]);
+
+ const torsoTexture = writtenTorsoTexture || plainTorsoTexture;
 
  const armTexture = useMemo(() => {
     const url = getTorsoUvUrl(torsoTextureId);

@@ -87,8 +87,8 @@ function patchIsDark(ctx, x, y, w, h) {
 export function drawTorsoText(image, text) {
   const clean = sanitiseTorsoText(text);
   const scale = 2;
-  const w = Math.min(4096, (image.naturalWidth || image.width) * scale);
-  const h = Math.min(4096, (image.naturalHeight || image.height) * scale);
+  const w = Math.min(2048, (image.naturalWidth || image.width) * scale);
+  const h = Math.min(2048, (image.naturalHeight || image.height) * scale);
 
   const canvas = document.createElement('canvas');
   canvas.width = w;
