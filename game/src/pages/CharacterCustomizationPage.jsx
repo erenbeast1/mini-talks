@@ -3,7 +3,8 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import LegoFigure from '../components/LegoFigure';
-import { sanitiseTorsoText, TORSO_TEXT_MAX } from '../components/torsoText';
+import TorsoDesignPanel from '../components/torso/TorsoDesignPanel';
+import { useTorsoDesign } from '../components/torso/useTorsoDesign';
 import Header from '../components/common/Header';
 import { useRewardNotifications } from '../components/popups/RewardNotifications';
 import axios from 'axios';
@@ -1419,8 +1420,8 @@ const CharacterCustomizationPage = () => {
   const [showTorsoColorDrop, setShowTorsoColorDrop] = useState(false);
 
     const [customizations, setCustomizations] = useState([
-    { gender: 'female', eyeGender: 'female', mouthGender: 'female', hairType: 'simple', hairColor: 0, hairTextureIndex: 109, hairUserSelected: false, torsoTextureId: null, torsoText: '', legTextureId: null, eyeTextureIndex: 0, glassesTextureIndex: 0, mouthTextureIndex: 0, facialHairTextureIndex: 0, eyeColor: '#000000', eyebrowColor: '#000000', glassesColor: '#1C1C1C', view: 'front' },
-      { gender: 'female', eyeGender: 'female', mouthGender: 'female', hairType: 'simple', hairColor: 0, hairTextureIndex: 109, hairUserSelected: false, torsoTextureId: null, torsoText: '', legTextureId: null, eyeTextureIndex: 0, glassesTextureIndex: 0, mouthTextureIndex: 0, facialHairTextureIndex: 0, eyeColor: '#000000', eyebrowColor: '#000000', glassesColor: '#1C1C1C', view: 'front' },  
+    { gender: 'female', eyeGender: 'female', mouthGender: 'female', hairType: 'simple', hairColor: 0, hairTextureIndex: 109, hairUserSelected: false, torsoTextureId: null, torsoText: '', torsoItems: [], legTextureId: null, eyeTextureIndex: 0, glassesTextureIndex: 0, mouthTextureIndex: 0, facialHairTextureIndex: 0, eyeColor: '#000000', eyebrowColor: '#000000', glassesColor: '#1C1C1C', view: 'front' },
+      { gender: 'female', eyeGender: 'female', mouthGender: 'female', hairType: 'simple', hairColor: 0, hairTextureIndex: 109, hairUserSelected: false, torsoTextureId: null, torsoText: '', torsoItems: [], legTextureId: null, eyeTextureIndex: 0, glassesTextureIndex: 0, mouthTextureIndex: 0, facialHairTextureIndex: 0, eyeColor: '#000000', eyebrowColor: '#000000', glassesColor: '#1C1C1C', view: 'front' },  
   ]);
 
    const customizationsRef = useRef(customizations);
@@ -1443,6 +1444,12 @@ const [warningType, setWarningType] = useState(null); // 'both' | 'mini2' | null
   const [torsoTabInitialized, setTorsoTabInitialized] = useState(false);
   const [torsoBasicColor, setTorsoBasicColor] = useState('white');
 
+  // Designing the shirt. It is a mode of the Torso tab, not a window of its
+  // own: only this panel changes, the figure stays where it is on the left.
+  const [designMode, setDesignMode] = useState(false);
+  const [designTab, setDesignTab] = useState('text');
+  const [designSelectedId, setDesignSelectedId] = useState(null);
+
   // Legs manifest + renk state
   const [legsManifest, setLegsManifest] = useState([]);
   const [legsBasicColor, setLegsBasicColor] = useState('black');
@@ -1458,7 +1465,7 @@ const [warningType, setWarningType] = useState(null); // 'both' | 'mini2' | null
   const [popupSurpriseHover, setPopupSurpriseHover] = useState(false);
 
   const activeCustomization = customizations[activeMiniIndex];
-const { gender, hairType, hairColor, hairTextureIndex, torsoTextureId, torsoText = '', legTextureId, eyeTextureIndex, glassesTextureIndex, mouthTextureIndex, facialHairTextureIndex, eyeColor, eyebrowColor, glassesColor, view } = activeCustomization;
+const { gender, hairType, hairColor, hairTextureIndex, torsoTextureId, torsoText = '', torsoItems = [], legTextureId, eyeTextureIndex, glassesTextureIndex, mouthTextureIndex, facialHairTextureIndex, eyeColor, eyebrowColor, glassesColor, view } = activeCustomization;
   // Eye/Mouth bağımsız gender (yoksa ana gender'a düş)
   const eyeGender = activeCustomization.eyeGender || gender;
   const mouthGender = activeCustomization.mouthGender || gender;
@@ -1608,6 +1615,22 @@ const { gender, hairType, hairColor, hairTextureIndex, torsoTextureId, torsoText
     currentPage * ITEMS_PER_PAGE_RESP,
     (currentPage + 1) * ITEMS_PER_PAGE_RESP
   );
+
+  const setTorsoItems = (next) => {
+    updateCustomization({
+      torsoItems: typeof next === 'function'
+        ? next(customizationsRef.current[activeMiniIndex]?.torsoItems || [])
+        : next,
+    });
+  };
+
+  const torsoDesign = useTorsoDesign({
+    items: torsoItems,
+    setItems: setTorsoItems,
+    side: view === 'back' ? 'back' : 'front',
+    selectedId: designSelectedId,
+    setSelectedId: setDesignSelectedId,
+  });
 
   const updateCustomization = (changes) => {
     setCustomizations((prev) => {
@@ -1819,7 +1842,7 @@ useEffect(() => {
       hairColor: custom.hairColor,
       hairTextureIndex: custom.hairTextureIndex,
          torsoTextureId: custom.torsoTextureId,
-      torsoText: sanitiseTorsoText(custom.torsoText),
+      torsoItems: custom.torsoItems || [],
       torsoTextureIndex: 0, // legacy
       legTextureId: custom.legTextureId,
       legTextureIndex: 0, // legacy
@@ -1994,7 +2017,7 @@ useEffect(() => {
   };
 
   const handleReset = () => {
-   updateCustomization({ gender: 'female', eyeGender: 'female', mouthGender: 'female', hairType: 'simple', hairColor: 0, hairTextureIndex: 109, hairUserSelected: false, torsoTextureId: null, torsoText: '', legTextureId: null, eyeTextureIndex: 0, glassesTextureIndex: 0, mouthTextureIndex: 0, facialHairTextureIndex: 0, eyeColor: '#000000', eyebrowColor: '#000000', glassesColor: '#1C1C1C', view: 'front' });    setActiveCategory('hair');
+   updateCustomization({ gender: 'female', eyeGender: 'female', mouthGender: 'female', hairType: 'simple', hairColor: 0, hairTextureIndex: 109, hairUserSelected: false, torsoTextureId: null, torsoText: '', torsoItems: [], legTextureId: null, eyeTextureIndex: 0, glassesTextureIndex: 0, mouthTextureIndex: 0, facialHairTextureIndex: 0, eyeColor: '#000000', eyebrowColor: '#000000', glassesColor: '#1C1C1C', view: 'front' });    setActiveCategory('hair');
     setTorsoPage(0);
     setTorsoCategoryTab('basic');
     setLegsBasicColor('black');
@@ -2973,6 +2996,12 @@ useEffect(() => {
                     <LegoFigure
                       view={view}
                       activeCategory={activeCategory}
+                      design={designMode ? {
+                        active: true,
+                        items: torsoItems,
+                        selectedId: designSelectedId,
+                        onPanelPointer: torsoDesign.onPanelPointer,
+                      } : null}
                       customization={{
                         gender, hairType, hairColor, hairTextureIndex,
                         torsoTextureId, torsoText, legTextureId, eyeTextureIndex, mouthTextureIndex,
@@ -3040,6 +3069,12 @@ useEffect(() => {
                      <LegoFigure 
                   view={view}
                   activeCategory={activeCategory}
+                  design={designMode ? {
+                    active: true,
+                    items: torsoItems,
+                    selectedId: designSelectedId,
+                    onPanelPointer: torsoDesign.onPanelPointer,
+                  } : null}
                     customization={{ 
                     gender, 
                     hairType, 
@@ -3744,12 +3779,27 @@ useEffect(() => {
                       (torsoPage + 1) * TORSO_ITEMS_PER_PAGE_RESP
                     );
 
+                    if (designMode) {
+                      return (
+                        <TorsoDesignPanel
+                          design={torsoDesign}
+                          items={torsoItems}
+                          side={view === 'back' ? 'back' : 'front'}
+                          tab={designTab}
+                          setTab={setDesignTab}
+                          icons={[]}
+                          compact={isSmallScreen}
+                          onFlip={() => { toggleView(); setDesignSelectedId(null); }}
+                          onDone={() => { setDesignMode(false); setDesignSelectedId(null); }}
+                        />
+                      );
+                    }
+
                     return (
                       <>
-                        {/* Writing on the shirt. The text is drawn into the chest
-                            of the torso texture — see components/torsoText.js.
-                            Letters, digits and spaces only, capped, so it stays
-                            readable on a figure a few centimetres tall. */}
+                        {/* Designing the shirt is a mode of this tab: press
+                            this and only this panel changes — the figure stays
+                            where it is and becomes the thing you drag on. */}
                         <div style={{
                           ...flexStyles.flexShrink0,
                           display: 'flex',
@@ -3765,60 +3815,32 @@ useEffect(() => {
                             fontSize: isSmallScreen ? '11px' : 'clamp(11px, 1.1vw, 14px)',
                             letterSpacing: '0.3px',
                           }}>
-                            WRITE ON SHIRT
+                            DESIGN THE SHIRT
                           </span>
-                          <input
-                            type="text"
-                            value={torsoText}
-                            onChange={(e) => updateCustomization({ torsoText: sanitiseTorsoText(e.target.value) })}
-                            maxLength={TORSO_TEXT_MAX}
-                            placeholder="BRAVE"
-                            aria-label="Write on shirt"
-                            style={{
-                              flex: 1,
-                              minWidth: 0,
-                              height: isSmallScreen ? '28px' : '32px',
-                              borderRadius: '8px',
-                              border: '2px solid #1D1D1B',
-                              padding: '0 10px',
-                              fontFamily: "'Montserrat', sans-serif",
-                              fontWeight: 800,
-                              fontSize: isSmallScreen ? '12px' : '14px',
-                              letterSpacing: '1px',
-                              textTransform: 'uppercase',
-                              backgroundColor: '#fff',
-                              color: '#1D1D1B',
-                              outline: 'none',
-                            }}
-                          />
-                          <span style={{
-                            color: torsoText.length >= TORSO_TEXT_MAX ? '#FFCC00' : 'rgba(255,255,255,0.75)',
-                            fontWeight: 800, fontSize: '11px', whiteSpace: 'nowrap',
-                          }}>
-                            {torsoText.length}/{TORSO_TEXT_MAX}
-                          </span>
-                          {torsoText ? (
-                            <button
-                              type="button"
-                              onClick={() => updateCustomization({ torsoText: '' })}
-                              aria-label="Clear shirt text"
-                              style={{
-                                width: isSmallScreen ? '28px' : '32px',
-                                height: isSmallScreen ? '28px' : '32px',
-                                flexShrink: 0,
-                                borderRadius: '8px',
-                                border: '2px solid #1D1D1B',
-                                backgroundColor: '#E31E24',
-                                color: '#fff',
-                                fontWeight: 900,
-                                fontSize: '13px',
-                                cursor: 'pointer',
-                                lineHeight: 1,
-                              }}
-                            >
-                              ✕
-                            </button>
+                          {torsoItems.length > 0 ? (
+                            <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: 700 }}>
+                              {torsoItems.length} on it
+                            </span>
                           ) : null}
+                          <button
+                            type="button"
+                            onClick={() => { setDesignMode(true); setDesignSelectedId(null); }}
+                            style={{
+                              marginLeft: 'auto',
+                              height: isSmallScreen ? '28px' : '32px',
+                              borderRadius: '999px',
+                              border: '2px solid #1D1D1B',
+                              backgroundColor: '#FFCC00',
+                              color: '#1D1D1B',
+                              padding: '0 16px',
+                              fontFamily: "'Montserrat', sans-serif",
+                              fontWeight: 900,
+                              fontSize: isSmallScreen ? '12px' : '13px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Text &amp; stickers
+                          </button>
                         </div>
                              {/* Tab bar + (Basic'te) renk paleti — aynı satır, ayrı scrollable bölmeler */}
                                <div style={{

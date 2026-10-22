@@ -3,6 +3,7 @@ import React, { Suspense, useRef, useLayoutEffect, useMemo, useEffect, useState 
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
 import { drawTorsoText, sanitiseTorsoText } from './torsoText';
+import { drawTorsoDesign, PANELS } from './torsoDesign';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { HairModel } from './HairModels';
@@ -57,12 +58,16 @@ const getLegsUvUrl = (legTextureId) =>
 const CAMERA_TARGETS = {
   hair:    new THREE.Vector3(0, 2.2, 0),
   face:    new THREE.Vector3(0, 1.95, 0),
+  // Designing the shirt: the torso runs y 0.60..2.46 and the head reaches
+  // 3.02, so this looks between them and from far enough to hold both.
+  design:  new THREE.Vector3(0, 1.75, 0),
   default: new THREE.Vector3(0, 1.0, 0),
 };
 
 const CAMERA_POSITIONS = {
   hair:    new THREE.Vector3(0, 2.4, 5.5),
   face:    new THREE.Vector3(0, 1.95, 5.0),
+  design:  new THREE.Vector3(0, 1.75, 4.6),
   default: new THREE.Vector3(0, 1, 6),  // torso/legs için yakın + ortalanmış
 };
 
@@ -104,7 +109,7 @@ function CameraController({ cameraMode, controlsRef }) {
   return null;
 }
 
-function LegoModel({ view, customization }) {
+function LegoModel({ view, customization, design }) {
   const group = useRef();
   const hairGroup = useRef();
   const faceGroup = useRef();
@@ -154,6 +159,50 @@ const hairColors = [
     return texture;
   }, [torsoTextureId]);
 
+ // ── Designing the shirt ────────────────────────────────────────────────
+ // While the designer is open the torso is painted from the design rather
+ // than from the atlas alone: the same atlas with the child's writing and
+ // stickers drawn into the chest and back panels. It is redrawn onto one kept
+ // canvas so dragging does not allocate a 2048px one per frame.
+ const designActive = !!design?.active;
+ const [designAtlas, setDesignAtlas] = useState(null);
+ const designCanvasRef = useRef(null);
+ const designTextureRef = useRef(null);
+ const [, bumpDesign] = useState(0);
+
+ useEffect(() => {
+    if (!designActive) { setDesignAtlas(null); return undefined; }
+    const url = getTorsoUvUrl(torsoTextureId);
+    if (!url) { setDesignAtlas(null); return undefined; }
+    let cancelled = false;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { if (!cancelled) setDesignAtlas(img); };
+    img.onerror = () => { if (!cancelled) setDesignAtlas(null); };
+    img.src = url;
+    return () => { cancelled = true; };
+  }, [designActive, torsoTextureId]);
+
+ useEffect(() => {
+    if (!designActive || !designAtlas) return;
+    if (!designCanvasRef.current) designCanvasRef.current = document.createElement('canvas');
+    drawTorsoDesign(designAtlas, design.items || [], design.icons || {}, {
+      selectedId: design.selectedId,
+      target: designCanvasRef.current,
+    });
+    if (!designTextureRef.current) {
+      const t = new THREE.CanvasTexture(designCanvasRef.current);
+      t.flipY = false;
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.wrapS = THREE.ClampToEdgeWrapping;
+      t.wrapT = THREE.ClampToEdgeWrapping;
+      designTextureRef.current = t;
+      bumpDesign((n) => n + 1);
+    } else {
+      designTextureRef.current.needsUpdate = true;
+    }
+  }, [designActive, designAtlas, design?.items, design?.icons, design?.selectedId]);
+
  const [writtenTorsoTexture, setWrittenTorsoTexture] = useState(null);
 
  useEffect(() => {
@@ -173,7 +222,9 @@ const hairColors = [
     return () => { cancelled = true; };
   }, [torsoTextureId, cleanTorsoText]);
 
- const torsoTexture = writtenTorsoTexture || plainTorsoTexture;
+ const torsoTexture = (designActive && designTextureRef.current)
+   ? designTextureRef.current
+   : (writtenTorsoTexture || plainTorsoTexture);
 
  const armTexture = useMemo(() => {
     const url = getTorsoUvUrl(torsoTextureId);
@@ -330,6 +381,18 @@ const hairColors = [
   // Gözlük modelinin aktif olup olmadığını belirle
   const isGlassesModel = eyeModelName && eyeModelName.includes('glasses');
 
+  // A tap on the shirt arrives with the uv of the point under the finger,
+  // because the torso's geometry carries UVs. The panel rectangle turns that
+  // straight into "43% across, 20% down the chest" — no projecting back from
+  // 3D to the page, and it keeps working however the figure is turned.
+  const designPointer = (phase) => (event) => {
+    if (!designActive || !design?.onPanelPointer || !event.uv) return;
+    const panel = PANELS[view === 'back' ? 'back' : 'front'];
+    const px = (event.uv.x - panel.u0) / (panel.u1 - panel.u0);
+    const py = (event.uv.y - panel.v0) / (panel.v1 - panel.v0);
+    design.onPanelPointer(phase, px, py, event);
+  };
+
   return (
     <>
       {/* Vücut */}
@@ -337,6 +400,9 @@ const hairColors = [
         ref={group}
         position={[0, -1, 0]}
         scale={[0.1, 0.1, 0.1]}
+        onPointerDown={designActive ? designPointer('down') : undefined}
+        onPointerMove={designActive ? designPointer('move') : undefined}
+        onPointerUp={designActive ? designPointer('up') : undefined}
       />
       
       {/* Saç */}
@@ -418,13 +484,14 @@ const hairColors = [
   );
 }
 
-const LegoFigure = ({ view = 'front', activeCategory = 'hair', customization = {} }) => {
+const LegoFigure = ({ view = 'front', activeCategory = 'hair', customization = {}, design = null }) => {
   const controlsRef = useRef();
 
   const { hairTextureIndex = 0, eyeTextureIndex = 0, glassesTextureIndex = 0, mouthTextureIndex = 0, facialHairTextureIndex = 0 } = customization;
   const hasFaceSelection = eyeTextureIndex > 0 || glassesTextureIndex > 0 || mouthTextureIndex > 0 || facialHairTextureIndex > 0;
 
   const cameraMode =
+    design?.active ? 'design' :
     activeCategory === 'hair' && hairTextureIndex > 0 ? 'hair' :
     activeCategory === 'head' ? 'face' :
     'default';
@@ -473,12 +540,14 @@ const LegoFigure = ({ view = 'front', activeCategory = 'hair', customization = {
 
           <CameraController cameraMode={cameraMode} controlsRef={controlsRef} />
           
-          <LegoModel view={view} customization={customization} />
+          <LegoModel view={view} customization={customization} design={design} />
 
                    <OrbitControls
             ref={controlsRef}
             target={[0, 1, 0]}
-            enableRotate={true}
+            // While the shirt is being designed, a finger on the figure is
+            // moving a sticker, not spinning the camera.
+            enableRotate={!design?.active}
             enablePan={false}
             enableZoom={true}
             minDistance={2}
