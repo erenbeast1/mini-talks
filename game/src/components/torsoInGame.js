@@ -65,13 +65,12 @@ export function applyTorsoDesign(figureRig, config) {
       texture.minFilter = THREE.LinearFilter;
       texture.magFilter = THREE.LinearFilter;
       texture.anisotropy = 16;
-      // With no shirt chosen the design is drawn onto a plain one, and that
-      // plain one is not what the sleeves are wearing — so they are left as
-      // they are rather than turned white to match.
-      const dressArms = !!config?.torsoTextureId;
+      // Sleeves included, always. With no shirt chosen the design is drawn
+      // onto a plain one, and leaving the sleeves out of that left a Mini in
+      // a white shirt with red arms: the body had become the shirt the child
+      // designed and the arms were still the figure's default plastic.
       figureRig.traverse((child) => {
-        const part = child.userData?.miniSkin;
-        if (!part || (part === 'arm' && !dressArms)) return;
+        if (!child.userData?.miniSkin) return;
         child.material = new THREE.MeshStandardMaterial({
           map: texture, metalness: 0.12, roughness: 0.35, envMapIntensity: 0.3,
         });
