@@ -15,6 +15,7 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment';
 import { HAIR_MODEL_OFFSETS, DEFAULT_OFFSET, EXCLUDED_HAIR } from '../components/HairModels';
+import { applyTorsoDesign } from '../components/torsoInGame';
 
 // ============================================
 // UI ASSETS
@@ -676,6 +677,50 @@ function formatTime(seconds) {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Baked lighting, loaded once and kept: every mesh in a scene asks for the
+// same lightmap, and a TextureLoader call per mesh would fetch the same PNG a
+// hundred times over. A lightmap is baked against a mesh's second set of UVs,
+// and which set that is differs between meshes, so one copy is kept per UV
+// set rather than one guess being made for the whole scene.
+const lightmapCache = new Map();
+function loadLightmap(url, channel) {
+  if (!url) return null;
+  const key = `${url}#${channel}`;
+  if (!lightmapCache.has(key)) {
+    const texture = new THREE.TextureLoader().load(url);
+    texture.flipY = false;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.channel = channel;
+    lightmapCache.set(key, texture);
+  }
+  return lightmapCache.get(key);
+}
+
+/** The lightmap for one mesh, on the UV set that mesh actually carries. */
+function lightmapForMesh(child, url) {
+  const attributes = child.geometry?.attributes;
+  if (!url || !attributes) return null;
+  if (attributes.uv1) return loadLightmap(url, 1);
+  if (attributes.uv2) return loadLightmap(url, 2);
+  return null;   // nothing to sample it with; the mesh keeps its own shading
+}
+
+// Sahne 2 (lightmapped classroom): her parça kendi lightmap'ini kullanıyor.
+// Mesh adları sahnenin kendi adlandırmasından geliyor; eşleşmeyen mesh
+// lightmap'siz kalır, yanlış lightmap almaz.
+const SCENE2_LIGHTMAPS = [
+  [/duvar|wall/i, lightmapTexturePath2_Duvar],
+  [/zemin|floor|ground/i, lightmapTexturePath2_Zemin],
+  [/sandalye|chair|stool/i, lightmapTexturePath2_Sandalyeler],
+  [/kitap|book|raf|shelf/i, lightmapTexturePath2_Kitaplik],
+  [/masa|desk|table/i, lightmapTexturePath2_Masalar],
+];
+function scene2LightmapUrlFor(name) {
+  if (!name) return null;
+  const hit = SCENE2_LIGHTMAPS.find(([pattern]) => pattern.test(name));
+  return hit ? hit[1] : null;
 }
 
 // Torso texture yükleyici (ID bazlı)
@@ -1690,6 +1735,17 @@ const isRealTimeScene = isScene27
   || scenePath === sceneModelPathRobot
   || scenePath === sceneModelPathSupermarket
   || scenePath === sceneModelPathTennis;
+
+    // Baked lighting. These four names were used a few lines down and never
+    // declared anywhere, so the moment a scene that is neither sahne-1 nor a
+    // real-time one reached them the traverse threw ReferenceError — and with
+    // it went everything after it in this effect: the Minis' shirts, their
+    // trousers, their hair and their faces. That is why a scene could come up
+    // with two plain red-and-blue figures in it.
+    const isScene2 = scenePath === sceneModelPath2;
+    const isScene4 = scenePath === sceneModelPath4;
+    const lightmapUrl = isScene4 ? lightmapTexturePath4 : lightmapTexturePath;
+
     if (isScene1) {
      
     } else {
@@ -1780,16 +1836,17 @@ const isRealTimeScene = isScene27
         const mats = Array.isArray(child.material) ? child.material : [child.material];
         mats.forEach(mat => {
           if (isScene4) {
-            if (child.geometry.attributes.uv1 || child.geometry.attributes.uv2) {
-              mat.lightMap = lightmapTex;
+            const meshLightmap = lightmapForMesh(child, lightmapUrl);
+            if (meshLightmap) {
+              mat.lightMap = meshLightmap;
               mat.lightMapIntensity = 1.0;
             }
             mat.roughness = 0.15;
             mat.metalness = 0.0;
             mat.envMapIntensity = 2.0;
-          } else if (isScene2 && scene2LightmapMap) {
-            const meshLightmap = scene2LightmapMap[child.name];
-            if (meshLightmap && (child.geometry.attributes.uv1 || child.geometry.attributes.uv2)) {
+          } else if (isScene2) {
+            const meshLightmap = lightmapForMesh(child, scene2LightmapUrlFor(child.name));
+            if (meshLightmap) {
               mat.lightMap = meshLightmap;
               mat.lightMapIntensity = 1.5;
             }
@@ -1801,8 +1858,9 @@ const isRealTimeScene = isScene27
           } else {
             mat.normalMap = null;
             mat.envMapIntensity = 0;
-            if (child.geometry.attributes.uv1 || child.geometry.attributes.uv2) {
-              mat.lightMap = lightmapTex;
+            const meshLightmap = lightmapForMesh(child, lightmapUrl);
+            if (meshLightmap) {
+              mat.lightMap = meshLightmap;
               mat.lightMapIntensity = 0.15;
             }
           }
@@ -2629,6 +2687,7 @@ addDefaultEyes(kafaMesh, config);
 
           // Gövde
           if (n.startsWith('govde') || n.includes('torso') || n.includes('body') || n.includes('chest')) {
+            child.userData.miniSkin = 'torso';   // the shirt a design is painted onto
             child.material = torsoTexture
               ? new THREE.MeshStandardMaterial({ map: torsoTexture, metalness: 0.12, roughness: 0.35, envMapIntensity: 0.3 })
               : createPremiumPlasticMaterial(torsoColor);
@@ -2638,6 +2697,7 @@ addDefaultEyes(kafaMesh, config);
           // Kol
           // Kol — LegoFigure ile aynı: tam torso texture kullan (UV mapping halleder)
           if (n.includes('kol') || n.includes('arm')) {
+            child.userData.miniSkin = 'arm';   // the shirt a design is painted onto
             child.material = torsoTexture
               ? new THREE.MeshStandardMaterial({ map: torsoTexture, metalness: 0.12, roughness: 0.35, envMapIntensity: 0.3 })
               : createPremiumPlasticMaterial(torsoColor);
@@ -2650,6 +2710,7 @@ addDefaultEyes(kafaMesh, config);
               ? new THREE.MeshStandardMaterial({ map: legTexture, metalness: 0.12, roughness: 0.35, envMapIntensity: 0.3 })
               : createPremiumPlasticMaterial(legColor);
           } else {
+            child.userData.miniSkin = 'torso';   // the shirt a design is painted onto
             child.material = torsoTexture
               ? new THREE.MeshStandardMaterial({ map: torsoTexture, metalness: 0.12, roughness: 0.35, envMapIntensity: 0.3 })
               : createPremiumPlasticMaterial(torsoColor);
@@ -2669,6 +2730,11 @@ addDefaultEyes(kafaMesh, config);
           mouthData = md;
           figurePromises.push(...faceP);
         }
+        // ...and then the shirt the child designed is drawn onto it. It is one
+        // fetch and one canvas, so it is a promise the scene waits on with the
+        // hair and the face rather than something that pops in afterwards.
+        const designPromise = applyTorsoDesign(figureRig, config);
+        if (designPromise) figurePromises.push(designPromise);
         return { mouthData, promises: figurePromises };
       }
 
@@ -2744,6 +2810,7 @@ addDefaultEyes(kafaMesh, config);
         }
         // GÖVDE - texture varsa uygula
         else if (n.startsWith('govde') || n.includes('torso') || n.includes('body') || n.includes('chest')) { 
+          child.userData.miniSkin = 'torso';   // the shirt a design is painted onto
           if (torsoTexture) {
             child.material = new THREE.MeshStandardMaterial({
               map: torsoTexture,
@@ -2758,6 +2825,7 @@ addDefaultEyes(kafaMesh, config);
         }
         // KOLLAR — tam torso texture kullan (LegoFigure ile aynı)
         else if (n.includes('kol') || n.includes('arm')) { 
+          child.userData.miniSkin = 'arm';   // the shirt a design is painted onto
           child.material = torsoTexture
             ? new THREE.MeshStandardMaterial({ map: torsoTexture, metalness: 0.12, roughness: 0.35, envMapIntensity: 0.3 })
             : createPremiumPlasticMaterial(torsoColor);
@@ -2778,6 +2846,7 @@ addDefaultEyes(kafaMesh, config);
             : createPremiumPlasticMaterial(legColor);
         } else {
           // Bel üstü = torso (texture varsa uygula)
+          child.userData.miniSkin = 'torso';   // the shirt a design is painted onto
           if (torsoTexture) {
             child.material = new THREE.MeshStandardMaterial({
               map: torsoTexture,
@@ -2813,6 +2882,11 @@ addDefaultEyes(kafaMesh, config);
           figurePromises.push(...faceP);
         }
       }
+      // ...and then the shirt the child designed is drawn onto it. It is one
+      // fetch and one canvas, so it is a promise the scene waits on with the
+      // hair and the face rather than something that pops in afterwards.
+      const designPromise = isPlayer ? applyTorsoDesign(figureRig, config) : null;
+      if (designPromise) figurePromises.push(designPromise);
       return { mouthData, promises: figurePromises };
     };
 

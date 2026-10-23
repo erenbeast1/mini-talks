@@ -1764,6 +1764,11 @@ useEffect(() => {
       custom.hairType === 'simple' &&
       custom.gender === 'female' &&
        !custom.torsoTextureId &&
+      // Designing the shirt is customising the Mini: writing a name on it or
+      // putting a sticker on it counted for nothing, and the child was still
+      // told the Mini had not been touched.
+      !(custom.torsoItems && custom.torsoItems.length) &&
+      !custom.torsoText &&
       !custom.legTextureId &&
       custom.eyeTextureIndex === 0 &&
       custom.glassesTextureIndex === 0 &&
@@ -1894,7 +1899,18 @@ useEffect(() => {
 
   const saveAndNavigate = async () => {
     setIsSaving(true);
-    
+
+    // The Mini is photographed as it is on screen, so it is put back the way a
+    // photograph of it should be first: facing front, with the editor out of
+    // the way. A child who designed the back of the shirt and pressed save got
+    // a picture of its back, with no face in it; and the selection box, which
+    // is painted into the shirt's own texture, would have been photographed
+    // with it.
+    setDesignMode(false);
+    setDesignSelectedId(null);
+    setCustomizations((prev) => prev.map((c) => ({ ...c, view: 'front' })));
+    await new Promise((resolve) => setTimeout(resolve, 350));
+
     const enrichedCustomizations = customizationsRef.current.map(custom => {
       const eg = custom.eyeGender || custom.gender || 'female';
       const mg = custom.mouthGender || custom.gender || 'female';
@@ -2073,6 +2089,25 @@ useEffect(() => {
   const toggleView = () => {
     updateCustomization({ view: view === 'front' ? 'back' : 'front' });
   };
+
+  // Leaving the Torso tab closes the shirt designer with it. Without this it
+  // stayed open behind the other tabs: the camera stayed locked on the chest,
+  // the figure could not be turned by hand, and the selection box — which is
+  // painted into the shirt itself — stayed on it while the child was choosing
+  // hair. And the face is only modelled on the front, so the Hair and Head
+  // tabs turn a figure that is showing its back round to face front again;
+  // otherwise eyes and mouths are being picked for the back of a head.
+  useEffect(() => {
+    if (activeCategory === 'torso') return;
+    if (designMode) {
+      setDesignMode(false);
+      setDesignSelectedId(null);
+    }
+    if ((activeCategory === 'hair' || activeCategory === 'head') && view === 'back') {
+      updateCustomization({ view: 'front' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCategory]);
 
   const switchMini = (index) => setActiveMiniIndex(index);
 
@@ -3789,7 +3824,14 @@ useEffect(() => {
                           setTab={setDesignTab}
                           compact={isSmallScreen}
                           onFlip={() => { toggleView(); setDesignSelectedId(null); }}
-                          onDone={() => { setDesignMode(false); setDesignSelectedId(null); }}
+                          onDone={() => {
+                            // Leaving the designer puts the figure back the
+                            // way it was found. Saving while turned round left
+                            // a child looking at a Mini with no face.
+                            setDesignMode(false);
+                            setDesignSelectedId(null);
+                            if (view === 'back') toggleView();
+                          }}
                         />
                       );
                     }

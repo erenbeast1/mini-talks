@@ -585,3 +585,72 @@ export function drawTorsoDesign(atlas, items, icons = {}, opts = {}) {
 
   return canvas;
 }
+
+/* ── The shirt as it is worn, for anyone who needs to draw it ────────── */
+
+function loadImage(url) {
+  return new Promise((resolve) => {
+    if (!url) { resolve(null); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+/**
+ * What a design is drawn onto when no shirt was chosen: the plain off-white
+ * the figure wears by default. Going into the designer without picking a
+ * shirt first is the ordinary way in, so it cannot be a special case.
+ */
+function blankAtlas() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#F5F5F5';
+  ctx.fillRect(0, 0, 512, 512);
+  return canvas;
+}
+
+/**
+ * The shirt to draw on: the chosen one, or a plain one. Exported because the
+ * game draws the older single line of writing onto the same thing.
+ */
+export async function loadTorsoAtlas(atlasUrl) {
+  if (typeof document === 'undefined') return null;
+  return (await loadImage(atlasUrl)) || blankAtlas();
+}
+
+/**
+ * The finished shirt: the chosen atlas, or a plain one, with everything the
+ * child put on it drawn in. Everything it needs — the atlas, the fonts, the
+ * pictures — is fetched first, so what comes back is complete.
+ *
+ * This is what the game uses. The customisation screen draws the same design
+ * itself, frame by frame, because there it is being dragged about; the game
+ * only ever needs it once, finished. Both go through drawTorsoDesign, so a
+ * Mini wears in the scene what the child made on the screen before it.
+ *
+ * Returns a canvas, or null when there is nothing on the shirt at all — then
+ * the plain texture is already right and nothing should be replaced.
+ */
+export async function composeTorsoDesign(atlasUrl, items, opts = {}) {
+  if (typeof document === 'undefined') return null;
+  const live = (items || []).filter((i) => i && (i.type === 'text' ? sanitiseText(i.text, i.fontId) : i.src));
+  if (live.length === 0) return null;
+
+  await ensureFonts(live);
+
+  const atlas = await loadTorsoAtlas(atlasUrl);
+
+  const sources = [...new Set(live.filter((i) => i.type === 'icon').map((i) => i.src))];
+  const loaded = await Promise.all(sources.map(async (src) => {
+    const img = await loadImage(resolveIconSrc(src));
+    return img ? [src, img] : null;
+  }));
+  const icons = Object.fromEntries(loaded.filter(Boolean));
+
+  return drawTorsoDesign(atlas, live, icons, opts);
+}

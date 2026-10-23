@@ -58,17 +58,12 @@ if [ -x game/node_modules/.bin/eslint ]; then
   # pre-existing unused-variable errors this repository has. So the exit code
   # cannot be the signal — the report is. But a run that produced NO report at
   # all is a broken check, not a clean one, and must fail loudly.
-  # KNOWN holds the names already undefined before any of this work, so a new
-  # one fails loudly instead of hiding in the noise. They are a real bug, in
-  # GamePage.jsx: scenes 2, 3 and 4 fall past the isRealTimeScene branch into a
-  # block that reads isScene4/isScene2/lightmapTex/scene2LightmapMap, none of
-  # which exist, so loading one of those scenes throws. Fixing it needs to know
-  # what lightmapTex was meant to be, so it is reported rather than guessed at.
-  KNOWN="isScene4|isScene2|scene2LightmapMap|lightmapTex"
-
-  # eslint exits non-zero whenever it reports anything, and this file runs
-  # under `set -e`, so without the `|| true` the assignment itself ends the
-  # script — silently, right after the label has been printed with no newline.
+  # There is no excused list any more. GamePage.jsx used to read four names
+  # that were never declared anywhere — isScene4, isScene2, lightmapTex and
+  # scene2LightmapMap — so any scene that was neither sahne-1 nor a real-time
+  # one threw ReferenceError part-way through dressing the figures, and the
+  # Minis walked in without their clothes, hair or faces. They are declared
+  # now, and any new one fails this check.
   out=$(cd game && node_modules/.bin/eslint src 2>&1 || true)
   if [ -z "$out" ]; then
     echo "problems"
@@ -76,17 +71,10 @@ if [ -x game/node_modules/.bin/eslint ]; then
     fail=1
   else
     undef=$(printf '%s\n' "$out" | grep "no-undef" || true)
-    new=$(printf '%s\n' "$undef" | grep -vE "'($KNOWN)'" | grep . || true)
-    old=$(printf '%s\n' "$undef" | grep -cE "'($KNOWN)'" || true)
-    if [ -n "$new" ]; then
-      echo "problems"; printf '%s\n' "$new" | sed 's/^ */  /'; fail=1
-    elif [ "$old" -gt 0 ]; then
-      echo "no new problems ($old known, pre-existing — see KNOWN in tests/run.sh)"
+    if [ -n "$undef" ]; then
+      echo "problems"; printf '%s\n' "$undef" | sed 's/^ */  /'; fail=1
     else
-      # Nothing left: the known ones were fixed, so stop excusing them.
-      echo "problems"
-      echo "  the KNOWN list in tests/run.sh is stale — nothing matches it any more, remove it"
-      fail=1
+      echo "no problems"
     fi
   fi
 else

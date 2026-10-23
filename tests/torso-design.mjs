@@ -91,4 +91,17 @@ ok('the last one drawn is the one picked up', T.hitTest([a, b], 'front', 0.5, 0.
 ok('a tap on the other side of the shirt picks up nothing', T.hitTest([a, b], 'back', 0.5, 0.45, 1) === null);
 ok('nor does one on bare cloth', T.hitTest([a, b], 'front', 0.02, 0.95, 1) === null);
 
+// ── what the game decides to draw ──────────────────────────────────────────
+// The drawing itself needs a canvas, so it is checked in a browser; what can
+// be checked here is the decision — a scene must not compose a shirt for a
+// Mini that has nothing on it, and must compose one for an old Mini whose
+// writing predates the designer.
+const G = await import('../game/src/components/torsoInGame.js');
+ok('a shirt with something on it is drawn', G.hasShirtDesign({ torsoItems: [{ type: 'icon', src: PNG }] }));
+ok('an old Mini\'s line of writing is drawn too', G.hasShirtDesign({ torsoText: 'eren' }));
+ok('a plain shirt is left alone', !G.hasShirtDesign({ torsoTextureId: 'x', torsoItems: [] }));
+ok('and so is one whose writing is only spaces', !G.hasShirtDesign({ torsoText: '   ' }));
+ok('a Mini with no customisation at all is left alone', !G.hasShirtDesign(undefined));
+ok('nothing is hung on a figure that is not there', G.applyTorsoDesign(null, { torsoText: 'eren' }) === null);
+
 console.log(`torso design           no problems (${passed} checks)`);
